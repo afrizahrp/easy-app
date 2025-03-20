@@ -11,7 +11,6 @@ import { AuthProvider } from '@/provider/auth.provider';
 import 'flatpickr/dist/themes/light.css';
 import DirectionProvider from '@/provider/direction.provider';
 import ModalProvider from '@/provider/modal-provider';
-// import './global.css';
 
 const inter = Inter({ subsets: ['latin'] });
 
