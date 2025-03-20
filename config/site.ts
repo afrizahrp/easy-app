@@ -1,20 +1,13 @@
-
-
-
 export const siteConfig = {
-  name: "Bumi Indah Apps",
+  name: 'easyApps',
   description: null,
-  theme: "blue",
-  layout: "vertical",
-  // semi-box, horizontal, vertical
+  theme: 'blue',
+  layout: 'vertical',
   hideSideBar: false,
-  sidebarType: "module",
-  // popover, classic, module
+  sidebarType: 'classic',
   sidebarColor: null,
-  navbarType: "sticky",
-  // sticky, floating, static
-  footerType: "static",
-  // sticky,  static, hidden
-  sidebarBg: "none",
+  navbarType: 'sticky',
+  footerType: 'static',
+  sidebarBg: 'none',
   radius: 0.5,
 };

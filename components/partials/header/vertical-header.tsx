@@ -107,10 +107,10 @@ const VerticalHeader: React.FC<VerticalHeaderProps> = ({
         className=' inline-flex  gap-2 items-center text-default-600 text-sm'
         onClick={handleOpenSearch}
       >
-        <span>
+        {/* <span>
           <Search className=' h-4 w-4' />
-        </span>
-        <span className=' md:block hidden'> Search...</span>
+        </span> */}
+        <span className=' md:block hidden'> {companyName}</span>
       </button>
     </div>
   );

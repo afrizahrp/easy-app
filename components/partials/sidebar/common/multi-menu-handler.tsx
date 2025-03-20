@@ -1,6 +1,6 @@
 'use client';
 import { Icon } from '@iconify/react';
-import { cn, translate } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 import React from 'react';
 
 const MultiMenuHandler = ({

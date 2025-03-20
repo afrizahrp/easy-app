@@ -5,7 +5,6 @@ import ThemeButton from './theme-button';
 import { useSidebar, useThemeStore } from '@/store';
 import ProfileInfo from './profile-info';
 import VerticalHeader from './vertical-header';
-import HorizontalHeader from './horizontal-header';
 import Inbox from './inbox';
 import NotificationMessage from './notification-message';
 
@@ -29,9 +28,9 @@ const NavTools = ({
       {isDesktop && <Language />}
       {isDesktop && <FullScreen />}
 
-      {/* <ThemeButton /> */}
-      {/* <Inbox /> */}
-      {/* <NotificationMessage /> */}
+      <ThemeButton />
+      <Inbox />
+      <NotificationMessage />
 
       <div className='ltr:pl-2 rtl:pr-2'>
         <ProfileInfo />
@@ -72,11 +71,11 @@ const Header = ({ handleOpenSearch }: { handleOpenSearch: () => void }) => {
           <div className='w-full bg-card/90 backdrop-blur-lg md:px-6 px-[15px] py-3 rounded-md my-6 shadow-md border-b'>
             <div className='flex justify-between items-center h-full'>
               <VerticalHeader handleOpenSearch={handleOpenSearch} />
-              {/* <NavTools
+              <NavTools
                 isDesktop={isDesktop}
                 isMobile={isMobile}
                 sidebarType={sidebarType}
-              /> */}
+              />
             </div>
           </div>
         </div>
@@ -99,11 +98,11 @@ const Header = ({ handleOpenSearch }: { handleOpenSearch: () => void }) => {
         <div className='w-full bg-card/90 backdrop-blur-lg md:px-6 px-[15px] py-3 border-b'>
           <div className='flex justify-between items-center h-full'>
             <VerticalHeader handleOpenSearch={handleOpenSearch} />
-            {/* <NavTools
+            <NavTools
               isDesktop={isDesktop}
               isMobile={isMobile}
               sidebarType={sidebarType}
-            /> */}
+            />
           </div>
         </div>
       </ClassicHeader>

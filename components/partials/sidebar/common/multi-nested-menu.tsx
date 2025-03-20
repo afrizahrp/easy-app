@@ -4,7 +4,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
-import { cn, isLocationMatch, translate, getDynamicPath } from '@/lib/utils';
+import { cn, isLocationMatch, getDynamicPath } from '@/lib/utils';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 const MultiNestedMenu = ({

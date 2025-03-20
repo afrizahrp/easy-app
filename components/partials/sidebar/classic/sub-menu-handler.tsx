@@ -1,6 +1,6 @@
 'use client';
 import { Icon } from '@iconify/react';
-import { cn, translate } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 // import { useModuleStore } from '@/store';
 
 const SubMenuHandler = ({
@@ -18,12 +18,7 @@ const SubMenuHandler = ({
   collapsed: boolean;
   hovered: boolean;
 }) => {
-  const { title, module_id } = item;
-
-  // const setModuleId = useModuleStore((state) => state.setModuleId); // Ambil setModuleId dari store
-
-  // setModuleId(module_id); // Panggil setModuleId dengan module_id
-  // setModule_id && setModule_id(module_id);
+  const { title } = item;
 
   return (
     <>
@@ -41,7 +36,7 @@ const SubMenuHandler = ({
             <span className='inline-flex items-center     '>
               <item.icon className='w-5 h-5' />
             </span>
-            <div className=' '>{title}</div>
+            <div>{title}</div>
           </div>
           <div className='flex-0'>
             <div
