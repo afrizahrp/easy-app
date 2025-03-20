@@ -46,7 +46,7 @@ const SidebarLogo = ({ hovered }: { hovered?: boolean }) => {
           ${
             collapsed
               ? ''
-              : 'bg-blue-700 text-white dark:bg-default-300 dark:text-white'
+              : 'bg-blue-800 text-white dark:bg-default-300 dark:text-white'
           }
           `}
             >
@@ -55,11 +55,11 @@ const SidebarLogo = ({ hovered }: { hovered?: boolean }) => {
           </div>
         )}
       </div>
-      {(!collapsed || hovered) && (
+      {/* {(!collapsed || hovered) && (
         <div className='text-md text-primary font-semibold mt-1 text-center'>
           {companyName}
         </div>
-      )}
+      )} */}
     </div>
   );
 };

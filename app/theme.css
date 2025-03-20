@@ -20,7 +20,7 @@
   --primary-800: 240 3.7% 15.9%;
   --primary-900: 240 5.9% 10%;
   --primary-950: 240 10% 3.9%;
-  --primary: 240 5.9% 10%;
+  --primary: 210 100% 32%;
   --primary-foreground: 0 0% 98%;
   --secondary: 240 4.8% 95.9%;
   --secondary-foreground: 240 5.9% 10%;
@@ -672,7 +672,7 @@
   --primary-800: 225.9 70.7% 40.2%;
   --primary-900: 224.4 64.3% 32.9%;
   --primary-950: 226.2 57% 21%;
-  --primary: 221.2 83.2% 53.3%;
+  --primary: 210 100% 32%;
   --primary-foreground: 210 40% 98%;
   --secondary: 210 40% 96.1%;
   --secondary-foreground: 222.2 47.4% 11.2%;

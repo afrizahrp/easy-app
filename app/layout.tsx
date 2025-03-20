@@ -1,7 +1,7 @@
 // import '../scss/globals.scss';
 // import '../scss/theme.scss';
-import '@/app/[lang]/globals.css'; // ✅ Impor dengan relative path
-import '@/app/[lang]/theme.css';
+import '@/app/globals.css'; // ✅ Impor dengan relative path
+import '@/app/theme.css';
 import { Inter } from 'next/font/google';
 // import { siteConfig } from '@/config/site';
 import Providers from '@/provider/providers';

@@ -1,6 +1,12 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+html,
+body,
+:root {
+  height: 100%;
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -24,9 +30,9 @@
     --primary-800: 255 71% 42%;
     --primary-900: 255 70% 35%;
     --primary-950: 255 70% 35%;
-    --primary: 250 92% 70%;
+    --primary: 210 100% 32%;
     --primary-foreground: 240 100% 98%;
-    --secondary: 214.3 31.8% 91.4%;
+    --secondary: 210 40% 96.1%;
     --secondary-foreground: 222.2 47.4% 11.2%;
     --accent: 214.3 31.8% 91.4%;
     --accent-foreground: 222.2 47.4% 11.2%;
@@ -257,6 +263,26 @@
 
 .no-scrollbar::-webkit-scrollbar-thumb {
   background-color: transparent;
+}
+
+.zoomed-image-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 110%;
+  background-color: rgba(0, 0, 0, 0.9);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  cursor: zoom-out;
+}
+
+.zoomed-image {
+  max-width: 100vw;
+  max-height: 100vh;
+  cursor: zoom-in;
 }
 
 .dash-tail-calendar .fc-toolbar-chunk button {
