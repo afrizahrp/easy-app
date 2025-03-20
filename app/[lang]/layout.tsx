@@ -3,7 +3,7 @@
 import '@/app/[lang]/globals.css'; // ✅ Impor dengan relative path
 import '@/app/[lang]/theme.css';
 import { Inter } from 'next/font/google';
-import { siteConfig } from '@/config/site';
+// import { siteConfig } from '@/config/site';
 import Providers from '@/provider/providers';
 import 'simplebar-react/dist/simplebar.min.css';
 import TanstackProvider from '@/provider/providers.client';
