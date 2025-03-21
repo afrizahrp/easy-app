@@ -2,12 +2,13 @@ import React from 'react';
 import { useSidebar, useThemeStore } from '@/store';
 import { cn } from '@/lib/utils';
 import { Icon } from '@iconify/react';
-import { Search } from 'lucide-react';
+import { Pin, Search } from 'lucide-react';
 import { SiteLogo } from '@/components/svg';
+import SidebarToggle from '../sidebar/common/sidebar-toggle';
 import Link from 'next/link';
 import { useMediaQuery } from '@/hooks/use-media-query';
 import Image from 'next/image';
-import { useAuth } from '@/provider/auth.provider';
+import { useCompanyInfo } from '@/store';
 
 const MenuBar = ({
   collapsed,
@@ -70,8 +71,9 @@ const VerticalHeader: React.FC<VerticalHeaderProps> = ({
 }) => {
   const { collapsed, setCollapsed, subMenu, sidebarType } = useSidebar();
   const { layout } = useThemeStore();
-  const { session } = useAuth();
-  const companyId = session?.user?.company_id;
+  const { company } = useCompanyInfo((state) => ({
+    company: state.company,
+  }));
 
   const isDesktop = useMediaQuery('(min-width: 1280px)');
   const isMobile = useMediaQuery('(min-width: 768px)');
@@ -79,44 +81,24 @@ const VerticalHeader: React.FC<VerticalHeaderProps> = ({
   let menuBarContent = null;
   let searchButtonContent = null;
 
-  // Pemetaan companyId ke nama perusahaan
-  let companyName = '';
-  let logoSrc = '/images/logo/logo.png'; // Default logo
-
-  if (companyId === 'BIS') {
-    companyName = 'Bumi Indah Saranamedis';
-  } else if (companyId === 'BIP') {
-    companyName = 'Bumi Indah Putra';
-    logoSrc = '/images/logo/bipmed-logo.png'; // Logo untuk BIP
-  } else if (companyId === 'KBIP') {
-    companyName = 'Karoseri Bumi Indah Putra';
-    logoSrc = '/images/logo/bipmed-logo.png'; // Logo untuk KBIP
-  }
+  const logoSrc = company?.companyLogo || '/images/logo/logo.png';
+  const companyName = company?.companyName || 'PT. BUMI INDAH SARANAMEDIS';
 
   const MainLogo = (
     <Link href='/dashboard' className=' text-primary '>
-      {/* <SiteLogo className='h-7 w-7' /> */}
-
       <Image src={logoSrc} alt='sidebar-logo' width={60} height={60} priority />
     </Link>
   );
+  {
+  }
+
   const SearchButton = (
-    <div>
-      <button
-        type='button'
-        className=' inline-flex  gap-2 items-center text-default-600 text-sm'
-        onClick={handleOpenSearch}
-      >
-        {/* <span>
-          <Search className=' h-4 w-4' />
-        </span> */}
-        <span className=' md:block hidden'> {companyName}</span>
-      </button>
+    <div className='flex items-center gap-2'>
+      <SidebarToggle />
+      <span className='md:block'>{companyName}</span>
     </div>
   );
-  if (layout === 'semibox' && !isDesktop) {
-    LogoContent = MainLogo;
-  }
+
   if (
     layout === 'vertical' &&
     !isDesktop &&
@@ -135,20 +117,14 @@ const VerticalHeader: React.FC<VerticalHeaderProps> = ({
       <MenuBar collapsed={collapsed} setCollapsed={setCollapsed} />
     );
   }
-  if (sidebarType === 'module') {
-    menuBarContent = (
-      <MenuBar collapsed={collapsed} setCollapsed={setCollapsed} />
-    );
-  }
+
   if (sidebarType === 'classic') {
     menuBarContent = null;
   }
   if (subMenu && isDesktop) {
     menuBarContent = null;
   }
-  if (sidebarType === 'module' && isMobile) {
-    searchButtonContent = SearchButton;
-  }
+
   if (sidebarType === 'classic' || sidebarType === 'popover') {
     searchButtonContent = SearchButton;
   }

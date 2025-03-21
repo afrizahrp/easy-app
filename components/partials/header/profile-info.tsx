@@ -1,6 +1,6 @@
 'use client';
-// import { useSession, signOut } from 'next-auth/react';
-import { useAuth } from '@/provider/auth.provider';
+import { useSessionStore } from '@/store';
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,23 +19,28 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 const ProfileInfo = () => {
-  const { session } = useAuth();
+  const { user, logout } = useSessionStore();
 
   const handleSignOut = async () => {
-    await fetch('/api/auth/signout', {
-      method: 'GET',
-    });
-    window.location.href = '/auth/login'; // Redirect to login page after sign out
+    try {
+      await fetch('/api/auth/signout', {
+        method: 'POST',
+      });
+      logout(); // Clear user session from the store
+      window.location.href = '/auth/login'; // Redirect to login page after sign out
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
   };
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild className=' cursor-pointer'>
         <div className=' flex items-center  '>
-          {session?.user?.image && (
+          {user?.image && (
             <Image
-              src={session?.user?.image}
-              alt={session?.user?.email ?? ''}
+              src={user?.image}
+              alt={user?.email ?? ''}
               width={36}
               height={36}
               className='rounded-full'
@@ -45,10 +50,10 @@ const ProfileInfo = () => {
       </DropdownMenuTrigger>
       <DropdownMenuContent className='w-56 p-0' align='end'>
         <DropdownMenuLabel className='flex gap-2 items-center mb-1 p-3'>
-          {session?.user?.image && (
+          {user?.image && (
             <Image
-              src={session?.user?.image}
-              alt={session?.user?.email ?? ''}
+              src={user?.image}
+              alt={user?.email ?? ''}
               width={36}
               height={36}
               className='rounded-full'
@@ -56,17 +61,17 @@ const ProfileInfo = () => {
           )}
           <div>
             <div className='text-sm font-medium text-default-800 capitalize '>
-              {session?.user?.name ?? 'User'}
+              {user?.name ?? 'User'}
             </div>
 
             <Link
               href='/dashboard'
               className='text-xs text-default-600 hover:text-primary'
             >
-              {session?.user.email}
+              {user?.email}
             </Link>
             <div className='text-xs font-medium text-default-500 capitalize '>
-              Signed in as {session?.user?.role_name ?? 'Role'}
+              Signed in as {user?.role_id ?? 'Role'}
             </div>
           </div>
         </DropdownMenuLabel>

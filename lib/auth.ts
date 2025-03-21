@@ -37,7 +37,17 @@ export async function signIn(
   name: string,
   password: string,
   company_id: string
-): Promise<{ ok: boolean; error?: string }> {
+): Promise<{
+  ok: boolean;
+  error?: string;
+  user?: {
+    name: string;
+    role_id: string;
+    company_id: string;
+    image: string;
+    email: string;
+  };
+}> {
   const response = await fetch(`${BACKEND_URL}/auth/login`, {
     method: 'POST',
     headers: {
@@ -67,13 +77,19 @@ export async function signIn(
       accessToken: result.accessToken,
       refreshToken: result.refreshToken,
     });
-    return { ok: true };
+    return {
+      ok: true,
+      user: {
+        name: result.user.name,
+        role_id: result.user.company.role_id,
+        company_id: result.user.company.company_id,
+        image: result.user.image,
+        email: result.user.email,
+      },
+    };
   } else {
     const errorResult = await response.json();
-    // console.error('Error response from API:', errorResult); // Debugging log
 
-    // console.log('errorResult:', errorResult);
-    // toast.error(errorResult.message);
     return {
       ok: false,
       error: errorResult.message || response.statusText,

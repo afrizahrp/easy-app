@@ -12,7 +12,7 @@
 'use client';
 import React from 'react';
 // import { useSession } from 'next-auth/react';
-import { useAuth } from '@/provider/auth.provider';
+import { useSessionStore } from '@/store';
 
 interface DashboardPageViewProps {
   trans: {
@@ -21,9 +21,9 @@ interface DashboardPageViewProps {
 }
 const DashboardPageView = () => {
   // const { data: session } = useSession();
-  const { session } = useAuth();
+  const { user } = useSessionStore();
   // console.log(session);
-  const welcome = `Selamat datang ${session?.user?.name}`;
+  const welcome = `Selamat datang ${user?.name}`;
 
   return <div>{welcome}</div>;
 };

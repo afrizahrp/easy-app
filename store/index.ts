@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { siteConfig } from '@/config/site';
 import { persist, createJSONStorage } from 'zustand/middleware';
+import { shallow } from 'zustand/shallow'; // Hindari re-render yang tidak perlu
 
 interface ThemeStoreState {
   theme: string;
@@ -100,5 +101,58 @@ export const useModuleStore = create<MenuModuleState>()(
       setModuleId: (id: string) => set({ moduleId: id }),
     }),
     { name: 'module-store', storage: createJSONStorage(() => localStorage) }
+  )
+);
+
+interface UserSession {
+  name: string;
+  company_id: string;
+  role_id: string;
+  image: string;
+  email: string;
+  // id: string;
+  // branch_id: string;
+}
+
+interface SessionStoreState {
+  user: UserSession | null;
+  setUser: (user: UserSession) => void;
+  logout: () => void;
+}
+
+export const useSessionStore = create<SessionStoreState>()(
+  persist(
+    (set) => ({
+      user: null,
+      setUser: (user) => set({ user }),
+      logout: () => set({ user: null }),
+    }),
+    {
+      name: 'session-store',
+      storage: createJSONStorage(() => localStorage),
+    }
+  )
+);
+
+interface CompanyInfoState {
+  companyName: string;
+  companyLogo: string;
+}
+
+interface CompanyInfoStoreState {
+  company: CompanyInfoState | null;
+  setCompany: (company: CompanyInfoState) => void;
+}
+
+export const useCompanyInfo = create<CompanyInfoStoreState>()(
+  persist(
+    (set) => ({
+      company: null,
+      setCompany: (company) => set({ company }),
+    }),
+    {
+      name: 'company-info-store',
+      storage: createJSONStorage(() => localStorage),
+    }
   )
 );

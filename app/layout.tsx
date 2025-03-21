@@ -1,9 +1,6 @@
-// import '../scss/globals.scss';
-// import '../scss/theme.scss';
-import '@/app/globals.css'; // ✅ Impor dengan relative path
+import '@/app/globals.css';
 import '@/app/theme.css';
 import { Inter } from 'next/font/google';
-// import { siteConfig } from '@/config/site';
 import Providers from '@/provider/providers';
 import 'simplebar-react/dist/simplebar.min.css';
 import TanstackProvider from '@/provider/providers.client';
@@ -14,27 +11,20 @@ import ModalProvider from '@/provider/modal-provider';
 
 const inter = Inter({ subsets: ['latin'] });
 
-// export const metadata = {
-//   title: {
-//     default: siteConfig.name,
-//     template: `%s - ${siteConfig.name}`,
-//   },
-//   description: siteConfig.description,
-// };
-
 export default function RootLayout({
   children,
-  params: { lang },
+  // params: { lang },
 }: {
   children: React.ReactNode;
-  params: { lang: string };
+  // params: { lang: string };
 }) {
   return (
-    <html lang={lang}>
+    <html className={inter.className} suppressHydrationWarning>
+      {/* <body className={inter.className}> */}
       <AuthProvider>
         <TanstackProvider>
           <Providers>
-            <DirectionProvider lang={lang}>
+            <DirectionProvider>
               {/* <ModalProvider /> */}
 
               {children}
@@ -42,6 +32,7 @@ export default function RootLayout({
           </Providers>
         </TanstackProvider>
       </AuthProvider>
+      {/* </body> */}
     </html>
   );
 }

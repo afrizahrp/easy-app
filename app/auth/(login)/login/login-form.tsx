@@ -19,6 +19,7 @@ import { CardWrapper } from '@/components/auth/card-wrapper';
 import { LoginSchema } from '@/utils/schema/login.schema';
 import { useMediaQuery } from '@/hooks/use-media-query';
 import CompanyCombobox from '@/components/ui/company-combobox';
+import { useSessionStore } from '@/store';
 
 interface Company {
   value: string;
@@ -31,6 +32,8 @@ const LogInForm = () => {
   const [passwordType, setPasswordType] = useState('password');
   const isDesktop2xl = useMediaQuery('(max-width: 1530px)');
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
+
+  const { setUser } = useSessionStore();
 
   const companyLogo = selectedCompany?.companyLogo;
   const companyName = selectedCompany?.label;
@@ -65,13 +68,22 @@ const LogInForm = () => {
         );
         if (response.ok) {
           toast.success('Login Successful');
+          if (response.user) {
+            setUser({
+              name: response.user.name,
+              role_id: response.user.role_id,
+              company_id: response.user.company_id,
+              image: response.user.image,
+              email: response.user.email,
+            });
+          }
           window.location.assign('/dashboard');
           form.reset();
         } else if (response.error) {
           toast.error(response.error);
         }
       } catch (error) {
-        console.error('Error during signIn:', error); // Debugging log
+        console.error('Error during signIn:', error);
         toast.error('An error occurred during login.');
       }
     });
