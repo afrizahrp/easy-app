@@ -159,6 +159,8 @@ export const BillboardForm: React.FC<BillboardFormProps> = ({
     };
     updateBillboardMutation.mutate(updatedData, {
       onSuccess: () => {
+        // toast.success(actionMessage);
+
         toast.success(actionMessage);
 
         router.refresh();
@@ -168,6 +170,7 @@ export const BillboardForm: React.FC<BillboardFormProps> = ({
         toast.error('Update failed');
       },
     });
+    // console.log('Data yang dikirim:', updatedData); // Debugging
   };
 
   const handleImageRemove = async (id: number) => {
@@ -177,8 +180,9 @@ export const BillboardForm: React.FC<BillboardFormProps> = ({
       const contentURL = form.getValues().contentURL as string;
       form.setValue('contentURL', '');
       form.setValue('content_id', '');
+
       handleUpdateBillboard(id);
-      setLoading(false);
+
       router.refresh();
       setLoading(false);
     } catch (error) {

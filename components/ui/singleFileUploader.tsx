@@ -104,8 +104,6 @@ const SingleFileUploader: React.FC<SingleFileUploaderProps> = ({
 
       if (result.urls && result.urls.length > 0) {
         setUploadedUrl(result.urls[0]);
-        setFiles([]); // Pindahkan ke sini agar tidak menghapus preview sebelum upload selesai
-        setFile(content_id);
         onChange(result.urls[0]);
       } else {
         throw new Error('Upload response is invalid');
@@ -178,9 +176,6 @@ const SingleFileUploader: React.FC<SingleFileUploaderProps> = ({
               src={uploadedUrl}
               width={400}
               height={300}
-              onError={(e) => {
-                e.currentTarget.src = '/fallback-image.png'; // Gambar default jika gagal
-              }}
             />
           ) : null}
         </div>
