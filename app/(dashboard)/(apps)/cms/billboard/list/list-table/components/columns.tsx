@@ -7,7 +7,7 @@ import { getDisplayStatus } from '@/utils/statusUils';
 import { EyeOff, Eye } from 'lucide-react';
 
 import NextImage from 'next/image';
-import { Video } from 'cloudinary-react';
+// import { Video } from 'cloudinary-react';
 
 export type BillboardColumn = {
   id: number;
@@ -111,9 +111,8 @@ export const columns: ColumnDef<BillboardColumn>[] = [
               className='max-w-[180px] rounded' // Added rounded corners here
             />
           ) : (
-            <Video
-              cloudName='biwebapp-live'
-              publicId={row.getValue('contentURL')}
+            <video
+              src={row.getValue('contentURL')}
               width='170px'
               height='170px'
               controls

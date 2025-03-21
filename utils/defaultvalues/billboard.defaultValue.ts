@@ -14,5 +14,10 @@ export function billboarddefaultValues(
     iShowedStatus: initialBillboardData?.iShowedStatus ?? 'SHOW',
     remarks: initialBillboardData?.remarks ?? '',
     company_id: initialBillboardData?.company_id ?? '',
+    branch_id: initialBillboardData?.branch_id ?? '',
+    createdBy: initialBillboardData?.createdBy ?? '',
+    updatedBy: initialBillboardData?.updatedBy ?? '',
+    updatedAt: initialBillboardData?.updatedAt ?? new Date(),
+    // createdAt: initialBillboardData?.createdAt ?? new Date(),
   };
 }

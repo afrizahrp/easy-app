@@ -20,6 +20,10 @@ export type Billboard = {
   iShowedStatus: string;
   remarks: string;
   company_id: string;
+  branch_id: string;
+  createdBy: string;
+  updatedBy: string;
+  updatedAt: Date;
 };
 
 export interface Products {

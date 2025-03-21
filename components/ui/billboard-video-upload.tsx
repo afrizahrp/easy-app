@@ -1,8 +1,8 @@
 'use client';
 
-import { CldUploadWidget } from 'next-cloudinary';
+// import { CldUploadWidget } from 'next-cloudinary';
 // import { CldVideoPlayer } from 'next-cloudinary';
-import { Video } from 'cloudinary-react';
+// import { Video } from 'cloudinary-react';
 // import { CldVideoPlayer } from 'next-cloudinary';
 import { useEffect, useState } from 'react';
 // mtzlseemkuydulx0wbn0
@@ -47,7 +47,6 @@ const BillboardVideoUpload: React.FC<BillboardVideoUploadProps> = ({
               <Button
                 type='button'
                 onClick={() => onRemove(url)}
-                variant='soft'
                 color='destructive'
                 size='sm'
               >
@@ -57,13 +56,11 @@ const BillboardVideoUpload: React.FC<BillboardVideoUploadProps> = ({
             {/* <Image fill className='object-cover' alt='video' src={url} /> */}
             {/* <CldVideoPlayer src={url} width='auto' controls autoPlay /> */}
 
-            <Video
-              cloudName='biwebapp-live'
-              objectFit='cover'
-              publicId={url}
+            <video
+              src={url}
+              className='rounded-md'
               width='100%'
               height='auto'
-              crop='scale'
               controls
               autoPlay
               loop
@@ -71,7 +68,7 @@ const BillboardVideoUpload: React.FC<BillboardVideoUploadProps> = ({
           </div>
         ))}
       </div>
-      <CldUploadWidget
+      {/* <CldUploadWidget
         onUpload={onUpload}
         options={{
           sources: ['local', 'google_drive', 'url'],
@@ -79,11 +76,6 @@ const BillboardVideoUpload: React.FC<BillboardVideoUploadProps> = ({
           multiple: false,
           clientAllowedFormats: ['mp4', 'webm', 'ogg'],
         }}
-        // signatureEndpoint='/api/cms/billboardURLS'
-
-        // signatureEndpoint={
-        //   process.env.NEXT_PUBLIC_CLOUDINARY_SIGNATURE_ENDPOINT
-        // }
         uploadPreset='uploadBiwebapp'
       >
         {({ open }) => {
@@ -103,7 +95,7 @@ const BillboardVideoUpload: React.FC<BillboardVideoUploadProps> = ({
             </Button>
           );
         }}
-      </CldUploadWidget>
+      </CldUploadWidget> */}
     </div>
   );
 };

@@ -6,7 +6,7 @@ import { useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import FormFooter from '@/components/form-footer';
-import 'easymde/dist/easymde.min.css';
+// import 'easymde/dist/easymde.min.css';
 import { toast } from 'react-hot-toast';
 import { useParams, useRouter } from 'next/navigation';
 import { Input } from '@/components/ui/input';
@@ -81,8 +81,6 @@ export const BillboardForm: React.FC<BillboardFormProps> = ({
     return filename.split('.')[0]; // Ambil nama file tanpa ekstensi
   }
 
-  console.log('Submitting form:', form.getValues());
-
   const handleCreateBillboard = () => {
     console.log('handleCreateBillboard called'); // Log ini untuk memastikan fungsi dipanggil
 
@@ -101,9 +99,12 @@ export const BillboardForm: React.FC<BillboardFormProps> = ({
       remarks: form.getValues().remarks ?? '',
       isImage: form.getValues().isImage ?? true,
       company_id: company_id ?? '',
+      branch_id: user?.company_id ?? '',
+      updatedBy: user?.name ?? '',
+      createdBy: user?.name ?? '',
     };
 
-    console.log('New Billboard Data:', newData); // Log untuk melihat data yang dikirimkan
+    // console.log('New Billboard Data:', newData); // Log untuk melihat data yang dikirimkan
 
     createBillboardMutation.mutate(
       { data: newData },
@@ -139,6 +140,9 @@ export const BillboardForm: React.FC<BillboardFormProps> = ({
         remarks: form.getValues().remarks ?? '',
         isImage: form.getValues().isImage ?? true,
         company_id: company_id ?? '',
+        branch_id: user?.company_id ?? '',
+        updatedBy: user?.name ?? '',
+        updatedAt: new Date(),
       },
     };
     updateBillboardMutation.mutate(updatedData, {
@@ -151,6 +155,7 @@ export const BillboardForm: React.FC<BillboardFormProps> = ({
         toast.error('Update failed');
       },
     });
+    console.log('Data yang dikirim:', updatedData); // Debugging
   };
 
   // console.log('initialBillboardData', initialBillboardData);
@@ -344,7 +349,7 @@ export const BillboardForm: React.FC<BillboardFormProps> = ({
                   <FormControl>
                     <QuillEditor
                       value={field.value || ''}
-                      onChange={(value ) => field.onChange(value)}
+                      onChange={(value) => field.onChange(value)}
                       placeholder='Input or edit description here'
                       className='col-span-full [&_.ql-editor]:min-h-[100px] dark:[&_.ql-editor]:bg-gray-800 dark:[&_.ql-editor]:text-gray-200 dark:[&_.ql-editor]:border-gray-700'
                     />
