@@ -1,6 +1,7 @@
 import { api } from '@/config/axios.config';
 import { useQuery } from '@tanstack/react-query';
-import { useAuth } from '@/provider/auth.provider';
+import { useSessionStore } from '@/store';
+
 import { useModuleStore } from '@/store';
 import { Billboard } from '@/types';
 
@@ -10,8 +11,8 @@ interface BillboardResponse {
 }
 
 export const useGetAllBillboard = (page: number, limit: number) => {
-  const { session } = useAuth();
-  const company_id = session?.user?.company_id;
+  const user = useSessionStore((state) => state.user);
+  const company_id = user?.company_id;
   const module_id = useModuleStore((state) => state.moduleId);
 
   const url = `${process.env.NEXT_PUBLIC_API_URL}/${company_id}/${module_id}/billboards/all`;

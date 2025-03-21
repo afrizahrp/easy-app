@@ -1,47 +1,31 @@
 'use client';
 import React, { useState } from 'react';
 import { cn, isLocationMatch } from '@/lib/utils';
-import { useModuleStore, useSidebar, useThemeStore } from '@/store';
-import SidebarLogo from '../common/logo';
+import { useModuleStore, useSidebar, useCompanyInfo } from '@/store';
 import { useGetMenu } from '@/queryHooks/use-get-menu'; // 🔥 Import hook yang sudah kamu buat
 
 import MenuLabel from '../common/menu-label';
-import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { usePathname } from 'next/navigation';
 import SingleMenuItem from './single-menu-item';
 import SubMenuHandler from './sub-menu-handler';
 import NestedSubMenu from '../common/nested-menus';
-
-import { useAuth } from '@/provider/auth.provider';
 import Image from 'next/image';
 
 const MobileSidebar = ({ className }: { className?: string }) => {
   const { sidebarBg, mobileMenu, setMobileMenu } = useSidebar();
   const [activeSubmenu, setActiveSubmenu] = useState<number | null>(null);
   const [activeMultiMenu, setMultiMenu] = useState<number | null>(null);
-  // const menus = menusConfig?.sidebarNav?.classic || [];
   const { menuItems, loading } = useGetMenu(); // 🔥 Gunakan hook untuk fetch data menu
 
   const { collapsed } = useSidebar();
 
-  const { session } = useAuth();
-  // console.log('Session from sidebarLogo:', session); // Debugging log
-  const companyId = session?.user?.company_id;
+  const { company } = useCompanyInfo((state) => ({
+    company: state.company,
+  }));
 
-  // Pemetaan companyId ke nama perusahaan
-  let companyName = '';
-  let logoSrc = '/images/logo/logo.png'; // Default logo
-
-  if (companyId === 'BIS') {
-    companyName = 'Bumi Indah Saranamedis';
-  } else if (companyId === 'BIP') {
-    companyName = 'Bumi Indah Putra';
-    logoSrc = '/images/logo/bipmed-logo.png'; // Logo untuk BIP
-  } else if (companyId === 'KBIP') {
-    companyName = 'Karoseri Bumi Indah Putra';
-    logoSrc = '/images/logo/bipmed-logo.png'; // Logo untuk KBIP
-  }
+  const logoSrc = company?.companyLogo || '/images/logo/logo.png';
+  const companyName = company?.companyName || 'PT. BUMI INDAH SARANAMEDIS';
 
   const setModuleId = useModuleStore((state) => state.setModuleId);
 

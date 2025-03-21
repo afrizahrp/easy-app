@@ -32,7 +32,7 @@ import {
 import { billboarddefaultValues } from '@/utils/defaultvalues/billboard.defaultValue';
 import { Switch } from '@/components/ui/switch';
 
-import { useAuth } from '@/provider/auth.provider';
+import { useSessionStore } from '@/store';
 import dynamic from 'next/dynamic';
 
 import QuillLoader from '@/components/ui/quill-loader';
@@ -49,11 +49,11 @@ interface BillboardFormProps {
 export const BillboardForm: React.FC<BillboardFormProps> = ({
   initialBillboardData,
 }) => {
-  const { session } = useAuth();
+  const user = useSessionStore((state) => state.user);
   const params = useParams();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const company_id = session?.user?.company_id;
+  const company_id = user?.company_id;
 
   const actionMessage = initialBillboardData
     ? 'Billboard has changed successfully.'
@@ -344,7 +344,7 @@ export const BillboardForm: React.FC<BillboardFormProps> = ({
                   <FormControl>
                     <QuillEditor
                       value={field.value || ''}
-                      onChange={(value) => field.onChange(value)}
+                      onChange={(value ) => field.onChange(value)}
                       placeholder='Input or edit description here'
                       className='col-span-full [&_.ql-editor]:min-h-[100px] dark:[&_.ql-editor]:bg-gray-800 dark:[&_.ql-editor]:text-gray-200 dark:[&_.ql-editor]:border-gray-700'
                     />

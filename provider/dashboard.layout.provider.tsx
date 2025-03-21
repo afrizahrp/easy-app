@@ -24,9 +24,8 @@ const DashBoardLayoutProvider = ({
 
   return (
     <>
-      <Header handleOpenSearch={() => {}} />
+      <Header />
       <Sidebar />
-
       <div
         className={cn('content-wrapper transition-all duration-150', {
           'ltr:xl:ml-[72px] rtl:xl:mr-[72px]': collapsed,

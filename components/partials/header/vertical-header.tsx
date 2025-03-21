@@ -1,9 +1,6 @@
 import React from 'react';
 import { useSidebar, useThemeStore } from '@/store';
 import { cn } from '@/lib/utils';
-import { Icon } from '@iconify/react';
-import { Pin, Search } from 'lucide-react';
-import { SiteLogo } from '@/components/svg';
 import SidebarToggle from '../sidebar/common/sidebar-toggle';
 import Link from 'next/link';
 import { useMediaQuery } from '@/hooks/use-media-query';
@@ -63,12 +60,7 @@ const MenuBar = ({
   );
 };
 
-type VerticalHeaderProps = {
-  handleOpenSearch: () => void;
-};
-const VerticalHeader: React.FC<VerticalHeaderProps> = ({
-  handleOpenSearch,
-}) => {
+const VerticalHeader: React.FC = () => {
   const { collapsed, setCollapsed, subMenu, sidebarType } = useSidebar();
   const { layout } = useThemeStore();
   const { company } = useCompanyInfo((state) => ({

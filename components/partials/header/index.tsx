@@ -25,7 +25,7 @@ const NavTools = ({
 }) => {
   return (
     <div className='nav-tools flex items-center  gap-2'>
-      {isDesktop && <Language />}
+      {/* {isDesktop && <Language />} */}
       {isDesktop && <FullScreen />}
 
       <ThemeButton />
@@ -39,7 +39,7 @@ const NavTools = ({
     </div>
   );
 };
-const Header = ({ handleOpenSearch }: { handleOpenSearch: () => void }) => {
+const Header = () => {
   const { collapsed, sidebarType, setCollapsed, subMenu, setSidebarType } =
     useSidebar();
   const { layout, navbarType, setLayout } = useThemeStore();
@@ -70,7 +70,7 @@ const Header = ({ handleOpenSearch }: { handleOpenSearch: () => void }) => {
         <div className='xl:mx-20 mx-4'>
           <div className='w-full bg-card/90 backdrop-blur-lg md:px-6 px-[15px] py-3 rounded-md my-6 shadow-md border-b'>
             <div className='flex justify-between items-center h-full'>
-              <VerticalHeader handleOpenSearch={handleOpenSearch} />
+              <VerticalHeader />
               <NavTools
                 isDesktop={isDesktop}
                 isMobile={isMobile}
@@ -97,7 +97,7 @@ const Header = ({ handleOpenSearch }: { handleOpenSearch: () => void }) => {
       >
         <div className='w-full bg-card/90 backdrop-blur-lg md:px-6 px-[15px] py-3 border-b'>
           <div className='flex justify-between items-center h-full'>
-            <VerticalHeader handleOpenSearch={handleOpenSearch} />
+            <VerticalHeader />
             <NavTools
               isDesktop={isDesktop}
               isMobile={isMobile}
@@ -124,7 +124,7 @@ const Header = ({ handleOpenSearch }: { handleOpenSearch: () => void }) => {
       >
         <div className='w-full bg-card/90 backdrop-blur-lg md:px-6 px-[15px] py-3 rounded-md my-6 shadow-md border-b'>
           <div className='flex justify-between items-center h-full'>
-            <VerticalHeader handleOpenSearch={handleOpenSearch} />
+            <VerticalHeader />
             <NavTools
               isDesktop={isDesktop}
               isMobile={isMobile}
@@ -147,7 +147,7 @@ const Header = ({ handleOpenSearch }: { handleOpenSearch: () => void }) => {
     >
       <div className='w-full bg-card/90 backdrop-blur-lg md:px-6 px-[15px] py-3 border-b'>
         <div className='flex justify-between items-center h-full'>
-          <VerticalHeader handleOpenSearch={handleOpenSearch} />
+          <VerticalHeader />
           <NavTools
             isDesktop={isDesktop}
             isMobile={isMobile}

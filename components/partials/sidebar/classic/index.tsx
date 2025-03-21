@@ -23,7 +23,6 @@ const ClassicSidebar = () => {
   const setModuleId = useModuleStore((state) => state.setModuleId);
 
   const toggleSubmenu = (i: number, module_id: string) => {
-    // console.log('Submenu clicked:', { index: i, module_id }); // Tambahkan log ini
     setModuleId(module_id);
     if (activeSubmenu === i) {
       setActiveSubmenu(null);
