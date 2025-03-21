@@ -5,6 +5,7 @@ import { Upload } from 'lucide-react';
 import { Icon } from '@iconify/react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'react-hot-toast';
+import { Skeleton } from '@/components/ui/skeleton';
 
 import Image from 'next/image';
 
@@ -103,6 +104,8 @@ const SingleFileUploader: React.FC<SingleFileUploaderProps> = ({
 
       if (result.urls && result.urls.length > 0) {
         setUploadedUrl(result.urls[0]);
+        setFiles([]); // Pindahkan ke sini agar tidak menghapus preview sebelum upload selesai
+        setFile(content_id);
         onChange(result.urls[0]);
       } else {
         throw new Error('Upload response is invalid');
@@ -139,6 +142,8 @@ const SingleFileUploader: React.FC<SingleFileUploaderProps> = ({
     }
   };
 
+  console.log('uploadedUrl', uploadedUrl);
+
   return (
     <div
       className={
@@ -147,8 +152,10 @@ const SingleFileUploader: React.FC<SingleFileUploaderProps> = ({
           : ''
       }
     >
-      {/* <div className='w-full h-full flex flex-col items-center justify-center'>  */}
-      {uploadedUrl ? (
+      {uploading ? (
+        // Menampilkan Skeleton Loader saat proses upload berlangsung
+        <Skeleton className='w-full h-[300px] rounded-md' />
+      ) : uploadedUrl ? (
         <div className='w-full h-full relative'>
           <Button
             type='button'
@@ -164,15 +171,20 @@ const SingleFileUploader: React.FC<SingleFileUploaderProps> = ({
               <Icon icon='fa6-solid:xmark' />
             </span>
           </Button>
-          <Image
-            alt='Uploaded Image'
-            className='w-full h-full object-cover rounded-md'
-            src={uploadedUrl}
-            width={400}
-            height={300}
-          />
+          {uploadedUrl ? (
+            <Image
+              alt='Uploaded Image'
+              className='w-full h-full object-cover rounded-md'
+              src={uploadedUrl}
+              width={400}
+              height={300}
+              onError={(e) => {
+                e.currentTarget.src = '/fallback-image.png'; // Gambar default jika gagal
+              }}
+            />
+          ) : null}
         </div>
-      ) : files.length ? (
+      ) : files.length > 0 ? (
         <div className='w-full h-full relative'>
           <Button
             type='button'
@@ -198,7 +210,7 @@ const SingleFileUploader: React.FC<SingleFileUploaderProps> = ({
             onClick={handleUpload}
             disabled={uploading}
           >
-            <span className='text-lg'>
+            <span className='text-md'>
               {uploading ? (
                 'Uploading...'
               ) : (

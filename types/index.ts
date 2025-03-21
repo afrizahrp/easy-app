@@ -21,9 +21,10 @@ export type Billboard = {
   remarks: string;
   company_id: string;
   branch_id: string;
-  createdBy: string;
+  createdBy?: string;
+  createdAt?: string;
   updatedBy: string;
-  updatedAt: Date;
+  updatedAt: string;
 };
 
 export interface Products {

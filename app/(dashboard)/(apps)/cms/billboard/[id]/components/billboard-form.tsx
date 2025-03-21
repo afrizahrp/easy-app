@@ -2,7 +2,7 @@
 
 import { useUpdateBillboard } from '@/queryHooks/useUpdateBillboard';
 import { useCreateBillboard } from '@/queryHooks/useCreateBillboard';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import FormFooter from '@/components/form-footer';
@@ -29,6 +29,9 @@ import {
   BillboardFormValues,
   billboardFormSchema,
 } from '@/utils/schema/billboard.form.schema';
+
+import { ConvertToWib } from '@/utils/convertToWib';
+
 import { billboarddefaultValues } from '@/utils/defaultvalues/billboard.defaultValue';
 import { Switch } from '@/components/ui/switch';
 
@@ -53,7 +56,8 @@ export const BillboardForm: React.FC<BillboardFormProps> = ({
   const params = useParams();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const company_id = user?.company_id;
+  const [imageDeleted, setImageDeleted] = useState(false);
+  const companyId = user?.company_id;
 
   const actionMessage = initialBillboardData
     ? 'Billboard has changed successfully.'
@@ -81,6 +85,12 @@ export const BillboardForm: React.FC<BillboardFormProps> = ({
     return filename.split('.')[0]; // Ambil nama file tanpa ekstensi
   }
 
+  useEffect(() => {
+    if (initialBillboardData?.contentURL) {
+      form.setValue('contentURL', initialBillboardData.contentURL);
+    }
+  }, [initialBillboardData, form]);
+
   const handleCreateBillboard = () => {
     console.log('handleCreateBillboard called'); // Log ini untuk memastikan fungsi dipanggil
 
@@ -98,13 +108,13 @@ export const BillboardForm: React.FC<BillboardFormProps> = ({
       iShowedStatus: form.getValues().iShowedStatus ?? 'SHOW',
       remarks: form.getValues().remarks ?? '',
       isImage: form.getValues().isImage ?? true,
-      company_id: company_id ?? '',
-      branch_id: user?.company_id ?? '',
-      updatedBy: user?.name ?? '',
+      company_id: companyId ?? '',
+      branch_id: companyId ?? '',
       createdBy: user?.name ?? '',
+      createdAt: ConvertToWib(form.getValues().updatedAt),
+      updatedBy: user?.name ?? '',
+      updatedAt: ConvertToWib(form.getValues().updatedAt),
     };
-
-    // console.log('New Billboard Data:', newData); // Log untuk melihat data yang dikirimkan
 
     createBillboardMutation.mutate(
       { data: newData },
@@ -139,15 +149,18 @@ export const BillboardForm: React.FC<BillboardFormProps> = ({
         iShowedStatus: form.getValues().iShowedStatus ?? 'SHOW',
         remarks: form.getValues().remarks ?? '',
         isImage: form.getValues().isImage ?? true,
-        company_id: company_id ?? '',
-        branch_id: user?.company_id ?? '',
+        company_id: companyId ?? '',
+        branch_id: companyId ?? '',
+        createdBy: initialBillboardData?.createdBy ?? '', // Ambil dari initial data
+        createdAt: ConvertToWib(initialBillboardData?.createdAt), // Ambil dari initial data
         updatedBy: user?.name ?? '',
-        updatedAt: new Date(),
+        updatedAt: ConvertToWib(form.getValues().updatedAt), // Pastikan selalu WIB
       },
     };
     updateBillboardMutation.mutate(updatedData, {
       onSuccess: () => {
         toast.success(actionMessage);
+
         router.refresh();
       },
       onError: (error) => {
@@ -155,15 +168,29 @@ export const BillboardForm: React.FC<BillboardFormProps> = ({
         toast.error('Update failed');
       },
     });
-    console.log('Data yang dikirim:', updatedData); // Debugging
   };
 
-  // console.log('initialBillboardData', initialBillboardData);
+  const handleImageRemove = async (id: number) => {
+    try {
+      setLoading(true);
+
+      const contentURL = form.getValues().contentURL as string;
+      form.setValue('contentURL', '');
+      form.setValue('content_id', '');
+      handleUpdateBillboard(id);
+      setLoading(false);
+      router.refresh();
+      setLoading(false);
+    } catch (error) {
+      console.error(error);
+      toast.error('Something went wrong');
+      setLoading(false);
+    }
+  };
 
   const onSubmit = async (data: BillboardFormValues) => {
     try {
       setLoading(true);
-      console.log('onSubmit called with data:', data);
 
       if (initialBillboardData) {
         handleUpdateBillboard(id);
@@ -176,23 +203,6 @@ export const BillboardForm: React.FC<BillboardFormProps> = ({
       console.error(error);
       toast.error(error.response?.data?.message || 'Save failed');
     } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleImageRemove = async (id: number) => {
-    try {
-      setLoading(true);
-
-      const contentURL = form.getValues().contentURL as string;
-      form.setValue('contentURL', '');
-      form.setValue('content_id', '');
-      handleUpdateBillboard(id);
-      router.refresh();
-      setLoading(false);
-    } catch (error) {
-      console.error(error);
-      toast.error('Something went wrong');
       setLoading(false);
     }
   };

@@ -12,9 +12,10 @@ export const billboardFormSchema = z.object({
   remarks: z.string().or(z.literal('')),
   company_id: z.string().or(z.literal('')),
   branch_id: z.string().or(z.literal('')),
-  createdBy: z.string().or(z.literal('')),
+  createdBy: z.string().optional().or(z.literal('')),
+  createdAt: z.string().optional(),
   updatedBy: z.string().or(z.literal('')),
-  updatedAt: z.date(),
+  updatedAt: z.string(),
 });
 
 export type BillboardFormValues = z.infer<typeof billboardFormSchema>;
