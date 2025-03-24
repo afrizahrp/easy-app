@@ -1,6 +1,3 @@
-import { statuses } from '@/data/data';
-import { capitalizeFirstLetter } from '@/utils/capitalize-first-letter';
-
 type statusTypeOptionsProps = {
   filterData: number; //0 - search, 1 - filter
 };
@@ -14,8 +11,8 @@ const masterTableStatusOptions = ({
   isLoading: boolean;
 } => {
   const MasterRecordStatusOptions = [
-    { id: '0', name: 'INACTIVE' },
-    { id: '1', name: 'ACTIVE' },
+    { id: 'INACTIVE', name: 'INACTIVE' },
+    { id: 'ACTIVE', name: 'ACTIVE' },
   ];
 
   const isLoading = false;
@@ -23,7 +20,7 @@ const masterTableStatusOptions = ({
   const statusList: OptionType[] | undefined = MasterRecordStatusOptions.map(
     (_statusList) => ({
       value: filterData === 0 ? _statusList.id : _statusList.name,
-      label: capitalizeFirstLetter(_statusList.name),
+      label: _statusList.name,
     })
   );
 

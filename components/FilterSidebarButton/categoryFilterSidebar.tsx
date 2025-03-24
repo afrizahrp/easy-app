@@ -15,15 +15,17 @@ export function CategoryFilterSidebar<TData>({
   table,
 }: CategoryFilterSidebarProps<TData>) {
   const isFiltered = table.getState().columnFilters.length > 0;
-
   const { options: statusOptionList, isLoading: isStatusLoading } =
     masterTableStatusOptions({ filterData: 1 });
 
   const { options: categoryTypeOption, isLoading: isCategoryTypeLoading } =
     categoryTypeOptions({ filterData: 1 });
 
-  console.log('categoryTypeOption', categoryTypeOption);
-  console.log('statusOptionList', statusOptionList);
+  console.log('All rows:', table.getGlobalFacetedRowModel().rows);
+  console.log(
+    'Unique status values:',
+    table.getColumn('iStatus')?.getFacetedUniqueValues()
+  );
 
   return (
     <div className='flex items-center justify-end py-2 '>
@@ -38,16 +40,16 @@ export function CategoryFilterSidebar<TData>({
             />
           )}
         </div>
-        <div className='w-full py-1'>
+        {/* <div className='w-full py-1'>
           {table.getColumn('categoryType') && (
             <DataTableFacetedFilter
               column={table.getColumn('categoryType')}
-              title='Type'
+              title='Category Type'
               options={categoryTypeOption}
               isLoading={isCategoryTypeLoading}
             />
           )}
-        </div>
+        </div> */}
         {isFiltered && (
           <Button
             variant='outline'
