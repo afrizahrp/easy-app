@@ -6,8 +6,8 @@ export const navItems = [
 ];
 
 export const MasterRecordStatusOptions = [
-  { name: 'Active', value: 'active' },
-  { name: 'InActive', value: 'inactive' },
+  { id: '0', name: 'INACTIVE' },
+  { id: '1', name: 'ACTIVE' },
 ];
 
 export const gridItems = [

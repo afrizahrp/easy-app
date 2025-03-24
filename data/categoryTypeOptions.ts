@@ -13,7 +13,7 @@ const categoryTypeOptions = ({
   options: OptionType[] | undefined;
   isLoading: boolean;
 } => {
-  const { data, isLoading, error } = useCategoryTypes();
+  const { data, isLoading, error } = useCategoryTypes(1, 20);
 
   const categoryTypeList: OptionType[] | undefined = data?.map(
     (_categoryTypeList) => ({

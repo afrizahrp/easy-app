@@ -1,7 +1,6 @@
 import { api } from '@/config/axios.config';
 import { useQuery } from '@tanstack/react-query';
-import { useSessionStore } from '@/store';
-import { useModuleStore } from '@/store';
+import { useSessionStore, useModuleStore } from '@/store';
 import { Category } from '@/types';
 
 interface CategoryResponse {

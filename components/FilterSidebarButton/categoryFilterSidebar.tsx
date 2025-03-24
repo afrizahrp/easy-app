@@ -15,18 +15,23 @@ export function CategoryFilterSidebar<TData>({
   table,
 }: CategoryFilterSidebarProps<TData>) {
   const isFiltered = table.getState().columnFilters.length > 0;
+
   const { options: statusOptionList, isLoading: isStatusLoading } =
-    masterTableStatusOptions();
+    masterTableStatusOptions({ filterData: 1 });
+
   const { options: categoryTypeOption, isLoading: isCategoryTypeLoading } =
     categoryTypeOptions({ filterData: 1 });
+
+  console.log('categoryTypeOption', categoryTypeOption);
+  console.log('statusOptionList', statusOptionList);
 
   return (
     <div className='flex items-center justify-end py-2 '>
       <div className='flex flex-col items-center space-y-2 w-full'>
         <div className='w-full py-3'>
-          {table.getColumn('status') && (
+          {table.getColumn('iStatus') && (
             <DataTableFacetedFilter
-              column={table.getColumn('status')}
+              column={table.getColumn('iStatus')}
               title='Status'
               options={statusOptionList}
               isLoading={isStatusLoading}
@@ -37,7 +42,7 @@ export function CategoryFilterSidebar<TData>({
           {table.getColumn('categoryType') && (
             <DataTableFacetedFilter
               column={table.getColumn('categoryType')}
-              title='Category Type'
+              title='Type'
               options={categoryTypeOption}
               isLoading={isCategoryTypeLoading}
             />
