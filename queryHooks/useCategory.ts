@@ -64,7 +64,8 @@ export const useCategory = ({
     retry: 3,
     placeholderData: (previousData) => previousData,
   });
-
+  console.log('Raw API Response:', data?.data);
+  console.log('Total Records dari API:', data?.totalRecords);
   return {
     data: data?.data,
     total: data?.totalRecords,

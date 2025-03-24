@@ -1,11 +1,13 @@
 type statusTypeOptionsProps = {
-  filterData: number; //0 - search, 1 - filter
+  filterData: number; // 0 - search, 1 - filter
+  statusCounts?: Record<string, number>; // Total records per status
 };
 
-type OptionType = { value: string; label: string };
+type OptionType = { value: string; label: string; count?: number };
 
 const masterTableStatusOptions = ({
   filterData,
+  statusCounts = {},
 }: statusTypeOptionsProps): {
   options: OptionType[] | undefined;
   isLoading: boolean;
@@ -21,6 +23,7 @@ const masterTableStatusOptions = ({
     (_statusList) => ({
       value: filterData === 0 ? _statusList.id : _statusList.name,
       label: _statusList.name,
+      count: statusCounts[_statusList.id] || 0, // Menambahkan jumlah data per status
     })
   );
 

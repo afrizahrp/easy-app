@@ -15,8 +15,14 @@ export function CategoryFilterSidebar<TData>({
   table,
 }: CategoryFilterSidebarProps<TData>) {
   const isFiltered = table.getState().columnFilters.length > 0;
+  // const { options: statusOptionList, isLoading: isStatusLoading } =
+  //   masterTableStatusOptions({ filterData: 1 });
+
   const { options: statusOptionList, isLoading: isStatusLoading } =
-    masterTableStatusOptions({ filterData: 1 });
+    masterTableStatusOptions({
+      filterData: 1,
+      statusCounts: { ACTIVE: 500, INACTIVE: 170 }, // Ambil dari API
+    });
 
   const { options: categoryTypeOption, isLoading: isCategoryTypeLoading } =
     categoryTypeOptions({ filterData: 1 });
