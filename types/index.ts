@@ -1,3 +1,8 @@
+export type CategoryType = {
+  id: string;
+  name: string;
+};
+
 export type Category = {
   id: string;
   name: string;

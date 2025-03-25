@@ -1,8 +1,6 @@
 import { api } from '@/config/axios.config';
 import { useQuery } from '@tanstack/react-query';
-import { useSessionStore } from '@/store';
-
-import { useModuleStore } from '@/store';
+import { useSessionStore, useModuleStore } from '@/store';
 import { Billboard } from '@/types';
 
 interface BillboardResponse {
@@ -25,7 +23,6 @@ export const useGetAllBillboard = (page: number, limit: number) => {
     queryFn: async () => {
       try {
         const response = await api.get<BillboardResponse>(url);
-
         return response.data;
       } catch (error) {
         console.error('Error fetching billboard:', error);
@@ -41,7 +38,7 @@ export const useGetAllBillboard = (page: number, limit: number) => {
     data: data?.data,
     total: data?.totalRecords,
     isLoading,
-    isFetching, // Tambahkan untuk menampilkan loading hanya saat fetch baru
+    isFetching,
     error,
     ...rest,
   };
