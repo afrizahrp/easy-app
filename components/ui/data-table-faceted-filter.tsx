@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { CheckIcon } from '@radix-ui/react-icons';
 import { Column } from '@tanstack/react-table';
-import { useCategoryFilterStore } from '@/store'; // ✅ Import Zustand store
+import { useCategoryFilterStore } from '@/store';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -27,6 +27,7 @@ interface DataTableFacetedFilterProps<TData, TValue> {
   title?: string;
   options?: { value: string; label: string; count?: number }[];
   isLoading?: boolean;
+  filterType: 'status' | 'categoryType'; // 🔥 Tambahkan filterType
   table?: any;
 }
 
@@ -35,10 +36,15 @@ export function DataTableFacetedFilter<TData, TValue>({
   title,
   options,
   isLoading,
+  filterType, // 🔥 Gunakan filterType untuk menentukan store yang digunakan
   table,
 }: DataTableFacetedFilterProps<TData, TValue>) {
-  const { status, setStatus } = useCategoryFilterStore(); // ✅ Gunakan Zustand untuk menyimpan filter
-  const selectedValues = new Set(status);
+  const { status, setStatus, categoryType, setCategoryType } =
+    useCategoryFilterStore();
+
+  // 🔥 Pilih state sesuai dengan filterType
+  const selectedValues =
+    filterType === 'status' ? new Set(status) : new Set(categoryType);
 
   const handleSelect = (optionValue: string) => {
     const updatedValues = new Set(selectedValues);
@@ -50,13 +56,16 @@ export function DataTableFacetedFilter<TData, TValue>({
     }
 
     const filterValues = Array.from(updatedValues);
-    setStatus(filterValues); // ✅ Update Zustand store
-    column?.setFilterValue(filterValues.length ? filterValues : undefined); // ✅ Tetap support React Table
 
-    // console.log('✅ Selected Filters:', filterValues);
+    if (filterType === 'status') {
+      setStatus(filterValues); // 🔥 Update status
+    } else {
+      setCategoryType(filterValues); // 🔥 Update categoryType
+    }
 
-    // 🔥 Panggil refetch untuk update data
-    // console.log('🔥 Calling Refetch Data...');
+    column?.setFilterValue(filterValues.length ? filterValues : undefined);
+
+    // 🔥 Panggil refetch data
     table?.options?.meta?.refetchData?.();
   };
 
@@ -82,28 +91,6 @@ export function DataTableFacetedFilter<TData, TValue>({
           )}
         </Button>
       </PopoverTrigger>
-
-      {selectedValues.size > 0 && (
-        <div className='hidden space-x-1 py-3 lg:flex'>
-          {selectedValues.size > 3 ? (
-            <Badge variant='outline' className='rounded-sm px-1 font-normal'>
-              {selectedValues.size} data filtered
-            </Badge>
-          ) : (
-            options
-              ?.filter((option) => selectedValues.has(option.value))
-              .map((option) => (
-                <Badge
-                  variant='outline'
-                  key={option.value}
-                  className='rounded-sm px-1 text-sm'
-                >
-                  {option.label}
-                </Badge>
-              ))
-          )}
-        </div>
-      )}
 
       <PopoverContent className='w-[full] p-0' align='start'>
         <Command>
@@ -149,7 +136,11 @@ export function DataTableFacetedFilter<TData, TValue>({
                 <CommandGroup>
                   <CommandItem
                     onSelect={() => {
-                      setStatus([]); // ✅ Clear filter dengan Zustand
+                      if (filterType === 'status') {
+                        setStatus([]);
+                      } else {
+                        setCategoryType([]);
+                      }
                       column?.setFilterValue(undefined);
                     }}
                     className='justify-center text-center'

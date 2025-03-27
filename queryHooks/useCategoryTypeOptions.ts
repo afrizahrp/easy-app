@@ -1,4 +1,4 @@
-import useCategoryStatus from '@/queryHooks/useCategoryStatus';
+import useCategoryType from '@/queryHooks/useCategoryType';
 
 interface OptionType {
   value: string;
@@ -9,14 +9,14 @@ interface OptionType {
 export default function useCategoryStatusOptions(
   statusCounts?: Record<string, number>
 ) {
-  const { data: statusData, isLoading } = useCategoryStatus();
+  const { data: typeData, isLoading } = useCategoryType();
 
-  const options =
-    statusData?.map((status) => ({
-      value: status.id, // Sesuaikan dengan format API
-      label: status.name, //(${status.count})`, // Menampilkan count dari API
-      count: Number(status.count), // Pastikan count dalam bentuk number
+  const typeOptions =
+    typeData?.map((type) => ({
+      value: type.id, // Sesuaikan dengan format API
+      label: type.name, //(${type.count})`, // Menampilkan count dari API
+      count: Number(type.count), // Pastikan count dalam bentuk number
     })) || [];
 
-  return { options, isLoading };
+  return { typeOptions, isLoading };
 }
