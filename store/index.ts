@@ -156,3 +156,13 @@ export const useCompanyInfo = create<CompanyInfoStoreState>()(
     }
   )
 );
+
+interface CategoryFilterState {
+  status: string[]; // Array status
+  setStatus: (status: string[]) => void;
+}
+
+export const useCategoryFilterStore = create<CategoryFilterState>((set) => ({
+  status: [],
+  setStatus: (status) => set({ status }),
+}));

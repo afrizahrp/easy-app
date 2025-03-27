@@ -1,19 +1,22 @@
-import { useCategoryStatus } from '@/queryHooks/useCategoryStatus';
+import useCategoryStatus from '@/queryHooks/useCategoryStatus';
 
-type OptionType = { value: string; label: string; count: number };
+interface OptionType {
+  value: string;
+  label: string;
+  count: number;
+}
 
-const useCategoryStatusOptions = (statusCounts?: Record<string, number>) => {
+export default function useCategoryStatusOptions(
+  statusCounts?: Record<string, number>
+) {
   const { data: statusData, isLoading } = useCategoryStatus();
 
-  const statusList: OptionType[] | undefined = statusData?.map((status) => ({
-    value: status.id,
-    label: `${status.name} (${statusCounts?.[status.id] ?? status.count})`, // ✅ Gunakan API jika statusCounts tidak ada
-    count: statusCounts?.[status.id] ?? Number(status.count), // ✅ Gunakan API sebagai fallback
-  }));
+  const options =
+    statusData?.map((status) => ({
+      value: status.id, // Sesuaikan dengan format API
+      label: `${status.name} (${status.count})`, // Menampilkan count dari API
+      count: Number(status.count), // Pastikan count dalam bentuk number
+    })) || [];
 
-  console.log('Status List:', statusList); // ✅ Debugging data dari API
-
-  return { options: statusList, isLoading };
-};
-
-export default useCategoryStatusOptions;
+  return { options, isLoading };
+}
