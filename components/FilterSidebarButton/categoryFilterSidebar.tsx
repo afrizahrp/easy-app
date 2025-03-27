@@ -90,6 +90,7 @@ export function CategoryFilterSidebar<TData>({
             onClick={() => {
               table.resetColumnFilters(); // ✅ Reset filter di tabel
               setStatus([]); // ✅ Reset filter di Zustand
+              setCategoryType([]); // ✅ Reset filter di Zustand
             }}
             className='h-10 px-2 lg:px-3 w-full mb-5'
           >

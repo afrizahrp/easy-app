@@ -92,6 +92,28 @@ export function DataTableFacetedFilter<TData, TValue>({
         </Button>
       </PopoverTrigger>
 
+      {selectedValues.size > 0 && (
+        <div className='hidden space-x-1 py-3 lg:flex'>
+          {selectedValues.size > 3 ? (
+            <Badge variant='outline' className='rounded-sm px-1 font-normal'>
+              {selectedValues.size} data filtered
+            </Badge>
+          ) : (
+            options
+              ?.filter((option) => selectedValues.has(option.value))
+              .map((option) => (
+                <Badge
+                  variant='outline'
+                  key={option.value}
+                  className='rounded-sm px-1 text-sm'
+                >
+                  {option.label}
+                </Badge>
+              ))
+          )}
+        </div>
+      )}
+
       <PopoverContent className='w-[full] p-0' align='start'>
         <Command>
           <CommandInput placeholder={title} />
