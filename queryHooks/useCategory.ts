@@ -11,16 +11,10 @@ interface CategoryResponse {
 interface UseCategoryParams {
   page: number;
   limit: number;
-  status?: string;
-  categoryType?: string;
+  status?: string[]; // ✅ Pastikan status dalam bentuk array
 }
 
-export const useCategory = ({
-  page,
-  limit,
-  status,
-  categoryType,
-}: UseCategoryParams) => {
+export const useCategory = ({ page, limit, status }: UseCategoryParams) => {
   const user = useSessionStore((state) => state.user);
   const company_id = user?.company_id;
   const module_id = useModuleStore((state) => state.moduleId);
@@ -37,26 +31,21 @@ export const useCategory = ({
       module_id,
       page,
       limit,
-      status || null, // Jangan sertakan dalam queryKey jika undefined
-      categoryType || null, // Jangan sertakan dalam queryKey jika undefined
-    ].filter((item) => item !== null), // Hapus item `null` dari array queryKey
+      status?.length ? status.join(',') : 'all', // ✅ Gunakan join agar lebih stabil
+    ],
     queryFn: async () => {
       try {
         const params: Record<string, any> = { page, limit };
 
-        // Hanya tambahkan `status` jika ada nilai
-        if (status) {
+        // ✅ Tambahkan `status` sebagai array jika ada
+        if (status?.length) {
           params.status = status;
-        }
-
-        // Hanya tambahkan `categoryType` jika ada nilai
-        if (categoryType) {
-          params.categoryType = categoryType;
         }
 
         const response = await api.get<CategoryResponse>(url, { params });
         return response.data;
       } catch (error) {
+        console.error('Error fetching categories:', error);
         throw new Error('Failed to fetch categories');
       }
     },
@@ -64,8 +53,7 @@ export const useCategory = ({
     retry: 3,
     placeholderData: (previousData) => previousData,
   });
-  console.log('Raw API Response:', data?.data);
-  console.log('Total Records dari API:', data?.totalRecords);
+
   return {
     data: data?.data,
     total: data?.totalRecords,

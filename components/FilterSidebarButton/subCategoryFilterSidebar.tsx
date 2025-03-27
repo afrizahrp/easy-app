@@ -1,22 +1,26 @@
-'use client'
-import * as React from 'react'
-import { Cross2Icon } from '@radix-ui/react-icons'
-import { Table } from '@tanstack/react-table'
-import { Button } from '@/components/ui/button'
-import { DataTableFacetedFilter } from '@/components/ui/data-table-faceted-filter'
-import masterTableStatusOptions from '@/data/masterTableStatusOptions'
-import categoryOptions from '@/data/categoryOptions'
+'use client';
+import * as React from 'react';
+import { Cross2Icon } from '@radix-ui/react-icons';
+import { Table } from '@tanstack/react-table';
+import { Button } from '@/components/ui/button';
+import { DataTableFacetedFilter } from '@/components/ui/data-table-faceted-filter';
+import masterTableStatusOptions from '@/queryHooks/useCategoryStatusOptions';
+import categoryOptions from '@/data/categoryOptions';
 // import categoryTypeOptions from '@/data/categoryTypeOptions';
 
 interface SubCategoryFilterSidebarProps<TData> {
-  table: Table<TData>
+  table: Table<TData>;
 }
 
-export function SubCategoryFilterSidebar<TData>({ table }: SubCategoryFilterSidebarProps<TData>) {
-  const isFiltered = table.getState().columnFilters.length > 0
+export function SubCategoryFilterSidebar<TData>({
+  table,
+}: SubCategoryFilterSidebarProps<TData>) {
+  const isFiltered = table.getState().columnFilters.length > 0;
 
-  const { options: statusOptionList, isLoading: isStatusLoading } = masterTableStatusOptions()
-  const { options: categoryOption, isLoading: isCategoryLoading } = categoryOptions({ filterData: 1 })
+  const { options: statusOptionList, isLoading: isStatusLoading } =
+    masterTableStatusOptions();
+  const { options: categoryOption, isLoading: isCategoryLoading } =
+    categoryOptions({ filterData: 1 });
 
   return (
     <div className='flex items-center justify-end py-2 '>
@@ -53,5 +57,5 @@ export function SubCategoryFilterSidebar<TData>({ table }: SubCategoryFilterSide
         )}
       </div>
     </div>
-  )
+  );
 }

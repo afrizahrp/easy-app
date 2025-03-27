@@ -4,8 +4,8 @@ import { Cross2Icon } from '@radix-ui/react-icons';
 import { Table } from '@tanstack/react-table';
 import { Button } from '@/components/ui/button';
 import { DataTableFacetedFilter } from '@/components/ui/data-table-faceted-filter';
-import masterTableStatusOptions from '@/data/masterTableStatusOptions';
-import categoryTypeOptions from '@/data/categoryTypeOptions';
+import useCategoryStatusOptions from '@/queryHooks/useCategoryStatusOptions';
+import { Skeleton } from '@/components/ui/skeleton'; // ✅ Tambahkan Skeleton untuk loading state
 
 interface CategoryFilterSidebarProps<TData> {
   table: Table<TData>;
@@ -15,47 +15,41 @@ export function CategoryFilterSidebar<TData>({
   table,
 }: CategoryFilterSidebarProps<TData>) {
   const isFiltered = table.getState().columnFilters.length > 0;
-  // const { options: statusOptionList, isLoading: isStatusLoading } =
-  //   masterTableStatusOptions({ filterData: 1 });
 
+  // ✅ Hitung jumlah data berdasarkan status yang ada di tabel (lokal dari data yang sedang ditampilkan)
+  const statusCounts = table
+    .getCoreRowModel()
+    .rows.reduce<Record<string, number>>((acc, row) => {
+      const status = row.getValue<string>('iStatus');
+      if (status) {
+        acc[status] = (acc[status] || 0) + 1;
+      }
+      return acc;
+    }, {});
+
+  // ✅ Ambil status dari API, sambil menyertakan statusCounts
   const { options: statusOptionList, isLoading: isStatusLoading } =
-    masterTableStatusOptions({
-      filterData: 1,
-      statusCounts: { ACTIVE: 500, INACTIVE: 170 }, // Ambil dari API
-    });
+    useCategoryStatusOptions(statusCounts);
 
-  const { options: categoryTypeOption, isLoading: isCategoryTypeLoading } =
-    categoryTypeOptions({ filterData: 1 });
-
-  console.log('All rows:', table.getGlobalFacetedRowModel().rows);
-  console.log(
-    'Unique status values:',
-    table.getColumn('iStatus')?.getFacetedUniqueValues()
-  );
+  // console.log('API Status List:', statusOptionList); // ✅ Debugging data dari API
 
   return (
-    <div className='flex items-center justify-end py-2 '>
+    <div className='flex items-center justify-end py-2'>
       <div className='flex flex-col items-center space-y-2 w-full'>
         <div className='w-full py-3'>
-          {table.getColumn('iStatus') && (
-            <DataTableFacetedFilter
-              column={table.getColumn('iStatus')}
-              title='Status'
-              options={statusOptionList}
-              isLoading={isStatusLoading}
-            />
-          )}
+          {table.getColumn('iStatus') ? (
+            isStatusLoading ? (
+              <Skeleton className='h-10 w-full' /> // ✅ Tambahkan loader saat API masih loading
+            ) : (
+              <DataTableFacetedFilter
+                column={table.getColumn('iStatus')}
+                title='Status'
+                options={statusOptionList} // ✅ Gunakan data dari API
+              />
+            )
+          ) : null}
         </div>
-        {/* <div className='w-full py-1'>
-          {table.getColumn('categoryType') && (
-            <DataTableFacetedFilter
-              column={table.getColumn('categoryType')}
-              title='Category Type'
-              options={categoryTypeOption}
-              isLoading={isCategoryTypeLoading}
-            />
-          )}
-        </div> */}
+
         {isFiltered && (
           <Button
             variant='outline'

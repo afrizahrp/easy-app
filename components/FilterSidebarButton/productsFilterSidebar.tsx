@@ -4,7 +4,7 @@ import { Cross2Icon } from '@radix-ui/react-icons';
 import { Table } from '@tanstack/react-table';
 import { Button } from '@/components/ui/button';
 import { DataTableFacetedFilter } from '@/components/ui/data-table-faceted-filter';
-import masterTableStatusOptions from '@/data/masterTableStatusOptions';
+import masterTableStatusOptions from '@/queryHooks/useCategoryStatusOptions';
 import productCategoryOptions from '@/data/productCategoryOptions';
 
 interface ProductsFilterSidebarProps<TData> {

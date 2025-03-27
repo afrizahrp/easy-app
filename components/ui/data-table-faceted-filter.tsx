@@ -29,6 +29,7 @@ interface DataTableFacetedFilterProps<TData, TValue> {
   options?: {
     value: string;
     label: string;
+    count?: number;
   }[];
   isLoading?: boolean;
 }
@@ -42,7 +43,10 @@ export function DataTableFacetedFilter<TData, TValue>({
   const facets = column?.getFacetedUniqueValues();
   const selectedValues = new Set(column?.getFilterValue() as string[]);
 
-  // console.log('selectedValues', selectedValues);
+  // console.log('Table Unique Values:', column?.getFacetedUniqueValues());
+  // console.log('Table Facets:', facets);
+  console.log('Table Filter Value:', column?.getFilterValue());
+  console.log('Selected Filters:', selectedValues);
 
   const optionsValue = options || []; // Provide [] as a default value
 
@@ -112,12 +116,20 @@ export function DataTableFacetedFilter<TData, TValue>({
                   <CommandItem
                     key={option.value}
                     onSelect={() => {
-                      if (isSelected) {
-                        selectedValues.delete(option.value);
+                      // Konversi Set ke Array agar React Table bisa mengenali perubahan
+                      const updatedValues = new Set(selectedValues);
+
+                      if (updatedValues.has(option.value)) {
+                        updatedValues.delete(option.value);
                       } else {
-                        selectedValues.add(option.value);
+                        updatedValues.add(option.value);
                       }
-                      const filterValues = Array.from(selectedValues);
+
+                      // Pastikan format filter sesuai dengan nilai di tabel
+                      const filterValues = Array.from(updatedValues);
+
+                      console.log('Selected Filters:', filterValues); // Debugging
+
                       column?.setFilterValue(
                         filterValues.length ? filterValues : undefined
                       );
@@ -140,9 +152,10 @@ export function DataTableFacetedFilter<TData, TValue>({
                     </div>
 
                     <span>{option.label}</span>
-                    {facets?.get(option.value) && (
+                    {/* Menampilkan count dari CategoryFilterSidebar */}
+                    {option.count !== undefined && (
                       <span className='ml-auto flex h-4 w-4 items-center justify-center font-mono text-xs'>
-                        {facets.get(option.value)}
+                        {option.count}
                       </span>
                     )}
                   </CommandItem>
