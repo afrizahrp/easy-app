@@ -53,10 +53,10 @@ export function DataTableFacetedFilter<TData, TValue>({
     setStatus(filterValues); // ✅ Update Zustand store
     column?.setFilterValue(filterValues.length ? filterValues : undefined); // ✅ Tetap support React Table
 
-    console.log('✅ Selected Filters:', filterValues);
+    // console.log('✅ Selected Filters:', filterValues);
 
     // 🔥 Panggil refetch untuk update data
-    console.log('🔥 Calling Refetch Data...');
+    // console.log('🔥 Calling Refetch Data...');
     table?.options?.meta?.refetchData?.();
   };
 

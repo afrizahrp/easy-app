@@ -26,12 +26,21 @@ export const useCategory = ({ page, limit }: UseCategoryParams) => {
   const isValidRequest = Boolean(company_id && module_id);
 
   const status = useCategoryFilterStore((state) => state.status);
+  const categoryType = useCategoryFilterStore((state) => state.categoryType);
 
   const { data, isLoading, error, isFetching, ...rest } = useQuery<
     CategoryResponse,
     Error
   >({
-    queryKey: ['categories', company_id, module_id, page, limit, status],
+    queryKey: [
+      'categories',
+      company_id,
+      module_id,
+      page,
+      limit,
+      status,
+      categoryType,
+    ],
     queryFn: async () => {
       if (!isValidRequest) {
         throw new Error('Invalid request: company_id or module_id missing');
@@ -41,6 +50,10 @@ export const useCategory = ({ page, limit }: UseCategoryParams) => {
 
       if (status.length > 0) {
         params.status = status.join(','); // ✅ Kirim sebagai string "ACTIVE,INACTIVE"
+      }
+
+      if (categoryType.length > 0) {
+        params.categoryType = categoryType.join(','); // ✅ Kirim sebagai string "TYPE1,TYPE2"
       }
 
       console.log('🔥 Fetching Categories with Params:', params);

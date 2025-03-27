@@ -159,10 +159,22 @@ export const useCompanyInfo = create<CompanyInfoStoreState>()(
 
 interface CategoryFilterState {
   status: string[]; // Array status
+  categoryType: string[]; // Array categoryType
   setStatus: (status: string[]) => void;
+  setCategoryType: (categoryType: string[]) => void;
 }
 
-export const useCategoryFilterStore = create<CategoryFilterState>((set) => ({
-  status: [],
-  setStatus: (status) => set({ status }),
-}));
+export const useCategoryFilterStore = create<CategoryFilterState>()(
+  persist(
+    (set) => ({
+      status: [],
+      categoryType: [],
+      setStatus: (status) => set({ status }),
+      setCategoryType: (categoryType) => set({ categoryType }), // Tambahkan setter untuk categoryType
+    }),
+    {
+      name: 'category-filter-store', // Nama kunci di localStorage
+      storage: createJSONStorage(() => localStorage), // Gunakan localStorage
+    }
+  )
+);
