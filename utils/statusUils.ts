@@ -1,6 +1,6 @@
 export function getStatusColor(status: string) {
   // if (status.toLowerCase() === 'active') {
-  if (status === 'ACTIVE') {
+  if (status === 'Active') {
     return 'bg-green-600';
   } else {
     return 'bg-gray-400';

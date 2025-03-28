@@ -157,6 +157,29 @@ export const useCompanyInfo = create<CompanyInfoStoreState>()(
   )
 );
 
+interface SearchParamsState {
+  searchParams: Record<string, string | string[]>; // Bisa untuk semua parameter
+  setSearchParam: (key: string, value: string | string[]) => void;
+  resetSearchParams: () => void; // Untuk reset ke default
+}
+
+export const useSearchParamsStore = create<SearchParamsState>()(
+  persist(
+    (set) => ({
+      searchParams: {}, // Awal kosong, bisa menampung banyak filter
+      setSearchParam: (key, value) =>
+        set((state) => ({
+          searchParams: { ...state.searchParams, [key]: value },
+        })),
+      resetSearchParams: () => set({ searchParams: {} }),
+    }),
+    {
+      name: 'search-params-store', // Nama kunci di localStorage
+      storage: createJSONStorage(() => localStorage), // Gunakan localStorage
+    }
+  )
+);
+
 interface CategoryFilterState {
   status: string[]; // Array status
   categoryType: string[]; // Array categoryType

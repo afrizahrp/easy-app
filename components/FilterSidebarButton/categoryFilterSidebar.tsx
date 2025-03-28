@@ -1,12 +1,12 @@
 'use client';
+import { useEffect } from 'react';
 import { Cross2Icon } from '@radix-ui/react-icons';
 import { Table } from '@tanstack/react-table';
+import useCategoryStatusOptions from '@/queryHooks/useCategoryStatusOptions';
+import useCategoryTypeOptions from '@/queryHooks/useCategoryTypeOptions';
 import { Button } from '@/components/ui/button';
 import { DataTableFacetedFilter } from '@/components/ui/data-table-faceted-filter';
 import { useCategoryFilterStore } from '@/store'; // ✅ Gunakan Zustand Store
-import useCategoryStatusOptions from '@/queryHooks/useCategoryStatusOptions';
-import useCategoryTypeOptions from '@/queryHooks/useCategoryTypeOptions';
-import { useEffect } from 'react';
 
 interface CategoryFilterSidebarProps<TData> {
   table: Table<TData>;

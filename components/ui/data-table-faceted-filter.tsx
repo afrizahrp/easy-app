@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { CheckIcon } from '@radix-ui/react-icons';
+import { CheckIcon, Cross2Icon } from '@radix-ui/react-icons';
 import { Column } from '@tanstack/react-table';
 import { useCategoryFilterStore } from '@/store';
 import { cn } from '@/lib/utils';
@@ -80,7 +80,7 @@ export function DataTableFacetedFilter<TData, TValue>({
         >
           {isLoading && <Loader2 className='mr-2 h-4 w-4 animate-spin' />}
           <FilterIcon className='mr-2 h-4 w-4 text-sm' />
-          Filter by {title}
+          Filter data by {title}
           {selectedValues.size > 0 && (
             <>
               <Separator orientation='vertical' className='mx-2 h-4' />
@@ -105,9 +105,13 @@ export function DataTableFacetedFilter<TData, TValue>({
                 <Badge
                   variant='outline'
                   key={option.value}
-                  className='rounded-sm px-1 text-sm'
+                  className='rounded-sm px-1 text-xs text-slate-400'
                 >
                   {option.label}
+                  <Cross2Icon
+                    className='ml-1 h-3 w-3 cursor-pointer text-red-500'
+                    onClick={() => handleSelect(option.value)} // Remove selected item on click
+                  />
                 </Badge>
               ))
           )}

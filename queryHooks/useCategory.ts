@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import {
   useSessionStore,
   useModuleStore,
+  useSearchParamsStore,
   useCategoryFilterStore, // ✅ Import Zustand store
 } from '@/store';
 import { Category } from '@/types';
@@ -25,6 +26,7 @@ export const useCategory = ({ page, limit }: UseCategoryParams) => {
   // ✅ Pastikan nilai tidak undefined/null
   const isValidRequest = Boolean(company_id && module_id);
 
+  const searchParams = useSearchParamsStore((state) => state.searchParams);
   const status = useCategoryFilterStore((state) => state.status);
   const categoryType = useCategoryFilterStore((state) => state.categoryType);
 
@@ -38,6 +40,7 @@ export const useCategory = ({ page, limit }: UseCategoryParams) => {
       module_id,
       page,
       limit,
+      JSON.stringify(searchParams), // 🔥 Pastikan perubahan di object terdeteksi
       status,
       categoryType,
     ],
@@ -46,7 +49,9 @@ export const useCategory = ({ page, limit }: UseCategoryParams) => {
         throw new Error('Invalid request: company_id or module_id missing');
       }
 
-      const params: Record<string, any> = { page, limit };
+      const params: Record<string, any> = { page, limit, ...searchParams };
+
+      console.log('🔥 Fetching Categories with Params:', params);
 
       if (status.length > 0) {
         params.status = status.join(','); // ✅ Kirim sebagai string "ACTIVE,INACTIVE"
@@ -59,7 +64,8 @@ export const useCategory = ({ page, limit }: UseCategoryParams) => {
       console.log('🔥 Fetching Categories with Params:', params);
 
       const response = await api.get<CategoryResponse>(
-        `${process.env.NEXT_PUBLIC_API_URL}/${company_id}/${module_id}/get-categories`,
+        // `${process.env.NEXT_PUBLIC_API_URL}/${company_id}/${module_id}/get-categories`,
+        `${process.env.NEXT_PUBLIC_API_URL}/${company_id}/${module_id}/get-categories/search`,
         { params }
       );
       return response.data;

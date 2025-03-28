@@ -24,6 +24,8 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
+import { useSearchParamsStore } from '@/store';
+
 import { Filter } from 'lucide-react';
 
 import FilterSidebar from './filter-sidebar';
@@ -34,8 +36,8 @@ import { DataTableViewOptions } from '@/components/ui/data-table-view-options';
 import { Button } from '@/components/ui/button';
 
 import { routes } from '@/config/routes';
-import { Icon } from '@iconify/react';
 import Link from 'next/link';
+import { Icon } from '@iconify/react';
 import { Plus } from 'lucide-react';
 
 import {
@@ -80,6 +82,9 @@ export function DataTable<TData, TValue>({
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
   );
+  const setSearchParam = useSearchParamsStore((state) => state.setSearchParam);
+
+  console.log('Search Params:', setSearchParam);
   const [sorting, setSorting] = React.useState<SortingState>([]);
 
   const [open, setOpen] = React.useState<boolean>(false);
@@ -142,7 +147,10 @@ export function DataTable<TData, TValue>({
               type='search'
               placeholder='Type here to search...'
               value={filtering}
-              onChange={(event) => setFiltering(event.target.value)}
+              onChange={(event) => {
+                setFiltering(event.target.value);
+                setSearchParam('name', event.target.value); // 🔥 Update Zustand
+              }}
               className='min-w-[300px] sm:max-w-[600px] pl-7 rounded'
             />
             <Icon
