@@ -53,6 +53,23 @@ export const useThemeStore = create<ThemeStoreState>()(
   )
 );
 
+interface PageState {
+  currentPage: number;
+  setCurrentPage: (page: number) => void;
+}
+const usePageStore = create<PageState>()(
+  persist(
+    (set) => ({
+      currentPage: 1,
+      setCurrentPage: (page) => set({ currentPage: page }),
+    }),
+    {
+      name: 'page-store', // Nama kunci di localStorage
+      storage: createJSONStorage(() => localStorage), // Gunakan localStorage
+    }
+  )
+);
+
 interface SidebarState {
   collapsed: boolean;
   setCollapsed: (value: boolean) => void;
@@ -160,18 +177,25 @@ export const useCompanyInfo = create<CompanyInfoStoreState>()(
 interface SearchParamsState {
   searchParams: Record<string, string | string[]>; // Bisa untuk semua parameter
   setSearchParam: (key: string, value: string | string[]) => void;
-  resetSearchParams: () => void; // Untuk reset ke default
+  removeSearchParam: (key: string) => void; // ✅ Perbaikan di sini
 }
 
 export const useSearchParamsStore = create<SearchParamsState>()(
   persist(
     (set) => ({
       searchParams: {}, // Awal kosong, bisa menampung banyak filter
+
       setSearchParam: (key, value) =>
         set((state) => ({
           searchParams: { ...state.searchParams, [key]: value },
         })),
-      resetSearchParams: () => set({ searchParams: {} }),
+
+      removeSearchParam: (key) =>
+        set((state) => {
+          const newParams = { ...state.searchParams };
+          delete newParams[key];
+          return { searchParams: newParams };
+        }),
     }),
     {
       name: 'search-params-store', // Nama kunci di localStorage

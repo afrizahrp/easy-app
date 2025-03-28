@@ -84,7 +84,6 @@ export function DataTable<TData, TValue>({
   );
   const setSearchParam = useSearchParamsStore((state) => state.setSearchParam);
 
-  console.log('Search Params:', setSearchParam);
   const [sorting, setSorting] = React.useState<SortingState>([]);
 
   const [open, setOpen] = React.useState<boolean>(false);

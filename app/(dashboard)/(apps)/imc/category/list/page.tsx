@@ -24,7 +24,7 @@ const CategoryListPage = () => {
   }
 
   if (error) {
-    return <div>Error fetching billboards: {error.message}</div>;
+    return <div>Error fetching category: {error.message}</div>;
   }
 
   const formattedCategory: CategoryColumns[] =
