@@ -30,7 +30,7 @@ import { Filter } from 'lucide-react';
 
 import FilterSidebar from './filter-sidebar';
 
-import DataTablePagination from '@/components/ui/data-table-pagination';
+import { DataTablePagination } from '@/components/ui/data-table-pagination';
 import { DataTableViewOptions } from '@/components/ui/data-table-view-options';
 
 import { Button } from '@/components/ui/button';
@@ -241,7 +241,8 @@ export function DataTable<TData, TValue>({
           <div className='text-xs'>Total data: {totalRecords}</div>
           <div className='ml-auto'>
             <DataTablePagination
-              currentPage={currentPage}
+              // currentPage={currentPage}
+              // table={table}
               totalPages={totalPages}
               onPageChange={onPageChange}
             />

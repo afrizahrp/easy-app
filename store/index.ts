@@ -57,7 +57,7 @@ interface PageState {
   currentPage: number;
   setCurrentPage: (page: number) => void;
 }
-const usePageStore = create<PageState>()(
+export const usePageStore = create<PageState>()(
   persist(
     (set) => ({
       currentPage: 1,
