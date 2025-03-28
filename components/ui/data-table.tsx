@@ -83,6 +83,9 @@ export function DataTable<TData, TValue>({
     []
   );
   const setSearchParam = useSearchParamsStore((state) => state.setSearchParam);
+  const removeSearchParam = useSearchParamsStore(
+    (state) => state.removeSearchParam
+  );
 
   const [sorting, setSorting] = React.useState<SortingState>([]);
 
@@ -143,7 +146,7 @@ export function DataTable<TData, TValue>({
 
           <div className='flex md:w-full sm:w-1/2 lg:w-full relative'>
             <Input
-              type='search'
+              type='text'
               placeholder='Type here to search...'
               value={filtering}
               onChange={(event) => {
@@ -152,6 +155,16 @@ export function DataTable<TData, TValue>({
               }}
               className='min-w-[300px] sm:max-w-[600px] pl-7 rounded'
             />
+            {filtering && (
+              <Icon
+                icon='heroicons:x-mark'
+                className='w-3.5 h-3.5 absolute top-1/2 -translate-y-1/2 right-3 text-default-500 cursor-pointer'
+                onClick={() => {
+                  setFiltering('');
+                  removeSearchParam('name'); //
+                }}
+              />
+            )}
             <Icon
               icon='heroicons:magnifying-glass'
               className='w-3.5 h-3.5 absolute top-1/2 -translate-y-1/2 left-3 text-default-500'
