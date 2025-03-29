@@ -6,9 +6,11 @@ interface OptionType {
   count: number;
 }
 
-export default function useCategoryStatusOptions(
-  statusCounts?: Record<string, number>
-) {
+// export default function useCategoryStatusOptions(
+//   statusCounts?: Record<string, number>
+// ) {
+
+export default function useCategoryStatusOptions() {
   const { data: statusData, isLoading } = useCategoryStatus();
 
   const options =

@@ -31,15 +31,15 @@ export function CategoryFilterSidebar<TData>({
   }, [status, categoryType, table]);
 
   // ✅ Hitung jumlah data berdasarkan status yang ada di tabel (lokal dari data yang sedang ditampilkan)
-  const statusCounts = table
-    .getCoreRowModel()
-    .rows.reduce<Record<string, number>>((acc, row) => {
-      const status = row.getValue<string>('iStatus');
-      if (status) {
-        acc[status] = (acc[status] || 0) + 1;
-      }
-      return acc;
-    }, {});
+  // const statusCounts = table
+  //   .getCoreRowModel()
+  //   .rows.reduce<Record<string, number>>((acc, row) => {
+  //     const status = row.getValue<string>('iStatus');
+  //     if (status) {
+  //       acc[status] = (acc[status] || 0) + 1;
+  //     }
+  //     return acc;
+  //   }, {});
 
   const typeCounts = table
     .getCoreRowModel()
@@ -53,7 +53,7 @@ export function CategoryFilterSidebar<TData>({
 
   // ✅ Ambil status dari API, sambil menyertakan statusCounts
   const { options: statusOptionList, isLoading: isStatusLoading } =
-    useCategoryStatusOptions(statusCounts);
+    useCategoryStatusOptions();
 
   const { typeOptions: typeOptionList, isLoading: isTypeLoading } =
     useCategoryTypeOptions(typeCounts);
