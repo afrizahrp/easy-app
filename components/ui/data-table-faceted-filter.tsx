@@ -27,8 +27,8 @@ interface DataTableFacetedFilterProps<TData, TValue> {
   title?: string;
   options?: { value: string; label: string; count?: number }[];
   isLoading?: boolean;
-  filterType: 'status' | 'categoryType'; // 🔥 Tambahkan filterType
-  table?: any;
+  selectedValues: Set<string>; // 🔥 Terima selectedValues dari parent
+  onSelect: (value: string) => void; // 🔥 Tambahkan handler onSelect
 }
 
 export function DataTableFacetedFilter<TData, TValue>({
@@ -36,39 +36,9 @@ export function DataTableFacetedFilter<TData, TValue>({
   title,
   options,
   isLoading,
-  filterType, // 🔥 Gunakan filterType untuk menentukan store yang digunakan
-  table,
+  selectedValues,
+  onSelect, // 🔥 Gunakan onSelect
 }: DataTableFacetedFilterProps<TData, TValue>) {
-  const { status, setStatus, categoryType, setCategoryType } =
-    useCategoryFilterStore();
-
-  // 🔥 Pilih state sesuai dengan filterType
-  const selectedValues =
-    filterType === 'status' ? new Set(status) : new Set(categoryType);
-
-  const handleSelect = (optionValue: string) => {
-    const updatedValues = new Set(selectedValues);
-
-    if (updatedValues.has(optionValue)) {
-      updatedValues.delete(optionValue);
-    } else {
-      updatedValues.add(optionValue);
-    }
-
-    const filterValues = Array.from(updatedValues);
-
-    if (filterType === 'status') {
-      setStatus(filterValues); // 🔥 Update status
-    } else {
-      setCategoryType(filterValues); // 🔥 Update categoryType
-    }
-
-    column?.setFilterValue(filterValues.length ? filterValues : undefined);
-
-    // 🔥 Panggil refetch data
-    table?.options?.meta?.refetchData?.();
-  };
-
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -91,7 +61,6 @@ export function DataTableFacetedFilter<TData, TValue>({
           )}
         </Button>
       </PopoverTrigger>
-
       {selectedValues.size > 0 && (
         <div className='hidden space-x-1 py-3 lg:flex'>
           {selectedValues.size > 3 ? (
@@ -110,7 +79,7 @@ export function DataTableFacetedFilter<TData, TValue>({
                   {option.label}
                   <Cross2Icon
                     className='ml-1 h-3 w-3 cursor-pointer text-red-500'
-                    onClick={() => handleSelect(option.value)} // Remove selected item on click
+                    onClick={() => onSelect(option.value)} // Remove selected item on click
                   />
                 </Badge>
               ))
@@ -118,7 +87,7 @@ export function DataTableFacetedFilter<TData, TValue>({
         </div>
       )}
 
-      <PopoverContent className='w-[full] p-0' align='start'>
+      <PopoverContent className='w-full p-0' align='start'>
         <Command>
           <CommandInput placeholder={title} />
           <CommandList>
@@ -126,11 +95,10 @@ export function DataTableFacetedFilter<TData, TValue>({
             <CommandGroup>
               {options?.map((option) => {
                 const isSelected = selectedValues.has(option.value);
-
                 return (
                   <CommandItem
                     key={option.value}
-                    onSelect={() => handleSelect(option.value)}
+                    onSelect={() => onSelect(option.value)}
                   >
                     <div
                       className={cn(
@@ -147,7 +115,6 @@ export function DataTableFacetedFilter<TData, TValue>({
                         )}
                       />
                     </div>
-
                     <span>{option.label}</span>
                     {option.count !== undefined && (
                       <span className='ml-auto text-xs'>{option.count}</span>
@@ -161,14 +128,7 @@ export function DataTableFacetedFilter<TData, TValue>({
                 <CommandSeparator />
                 <CommandGroup>
                   <CommandItem
-                    onSelect={() => {
-                      if (filterType === 'status') {
-                        setStatus([]);
-                      } else {
-                        setCategoryType([]);
-                      }
-                      column?.setFilterValue(undefined);
-                    }}
+                    onSelect={() => onSelect('')}
                     className='justify-center text-center'
                   >
                     Clear filter

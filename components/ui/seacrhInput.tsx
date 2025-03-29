@@ -10,7 +10,6 @@ const SearchInput: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearchTerm] = useDebounce(searchTerm, 500); // ⏳ Debounce 1/2 detik
 
-  // Reset page & update URL saat pencarian berubah
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (debouncedSearchTerm) {
@@ -26,11 +25,6 @@ const SearchInput: React.FC = () => {
   useEffect(() => {
     setCurrentPage(1);
   }, [debouncedSearchTerm, setCurrentPage]);
-
-  // 🔥 Fetch ulang data saat currentPage atau search berubah
-  //   useEffect(() => {
-  //     fetchData({ search: debouncedSearchTerm, page: currentPage });
-  //   }, [debouncedSearchTerm, currentPage]); // Pastikan fetching ulang terjadi
 
   return (
     <div className='relative w-full sm:w-auto'>

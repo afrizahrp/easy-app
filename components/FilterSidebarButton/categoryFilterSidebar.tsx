@@ -15,9 +15,6 @@ interface CategoryFilterSidebarProps<TData> {
 export function CategoryFilterSidebar<TData>({
   table,
 }: CategoryFilterSidebarProps<TData>) {
-  const isFiltered = table.getState().columnFilters.length > 0;
-
-  // ✅ Ambil state filter dari Zustand
   const { status, setStatus, categoryType, setCategoryType } =
     useCategoryFilterStore();
 
@@ -30,33 +27,10 @@ export function CategoryFilterSidebar<TData>({
       ?.setFilterValue(categoryType.length ? categoryType : undefined);
   }, [status, categoryType, table]);
 
-  // ✅ Hitung jumlah data berdasarkan status yang ada di tabel (lokal dari data yang sedang ditampilkan)
-  // const statusCounts = table
-  //   .getCoreRowModel()
-  //   .rows.reduce<Record<string, number>>((acc, row) => {
-  //     const status = row.getValue<string>('iStatus');
-  //     if (status) {
-  //       acc[status] = (acc[status] || 0) + 1;
-  //     }
-  //     return acc;
-  //   }, {});
-
-  const typeCounts = table
-    .getCoreRowModel()
-    .rows.reduce<Record<string, number>>((acc, row) => {
-      const type = row.getValue<string>('categoryType');
-      if (type) {
-        acc[type] = (acc[type] || 0) + 1;
-      }
-      return acc;
-    }, {});
-
-  // ✅ Ambil status dari API, sambil menyertakan statusCounts
   const { options: statusOptionList, isLoading: isStatusLoading } =
     useCategoryStatusOptions();
-
   const { typeOptions: typeOptionList, isLoading: isTypeLoading } =
-    useCategoryTypeOptions(typeCounts);
+    useCategoryTypeOptions();
 
   return (
     <div className='flex items-center justify-end py-2'>
@@ -67,8 +41,22 @@ export function CategoryFilterSidebar<TData>({
               column={table.getColumn('iStatus')}
               title='Status'
               options={statusOptionList}
-              table={table}
-              filterType='status' // ✅ Tambahkan filterType
+              isLoading={isStatusLoading}
+              selectedValues={new Set(status)}
+              onSelect={(value) => {
+                const updatedValues = new Set(status);
+                value
+                  ? updatedValues.has(value)
+                    ? updatedValues.delete(value)
+                    : updatedValues.add(value)
+                  : updatedValues.clear();
+                setStatus(Array.from(updatedValues));
+                table
+                  .getColumn('iStatus')
+                  ?.setFilterValue(
+                    updatedValues.size ? Array.from(updatedValues) : undefined
+                  );
+              }}
             />
           )}
         </div>
@@ -78,19 +66,32 @@ export function CategoryFilterSidebar<TData>({
               column={table.getColumn('categoryType')}
               title='Type'
               options={typeOptionList}
-              table={table}
-              filterType='categoryType' // ✅ Tambahkan filterType
+              isLoading={isTypeLoading}
+              selectedValues={new Set(categoryType)}
+              onSelect={(value) => {
+                const updatedValues = new Set(categoryType);
+                value
+                  ? updatedValues.has(value)
+                    ? updatedValues.delete(value)
+                    : updatedValues.add(value)
+                  : updatedValues.clear();
+                setCategoryType(Array.from(updatedValues));
+                table
+                  .getColumn('categoryType')
+                  ?.setFilterValue(
+                    updatedValues.size ? Array.from(updatedValues) : undefined
+                  );
+              }}
             />
           )}
         </div>
-
-        {isFiltered && (
+        {table.getState().columnFilters.length > 0 && (
           <Button
             variant='outline'
             onClick={() => {
-              table.resetColumnFilters(); // ✅ Reset filter di tabel
-              setStatus([]); // ✅ Reset filter di Zustand
-              setCategoryType([]); // ✅ Reset filter di Zustand
+              table.resetColumnFilters();
+              setStatus([]);
+              setCategoryType([]);
             }}
             className='h-10 px-2 lg:px-3 w-full mb-5'
           >
