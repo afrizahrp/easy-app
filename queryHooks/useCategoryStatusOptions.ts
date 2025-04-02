@@ -17,7 +17,7 @@ export default function useCategoryStatusOptions() {
     statusData?.map((status) => ({
       value: status.id, // Sesuaikan dengan format API
       label: status.name, //(${status.count})`, // Menampilkan count dari API
-      count: Number(status.count), // Pastikan count dalam bentuk number
+      // count: Number(status.count), // Pastikan count dalam bentuk number
     })) || [];
 
   return { options, isLoading };

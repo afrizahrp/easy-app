@@ -15,7 +15,7 @@ export default function useCategoryStatusOptions(
     typeData?.map((type) => ({
       value: type.id, // Sesuaikan dengan format API
       label: type.name, //(${type.count})`, // Menampilkan count dari API
-      count: Number(type.count), // Pastikan count dalam bentuk number
+      // count: Number(type.count), // Pastikan count dalam bentuk number
     })) || [];
 
   return { typeOptions, isLoading };

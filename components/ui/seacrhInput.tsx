@@ -29,18 +29,21 @@ const SearchInput: React.FC = () => {
   }, [debouncedSearchTerm, setCurrentPage]);
 
   return (
-    <div className='relative w-full sm:w-auto'>
+    // <div className='relative w-full sm:w-auto'>
+    // <div className='w-full sm:w-[400px] md:w-[500px] lg:w-[600px] pl-7 rounded'>
+    <div className='relative w-full sm:w-[400px] md:w-[500px] lg:w-[600px]'>
       <Input
         type='text'
         placeholder='Type here to search...'
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
-        className='min-w-[300px] sm:max-w-[600px] pl-7 rounded'
+        // className='min-w-[300px] sm:max-w-[600px] pl-7 rounded'
+        className='w-full min-w-[300px] max-w-[600px] pl-10 pr-10 rounded'
       />
       {searchTerm && (
         <Icon
           icon='heroicons:x-mark'
-          className='w-3.5 h-3.5 absolute top-1/2 -translate-y-1/2 right-3 text-default-500 cursor-pointer'
+          className='w-4 h-4 absolute top-1/2 -translate-y-1/2 right-3 text-default-500 cursor-pointer'
           onClick={() => {
             setSearchTerm('');
             removeSearchParam('name');
@@ -49,7 +52,7 @@ const SearchInput: React.FC = () => {
       )}
       <Icon
         icon='heroicons:magnifying-glass'
-        className='w-3.5 h-3.5 absolute top-1/2 -translate-y-1/2 left-3 text-default-500'
+        className='w-4 h-4 absolute top-1/2 -translate-y-1/2 left-3 text-default-500'
       />
     </div>
   );
