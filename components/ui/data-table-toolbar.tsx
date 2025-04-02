@@ -38,7 +38,7 @@ export function DataTableToolbar<TData>({
   pageName?: string;
 }) {
   return (
-    <div className='flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 w-full'>
+    <div className='flex flex-wrap items-center gap-2 sm:gap-4 w-full'>
       {/* Sidebar Filter */}
       <FilterSidebar
         table={table}
@@ -47,8 +47,8 @@ export function DataTableToolbar<TData>({
         pageName={pageName}
       />
 
-      {/* Kiri: Dropdown & Pencarian */}
-      <div className='flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 w-full sm:w-auto'>
+      {/* Dropdown Show dan Pencarian */}
+      <div className='flex flex-wrap items-center gap-2 sm:gap-4 w-full sm:w-auto'>
         <div className='flex items-center space-x-2'>
           <p className='text-sm whitespace-nowrap'>Show</p>
           <Select
@@ -72,13 +72,13 @@ export function DataTableToolbar<TData>({
         </div>
 
         {/* Pencarian */}
-        <div className='w-full sm:w-auto'>
+        <div className='w-full sm:w-auto min-w-0'>
           <SearchInput className='w-full sm:w-auto' />
         </div>
       </div>
 
-      {/* Kanan: Tombol Filter, View Options, dan Tambah Data */}
-      <div className='flex flex-wrap items-center gap-2 ml-auto'>
+      {/* Tombol Filter, View Options, dan Tambah Data */}
+      <div className='flex flex-wrap items-center gap-2 ml-auto w-full sm:w-auto'>
         <Button
           size='sm'
           variant='outline'
@@ -86,7 +86,7 @@ export function DataTableToolbar<TData>({
           className='px-3 h-8 flex items-center gap-1'
         >
           <Filter className='w-4 h-4' />
-          <span className='hidden sm:inline'>Filter</span>
+          <span className='hidden sm:inline'>Filter data</span>
         </Button>
 
         <DataTableViewOptions table={table} />
