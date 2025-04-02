@@ -33,14 +33,16 @@ export default function SearchInput({ className }: SearchInputProps) {
   }, [debouncedSearchTerm, setCurrentPage]);
 
   return (
-    <div className={`relative flex-grow ${className}`}>
+    // <div className={`relative flex-grow ${className}`}>
+    <div className={`relative flex-grow min-w-0 ${className}`}>
       {/* Input */}
       <Input
         type='text'
         placeholder='Type here to search...'
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
-        className='border rounded-md px-10 py-2 w-full max-w-inherit'
+        // className='border rounded-md px-10 py-2 w-full max-w-inherit'
+        className='border rounded-md px-10 py-2 w-full sm:max-w-[300px] lg:max-w-[500px] sm:py-2 lg:py-3'
       />
 
       {/* Ikon Pencarian */}
