@@ -153,39 +153,6 @@ export function DataTable<TData, TValue>({
 
           <div className='flex md:w-full sm:w-1/2 lg:w-full relative'>
             <SearchInput />
-
-            {/* <Input
-              type='text'
-              placeholder='Type here to search...'
-              value={filtering}
-              onChange={(event) => {
-                setFiltering(event.target.value);
-                setSearchParam('name', event.target.value); // 🔥 Update Zustand
-
-                const params = new URLSearchParams(window.location.search);
-                if (filtering) {
-                  params.set('name', filtering); // Tambahkan atau perbarui parameter
-                } else {
-                  params.delete('name'); // Hapus parameter jika kosong
-                }
-                window.history.replaceState(null, '', `?${params.toString()}`);
-              }}
-              className='min-w-[300px] sm:max-w-[600px] pl-7 rounded'
-            />
-            {filtering && (
-              <Icon
-                icon='heroicons:x-mark'
-                className='w-3.5 h-3.5 absolute top-1/2 -translate-y-1/2 right-3 text-default-500 cursor-pointer'
-                onClick={() => {
-                  setFiltering('');
-                  removeSearchParam('name'); //
-                }}
-              />
-            )}
-            <Icon
-              icon='heroicons:magnifying-glass'
-              className='w-3.5 h-3.5 absolute top-1/2 -translate-y-1/2 left-3 text-default-500'
-            /> */}
           </div>
 
           <div className='flex-none flex flex-col sm:flex-row sm:items-center  gap-4'>
