@@ -23,7 +23,6 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Input } from '@/components/ui/input';
 import { useSearchParamsStore } from '@/store';
 
 import SearchInput from '@/components/ui/seacrhInput';
@@ -37,9 +36,7 @@ import { DataTableViewOptions } from '@/components/ui/data-table-view-options';
 
 import { Button } from '@/components/ui/button';
 
-import { routes } from '@/config/routes';
 import Link from 'next/link';
-import { Icon } from '@iconify/react';
 import { Plus } from 'lucide-react';
 
 import {

@@ -14,13 +14,15 @@ const SearchInput: React.FC = () => {
     const params = new URLSearchParams(window.location.search);
     if (debouncedSearchTerm) {
       params.set('name', debouncedSearchTerm);
+      params.set('page', '1'); // ✅ Reset ke halaman pertama
       setSearchParam('name', debouncedSearchTerm);
     } else {
       params.delete('name');
+      params.delete('page'); // ✅ Hapus page jika pencarian dihapus
       removeSearchParam('name');
     }
     window.history.replaceState(null, '', `?${params.toString()}`);
-  }, [debouncedSearchTerm, setSearchParam, removeSearchParam, setCurrentPage]);
+  }, [debouncedSearchTerm, setSearchParam, removeSearchParam]);
 
   useEffect(() => {
     setCurrentPage(1);

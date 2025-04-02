@@ -55,36 +55,43 @@ export function DataTablePagination<TData>({
     window.history.pushState({}, '', url.toString());
   }, [table.getState().pagination.pageIndex]);
 
-  // Update total pages state when totalRecords changes
-  // Gunakan useEffect untuk memperbarui total pages saat totalRecords berubah
+  // 🆕 Perbaikan: Hitung ulang total halaman setiap kali totalRecords berubah
   useEffect(() => {
     if (totalRecords !== undefined && totalRecords > 0) {
       const calculatedPages = Math.ceil(
         totalRecords / table.getState().pagination.pageSize
       );
-      if (calculatedPages !== totalPagesState) {
-        setTotalPagesState(calculatedPages); // 🔥 Perbarui total pages setelah filter
+
+      setTotalPagesState(calculatedPages); // 🔥 Update total halaman
+
+      // ✅ Pastikan currentPage tidak lebih besar dari totalPagesState setelah pencarian
+      if (currentPage > calculatedPages) {
+        setCurrentPage(calculatedPages > 0 ? calculatedPages : 1);
       }
     }
-  }, [totalRecords, table.getState().pagination.pageSize, setTotalPagesState]);
+  }, [
+    totalRecords,
+    table.getState().pagination.pageSize,
+    currentPage,
+    setCurrentPage,
+  ]);
 
   const handlePageChange = (page: number) => {
-    if (page < 1 || page > totalPagesState) return;
+    if (page < 1 || page > totalPagesState) return; // Pastikan page dalam batas yang valid
 
     setCurrentPage(page);
 
     const params = new URLSearchParams(searchParams.toString());
     params.set('page', page.toString());
 
-    // router.replace(`${pathname}?${params.toString()}`);
     router.replace(`${pathname}?${params.toString()}`, { scroll: false });
 
-    // Kembalikan posisi scroll agar tidak scroll-up
+    // Kembalikan posisi scroll agar tidak naik ke atas
     setTimeout(() => {
       window.scrollTo(0, window.scrollY);
     }, 0);
 
-    // ✅ Panggil `onPageChange` dari `DataTable`
+    // ✅ Panggil `onPageChange` jika disediakan
     onPageChange?.(page);
   };
 

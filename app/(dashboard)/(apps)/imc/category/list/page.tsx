@@ -7,13 +7,18 @@ import { routes } from '@/config/routes';
 import PageHeader from '@/components/page-header';
 import useCategory from '@/queryHooks/useCategory';
 import { CategoryColumns } from './list-table/components/columns';
+import { usePageStore } from '@/store';
 
 const CategoryListPage = () => {
+  const { currentPage } = usePageStore();
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [categoryType, setCategoryType] = useState<string | null>(null);
 
-  const { data, total, isFetching, error } = useCategory({ page, limit });
+  const { data, total, isFetching, error } = useCategory({
+    page: currentPage,
+    limit,
+  });
 
   if (isFetching && !data) {
     return (

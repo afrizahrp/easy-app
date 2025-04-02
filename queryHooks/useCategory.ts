@@ -4,7 +4,7 @@ import {
   useSessionStore,
   useModuleStore,
   useSearchParamsStore,
-  useCategoryFilterStore, // ✅ Import Zustand store
+  useCategoryFilterStore,
 } from '@/store';
 import { Category } from '@/types';
 

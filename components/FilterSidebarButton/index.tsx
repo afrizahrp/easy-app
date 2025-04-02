@@ -4,7 +4,6 @@ import { ProductsFilterSidebarWeb } from './productsFilterSidebar-web';
 import { MaterialFilterSidebar } from './materialFilterSidebar';
 import { CategoryFilterSidebar } from './categoryFilterSidebar';
 import { CategoryFilterSidebarWeb } from './categoryFilterSidebar-web';
-import { SubCategoryFilterSidebar } from './subCategoryFilterSidebar';
 
 interface FilterSidebarButtonProps<TData> {
   table: Table<TData>;
@@ -25,8 +24,7 @@ export function FilterSidebarButton<TData>({
       return <CategoryFilterSidebar table={table} />;
     case 'category-web':
       return <CategoryFilterSidebarWeb table={table} />;
-    case 'subcategory':
-      return <SubCategoryFilterSidebar table={table} />;
+
     default:
       return <div>No sidebar available for this page</div>;
   }
