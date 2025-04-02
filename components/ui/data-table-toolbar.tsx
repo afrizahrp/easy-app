@@ -1,59 +1,109 @@
-'use client';
-import { X } from 'lucide-react';
-
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { DataTableViewOptions } from './data-table-view-options';
-
-import { priorities, statuses } from '@/data/data';
-import { DataTableFacetedFilter } from './data-table-faceted-filter';
 import { Table } from '@tanstack/react-table';
-interface DataTableToolbarProps {
-  table: Table<any>;
-}
-export function DataTableToolbar({ table }: DataTableToolbarProps) {
-  const isFiltered = table.getState().columnFilters.length > 0;
-  const handleFilterChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const value = event.target.value;
-    table.getColumn('title')?.setFilterValue(value);
-  };
-  const statusColumn = table.getColumn('status');
-  const priorityColumn = table.getColumn('priority');
+import { Button } from '@/components/ui/button';
+import { Filter, Plus } from 'lucide-react';
+import Link from 'next/link';
+import { DataTableViewOptions } from '@/components/ui/data-table-view-options';
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from '@/components/ui/select';
+import SearchInput from '@/components/ui/seacrhInput';
+import FilterSidebar from './filter-sidebar';
 
+interface DataTableToolbarProps<TData> {
+  table: Table<TData>;
+  href: string;
+  hrefText?: string;
+  onFilterClick: () => void;
+  limit: number;
+  setLimit: (limit: number) => void;
+}
+
+export function DataTableToolbar<TData>({
+  table,
+  href,
+  hrefText,
+  onFilterClick,
+  limit,
+  setLimit,
+  open,
+  handleSheetOpen,
+  pageName,
+}: DataTableToolbarProps<TData> & {
+  open: boolean;
+  handleSheetOpen: () => void;
+  pageName?: string;
+}) {
   return (
-    <div className='flex flex-1 flex-wrap items-center gap-2'>
-      <Input
-        placeholder='Filter tasks...'
-        value={(table.getColumn('title')?.getFilterValue() as string) || ''}
-        onChange={handleFilterChange}
-        className='h-8 min-w-[200px] max-w-sm'
+    <div className='flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 w-full'>
+      {/* Sidebar Filter */}
+      <FilterSidebar
+        table={table}
+        open={open}
+        onClose={handleSheetOpen}
+        pageName={pageName}
       />
 
-      {statusColumn && (
-        <DataTableFacetedFilter
-          column={statusColumn}
-          title='Status'
-          options={statuses}
-        />
-      )}
-      {priorityColumn && (
-        <DataTableFacetedFilter
-          column={priorityColumn}
-          title='Priority'
-          options={priorities}
-        />
-      )}
-      {isFiltered && (
+      {/* Kiri: Dropdown & Pencarian */}
+      <div className='flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 w-full sm:w-auto'>
+        <div className='flex items-center space-x-2'>
+          <p className='text-sm whitespace-nowrap'>Show</p>
+          <Select
+            value={`${limit}`}
+            onValueChange={(value) => {
+              setLimit(Number(value));
+              table.setPageSize(Number(value));
+            }}
+          >
+            <SelectTrigger className='h-8 w-[70px]'>
+              <SelectValue placeholder={limit} />
+            </SelectTrigger>
+            <SelectContent side='top'>
+              {[5, 10, 20].map((pageSize) => (
+                <SelectItem key={pageSize} value={`${pageSize}`}>
+                  {pageSize}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Pencarian */}
+        <div className='w-full sm:w-auto'>
+          <SearchInput className='w-full sm:w-auto' />
+        </div>
+      </div>
+
+      {/* Kanan: Tombol Filter, View Options, dan Tambah Data */}
+      <div className='flex flex-wrap items-center gap-2 ml-auto'>
         <Button
+          size='sm'
           variant='outline'
-          onClick={() => table.resetColumnFilters()}
-          className='h-8 px-2 lg:px-3'
+          onClick={onFilterClick}
+          className='px-3 h-8 flex items-center gap-1'
         >
-          Reset
-          <X className='ltr:ml-2 rtl:mr-2 h-4 w-4' />
+          <Filter className='w-4 h-4' />
+          <span className='hidden sm:inline'>Filter</span>
         </Button>
-      )}
-      {/* <DataTableViewOptions table={table} /> */}
+
+        <DataTableViewOptions table={table} />
+
+        {hrefText !== 'none' && (
+          <Button
+            size='sm'
+            asChild
+            className='px-3 h-8 flex items-center gap-1'
+          >
+            <Link href={href}>
+              <Plus className='w-4 h-4' />
+              <span className='hidden sm:inline'>{hrefText}</span>
+            </Link>
+          </Button>
+        )}
+      </div>
     </div>
   );
 }

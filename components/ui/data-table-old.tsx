@@ -34,8 +34,6 @@ import FilterSidebar from './filter-sidebar';
 import { DataTablePagination } from '@/components/ui/data-table-pagination';
 import { DataTableViewOptions } from '@/components/ui/data-table-view-options';
 
-import { DataTableToolbar } from '@/components/ui/data-table-toolbar';
-
 import { Button } from '@/components/ui/button';
 
 import Link from 'next/link';
@@ -63,7 +61,7 @@ interface DataTableProps<TData, TValue> {
   setLimit: (limit: number) => void;
 }
 
-export function DataTable<TData, TValue>({
+export function DataTableOLD<TData, TValue>({
   columns,
   data,
   href,
@@ -129,20 +127,63 @@ export function DataTable<TData, TValue>({
 
   return (
     <>
-      <div className='space-y-4'>
-        <DataTableToolbar
-          table={table}
-          href={href}
-          hrefText={hrefText}
-          onFilterClick={handleSheetOpen}
-          limit={limit}
-          setLimit={setLimit}
-          open={open}
-          handleSheetOpen={handleSheetOpen}
-          pageName={pageName}
-        />
+      <div>
+        <div className='flex flex-col md:flex-row  gap-4'>
+          <div className='flex items-center space-x-2'>
+            <p className='text-sm '>Show</p>
+            <Select
+              value={`${limit}`}
+              onValueChange={(value) => {
+                setLimit(Number(value));
+                table.setPageSize(Number(value)); // Terapkan ke react-table
+              }}
+            >
+              <SelectTrigger className='h-8 w-[70px]'>
+                <SelectValue placeholder={limit} />
+              </SelectTrigger>
+              <SelectContent side='top'>
+                {[5, 10, 20].map((pageSize) => (
+                  <SelectItem key={pageSize} value={`${pageSize}`}>
+                    {pageSize}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
-        <div className='rounded-md border'>
+          <div className='flex md:w-full sm:w-1/2 lg:w-full relative'>
+            <SearchInput />
+          </div>
+
+          <div className='flex-none flex flex-col sm:flex-row sm:items-center  gap-4'>
+            <Button
+              size='sm'
+              variant='outline'
+              onClick={handleSheetOpen}
+              className='ml-auto mx-2 my-1 px-5 h-8 lg:flex'
+            >
+              <Filter />
+              Filter data
+            </Button>
+
+            <DataTableViewOptions table={table} />
+
+            {hrefText !== 'none' && (
+              <Button
+                size='sm'
+                asChild
+                className='ml-auto mx-2 my-1 px-5 h-8 lg:flex sm:w-auto'
+              >
+                <Link href={href}>
+                  <Plus className='w-3 h-3 mr-2' />
+                  {hrefText}
+                </Link>
+              </Button>
+            )}
+          </div>
+        </div>
+
+        <div className='pt-1'>
           <Table>
             <TableHeader>
               {table.getHeaderGroups().map((headerGroup) => (
@@ -206,6 +247,12 @@ export function DataTable<TData, TValue>({
           </div>
         </div>
       </div>
+      <FilterSidebar
+        table={table}
+        open={open}
+        onClose={handleSheetOpen}
+        pageName={pageName}
+      />
     </>
   );
 }
