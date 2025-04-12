@@ -25,29 +25,8 @@ import {
 } from '@/components/ui/table';
 import { useSearchParamsStore } from '@/store';
 
-import SearchInput from '@/components/ui/seacrhInput';
-
-import { Filter } from 'lucide-react';
-
-import FilterSidebar from './filter-sidebar';
-
 import { DataTablePagination } from '@/components/ui/data-table-pagination';
-import { DataTableViewOptions } from '@/components/ui/data-table-view-options';
-
 import { DataTableToolbar } from '@/components/ui/data-table-toolbar';
-
-import { Button } from '@/components/ui/button';
-
-import Link from 'next/link';
-import { Plus } from 'lucide-react';
-
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -194,11 +173,15 @@ export function DataTable<TData, TValue>({
         </div>
 
         <div className='flex justify-between items-center mt-4'>
-          <div className='text-xs'>Total data: {totalRecords}</div>
+          <div className='text-xs text-muted-foreground'>
+            Total data: {totalRecords}
+          </div>
+
           <div className='ml-auto'>
             <DataTablePagination
-              // currentPage={currentPage}
               table={table}
+              limit={limit}
+              setLimit={setLimit}
               totalRecords={totalRecords}
               totalPages={totalPages}
               onPageChange={onPageChange}

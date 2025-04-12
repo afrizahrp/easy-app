@@ -12,6 +12,8 @@ import {
 } from '@/components/ui/select';
 import SearchInput from '@/components/ui/seacrhInput';
 import FilterSidebar from './filter-sidebar';
+import PageSizeSelector from './pageSize-selector';
+import SearchOption from './search-Option';
 
 interface DataTableToolbarProps<TData> {
   table: Table<TData>;
@@ -47,35 +49,20 @@ export function DataTableToolbar<TData>({
         pageName={pageName}
       />
 
-      {/* Dropdown Show dan Pencarian */}
-      <div className='flex flex-wrap items-center gap-2 sm:gap-4 w-full sm:w-auto'>
-        <div className='flex items-center space-x-2'>
-          <p className='text-sm whitespace-nowrap'>Show</p>
-          <Select
-            value={`${limit}`}
-            onValueChange={(value) => {
-              setLimit(Number(value));
-              table.setPageSize(Number(value));
-            }}
-          >
-            <SelectTrigger className='h-8 w-[70px]'>
-              <SelectValue placeholder={limit} />
-            </SelectTrigger>
-            <SelectContent side='top'>
-              {[5, 10, 20].map((pageSize) => (
-                <SelectItem key={pageSize} value={`${pageSize}`}>
-                  {pageSize}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* Pencarian */}
-        <div className='w-full sm:w-auto min-w-0'>
-          <SearchInput className='w-full sm:w-auto' />
-        </div>
+      <div className='flex items-center space-x-2'>
+        <SearchOption
+          value={table.getColumn('searchBy')?.getFilterValue() as string}
+          onChange={(value) => {
+            table.getColumn('searchBy')?.setFilterValue(value);
+          }}
+        />
       </div>
+
+      {/* Pencarian */}
+      <div className='flex-1 min-w-[200px]'>
+        <SearchInput className='w-full' />
+      </div>
+      {/* </div> */}
 
       {/* Tombol Filter, View Options, dan Tambah Data */}
       <div className='flex flex-wrap items-center gap-2 ml-auto w-full sm:w-auto'>

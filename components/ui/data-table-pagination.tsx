@@ -10,9 +10,12 @@ import {
 import { Button } from '@/components/ui/button';
 import { usePageStore, useSearchParamsStore } from '@/store';
 import { Table } from '@tanstack/react-table';
+import PageSizeSelector from './pageSize-selector';
 
 interface DataTablePaginationProps<TData> {
   table: Table<TData>;
+  limit: number;
+  setLimit: (limit: number) => void;
   totalRecords: number | undefined;
   totalPages: number;
   onPageChange?: (page: number) => void;
@@ -20,6 +23,8 @@ interface DataTablePaginationProps<TData> {
 
 export function DataTablePagination<TData>({
   table,
+  limit,
+  setLimit,
   totalRecords,
   totalPages,
   onPageChange,
@@ -103,8 +108,14 @@ export function DataTablePagination<TData>({
           : `Total ${totalRecords} data`}
       </div> */}
       <div className='flex flex-wrap items-center gap-6 lg:gap-8'>
-        <div className='flex w-[100px] items-center justify-center text-xs'>
-          <p className='whitespace-nowrap'>
+        <div className='flex flex-col sm:flex-row sm:items-center sm:space-x-4 text-xs'>
+          <PageSizeSelector
+            limit={limit}
+            setLimit={setLimit}
+            onPageSizeChange={(value) => table.setPageSize(value)}
+          />
+
+          <p className='mt-2 sm:mt-0 whitespace-nowrap text-muted-foreground'>
             Page {currentPage} of {totalPagesState}{' '}
             {totalPagesState === 1 ? 'Page' : 'Pages'}
           </p>
@@ -128,6 +139,7 @@ export function DataTablePagination<TData>({
             <span className='sr-only'>Go to previous page</span>
             <ChevronLeftIcon className='h-4 w-4' />
           </Button>
+
           <Button
             variant='outline'
             className='h-8 w-8 p-0'
@@ -137,6 +149,7 @@ export function DataTablePagination<TData>({
             <span className='sr-only'>Go to next page</span>
             <ChevronRightIcon className='h-4 w-4' />
           </Button>
+
           <Button
             variant='outline'
             className='hidden h-8 w-8 p-0 lg:flex'
