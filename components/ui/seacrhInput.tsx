@@ -6,9 +6,10 @@ import { useDebounce } from 'use-debounce';
 
 interface SearchInputProps {
   className?: string;
+  searchBy: string; // 👈 ini tambahan
 }
 
-export default function SearchInput({ className }: SearchInputProps) {
+export default function SearchInput({ className, searchBy }: SearchInputProps) {
   const { setSearchParam, removeSearchParam } = useSearchParamsStore();
   const { setCurrentPage } = usePageStore();
   const [searchTerm, setSearchTerm] = useState('');
@@ -17,16 +18,20 @@ export default function SearchInput({ className }: SearchInputProps) {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (debouncedSearchTerm) {
-      params.set('name', debouncedSearchTerm);
+      // params.set('name', debouncedSearchTerm);
+      params.set(searchBy, debouncedSearchTerm); // 👈 pakai field yang dipilih
+
       params.set('page', '1');
-      setSearchParam('name', debouncedSearchTerm);
+      // setSearchParam('name', debouncedSearchTerm);
+      setSearchParam(searchBy, debouncedSearchTerm);
     } else {
       params.delete('name');
       params.delete('page');
-      removeSearchParam('name');
+      // removeSearchParam('name');
+      removeSearchParam(searchBy);
     }
     window.history.replaceState(null, '', `?${params.toString()}`);
-  }, [debouncedSearchTerm, setSearchParam, removeSearchParam]);
+  }, [debouncedSearchTerm, searchBy, setSearchParam, removeSearchParam]);
 
   useEffect(() => {
     setCurrentPage(1);
@@ -53,7 +58,8 @@ export default function SearchInput({ className }: SearchInputProps) {
           className='w-4 h-4 absolute top-1/2 right-3 -translate-y-1/2 text-gray-500 cursor-pointer'
           onClick={() => {
             setSearchTerm('');
-            removeSearchParam('name');
+            // removeSearchParam('name');
+            removeSearchParam(searchBy);
           }}
         />
       )}

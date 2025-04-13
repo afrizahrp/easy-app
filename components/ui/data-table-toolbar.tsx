@@ -14,6 +14,7 @@ import SearchInput from '@/components/ui/seacrhInput';
 import FilterSidebar from './filter-sidebar';
 import PageSizeSelector from './pageSize-selector';
 import SearchOption from './search-Option';
+import { useState } from 'react';
 
 interface DataTableToolbarProps<TData> {
   table: Table<TData>;
@@ -39,6 +40,9 @@ export function DataTableToolbar<TData>({
   handleSheetOpen: () => void;
   pageName?: string;
 }) {
+  // const searchBy = table.getColumn('searchBy')?.getFilterValue() as string;
+  const [searchBy, setSearchBy] = useState('name'); // default field pencarian
+
   return (
     <div className='flex flex-wrap items-center gap-2 sm:gap-4 w-full'>
       {/* Sidebar Filter */}
@@ -51,16 +55,16 @@ export function DataTableToolbar<TData>({
 
       <div className='flex items-center space-x-2'>
         <SearchOption
-          value={table.getColumn('searchBy')?.getFilterValue() as string}
+          value={searchBy}
           onChange={(value) => {
-            table.getColumn('searchBy')?.setFilterValue(value);
+            setSearchBy(value); // ubah state lokal, bukan lewat column filter
           }}
         />
       </div>
 
       {/* Pencarian */}
       <div className='flex-1 min-w-[200px]'>
-        <SearchInput className='w-full' />
+        <SearchInput className='w-full' searchBy={searchBy} />
       </div>
       {/* </div> */}
 
