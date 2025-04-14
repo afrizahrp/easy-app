@@ -1,15 +1,15 @@
 export const routes = {
-  eCommerce: {
-    dashboard: '/ecommerce',
-    products: '/ecommerce/products',
-    createProduct: '/ecommerce/products/create',
-    productDetails: (slug: string) => `/ecommerce/products/${slug}`,
-    ediProduct: (slug: string) => `/ecommerce/products/${slug}/edit`,
-    categories: '/ecommerce/categories',
-    createCategory: '/ecommerce/categories/create',
-    editCategory: (id: string) => `/ecommerce/categories/${id}/edit`,
-    orders: '/ecommerce/orders',
-    createOrder: '/ecommerce/orders/create',
+  dashboard: {
+    dashboard: '/dashboard',
+    sales: '/dsb/sls/list',
+    createProduct: '/dashboard/products/create',
+    productDetails: (slug: string) => `/dashboard/products/${slug}`,
+    ediProduct: (slug: string) => `/dashboard/products/${slug}/edit`,
+    categories: '/dashboard/categories',
+    createCategory: '/dashboard/categories/create',
+    editCategory: (id: string) => `/dashboard/categories/${id}/edit`,
+    orders: '/dashboard/orders',
+    createOrder: '/dashboard/orders/create',
   },
   inventory: {
     dashboard: '/inventory',

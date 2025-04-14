@@ -3,18 +3,19 @@ import { Button } from '@/components/ui/button';
 import { Filter, Plus } from 'lucide-react';
 import Link from 'next/link';
 import { DataTableViewOptions } from '@/components/ui/data-table-view-options';
-import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-} from '@/components/ui/select';
-import SearchInput from '@/components/ui/seacrhInput';
+import SearchInput from '@/components/ui/seacrh-Input';
 import FilterSidebar from './filter-sidebar';
-import PageSizeSelector from './pageSize-selector';
 import SearchOption from './search-Option';
 import { useState } from 'react';
+
+// import {
+//   Select,
+//   SelectTrigger,
+//   SelectValue,
+//   SelectContent,
+//   SelectItem,
+// } from '@/components/ui/select';
+// import PageSizeSelector from './pageSize-selector';
 
 interface DataTableToolbarProps<TData> {
   table: Table<TData>;
@@ -53,14 +54,14 @@ export function DataTableToolbar<TData>({
         pageName={pageName}
       />
 
-      <div className='flex items-center space-x-2'>
+      {/* <div className='flex items-center space-x-2'>
         <SearchOption
           value={searchBy}
           onChange={(value) => {
             setSearchBy(value); // ubah state lokal, bukan lewat column filter
           }}
         />
-      </div>
+      </div> */}
 
       {/* Pencarian */}
       <div className='flex-1 min-w-[200px]'>
@@ -72,7 +73,7 @@ export function DataTableToolbar<TData>({
       <div className='flex flex-wrap items-center gap-2 ml-auto w-full sm:w-auto'>
         <Button
           size='sm'
-          variant='outline'
+          // variant='outline'
           onClick={onFilterClick}
           className='px-3 h-8 flex items-center gap-1'
         >

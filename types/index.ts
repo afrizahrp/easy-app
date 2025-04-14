@@ -14,6 +14,32 @@ export type Category = {
   iShowedStatus: string;
 };
 
+export type InvoiceHd = {
+  invoiceType: string;
+  invoice_id: string;
+  so_id?: string;
+  invoiceDate: Date;
+  ref_id?: string;
+  tax_id?: string;
+  taxRate?: number;
+  debtor_id: string;
+  debtorName?: string;
+  customer_id: string;
+  customerName: string;
+  creditTerms?: number;
+  dueDate?: Date;
+  salesPerson_id?: string;
+  salesPersonName: string;
+  base_amount?: number;
+  dp_amount?: number;
+  discount_amount?: number;
+  totalDiscount_amount?: number;
+  tax_amount: number;
+  totalDelivery_amount?: number;
+  total_amount: number;
+  invoiceStatus: string;
+};
+
 export type Billboard = {
   id?: number;
   name: string;

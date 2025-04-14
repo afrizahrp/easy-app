@@ -25,7 +25,7 @@ import {
 } from '@/components/ui/table';
 import { useSearchParamsStore } from '@/store';
 
-import SearchInput from '@/components/ui/seacrhInput';
+import SearchInput from '@/components/ui/seacrh-Input';
 
 import { Filter } from 'lucide-react';
 

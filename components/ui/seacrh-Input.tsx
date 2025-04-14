@@ -19,19 +19,19 @@ export default function SearchInput({ className, searchBy }: SearchInputProps) {
     const params = new URLSearchParams(window.location.search);
     if (debouncedSearchTerm) {
       // params.set('name', debouncedSearchTerm);
-      params.set(searchBy, debouncedSearchTerm); // 👈 pakai field yang dipilih
+      // params.set(searchBy, debouncedSearchTerm); // 👈 pakai field yang dipilih
 
       params.set('page', '1');
-      // setSearchParam('name', debouncedSearchTerm);
-      setSearchParam(searchBy, debouncedSearchTerm);
+      setSearchParam('name', debouncedSearchTerm);
+      // setSearchParam(searchBy, debouncedSearchTerm);
     } else {
       params.delete('name');
       params.delete('page');
-      // removeSearchParam('name');
-      removeSearchParam(searchBy);
+      removeSearchParam('name');
+      // removeSearchParam(searchBy);
     }
     window.history.replaceState(null, '', `?${params.toString()}`);
-  }, [debouncedSearchTerm, searchBy, setSearchParam, removeSearchParam]);
+  }, [debouncedSearchTerm, name, setSearchParam, removeSearchParam]);
 
   useEffect(() => {
     setCurrentPage(1);
@@ -44,7 +44,7 @@ export default function SearchInput({ className, searchBy }: SearchInputProps) {
         placeholder='Type here to search...'
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
-        className='border rounded-md px-10 py-2 w-full sm:max-w-[300px] lg:max-w-[700px] sm:py-2 lg:py-3'
+        className='border rounded-md px-10 py-2 w-full sm:max-w-[300px] lg:max-w-[500px] sm:py-2 lg:py-3'
       />
 
       <Icon
@@ -58,8 +58,8 @@ export default function SearchInput({ className, searchBy }: SearchInputProps) {
           className='w-4 h-4 absolute top-1/2 right-3 -translate-y-1/2 text-gray-500 cursor-pointer'
           onClick={() => {
             setSearchTerm('');
-            // removeSearchParam('name');
-            removeSearchParam(searchBy);
+            removeSearchParam('name');
+            // removeSearchParam(searchBy);
           }}
         />
       )}
