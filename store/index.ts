@@ -226,14 +226,14 @@ export const useCategoryFilterStore = create<CategoryFilterState>()(
   )
 );
 
-interface InvoiceHdFilterState {
+interface SalesInvoiceHdState {
   status: string[]; // Array status
   setStatus: (status: string[]) => void;
   invoiceType: string[]; // Array invoiceType
   setInvoiceType: (invoiceType: string[]) => void;
 }
 
-export const useInvoiceHdFilterStore = create<InvoiceHdFilterState>()(
+export const useSalesInvoiceHdFilterStore = create<SalesInvoiceHdState>()(
   persist(
     (set) => ({
       status: [],
@@ -242,7 +242,7 @@ export const useInvoiceHdFilterStore = create<InvoiceHdFilterState>()(
       setInvoiceType: (invoiceType) => set({ invoiceType }), // Tambahkan setter untuk invoiceType
     }),
     {
-      name: 'invoiceHd-filter-store', // Nama kunci di localStorage
+      name: 'sales-invoiceHd-filter-store', // Nama kunci di localStorage
       storage: createJSONStorage(() => localStorage), // Gunakan localStorage
     }
   )

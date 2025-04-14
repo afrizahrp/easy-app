@@ -4,6 +4,7 @@ import { ProductsFilterSidebarWeb } from './productsFilterSidebar-web';
 import { MaterialFilterSidebar } from './materialFilterSidebar';
 import { CategoryFilterSidebar } from './categoryFilterSidebar';
 import { CategoryFilterSidebarWeb } from './categoryFilterSidebar-web';
+import { SalesInvoiceFilterSidebar } from './salesInvoiceFilterSidebar';
 
 interface FilterSidebarButtonProps<TData> {
   table: Table<TData>;
@@ -22,6 +23,8 @@ export function FilterSidebarButton<TData>({
       return <MaterialFilterSidebar table={table} />;
     case 'category':
       return <CategoryFilterSidebar table={table} />;
+    case 'salesInvoice':
+      return <SalesInvoiceFilterSidebar table={table} />;
     case 'category-web':
       return <CategoryFilterSidebarWeb table={table} />;
 

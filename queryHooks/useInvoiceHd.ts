@@ -4,7 +4,7 @@ import {
   useSessionStore,
   useModuleStore,
   useSearchParamsStore,
-  useInvoiceHdFilterStore,
+  useSalesInvoiceHdFilterStore,
 } from '@/store';
 import { InvoiceHd } from '@/types';
 
@@ -27,8 +27,10 @@ const useInvoiceHd = ({ page, limit }: UseCategoryParams) => {
 
   // ✅ Ambil data dari Zustand
   const searchParams = useSearchParamsStore((state) => state.searchParams);
-  const status = useInvoiceHdFilterStore((state) => state.status);
-  const invoiceType = useInvoiceHdFilterStore((state) => state.invoiceType);
+  const status = useSalesInvoiceHdFilterStore((state) => state.status);
+  const invoiceType = useSalesInvoiceHdFilterStore(
+    (state) => state.invoiceType
+  );
 
   const hasSearchParams = Object.values(searchParams).some(
     (value) =>

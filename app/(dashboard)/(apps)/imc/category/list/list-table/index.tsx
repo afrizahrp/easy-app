@@ -27,7 +27,7 @@ export const CategoryListTable: React.FC<CategoriesProps> = ({
       <DataTable
         columns={columns}
         data={data}
-        href={routes.inventory.newCategory}
+        href='#' //{routes.inventory.newCategory}
         hrefText='none'
         placeholder='Type hear to search category by name...'
         pageName='category'

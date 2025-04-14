@@ -35,9 +35,9 @@ const InvoiceHdListPage = () => {
   const formattedInvoiceHd: InvoiceHdColumns[] =
     data?.map((item) => ({
       invoiceDate: item.invoiceDate,
-      invoice_id: item.invoice_id,
+      invoice_id: item.invoice_id.trim(),
       customerName: item.customerName.trim(),
-      invoiceType: item.invoiceType,
+      invoiceType: item.invoiceType.trim(),
       total_amount: item.total_amount,
       salesPersonName: item.salesPersonName.trim(),
       invoiceStatus: item.invoiceStatus,
