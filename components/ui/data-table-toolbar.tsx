@@ -21,6 +21,7 @@ interface DataTableToolbarProps<TData> {
   table: Table<TData>;
   href: string;
   hrefText?: string;
+  placeholder?: string;
   onFilterClick: () => void;
   limit: number;
   setLimit: (limit: number) => void;
@@ -30,6 +31,7 @@ export function DataTableToolbar<TData>({
   table,
   href,
   hrefText,
+  placeholder,
   onFilterClick,
   limit,
   setLimit,
@@ -65,7 +67,11 @@ export function DataTableToolbar<TData>({
 
       {/* Pencarian */}
       <div className='flex-1 min-w-[200px]'>
-        <SearchInput className='w-full' searchBy={searchBy} />
+        <SearchInput
+          className='w-full'
+          placeholder={placeholder}
+          searchBy={searchBy}
+        />
       </div>
       {/* </div> */}
 

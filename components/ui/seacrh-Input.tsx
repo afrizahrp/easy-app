@@ -6,10 +6,15 @@ import { useDebounce } from 'use-debounce';
 
 interface SearchInputProps {
   className?: string;
+  placeholder?: string;
   searchBy: string; // 👈 ini tambahan
 }
 
-export default function SearchInput({ className, searchBy }: SearchInputProps) {
+export default function SearchInput({
+  className,
+  searchBy,
+  placeholder,
+}: SearchInputProps) {
   const { setSearchParam, removeSearchParam } = useSearchParamsStore();
   const { setCurrentPage } = usePageStore();
   const [searchTerm, setSearchTerm] = useState('');
@@ -41,7 +46,7 @@ export default function SearchInput({ className, searchBy }: SearchInputProps) {
     <div className={`relative flex-grow min-w-0 ${className}`}>
       <Input
         type='text'
-        placeholder='Type here to search...'
+        placeholder={placeholder}
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
         className='border rounded-md px-10 py-2 w-full sm:max-w-[300px] lg:max-w-[500px] sm:py-2 lg:py-3'

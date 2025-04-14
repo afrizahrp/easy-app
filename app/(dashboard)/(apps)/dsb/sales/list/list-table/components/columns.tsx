@@ -81,25 +81,6 @@ export const columns: ColumnDef<InvoiceHdColumns>[] = [
   },
 
   {
-    accessorKey: 'invoiceType',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Type' />
-    ),
-    cell: ({ row }) => {
-      return (
-        <div className='flex space-x-1'>
-          <span className={cn('max-w-[450px] truncate font-sm')}>
-            {row.getValue('invoiceType')}
-          </span>
-        </div>
-      );
-    },
-    filterFn: (row, id, value) => {
-      return value.includes(row.getValue(id));
-    },
-  },
-
-  {
     accessorKey: 'total_amount',
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title='Total' />
@@ -156,6 +137,24 @@ export const columns: ColumnDef<InvoiceHdColumns>[] = [
           </span>
         </div>
       );
+    },
+  },
+  {
+    accessorKey: 'invoiceType',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title='Type' />
+    ),
+    cell: ({ row }) => {
+      return (
+        <div className='flex space-x-1'>
+          <span className={cn('max-w-[450px] truncate font-sm')}>
+            {row.getValue('invoiceType')}
+          </span>
+        </div>
+      );
+    },
+    filterFn: (row, id, value) => {
+      return value.includes(row.getValue(id));
     },
   },
 ];

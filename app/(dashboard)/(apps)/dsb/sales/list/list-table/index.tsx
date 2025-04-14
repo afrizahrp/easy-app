@@ -29,6 +29,7 @@ export const InvoiceListTable: React.FC<CategoriesProps> = ({
         data={data}
         href='#' //{routes.inventory.newCategory}
         hrefText='none'
+        placeholder='Type here to search invoice by id or customer name...'
         pageName='invoice'
         currentPage={currentPage}
         totalPages={totalPages}

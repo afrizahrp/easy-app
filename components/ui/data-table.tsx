@@ -33,6 +33,7 @@ interface DataTableProps<TData, TValue> {
   data: TData[];
   href: string;
   hrefText?: string;
+  placeholder?: string;
   pageName?: string;
   currentPage: number;
   totalPages: number;
@@ -47,6 +48,7 @@ export function DataTable<TData, TValue>({
   data,
   href,
   hrefText,
+  placeholder,
   pageName,
   currentPage,
   totalPages,
@@ -113,6 +115,7 @@ export function DataTable<TData, TValue>({
           table={table}
           href={href}
           hrefText={hrefText}
+          placeholder={placeholder}
           onFilterClick={handleSheetOpen}
           limit={limit}
           setLimit={setLimit}
