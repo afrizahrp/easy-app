@@ -231,6 +231,8 @@ interface SalesInvoiceHdState {
   setStatus: (status: string[]) => void;
   invoiceType: string[]; // Array invoiceType
   setInvoiceType: (invoiceType: string[]) => void;
+  salesPersonName: string[]; // Array salesPersonName
+  setSalesPersonName: (salesPersonName: string[]) => void;
 }
 
 export const useSalesInvoiceHdFilterStore = create<SalesInvoiceHdState>()(
@@ -238,8 +240,12 @@ export const useSalesInvoiceHdFilterStore = create<SalesInvoiceHdState>()(
     (set) => ({
       status: [],
       invoiceType: [],
+      salesPersonName: [], // Array salesPersonName
       setStatus: (status) => set({ status }),
-      setInvoiceType: (invoiceType) => set({ invoiceType }), // Tambahkan setter untuk invoiceType
+      setInvoiceType: (invoiceType) => set({ invoiceType }),
+      setSalesPersonName: (salesPersonName) => set({ salesPersonName }), // Tambahkan setter untuk salesPersonName
+
+      // Tambahkan setter untuk invoiceType
     }),
     {
       name: 'sales-invoiceHd-filter-store', // Nama kunci di localStorage

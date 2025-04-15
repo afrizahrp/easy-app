@@ -6,14 +6,14 @@ import {
   useSalesInvoiceHdFilterStore,
 } from '@/store';
 
-interface InvoiceStatus {
+interface SalesInvoiceHdStatus {
   id: string;
   name: string;
   count: number; // ✅ Ubah ke number agar mudah diproses
 }
 
-interface InvoiceStatusResponse {
-  data: InvoiceStatus[];
+interface SalesInvoiceHdStatusResponse {
+  data: SalesInvoiceHdStatus[];
 }
 
 export const useSalesInvoiceHdStatus = () => {
@@ -27,10 +27,10 @@ export const useSalesInvoiceHdStatus = () => {
   const isEnabled = !!company_id && !!module_id;
 
   const { data, isLoading, error, isFetching, ...rest } = useQuery<
-    InvoiceStatusResponse,
+    SalesInvoiceHdStatusResponse,
     Error
   >({
-    queryKey: ['invoiceStatus', company_id, module_id, invoiceType],
+    queryKey: ['salesInvoiceHdStatus', company_id, module_id, invoiceType],
     queryFn: async () => {
       // ✅ Seragam dengan `useinvoiceType`, gunakan query string
       const url = `${process.env.NEXT_PUBLIC_API_URL}/${company_id}/${module_id}/get-invoiceHd/statuses${
@@ -39,7 +39,7 @@ export const useSalesInvoiceHdStatus = () => {
           : ''
       }`;
 
-      const response = await api.get<InvoiceStatusResponse>(url);
+      const response = await api.get<SalesInvoiceHdStatusResponse>(url);
       return response.data;
     },
     enabled: isEnabled,

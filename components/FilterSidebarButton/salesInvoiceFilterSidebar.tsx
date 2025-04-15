@@ -2,17 +2,15 @@
 import { useEffect, useState } from 'react';
 import { Cross2Icon } from '@radix-ui/react-icons';
 import { Table } from '@tanstack/react-table';
-import useCategoryStatusOptions from '@/queryHooks/useCategoryStatusOptions';
-import useCategoryTypeOptions from '@/queryHooks/useCategoryTypeOptions';
 
 import useSalesInvoiceHdStatusOptions from '@/queryHooks/useSalesInvoiceHdStatusOptions';
+import useSalesInvoiceHdSalesPersonOptions from '@/queryHooks/useSalesInvoiceHdStatusOptions';
 
 import { Button } from '@/components/ui/button';
 import { DataTableFacetedFilter } from '@/components/ui/data-table-faceted-filter';
-import { useCategoryFilterStore } from '@/store'; // ✅ Gunakan Zustand Store
 import { useSalesInvoiceHdFilterStore } from '@/store'; // ✅ Gunakan Zustand Store
-import { CustomDatePicker } from '../ui/custom-date-picker';
-import { MonthYearPickerRange } from '@/components/ui/monthYearPickerRange';
+// import { CustomDatePicker } from '../ui/custom-date-picker';
+// import { MonthYearPickerRange } from '@/components/ui/monthYearPickerRange';
 
 interface SalesInvoiceFilterSidebarProps<TData> {
   table: Table<TData>;
@@ -21,7 +19,7 @@ interface SalesInvoiceFilterSidebarProps<TData> {
 export function SalesInvoiceFilterSidebar<TData>({
   table,
 }: SalesInvoiceFilterSidebarProps<TData>) {
-  const { status, setStatus, invoiceType, setInvoiceType } =
+  const { status, setStatus, salesPersonName, setSalesPersonName } =
     useSalesInvoiceHdFilterStore();
 
   const [range, setRange] = useState<{ from?: Date; to?: Date }>({});
@@ -30,13 +28,17 @@ export function SalesInvoiceFilterSidebar<TData>({
     table
       .getColumn('invoiceStatus')
       ?.setFilterValue(status.length ? status : undefined);
-    // table
-    //   .getColumn('invoiceType')
-    //   ?.setFilterValue(invoiceType.length ? invoiceType : undefined);
-  }, [status, table]);
+    table
+      .getColumn('salesPersonName')
+      ?.setFilterValue(salesPersonName.length ? salesPersonName : undefined);
+  }, [status, salesPersonName, table]);
 
   const { options: statusOptionList, isLoading: isStatusLoading } =
     useSalesInvoiceHdStatusOptions();
+
+  const { options: salesPersonOptionList, isLoading: isSalesPersonLoading } =
+    useSalesInvoiceHdSalesPersonOptions();
+
   // const { typeOptions: typeOptionList, isLoading: isTypeLoading } =
   //   useSalesInvoiceHdTypeOptions();
 
@@ -68,37 +70,38 @@ export function SalesInvoiceFilterSidebar<TData>({
             />
           )}
         </div>
-        {/* <div className='w-full py-3'>
-          {table.getColumn('categoryType') && (
+        <div className='w-full py-3'>
+          {table.getColumn('salesPersonName') && (
             <DataTableFacetedFilter
-              column={table.getColumn('categoryType')}
-              title='Type'
-              options={typeOptionList}
-              isLoading={isTypeLoading}
-              selectedValues={new Set(categoryType)}
+              column={table.getColumn('salesPersonName')}
+              title='Sales Person'
+              options={salesPersonOptionList}
+              isLoading={isSalesPersonLoading}
+              selectedValues={new Set(salesPersonName)}
               onSelect={(value) => {
-                const updatedValues = new Set(categoryType);
+                const updatedValues = new Set(salesPersonName);
                 value
                   ? updatedValues.has(value)
                     ? updatedValues.delete(value)
                     : updatedValues.add(value)
                   : updatedValues.clear();
-                setCategoryType(Array.from(updatedValues));
+                setSalesPersonName(Array.from(updatedValues));
                 table
-                  .getColumn('categoryType')
+                  .getColumn('salesPersonName')
                   ?.setFilterValue(
                     updatedValues.size ? Array.from(updatedValues) : undefined
                   );
               }}
             />
-          )}  
-        </div> */}
+          )}
+        </div>
         {table.getState().columnFilters.length > 0 && (
           <Button
             variant='outline'
             onClick={() => {
               table.resetColumnFilters();
               setStatus([]);
+              setSalesPersonName([]);
               // setInvoiceType([]);
             }}
             className='h-10 px-2 lg:px-3 w-full mb-5'
