@@ -3,8 +3,8 @@ import { useEffect, useState } from 'react';
 import { Cross2Icon } from '@radix-ui/react-icons';
 import { Table } from '@tanstack/react-table';
 
-import useSalesInvoiceHdStatusOptions from '@/queryHooks/useSalesInvoiceHdStatusOptions';
-import useSalesInvoiceHdSalesPersonOptions from '@/queryHooks/useSalesInvoiceHdStatusOptions';
+import useSalesInvoiceHdPaidStatusOptions from '@/queryHooks/useSalesInvoiceHdPaidStatusOptions';
+import useSalesInvoiceHdSalesPersonOptions from '@/queryHooks/useSalesInvoiceHdSalesPersonOptions';
 
 import { Button } from '@/components/ui/button';
 import { DataTableFacetedFilter } from '@/components/ui/data-table-faceted-filter';
@@ -24,17 +24,29 @@ export function SalesInvoiceFilterSidebar<TData>({
 
   const [range, setRange] = useState<{ from?: Date; to?: Date }>({});
 
+  // useEffect(() => {
+  //   table
+  //     .getColumn('paidStatus')
+  //     ?.setFilterValue(status.length ? status : undefined);
+  //   table
+  //     .getColumn('salesPersonName')
+  //     ?.setFilterValue(salesPersonName.length ? salesPersonName : undefined);
+  // }, [status, salesPersonName, table]);
+
   useEffect(() => {
     table
-      .getColumn('invoiceStatus')
+      .getColumn('paidStatus')
       ?.setFilterValue(status.length ? status : undefined);
+  }, [status, table]);
+
+  useEffect(() => {
     table
       .getColumn('salesPersonName')
       ?.setFilterValue(salesPersonName.length ? salesPersonName : undefined);
-  }, [status, salesPersonName, table]);
+  }, [salesPersonName, table]);
 
   const { options: statusOptionList, isLoading: isStatusLoading } =
-    useSalesInvoiceHdStatusOptions();
+    useSalesInvoiceHdPaidStatusOptions();
 
   const { options: salesPersonOptionList, isLoading: isSalesPersonLoading } =
     useSalesInvoiceHdSalesPersonOptions();
@@ -46,9 +58,9 @@ export function SalesInvoiceFilterSidebar<TData>({
     <div className='flex items-center justify-end py-2'>
       <div className='flex flex-col items-center space-y-2 w-full'>
         <div className='w-full py-3'>
-          {table.getColumn('invoiceStatus') && (
+          {table.getColumn('paidStatus') && (
             <DataTableFacetedFilter
-              column={table.getColumn('invoiceStatus')}
+              column={table.getColumn('paidStatus')}
               title='Status'
               options={statusOptionList}
               isLoading={isStatusLoading}
@@ -62,7 +74,7 @@ export function SalesInvoiceFilterSidebar<TData>({
                   : updatedValues.clear();
                 setStatus(Array.from(updatedValues));
                 table
-                  .getColumn('invoiceStatus')
+                  .getColumn('paidStatus')
                   ?.setFilterValue(
                     updatedValues.size ? Array.from(updatedValues) : undefined
                   );

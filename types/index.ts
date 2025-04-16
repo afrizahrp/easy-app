@@ -14,7 +14,8 @@ export type Category = {
   iShowedStatus: string;
 };
 
-export type InvoiceHd = {
+export type SalesInvoiceHd = {
+  PoType: string;
   invoiceType: string;
   invoice_id: string;
   so_id?: string;
@@ -37,7 +38,7 @@ export type InvoiceHd = {
   tax_amount: number;
   totalDelivery_amount?: number;
   total_amount: number;
-  invoiceStatus: string;
+  paidStatus: string;
 };
 
 export type Billboard = {

@@ -8,17 +8,17 @@ import { getStatusColor } from '@/utils/statusUils';
 
 import Link from 'next/link';
 
-export type InvoiceHdColumns = {
+export type SalesInvoiceHdColumns = {
   invoiceDate: Date;
   invoice_id: string;
   customerName: string;
   salesPersonName: string;
   invoiceType: string;
-  invoiceStatus: string;
+  paidStatus: string;
   total_amount: number;
 };
 
-export const columns: ColumnDef<InvoiceHdColumns>[] = [
+export const columns: ColumnDef<SalesInvoiceHdColumns>[] = [
   {
     accessorKey: 'invoice_id',
     header: ({ column }) => (
@@ -97,7 +97,7 @@ export const columns: ColumnDef<InvoiceHdColumns>[] = [
     },
   },
   {
-    accessorKey: 'invoiceStatus',
+    accessorKey: 'paidStatus',
     header: ({ column }) => (
       <DataTableColumnHeader
         column={column}
@@ -106,7 +106,7 @@ export const columns: ColumnDef<InvoiceHdColumns>[] = [
       />
     ),
     cell: ({ row }) => {
-      let value: string = row.getValue('invoiceStatus');
+      let value: string = row.getValue('paidStatus');
       const color = getStatusColor(value);
       return (
         <div className='w-[140px]'>

@@ -6,10 +6,10 @@ import {
   useSearchParamsStore,
   useSalesInvoiceHdFilterStore,
 } from '@/store';
-import { InvoiceHd } from '@/types';
+import { SalesInvoiceHd } from '@/types';
 
-interface CategoryResponse {
-  data: InvoiceHd[];
+interface SalesInvoiceHdResponse {
+  data: SalesInvoiceHd[];
   totalRecords: number;
 }
 
@@ -18,7 +18,7 @@ interface UseCategoryParams {
   limit: number;
 }
 
-const useInvoiceHd = ({ page, limit }: UseCategoryParams) => {
+const useSalesInvoiceHd = ({ page, limit }: UseCategoryParams) => {
   const user = useSessionStore((state) => state.user);
   const company_id = user?.company_id;
   const module_id = useModuleStore((state) => state.moduleId);
@@ -39,11 +39,11 @@ const useInvoiceHd = ({ page, limit }: UseCategoryParams) => {
   );
 
   const { data, isLoading, error, isFetching, ...rest } = useQuery<
-    CategoryResponse,
+    SalesInvoiceHdResponse,
     Error
   >({
     queryKey: [
-      'categories',
+      'salesInvoiceHd',
       company_id,
       module_id,
       page,
@@ -84,7 +84,7 @@ const useInvoiceHd = ({ page, limit }: UseCategoryParams) => {
         : `${process.env.NEXT_PUBLIC_API_URL}/${company_id}/${module_id}/get-invoiceHd`;
 
       // 🔥 Fetch data berdasarkan kondisi
-      const response = await api.get<CategoryResponse>(url, {
+      const response = await api.get<SalesInvoiceHdResponse>(url, {
         params: filteredParams,
       });
 
@@ -106,4 +106,4 @@ const useInvoiceHd = ({ page, limit }: UseCategoryParams) => {
   };
 };
 
-export default useInvoiceHd;
+export default useSalesInvoiceHd;

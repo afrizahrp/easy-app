@@ -16,7 +16,7 @@ interface SalesInvoiceHdStatusResponse {
   data: SalesInvoiceHdStatus[];
 }
 
-export const useSalesInvoiceHdStatus = () => {
+export const useSalesInvoiceHdPaidStatus = () => {
   const user = useSessionStore((state) => state.user);
   const company_id = user?.company_id;
   const module_id = useModuleStore((state) => state.moduleId);
@@ -55,4 +55,4 @@ export const useSalesInvoiceHdStatus = () => {
   };
 };
 
-export default useSalesInvoiceHdStatus;
+export default useSalesInvoiceHdPaidStatus;

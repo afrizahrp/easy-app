@@ -1,8 +1,8 @@
-import useSalesInvoiceHdStatus from '@/queryHooks/useSalesInvoiceHdStatus';
+import useSalesInvoiceHdSalesPerson from '@/queryHooks/useSalesInvoiceHdSalesPerson';
 
-interface OptionType {
-  value: string;
-  label: string;
+interface useSalesInvoiceHdSalesPersonOptions {
+  id: string;
+  name: string;
   count: number;
 }
 
@@ -10,13 +10,13 @@ interface OptionType {
 //   statusCounts?: Record<string, number>
 // ) {
 
-export default function useSalesInvoiceHdStatusOptions() {
-  const { data: statusData, isLoading } = useSalesInvoiceHdStatus();
+export default function useSalesInvoiceHdSalesPersonOptions() {
+  const { data: salesPersonData, isLoading } = useSalesInvoiceHdSalesPerson();
 
   const options =
-    statusData?.map((status) => ({
-      value: status.id, // Sesuaikan dengan format API
-      label: status.name, //(${status.count})`, // Menampilkan count dari API
+    salesPersonData?.map((salesPersonList) => ({
+      value: salesPersonList.id, // Sesuaikan dengan format API
+      label: salesPersonList.name, //(${status.count})`, // Menampilkan count dari API
       // count: Number(status.count), // Pastikan count dalam bentuk number
     })) || [];
 

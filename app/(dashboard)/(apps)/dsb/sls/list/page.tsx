@@ -5,8 +5,8 @@ import { InvoiceListTable } from './list-table';
 import LayoutLoader from '@/components/layout-loader';
 import { routes } from '@/config/routes';
 import PageHeader from '@/components/page-header';
-import useInvoiceHd from '@/queryHooks/useInvoiceHd';
-import { InvoiceHdColumns } from './list-table/components/columns';
+import useSalesInvoiceHd from '@/queryHooks/useSalesInvoiceHd';
+import { SalesInvoiceHdColumns } from './list-table/components/columns';
 import { usePageStore } from '@/store';
 
 const InvoiceHdListPage = () => {
@@ -15,7 +15,7 @@ const InvoiceHdListPage = () => {
   const [limit, setLimit] = useState(10);
   const [invoiceType, setInvoiceType] = useState<string | null>(null);
 
-  const { data, total, isFetching, error } = useInvoiceHd({
+  const { data, total, isFetching, error } = useSalesInvoiceHd({
     page: currentPage,
     limit,
   });
@@ -32,7 +32,7 @@ const InvoiceHdListPage = () => {
     return <div>Error fetching invoiceHd: {error.message}</div>;
   }
 
-  const formattedInvoiceHd: InvoiceHdColumns[] =
+  const formattedInvoiceHd: SalesInvoiceHdColumns[] =
     data?.map((item) => ({
       invoiceDate: item.invoiceDate,
       invoice_id: item.invoice_id.trim(),
@@ -40,7 +40,7 @@ const InvoiceHdListPage = () => {
       invoiceType: item.invoiceType.trim(),
       total_amount: item.total_amount,
       salesPersonName: item.salesPersonName.trim(),
-      invoiceStatus: item.invoiceStatus,
+      paidStatus: item.paidStatus,
     })) ?? [];
 
   return (
