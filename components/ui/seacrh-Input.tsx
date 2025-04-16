@@ -7,12 +7,12 @@ import { useDebounce } from 'use-debounce';
 interface SearchInputProps {
   className?: string;
   placeholder?: string;
-  searchBy: string; // 👈 ini tambahan
+  name: string; // 👈 ini tambahan
 }
 
 export default function SearchInput({
   className,
-  searchBy,
+  name,
   placeholder,
 }: SearchInputProps) {
   const { setSearchParam, removeSearchParam } = useSearchParamsStore();
