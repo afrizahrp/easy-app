@@ -41,7 +41,6 @@ export const useSalesInvoiceHdSalesPerson = () => {
 
       const response = await api.get<SalesInvoiceHdSalesPersonResponse>(url);
 
-      console.log('🔥 Debugging response.data:', response.data);
       return response.data;
     },
     enabled: isEnabled,

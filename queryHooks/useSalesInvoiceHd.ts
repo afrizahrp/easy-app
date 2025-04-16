@@ -21,15 +21,16 @@ interface UseCategoryParams {
 const useSalesInvoiceHd = ({ page, limit }: UseCategoryParams) => {
   const user = useSessionStore((state) => state.user);
   const company_id = user?.company_id;
-  const module_id = useModuleStore((state) => state.moduleId);
+  // const module_id = useModuleStore((state) => state.moduleId);
+  const module_id = 'SLS';
 
   const isValidRequest = Boolean(company_id && module_id);
 
   // ✅ Ambil data dari Zustand
   const searchParams = useSearchParamsStore((state) => state.searchParams);
   const status = useSalesInvoiceHdFilterStore((state) => state.status);
-  const invoiceType = useSalesInvoiceHdFilterStore(
-    (state) => state.invoiceType
+  const salesPersonName = useSalesInvoiceHdFilterStore(
+    (state) => state.salesPersonName
   );
 
   const hasSearchParams = Object.values(searchParams).some(
@@ -50,7 +51,7 @@ const useSalesInvoiceHd = ({ page, limit }: UseCategoryParams) => {
       limit,
       JSON.stringify(searchParams), // 🔥 Pastikan perubahan di object terdeteksi
       status,
-      invoiceType,
+      salesPersonName,
     ],
     queryFn: async () => {
       if (!isValidRequest) {
@@ -72,15 +73,15 @@ const useSalesInvoiceHd = ({ page, limit }: UseCategoryParams) => {
         filteredParams.status = status.join(','); // ✅ Format string: "PAID,UNPAID"
       }
 
-      if (invoiceType.length > 0) {
-        filteredParams.invoiceType = invoiceType.join(','); // ✅ Format string: "REGULER,DP"
+      if (salesPersonName.length > 0) {
+        filteredParams.salesPersonName = salesPersonName.join(','); // ✅ Format string: "REGULER,DP"
       }
 
       // 🔥 Debugging
       console.log('🔥 Fetching InvoiceHd with Params:', filteredParams);
 
       const url = hasSearchParams
-        ? `${process.env.NEXT_PUBLIC_API_URL}/${company_id}/${module_id}/get-invoiceHd/search`
+        ? `${process.env.NEXT_PUBLIC_API_URL}/${company_id}/${module_id}/get-invoiceHd/filter`
         : `${process.env.NEXT_PUBLIC_API_URL}/${company_id}/${module_id}/get-invoiceHd`;
 
       // 🔥 Fetch data berdasarkan kondisi
