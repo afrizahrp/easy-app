@@ -5,8 +5,9 @@ import Link from 'next/link';
 import { DataTableViewOptions } from '@/components/ui/data-table-view-options';
 import SearchInput from '@/components/ui/seacrh-Input';
 import FilterSidebar from './filter-sidebar';
-import SearchOption from './search-Option';
+import { SearchOption } from './search-Option';
 import { useState } from 'react';
+import { useSearchParamsStore } from '@/store';
 
 // import {
 //   Select,
@@ -21,6 +22,8 @@ interface DataTableToolbarProps<TData> {
   table: Table<TData>;
   href: string;
   hrefText?: string;
+  searchTerm: string;
+  // setSearchTerm?: (searchTerm: string) => void;
   placeholder?: string;
   onFilterClick: () => void;
   limit: number;
@@ -31,7 +34,10 @@ export function DataTableToolbar<TData>({
   table,
   href,
   hrefText,
+  searchTerm,
+  // setSearchTerm,
   placeholder,
+
   onFilterClick,
   limit,
   setLimit,
@@ -43,8 +49,10 @@ export function DataTableToolbar<TData>({
   handleSheetOpen: () => void;
   pageName?: string;
 }) {
-  // const searchBy = table.getColumn('searchBy')?.getFilterValue() as string;
-  const [searchBy, setSearchBy] = useState('name'); // default field pencarian
+  const { searchParams, setSearchBy, setSearchParam } = useSearchParamsStore();
+
+  const searchBy = (searchParams.searchBy as string) || 'id';
+  const searchValue = (searchParams[searchBy] as string) || '';
 
   return (
     <div className='flex flex-wrap items-center gap-2 sm:gap-4 w-full'>
@@ -56,14 +64,14 @@ export function DataTableToolbar<TData>({
         pageName={pageName}
       />
 
-      {/* <div className='flex items-center space-x-2'>
+      <div className='flex items-center space-x-2'>
         <SearchOption
           value={searchBy}
           onChange={(value) => {
             setSearchBy(value); // ubah state lokal, bukan lewat column filter
           }}
         />
-      </div> */}
+      </div>
 
       {/* Pencarian */}
       <div className='flex-1 min-w-[200px]'>

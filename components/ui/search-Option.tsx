@@ -1,39 +1,35 @@
-'use client';
-
 import {
   Select,
-  SelectTrigger,
-  SelectValue,
   SelectContent,
   SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from '@/components/ui/select';
 
-interface SearchOptionProps {
+const options = [
+  { value: 'invoice_id', label: 'Invoice ID' },
+  { value: 'customerName', label: 'Customer Name' },
+];
+
+export function SearchOption({
+  value,
+  onChange,
+}: {
   value: string;
   onChange: (value: string) => void;
-}
-
-const SEARCH_FIELDS = ['id', 'name', 'remarks'];
-
-export default function SearchOption({ value, onChange }: SearchOptionProps) {
+}) {
   return (
-    <div className='flex items-center space-x-2'>
-      <Select value={value} onValueChange={onChange}>
-        <SelectTrigger className='h-8 w-[120px] text-sm'>
-          <SelectValue placeholder='Search By' />
-        </SelectTrigger>
-        <SelectContent side='bottom'>
-          {SEARCH_FIELDS.map((field) => (
-            <SelectItem
-              key={field}
-              value={field}
-              className='text-sm capitalize'
-            >
-              {field}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    </div>
+    <Select value={value} onValueChange={onChange}>
+      <SelectTrigger className='w-[180px]' title='Select search field'>
+        <SelectValue placeholder='Search by' />
+      </SelectTrigger>
+      <SelectContent>
+        {options.map((opt) => (
+          <SelectItem key={opt.value} value={opt.value}>
+            {opt.label}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   );
 }

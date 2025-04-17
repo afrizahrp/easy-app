@@ -6,13 +6,13 @@ import { useDebounce } from 'use-debounce';
 
 interface SearchInputProps {
   className?: string;
+  searchBy?: string;
   placeholder?: string;
-  name: string; // 👈 ini tambahan
 }
 
 export default function SearchInput({
   className,
-  name,
+  searchBy,
   placeholder,
 }: SearchInputProps) {
   const { setSearchParam, removeSearchParam } = useSearchParamsStore();
@@ -23,20 +23,15 @@ export default function SearchInput({
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (debouncedSearchTerm) {
-      // params.set('name', debouncedSearchTerm);
-      // params.set(searchBy, debouncedSearchTerm); // 👈 pakai field yang dipilih
-
       params.set('page', '1');
-      setSearchParam('name', debouncedSearchTerm);
-      // setSearchParam(searchBy, debouncedSearchTerm);
+      setSearchParam('searchTerm', debouncedSearchTerm); // Ubah ke searchTerm
     } else {
-      params.delete('name');
+      params.delete('searchTerm');
       params.delete('page');
-      removeSearchParam('name');
-      // removeSearchParam(searchBy);
+      removeSearchParam('searchTerm');
     }
     window.history.replaceState(null, '', `?${params.toString()}`);
-  }, [debouncedSearchTerm, name, setSearchParam, removeSearchParam]);
+  }, [debouncedSearchTerm, setSearchParam, removeSearchParam]);
 
   useEffect(() => {
     setCurrentPage(1);
@@ -49,22 +44,20 @@ export default function SearchInput({
         placeholder={placeholder}
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
-        className='border rounded-md px-10 py-2 w-full sm:max-w-[300px] lg:max-w-[500px] sm:py-2 lg:py-3'
+        // className='border rounded-md px-10 py-2 w-full sm:max-w-[300px] lg:max-w-[500px] sm:py-2 lg:py-3'
+        className='pl-10 pr-10 py-2 w-full border rounded-md'
       />
-
       <Icon
         icon='heroicons:magnifying-glass'
         className='w-4 h-4 absolute top-1/2 left-3 -translate-y-1/2 text-gray-500'
       />
-
       {searchTerm && (
         <Icon
           icon='heroicons:x-mark'
-          className='w-4 h-4 absolute top-1/2 right-3 -translate-y-1/2 text-gray-500 cursor-pointer'
+          className='w-4 h-4 absolute top-1/2 right-3 -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer'
           onClick={() => {
             setSearchTerm('');
-            removeSearchParam('name');
-            // removeSearchParam(searchBy);
+            removeSearchParam('searchTerm');
           }}
         />
       )}

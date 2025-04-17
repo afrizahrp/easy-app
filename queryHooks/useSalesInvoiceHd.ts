@@ -16,9 +16,16 @@ interface SalesInvoiceHdResponse {
 interface UseCategoryParams {
   page: number;
   limit: number;
+  searchBy?: string;
+  searchTerm?: string;
 }
 
-const useSalesInvoiceHd = ({ page, limit }: UseCategoryParams) => {
+const useSalesInvoiceHd = ({
+  page,
+  limit,
+  searchBy,
+  searchTerm,
+}: UseCategoryParams) => {
   const user = useSessionStore((state) => state.user);
   const company_id = user?.company_id;
   const module_id = 'SLS';
@@ -30,15 +37,15 @@ const useSalesInvoiceHd = ({ page, limit }: UseCategoryParams) => {
   );
 
   const isValidRequest = Boolean(company_id && module_id);
-  const hasSearchParams = Object.values(searchParams).some(
-    (value) =>
-      (typeof value === 'string' && value.trim() !== '') ||
-      (Array.isArray(value) && value.length > 0)
-  );
 
   const buildFilteredParams = (
     base: Record<string, any>,
-    extra: { status?: string[]; salesPersonName?: string[] }
+    extra: {
+      status?: string[];
+      salesPersonName?: string[];
+      searchBy?: string;
+      searchTerm?: string;
+    }
   ): Record<string, any> => {
     const result = Object.fromEntries(
       Object.entries(base).filter(([_, value]) => {
@@ -54,6 +61,11 @@ const useSalesInvoiceHd = ({ page, limit }: UseCategoryParams) => {
 
     if (extra.salesPersonName?.length) {
       result.salesPersonName = extra.salesPersonName.join(',');
+    }
+
+    if (extra.searchBy && extra.searchTerm) {
+      result.searchBy = extra.searchBy;
+      result.searchTerm = extra.searchTerm;
     }
 
     return result;
@@ -72,6 +84,8 @@ const useSalesInvoiceHd = ({ page, limit }: UseCategoryParams) => {
       JSON.stringify(searchParams),
       status,
       salesPersonName,
+      searchBy,
+      searchTerm,
     ],
     queryFn: async () => {
       if (!isValidRequest) {
@@ -80,11 +94,10 @@ const useSalesInvoiceHd = ({ page, limit }: UseCategoryParams) => {
 
       const filteredParams = buildFilteredParams(
         { page, limit, ...searchParams },
-        { status, salesPersonName }
+        { status, salesPersonName, searchBy, searchTerm }
       );
 
-      const baseUrl = `${process.env.NEXT_PUBLIC_API_URL}/${company_id}/${module_id}/get-invoiceHd`;
-      const url = hasSearchParams ? `${baseUrl}/filter` : baseUrl;
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/${company_id}/${module_id}/get-invoiceHd`;
 
       const response = await api.get<SalesInvoiceHdResponse>(url, {
         params: filteredParams,

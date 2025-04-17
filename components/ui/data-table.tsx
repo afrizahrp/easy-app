@@ -33,6 +33,7 @@ interface DataTableProps<TData, TValue> {
   data: TData[];
   href: string;
   hrefText?: string;
+  searchTerm: string;
   placeholder?: string;
   pageName?: string;
   currentPage: number;
@@ -48,6 +49,7 @@ export function DataTable<TData, TValue>({
   data,
   href,
   hrefText,
+  searchTerm,
   placeholder,
   pageName,
   currentPage,
@@ -64,10 +66,6 @@ export function DataTable<TData, TValue>({
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
   );
-  const setSearchParam = useSearchParamsStore((state) => state.setSearchParam);
-  const removeSearchParam = useSearchParamsStore(
-    (state) => state.removeSearchParam
-  );
 
   const [sorting, setSorting] = React.useState<SortingState>([]);
 
@@ -75,14 +73,6 @@ export function DataTable<TData, TValue>({
   const handleSheetOpen = () => {
     setOpen(!open);
   };
-
-  const handleSearch = React.useCallback(
-    (value: string) => {
-      setFiltering(value);
-      setSearchParam('name', value);
-    },
-    [setSearchParam]
-  ); // Pastikan tidak bergantung pada `filtering` agar tidak memicu re-render
 
   const table = useReactTable({
     data,
@@ -111,10 +101,11 @@ export function DataTable<TData, TValue>({
   return (
     <>
       <div className='space-y-4'>
-        <DataTableToolbar
+        <DataTableToolbar<TData>
           table={table}
           href={href}
           hrefText={hrefText}
+          searchTerm={searchTerm}
           placeholder={placeholder}
           onFilterClick={handleSheetOpen}
           limit={limit}

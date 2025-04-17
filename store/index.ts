@@ -175,31 +175,75 @@ export const useCompanyInfo = create<CompanyInfoStoreState>()(
 );
 
 interface SearchParamsState {
-  searchParams: Record<string, string | string[]>; // Bisa untuk semua parameter
+  searchParams: Record<string, string | string[]>;
+  setSearchBy: (by: string) => void;
   setSearchParam: (key: string, value: string | string[]) => void;
-  removeSearchParam: (key: string) => void; // ✅ Perbaikan di sini
+  removeSearchParam: (key: string) => void;
+  resetSearchParams: () => void;
 }
 
 export const useSearchParamsStore = create<SearchParamsState>()(
   persist(
-    (set) => ({
-      searchParams: {}, // Awal kosong, bisa menampung banyak filter
+    (set, get) => ({
+      // Inisialisasi dengan default searchBy
+      searchParams: {
+        searchBy: 'invoice_id', // Default untuk mencegah undefined
+      },
 
-      setSearchParam: (key, value) =>
+      setSearchBy: (by) => {
+        if (!by) return; // Cegah set nilai kosong atau undefined
+        set((state) => ({
+          searchParams: { ...state.searchParams, searchBy: by },
+        }));
+      },
+
+      setSearchParam: (key, value) => {
+        // Hapus param jika value kosong
+        if (!value || (Array.isArray(value) && value.length === 0)) {
+          return get().removeSearchParam(key);
+        }
         set((state) => ({
           searchParams: { ...state.searchParams, [key]: value },
-        })),
+        }));
+      },
 
-      removeSearchParam: (key) =>
+      removeSearchParam: (key) => {
         set((state) => {
           const newParams = { ...state.searchParams };
           delete newParams[key];
           return { searchParams: newParams };
-        }),
+        });
+      },
+
+      resetSearchParams: () => {
+        set({
+          searchParams: {
+            searchBy: 'invoice_id', // Reset ke default
+          },
+        });
+      },
     }),
     {
-      name: 'search-params-store', // Nama kunci di localStorage
-      storage: createJSONStorage(() => localStorage), // Gunakan localStorage
+      name: 'search-params-store',
+      storage: createJSONStorage(() => localStorage),
+      partialize: (state) => ({ searchParams: state.searchParams }),
+      onRehydrateStorage: () => (state) => {
+        if (typeof window === 'undefined' || !state) return;
+
+        const params = new URLSearchParams(window.location.search);
+        const searchBy = params.get('searchBy');
+        const searchTerm = params.get('searchTerm');
+
+        const newParams = { ...state.searchParams };
+        if (searchBy) {
+          newParams.searchBy = searchBy;
+        }
+        if (searchTerm) {
+          newParams.searchTerm = searchTerm;
+        }
+
+        state.searchParams = newParams;
+      },
     }
   )
 );

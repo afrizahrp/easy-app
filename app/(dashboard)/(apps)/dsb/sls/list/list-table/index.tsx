@@ -1,10 +1,10 @@
 'use client';
 import { DataTable } from '@/components/ui/data-table';
-import { InvoiceHdColumns, columns } from './components/columns';
+import { SalesInvoiceHdColumns, columns } from './components/columns';
 import { routes } from '@/config/routes';
 
-interface CategoriesProps {
-  data: InvoiceHdColumns[];
+interface SalesInvoiceHdProps {
+  data: SalesInvoiceHdColumns[];
   currentPage: number;
   totalPages: number;
   totalRecords: number | undefined;
@@ -13,7 +13,7 @@ interface CategoriesProps {
   setLimit: (limit: number) => void;
 }
 
-export const InvoiceListTable: React.FC<CategoriesProps> = ({
+export const InvoiceListTable: React.FC<SalesInvoiceHdProps> = ({
   data,
   currentPage,
   totalPages,
@@ -29,6 +29,7 @@ export const InvoiceListTable: React.FC<CategoriesProps> = ({
         data={data}
         href='#' //{routes.inventory.newCategory}
         hrefText='none'
+        searchTerm='customerName'
         placeholder='Type here to search invoice by id or customer name...'
         pageName='salesInvoice'
         currentPage={currentPage}
