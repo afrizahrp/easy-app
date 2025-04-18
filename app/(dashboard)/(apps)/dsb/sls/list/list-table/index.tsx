@@ -1,7 +1,6 @@
 'use client';
 import { DataTable } from '@/components/ui/data-table';
 import { SalesInvoiceHdColumns, columns } from './components/columns';
-import { routes } from '@/config/routes';
 
 interface SalesInvoiceHdProps {
   data: SalesInvoiceHdColumns[];

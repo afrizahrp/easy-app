@@ -34,6 +34,8 @@ export function SalesInvoiceFilterSidebar<TData>({
   // }, [status, salesPersonName, table]);
 
   useEffect(() => {
+    console.log('salesPersonName filter', salesPersonName);
+
     table
       .getColumn('paidStatus')
       ?.setFilterValue(status.length ? status : undefined);

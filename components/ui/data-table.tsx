@@ -23,7 +23,6 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { useSearchParamsStore } from '@/store';
 
 import { DataTablePagination } from '@/components/ui/data-table-pagination';
 import { DataTableToolbar } from '@/components/ui/data-table-toolbar';
@@ -66,8 +65,9 @@ export function DataTable<TData, TValue>({
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
   );
-
   const [sorting, setSorting] = React.useState<SortingState>([]);
+
+  // const [sorting, setSorting] = React.useState<SortingState>([]);
 
   const [open, setOpen] = React.useState<boolean>(false);
   const handleSheetOpen = () => {
@@ -96,6 +96,7 @@ export function DataTable<TData, TValue>({
     getSortedRowModel: getSortedRowModel(),
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
+    manualSorting: true, // <- penting jika sorting dikirim ke backend
   });
 
   return (

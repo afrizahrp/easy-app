@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { siteConfig } from '@/config/site';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import { shallow } from 'zustand/shallow'; // Hindari re-render yang tidak perlu
+import { SortingState } from '@tanstack/react-table';
 
 interface ThemeStoreState {
   theme: string;
@@ -55,17 +55,21 @@ export const useThemeStore = create<ThemeStoreState>()(
 
 interface PageState {
   currentPage: number;
+  sorting: SortingState;
   setCurrentPage: (page: number) => void;
+  setSorting: (sorting: SortingState) => void;
 }
 export const usePageStore = create<PageState>()(
   persist(
     (set) => ({
       currentPage: 1,
+      sorting: [],
       setCurrentPage: (page) => set({ currentPage: page }),
+      setSorting: (sorting) => set({ sorting }),
     }),
     {
-      name: 'page-store', // Nama kunci di localStorage
-      storage: createJSONStorage(() => localStorage), // Gunakan localStorage
+      name: 'page-store',
+      storage: createJSONStorage(() => localStorage),
     }
   )
 );

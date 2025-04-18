@@ -33,6 +33,7 @@ export const columns: ColumnDef<SalesInvoiceHdColumns>[] = [
       </Link>
     ),
     enableHiding: false,
+    enableSorting: true, // pastikan ini ada
   },
   {
     accessorKey: 'invoiceDate',
@@ -44,7 +45,7 @@ export const columns: ColumnDef<SalesInvoiceHdColumns>[] = [
       const formattedDate =
         rawDate instanceof Date
           ? format(rawDate, 'dd/MM/yyyy')
-          : format(new Date(rawDate as string | number), 'dd/MM/yyyy'); // jaga-jaga kalau masih dalam bentuk string
+          : format(new Date(rawDate as string | number), 'dd/MM/yyyy');
 
       return (
         <Link
@@ -55,6 +56,7 @@ export const columns: ColumnDef<SalesInvoiceHdColumns>[] = [
         </Link>
       );
     },
+    enableSorting: true, // pastikan ini ada
     enableHiding: false,
   },
 
@@ -137,6 +139,9 @@ export const columns: ColumnDef<SalesInvoiceHdColumns>[] = [
           </span>
         </div>
       );
+    },
+    filterFn: (row, id, value: string) => {
+      return value.includes(row.getValue(id));
     },
   },
   {

@@ -10,14 +10,18 @@ import { SalesInvoiceHdColumns } from './list-table/components/columns';
 import { usePageStore } from '@/store';
 
 const InvoiceHdListPage = () => {
-  const { currentPage } = usePageStore();
+  const { currentPage, sorting, setSorting } = usePageStore();
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
-  const [invoiceType, setInvoiceType] = useState<string | null>(null);
+  const sort = sorting?.[0]; // Ambil kolom pertama (karena TanStack Table hanya mengirim array)
+  const orderBy = sort?.id ?? 'invoiceDate';
+  const orderDir = sort?.desc ? 'desc' : 'asc';
 
   const { data, total, isFetching, error } = useSalesInvoiceHd({
     page: currentPage,
     limit,
+    orderBy,
+    orderDir,
   });
 
   if (isFetching && !data) {

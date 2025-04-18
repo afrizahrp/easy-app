@@ -13,11 +13,13 @@ interface SalesInvoiceHdResponse {
   totalRecords: number;
 }
 
-interface UseCategoryParams {
+interface UseSalesInvoiceHdParams {
   page: number;
   limit: number;
   searchBy?: string;
   searchTerm?: string;
+  orderBy?: string;
+  orderDir?: 'asc' | 'desc';
 }
 
 const useSalesInvoiceHd = ({
@@ -25,7 +27,9 @@ const useSalesInvoiceHd = ({
   limit,
   searchBy,
   searchTerm,
-}: UseCategoryParams) => {
+  orderBy,
+  orderDir,
+}: UseSalesInvoiceHdParams) => {
   const user = useSessionStore((state) => state.user);
   const company_id = user?.company_id;
   const module_id = 'SLS';
@@ -86,6 +90,8 @@ const useSalesInvoiceHd = ({
       salesPersonName,
       searchBy,
       searchTerm,
+      orderBy,
+      orderDir,
     ],
     queryFn: async () => {
       if (!isValidRequest) {
@@ -93,7 +99,7 @@ const useSalesInvoiceHd = ({
       }
 
       const filteredParams = buildFilteredParams(
-        { page, limit, ...searchParams },
+        { page, limit, orderBy, orderDir, ...searchParams },
         { status, salesPersonName, searchBy, searchTerm }
       );
 
