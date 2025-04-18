@@ -1,6 +1,7 @@
 'use client';
 import { DataTable } from '@/components/ui/data-table';
 import { SalesInvoiceHdColumns, columns } from './components/columns';
+import { SortingState } from '@tanstack/react-table';
 
 interface SalesInvoiceHdProps {
   data: SalesInvoiceHdColumns[];
@@ -10,6 +11,11 @@ interface SalesInvoiceHdProps {
   onPageChange: (page: number) => void;
   limit: number;
   setLimit: (limit: number) => void;
+  sorting: SortingState; // Tambah props
+
+  setSorting: (
+    sorting: SortingState | ((old: SortingState) => SortingState)
+  ) => void; // Perbaiki tipe
 }
 
 export const InvoiceListTable: React.FC<SalesInvoiceHdProps> = ({
@@ -20,6 +26,8 @@ export const InvoiceListTable: React.FC<SalesInvoiceHdProps> = ({
   onPageChange,
   limit,
   setLimit,
+  sorting,
+  setSorting,
 }) => {
   return (
     <div>
@@ -37,6 +45,8 @@ export const InvoiceListTable: React.FC<SalesInvoiceHdProps> = ({
         onPageChange={onPageChange}
         limit={limit}
         setLimit={setLimit}
+        sorting={sorting} // Pass sorting
+        setSorting={setSorting} // Pass setSorting
       />
     </div>
   );

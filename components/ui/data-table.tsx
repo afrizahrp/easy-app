@@ -41,6 +41,14 @@ interface DataTableProps<TData, TValue> {
   onPageChange: (page: number) => void;
   limit: number;
   setLimit: (limit: number) => void;
+  sorting: SortingState; // Tambah prop
+  // setSorting: (
+  //   sorting: SortingState | ((old: SortingState) => SortingState)
+  // ) => void; // Tambah prop
+
+  setSorting: (
+    sorting: SortingState | ((old: SortingState) => SortingState)
+  ) => void;
 }
 
 export function DataTable<TData, TValue>({
@@ -57,6 +65,8 @@ export function DataTable<TData, TValue>({
   onPageChange,
   limit,
   setLimit,
+  sorting, // Gunakan dari props
+  setSorting, // Gunakan dari props
 }: DataTableProps<TData, TValue>) {
   const [rowSelection, setRowSelection] = React.useState({});
   const [columnVisibility, setColumnVisibility] =
@@ -65,7 +75,7 @@ export function DataTable<TData, TValue>({
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
   );
-  const [sorting, setSorting] = React.useState<SortingState>([]);
+  // const [sorting, setSorting] = React.useState<SortingState>([]);
 
   // const [sorting, setSorting] = React.useState<SortingState>([]);
 
@@ -73,6 +83,9 @@ export function DataTable<TData, TValue>({
   const handleSheetOpen = () => {
     setOpen(!open);
   };
+
+  // console.log('DataTable sorting:', sorting); // Debug
+  // console.log('DataTable setSorting:', setSorting); // Debug
 
   const table = useReactTable({
     data,
@@ -88,6 +101,11 @@ export function DataTable<TData, TValue>({
     enableRowSelection: true,
     onRowSelectionChange: setRowSelection,
     onSortingChange: setSorting,
+
+    // onSortingChange: (updater) => {
+    //   console.log('onSortingChange:', updater);
+    //   setSorting(updater);
+    // },
     onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
     getCoreRowModel: getCoreRowModel(),
@@ -96,6 +114,7 @@ export function DataTable<TData, TValue>({
     getSortedRowModel: getSortedRowModel(),
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
+
     manualSorting: true, // <- penting jika sorting dikirim ke backend
   });
 

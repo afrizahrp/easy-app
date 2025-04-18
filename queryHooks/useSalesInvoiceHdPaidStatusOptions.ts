@@ -6,18 +6,14 @@ interface OptionType {
   count: number;
 }
 
-// export default function useSalesInvoiceHdStatusOptions(
-//   statusCounts?: Record<string, number>
-// ) {
-
 export default function useSalesInvoiceHdStatusOptions() {
   const { data: statusData, isLoading } = useSalesInvoiceHdPaidStatus();
 
   const options =
     statusData?.map((status) => ({
       value: status.id, // Sesuaikan dengan format API
-      label: status.name, //(${status.count})`, // Menampilkan count dari API
-      // count: Number(status.count), // Pastikan count dalam bentuk number
+      label: status.name, // Tambahkan count dengan pemisah ribuan di label
+      count: Number(status.count), // Pastikan count tetap number
     })) || [];
 
   return { options, isLoading };

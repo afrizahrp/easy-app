@@ -3,12 +3,18 @@ import { cn } from '@/lib/utils';
 import { ColumnDef } from '@tanstack/react-table';
 import { DataTableColumnHeader } from '@/components/ui/data-table-column-header';
 import { format } from 'date-fns';
-
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'; // Impor Tooltip
 import { getStatusColor } from '@/utils/statusUils';
 
 import Link from 'next/link';
 
 export type SalesInvoiceHdColumns = {
+  po_id: string;
   invoiceDate: Date;
   invoice_id: string;
   customerName: string;
@@ -19,10 +25,27 @@ export type SalesInvoiceHdColumns = {
 };
 
 export const columns: ColumnDef<SalesInvoiceHdColumns>[] = [
+  // {
+  //   accessorKey: 'po_id',
+  //   header: ({ column }) => (
+  //     <DataTableColumnHeader column={column} title='Po Id.' />
+  //   ),
+  //   cell: ({ row }) => (
+  //     <Link
+  //       href={`/inventory/categories/${row.getValue('po_id')}`}
+  //       className='text-primary-600 dark:text-primary-400'
+  //     >
+  //       {row.getValue('po_id')}
+  //     </Link>
+  //   ),
+  //   enableHiding: false,
+  //   enableSorting: true, // pastikan ini ada
+  // },
+
   {
     accessorKey: 'invoice_id',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Id' />
+      <DataTableColumnHeader column={column} title='Invoice Id.' />
     ),
     cell: ({ row }) => (
       <Link
@@ -73,12 +96,42 @@ export const columns: ColumnDef<SalesInvoiceHdColumns>[] = [
           : customerName;
 
       return (
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className='flex space-x-1'>
+                <span className={cn('max-w-[450px] truncate font-xs')}>
+                  {displayName}
+                </span>
+              </div>
+            </TooltipTrigger>
+            {customerName.length > 30 && (
+              <TooltipContent>
+                <p>{customerName}</p>
+              </TooltipContent>
+            )}
+          </Tooltip>
+        </TooltipProvider>
+      );
+    },
+  },
+
+  {
+    accessorKey: 'salesPersonName',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title='Sales Person' />
+    ),
+    cell: ({ row }) => {
+      return (
         <div className='flex space-x-1'>
           <span className={cn('max-w-[450px] truncate font-sm')}>
-            {displayName}
+            {row.getValue('salesPersonName')}
           </span>
         </div>
       );
+    },
+    filterFn: (row, id, value: string) => {
+      return value.includes(row.getValue(id));
     },
   },
 
@@ -126,40 +179,40 @@ export const columns: ColumnDef<SalesInvoiceHdColumns>[] = [
       return value.includes(row.getValue(id));
     },
   },
-  {
-    accessorKey: 'salesPersonName',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Sales Person' />
-    ),
-    cell: ({ row }) => {
-      return (
-        <div className='flex space-x-1'>
-          <span className={cn('max-w-[450px] truncate font-sm')}>
-            {row.getValue('salesPersonName')}
-          </span>
-        </div>
-      );
-    },
-    filterFn: (row, id, value: string) => {
-      return value.includes(row.getValue(id));
-    },
-  },
-  {
-    accessorKey: 'invoiceType',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Type' />
-    ),
-    cell: ({ row }) => {
-      return (
-        <div className='flex space-x-1'>
-          <span className={cn('max-w-[450px] truncate font-sm')}>
-            {row.getValue('invoiceType')}
-          </span>
-        </div>
-      );
-    },
-    filterFn: (row, id, value) => {
-      return value.includes(row.getValue(id));
-    },
-  },
+  // {
+  //   accessorKey: 'salesPersonName',
+  //   header: ({ column }) => (
+  //     <DataTableColumnHeader column={column} title='Sales Person' />
+  //   ),
+  //   cell: ({ row }) => {
+  //     return (
+  //       <div className='flex space-x-1'>
+  //         <span className={cn('max-w-[450px] truncate font-sm')}>
+  //           {row.getValue('salesPersonName')}
+  //         </span>
+  //       </div>
+  //     );
+  //   },
+  //   filterFn: (row, id, value: string) => {
+  //     return value.includes(row.getValue(id));
+  //   },
+  // },
+  // {
+  //   accessorKey: 'invoiceType',
+  //   header: ({ column }) => (
+  //     <DataTableColumnHeader column={column} title='Type' />
+  //   ),
+  //   cell: ({ row }) => {
+  //     return (
+  //       <div className='flex space-x-1'>
+  //         <span className={cn('max-w-[450px] truncate font-sm')}>
+  //           {row.getValue('invoiceType')}
+  //         </span>
+  //       </div>
+  //     );
+  //   },
+  //   filterFn: (row, id, value) => {
+  //     return value.includes(row.getValue(id));
+  //   },
+  // },
 ];

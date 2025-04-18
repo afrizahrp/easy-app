@@ -56,16 +56,42 @@ export const useThemeStore = create<ThemeStoreState>()(
 interface PageState {
   currentPage: number;
   sorting: SortingState;
+  limit: number; // Tambah limit
   setCurrentPage: (page: number) => void;
-  setSorting: (sorting: SortingState) => void;
+  setSorting: (
+    sorting: SortingState | ((old: SortingState) => SortingState)
+  ) => void;
+  setLimit: (limit: number) => void; // Tambah setLimit
 }
+
 export const usePageStore = create<PageState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       currentPage: 1,
       sorting: [],
-      setCurrentPage: (page) => set({ currentPage: page }),
-      setSorting: (sorting) => set({ sorting }),
+      limit: 10,
+      setCurrentPage: (page) => {
+        // console.log('usePageStore: Setting currentPage:', page); // Debug
+        set({ currentPage: page });
+      },
+      setSorting: (updater) => {
+        // console.log('usePageStore: Before setSorting:', get().sorting);
+        // console.log('usePageStore: Updater:', updater);
+        const newSorting =
+          typeof updater === 'function' ? updater(get().sorting) : updater;
+        // console.log('usePageStore: New sorting:', newSorting);
+        set({ sorting: newSorting });
+        // console.log('usePageStore: After setSorting:', get().sorting);
+      },
+      setLimit: (limit) => {
+        // console.log('usePageStore: Setting limit:', limit); // Debug
+        if ([5, 10, 20].includes(limit)) {
+          // console.log('usePageStore: Valid limit, updating state to:', limit); // Debug
+          set({ limit, currentPage: 1 });
+        } else {
+          console.warn('usePageStore: Invalid limit value:', limit);
+        }
+      },
     }),
     {
       name: 'page-store',

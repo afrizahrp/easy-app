@@ -5,12 +5,11 @@ import {
   useModuleStore,
   useSalesInvoiceHdFilterStore,
 } from '@/store';
-import { log } from 'console';
 
 interface SalesInvoiceHdSalesPerson {
   id: string;
   name: string;
-  count: number; // ✅ Ubah ke number agar mudah diproses
+  count: number;
 }
 
 interface SalesInvoiceHdSalesPersonResponse {
@@ -21,9 +20,10 @@ export const useSalesInvoiceHdSalesPerson = () => {
   const user = useSessionStore((state) => state.user);
   const company_id = user?.company_id;
   const module_id = useModuleStore((state) => state.moduleId);
-  const salesPersonName = useSalesInvoiceHdFilterStore(
-    (state: { salesPersonName: string[] }) => state.salesPersonName
-  );
+  const { salesPersonName, status } = useSalesInvoiceHdFilterStore((state) => ({
+    salesPersonName: state.salesPersonName,
+    status: state.status, // Ambil status (paidStatus) dari store
+  }));
 
   const isEnabled = !!company_id && !!module_id;
 
@@ -31,15 +31,32 @@ export const useSalesInvoiceHdSalesPerson = () => {
     SalesInvoiceHdSalesPersonResponse,
     Error
   >({
-    queryKey: ['salesPersonName', company_id, module_id, salesPersonName],
+    queryKey: [
+      'salesPersonName',
+      company_id,
+      module_id,
+      salesPersonName,
+      status,
+    ], // Tambahkan status ke queryKey
     queryFn: async () => {
+      // Bangun URL dengan parameter salesPersonName dan paidStatus
+      const params = new URLSearchParams();
+      if (salesPersonName?.length) {
+        params.append('salesPersonName', salesPersonName.join(','));
+      }
+      if (status?.length) {
+        params.append('paidStatus', status.join(',')); // Tambahkan paidStatus ke query
+      }
+
       const url = `${process.env.NEXT_PUBLIC_API_URL}/${company_id}/${module_id}/get-invoiceHd/salesPersonName${
-        salesPersonName
-          ? `?salesPersonName=${encodeURIComponent(salesPersonName.join(','))}`
-          : ''
+        params.toString() ? `?${params.toString()}` : ''
       }`;
 
+      console.log('useSalesInvoiceHdSalesPerson: Fetching URL:', url); // Debug URL
+
       const response = await api.get<SalesInvoiceHdSalesPersonResponse>(url);
+
+      console.log('useSalesInvoiceHdSalesPerson: Response:', response.data); // Log the response data
 
       return response.data;
     },

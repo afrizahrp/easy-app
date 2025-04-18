@@ -15,6 +15,7 @@ export type Category = {
 };
 
 export type SalesInvoiceHd = {
+  po_id?: string;
   PoType: string;
   invoiceType: string;
   invoice_id: string;

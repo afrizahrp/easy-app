@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { Cross2Icon } from '@radix-ui/react-icons';
 import { Table } from '@tanstack/react-table';
 
@@ -8,9 +8,7 @@ import useSalesInvoiceHdSalesPersonOptions from '@/queryHooks/useSalesInvoiceHdS
 
 import { Button } from '@/components/ui/button';
 import { DataTableFacetedFilter } from '@/components/ui/data-table-faceted-filter';
-import { useSalesInvoiceHdFilterStore } from '@/store'; // ✅ Gunakan Zustand Store
-// import { CustomDatePicker } from '../ui/custom-date-picker';
-// import { MonthYearPickerRange } from '@/components/ui/monthYearPickerRange';
+import { useSalesInvoiceHdFilterStore } from '@/store';
 
 interface SalesInvoiceFilterSidebarProps<TData> {
   table: Table<TData>;
@@ -22,39 +20,26 @@ export function SalesInvoiceFilterSidebar<TData>({
   const { status, setStatus, salesPersonName, setSalesPersonName } =
     useSalesInvoiceHdFilterStore();
 
-  const [range, setRange] = useState<{ from?: Date; to?: Date }>({});
-
-  // useEffect(() => {
-  //   table
-  //     .getColumn('paidStatus')
-  //     ?.setFilterValue(status.length ? status : undefined);
-  //   table
-  //     .getColumn('salesPersonName')
-  //     ?.setFilterValue(salesPersonName.length ? salesPersonName : undefined);
-  // }, [status, salesPersonName, table]);
-
   useEffect(() => {
-    console.log('salesPersonName filter', salesPersonName);
+    console.log('SalesInvoiceFilterSidebar: Current status:', status);
+    console.log(
+      'SalesInvoiceFilterSidebar: Current salesPersonName:',
+      salesPersonName
+    );
 
     table
       .getColumn('paidStatus')
       ?.setFilterValue(status.length ? status : undefined);
-  }, [status, table]);
-
-  useEffect(() => {
     table
       .getColumn('salesPersonName')
       ?.setFilterValue(salesPersonName.length ? salesPersonName : undefined);
-  }, [salesPersonName, table]);
+  }, [status, salesPersonName, table]);
 
   const { options: statusOptionList, isLoading: isStatusLoading } =
     useSalesInvoiceHdPaidStatusOptions();
 
   const { options: salesPersonOptionList, isLoading: isSalesPersonLoading } =
     useSalesInvoiceHdSalesPersonOptions();
-
-  // const { typeOptions: typeOptionList, isLoading: isTypeLoading } =
-  //   useSalesInvoiceHdTypeOptions();
 
   return (
     <div className='flex items-center justify-end py-2'>
@@ -74,12 +59,11 @@ export function SalesInvoiceFilterSidebar<TData>({
                     ? updatedValues.delete(value)
                     : updatedValues.add(value)
                   : updatedValues.clear();
+                console.log(
+                  'SalesInvoiceFilterSidebar: Setting status:',
+                  Array.from(updatedValues)
+                );
                 setStatus(Array.from(updatedValues));
-                table
-                  .getColumn('paidStatus')
-                  ?.setFilterValue(
-                    updatedValues.size ? Array.from(updatedValues) : undefined
-                  );
               }}
             />
           )}
@@ -99,12 +83,11 @@ export function SalesInvoiceFilterSidebar<TData>({
                     ? updatedValues.delete(value)
                     : updatedValues.add(value)
                   : updatedValues.clear();
+                console.log(
+                  'SalesInvoiceFilterSidebar: Setting salesPersonName:',
+                  Array.from(updatedValues)
+                );
                 setSalesPersonName(Array.from(updatedValues));
-                table
-                  .getColumn('salesPersonName')
-                  ?.setFilterValue(
-                    updatedValues.size ? Array.from(updatedValues) : undefined
-                  );
               }}
             />
           )}
@@ -116,7 +99,6 @@ export function SalesInvoiceFilterSidebar<TData>({
               table.resetColumnFilters();
               setStatus([]);
               setSalesPersonName([]);
-              // setInvoiceType([]);
             }}
             className='h-10 px-2 lg:px-3 w-full mb-5'
           >

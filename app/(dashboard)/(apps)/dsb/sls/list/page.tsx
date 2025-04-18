@@ -10,10 +10,13 @@ import { SalesInvoiceHdColumns } from './list-table/components/columns';
 import { usePageStore } from '@/store';
 
 const InvoiceHdListPage = () => {
-  const { currentPage, sorting, setSorting } = usePageStore();
+  // const { currentPage, sorting, setCurrentPage, setSorting } = usePageStore();
+  const { currentPage, sorting, limit, setCurrentPage, setSorting, setLimit } =
+    usePageStore();
   const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(10);
-  const sort = sorting?.[0]; // Ambil kolom pertama (karena TanStack Table hanya mengirim array)
+
+  // const limit = 10;
+  const sort = sorting?.[0];
   const orderBy = sort?.id ?? 'invoiceDate';
   const orderDir = sort?.desc ? 'desc' : 'asc';
 
@@ -38,6 +41,7 @@ const InvoiceHdListPage = () => {
 
   const formattedInvoiceHd: SalesInvoiceHdColumns[] =
     data?.map((item) => ({
+      po_id: item.po_id ?? '',
       invoiceDate: item.invoiceDate,
       invoice_id: item.invoice_id.trim(),
       customerName: item.customerName.trim(),
@@ -61,12 +65,16 @@ const InvoiceHdListPage = () => {
           <CardContent className='p-10'>
             <InvoiceListTable
               data={formattedInvoiceHd}
+              // currentPage={currentPage}
               currentPage={page}
               totalPages={Math.ceil((total ?? 0) / limit)}
               totalRecords={total}
+              // onPageChange={setCurrentPage}
               onPageChange={setPage}
               limit={limit}
-              setLimit={setLimit}
+              setLimit={() => {}}
+              sorting={sorting}
+              setSorting={setSorting}
             />
           </CardContent>
         </Card>

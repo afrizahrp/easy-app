@@ -117,7 +117,9 @@ export function DataTableFacetedFilter<TData, TValue>({
                     </div>
                     <span>{option.label}</span>
                     {option.count !== undefined && (
-                      <span className='ml-auto text-xs'>{option.count}</span>
+                      <span className='ml-auto text-xs'>
+                        {option.count.toLocaleString('id-ID')}{' '}
+                      </span>
                     )}
                   </CommandItem>
                 );
