@@ -188,7 +188,7 @@ export function DataTable<TData, TValue>({
 
         <div className='flex justify-between items-center mt-4'>
           <div className='text-xs text-muted-foreground'>
-            Total data: {totalRecords}
+            Total data: {(totalRecords ?? 0).toLocaleString('id-ID')}
           </div>
 
           <div className='ml-auto'>

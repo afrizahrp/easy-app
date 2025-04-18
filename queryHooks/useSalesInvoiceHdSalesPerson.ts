@@ -18,8 +18,9 @@ interface SalesInvoiceHdSalesPersonResponse {
 
 export const useSalesInvoiceHdSalesPerson = () => {
   const user = useSessionStore((state) => state.user);
-  const company_id = user?.company_id;
-  const module_id = useModuleStore((state) => state.moduleId);
+  const company_id = user?.company_id.toLocaleUpperCase(); // Pastikan company_id dalam huruf besar
+  // const module_id = useModuleStore((state) => state.moduleId);
+  const module_id = 'SLS'; // Hardcode module_id untuk Sales Invoice
   const { salesPersonName, status } = useSalesInvoiceHdFilterStore((state) => ({
     salesPersonName: state.salesPersonName,
     status: state.status, // Ambil status (paidStatus) dari store

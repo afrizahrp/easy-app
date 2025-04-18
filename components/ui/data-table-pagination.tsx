@@ -115,10 +115,10 @@ export function DataTablePagination<TData>({
             onPageSizeChange={(value) => table.setPageSize(value)}
           />
 
-          <p className='mt-2 sm:mt-0 whitespace-nowrap text-muted-foreground'>
-            Page {currentPage} of {totalPagesState}{' '}
-            {totalPagesState === 1 ? 'Page' : 'Pages'}
-          </p>
+          {/* <p className='mt-2 sm:mt-0 whitespace-nowrap text-muted-foreground'>
+            Page {currentPage} of {totalPagesState.toLocaleString('id-ID')}
+            {totalPagesState === 1 ? ' page' : ' pages'}
+          </p> */}
         </div>
         <div className='flex items-center space-x-2'>
           <Button

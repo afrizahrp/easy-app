@@ -157,13 +157,12 @@ interface UserSession {
   role_id: string;
   image: string;
   email: string;
-  // id: string;
-  // branch_id: string;
 }
 
 interface SessionStoreState {
   user: UserSession | null;
   setUser: (user: UserSession) => void;
+  updateCompanyId: (companyId: string) => void; // Tambahkan fungsi ini
   logout: () => void;
 }
 
@@ -172,6 +171,10 @@ export const useSessionStore = create<SessionStoreState>()(
     (set) => ({
       user: null,
       setUser: (user) => set({ user }),
+      updateCompanyId: (companyId) =>
+        set((state) => ({
+          user: state.user ? { ...state.user, company_id: companyId } : null,
+        })),
       logout: () => set({ user: null }),
     }),
     {

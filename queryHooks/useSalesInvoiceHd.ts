@@ -31,7 +31,7 @@ const useSalesInvoiceHd = ({
   orderDir,
 }: UseSalesInvoiceHdParams) => {
   const user = useSessionStore((state) => state.user);
-  const company_id = user?.company_id;
+  const company_id = user?.company_id.toLocaleUpperCase(); // Pastikan company_id dalam huruf besar
   const module_id = 'SLS';
 
   const searchParams = useSearchParamsStore((state) => state.searchParams);
