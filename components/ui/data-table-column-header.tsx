@@ -19,19 +19,29 @@ interface DataTableColumnHeaderProps<TData, TValue>
   extends React.HTMLAttributes<HTMLDivElement> {
   column: Column<TData, TValue>;
   title: string;
+  align?: 'left' | 'center' | 'right';
 }
 
 export function DataTableColumnHeader<TData, TValue>({
   column,
   title,
   className,
+  align = 'left'
 }: DataTableColumnHeaderProps<TData, TValue>) {
   if (!column.getCanSort()) {
     return <div className={cn(className)}>{title}</div>;
   }
 
   return (
-    <div className={cn('flex items-center space-x-2', className)}>
+    <div
+      className={cn(
+        'flex items-center space-x-2',
+        align === 'right' && 'justify-end',
+        align === 'center' && 'justify-center',
+        align === 'left' && 'justify-start',
+        className
+      )}
+    >
       <span>{title}</span>
       {column.getIsSorted() === 'asc' ? (
         <ArrowUpIcon className='ml-2 h-4 w-4' />
@@ -45,35 +55,16 @@ export function DataTableColumnHeader<TData, TValue>({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align='start'>
-          <DropdownMenuItem
-            onClick={() => {
-              console.log('Sorting ascending:', column.id); // Debug
-              column.toggleSorting(false); // Ascending
-            }}
-          >
+          <DropdownMenuItem onClick={() => column.toggleSorting(false)}>
             Asc
           </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={() => {
-              console.log('Sorting descending:', column.id); // Debug
-              column.toggleSorting(true); // Descending
-            }}
-          >
+          <DropdownMenuItem onClick={() => column.toggleSorting(true)}>
             Desc
           </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={() => {
-              console.log('Clear sorting:', column.id); // Debug
-              column.clearSorting(); // Clear sorting
-            }}
-          >
+          <DropdownMenuItem onClick={() => column.clearSorting()}>
             Clear Sort
           </DropdownMenuItem>
           <DropdownMenuSeparator />
-          {/* <DropdownMenuItem onClick={() => column.toggleVisibility(false)}>
-            <EyeNoneIcon className="mr-2 h-3.5 w-3.5 text-muted-foreground/70" />
-            Hide
-          </DropdownMenuItem> */}
         </DropdownMenuContent>
       </DropdownMenu>
     </div>

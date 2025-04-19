@@ -12,29 +12,29 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
-// import { DataTableColumnHeader } from '@/components/ui/data-table-column-header';
 
 interface DataTableViewOptionsProps<TData> {
   table: Table<TData>;
+  columnLabels?: Record<string, string>;
 }
 
-// function toggleColumnVisibility(headerTitle: string) {
-//   const column = table.getColumn(headerTitle);
-//   column.toggleVisibility();
-// }
+// const columnLabels: Record<string, string> = {
+//   customerName: 'Customer',
+//   salesPersonName: 'Sales Person',
+//   invoiceNo: 'Invoice No',
+//   invoiceDate: 'Invoice Date',
+//   totalAmount: 'Total Amount',
+//   // Tambahkan sesuai kebutuhan
+// };
 
 export function DataTableViewOptions<TData>({
   table,
+  columnLabels,
 }: DataTableViewOptionsProps<TData>) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button
-          size='sm'
-          // variant='outline'
-          // className='ml-auto hidden h-8 lg:flex'
-          className='ml-auto mx-2 my-1 px-5 h-8 lg:flex'
-        >
+        <Button size='sm' className='ml-auto mx-2 my-1 px-5 h-8 lg:flex'>
           <MixerHorizontalIcon className='mr-2 h-4 w-4 flex' />
           Show Columns
         </Button>
@@ -44,12 +44,10 @@ export function DataTableViewOptions<TData>({
         <DropdownMenuSeparator />
         {table
           .getAllColumns()
-
           .filter(
             (column) =>
               typeof column.accessorFn !== 'undefined' && column.getCanHide()
           )
-
           .map((column) => {
             return (
               <DropdownMenuCheckboxItem
@@ -59,7 +57,7 @@ export function DataTableViewOptions<TData>({
                 checked={column.getIsVisible()}
                 onCheckedChange={(value) => column.toggleVisibility(!!value)}
               >
-                {column.id}
+                {columnLabels?.[column.id] ?? column.id}
               </DropdownMenuCheckboxItem>
             );
           })}

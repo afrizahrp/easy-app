@@ -1,0 +1,34 @@
+/* Hapus padding dan border default react-datepicker */
+.react-datepicker {
+  border: none;
+  font-family: inherit;
+}
+
+/* Ubah layout bulan menjadi grid 3 kolom */
+.react-datepicker__month-wrapper {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+  padding: 0 0.5rem;
+}
+
+/* Style item bulan */
+.react-datepicker__month-text {
+  padding: 0.5rem 0;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  text-align: center;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+/* Hover dan selected */
+.react-datepicker__month-text:hover {
+  background-color: #f3f4f6; /* Tailwind: gray-100 */
+}
+
+.react-datepicker__month-text--keyboard-selected,
+.react-datepicker__month-text--selected {
+  background-color: #000;
+  color: white;
+}

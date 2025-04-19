@@ -6,18 +6,21 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
-const options = [
-  { value: 'invoice_id', label: 'Invoice ID' },
-  { value: 'customerName', label: 'Customer Name' },
-];
+import { SearchOptionItem } from '@/types';
+
+interface SearchOptionProps {
+  value: string;
+  onChange: (value: string) => void;
+  options: SearchOptionItem[];
+  placeholder?: string;
+}
 
 export function SearchOption({
   value,
   onChange,
-}: {
-  value: string;
-  onChange: (value: string) => void;
-}) {
+  options,
+  placeholder = 'Search by',
+}: SearchOptionProps) {
   return (
     <Select value={value} onValueChange={onChange}>
       <SelectTrigger className='w-[180px]' title='Select search field'>

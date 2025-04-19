@@ -1,3 +1,5 @@
+// DataTableToolbar.tsx
+
 import { Table } from '@tanstack/react-table';
 import { Button } from '@/components/ui/button';
 import { Filter, Plus } from 'lucide-react';
@@ -6,53 +8,43 @@ import { DataTableViewOptions } from '@/components/ui/data-table-view-options';
 import SearchInput from '@/components/ui/seacrh-Input';
 import FilterSidebar from './filter-sidebar';
 import { SearchOption } from './search-Option';
-import { useState } from 'react';
 import { useSearchParamsStore } from '@/store';
-
-// import {
-//   Select,
-//   SelectTrigger,
-//   SelectValue,
-//   SelectContent,
-//   SelectItem,
-// } from '@/components/ui/select';
-// import PageSizeSelector from './pageSize-selector';
 
 interface DataTableToolbarProps<TData> {
   table: Table<TData>;
   href: string;
   hrefText?: string;
-  searchTerm: string;
-  // setSearchTerm?: (searchTerm: string) => void;
   placeholder?: string;
   onFilterClick: () => void;
   limit: number;
   setLimit: (limit: number) => void;
+  columnLabels?: Record<string, string>;
+  searchOptionItem: Record<string, string>;
+  open: boolean;
+  handleSheetOpen: () => void;
+  pageName?: string;
+}
+
+function toSearchOptionArray(options: Record<string, string>) {
+  return Object.entries(options).map(([value, label]) => ({ value, label }));
 }
 
 export function DataTableToolbar<TData>({
   table,
   href,
   hrefText,
-  searchTerm,
-  // setSearchTerm,
   placeholder,
-
   onFilterClick,
-  limit,
-  setLimit,
   open,
   handleSheetOpen,
   pageName,
-}: DataTableToolbarProps<TData> & {
-  open: boolean;
-  handleSheetOpen: () => void;
-  pageName?: string;
-}) {
-  const { searchParams, setSearchBy, setSearchParam } = useSearchParamsStore();
-
+  columnLabels,
+  searchOptionItem,
+}: DataTableToolbarProps<TData>) {
+  const { searchParams, setSearchBy } = useSearchParamsStore();
   const searchBy = (searchParams.searchBy as string) || 'id';
-  const searchValue = (searchParams[searchBy] as string) || '';
+
+  const searchOptions = toSearchOptionArray(searchOptionItem);
 
   return (
     <div className='flex flex-wrap items-center gap-2 sm:gap-4 w-full'>
@@ -64,16 +56,17 @@ export function DataTableToolbar<TData>({
         pageName={pageName}
       />
 
+      {/* Search Option Selector */}
       <div className='flex items-center space-x-2'>
         <SearchOption
           value={searchBy}
-          onChange={(value) => {
-            setSearchBy(value); // ubah state lokal, bukan lewat column filter
-          }}
+          onChange={setSearchBy}
+          options={searchOptions}
+          placeholder='Search by'
         />
       </div>
 
-      {/* Pencarian */}
+      {/* Search Input */}
       <div className='flex-1 min-w-[200px]'>
         <SearchInput
           className='w-full'
@@ -81,13 +74,11 @@ export function DataTableToolbar<TData>({
           searchBy={searchBy}
         />
       </div>
-      {/* </div> */}
 
-      {/* Tombol Filter, View Options, dan Tambah Data */}
+      {/* Actions: Filter, View Options, Add */}
       <div className='flex flex-wrap items-center gap-2 ml-auto w-full sm:w-auto'>
         <Button
           size='sm'
-          // variant='outline'
           onClick={onFilterClick}
           className='px-3 h-8 flex items-center gap-1'
         >
@@ -95,7 +86,7 @@ export function DataTableToolbar<TData>({
           <span className='hidden sm:inline'>Filter data</span>
         </Button>
 
-        <DataTableViewOptions table={table} />
+        <DataTableViewOptions table={table} columnLabels={columnLabels} />
 
         {hrefText !== 'none' && (
           <Button

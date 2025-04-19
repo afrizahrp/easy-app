@@ -18,6 +18,20 @@ interface SalesInvoiceHdProps {
   ) => void; // Perbaiki tipe
 }
 
+const columnLabels = {
+  customerName: 'Customer',
+  salesPersonName: 'Sales Person',
+  invoiceNo: 'Invoice No',
+  invoiceDate: 'Invoice Date',
+  total_amount: 'Total Amount',
+  paidStatus: 'Paid Status',
+};
+
+const searchOptionItem = {
+  invoice_id: 'Invoice No',
+  customerName: 'Customer',
+};
+
 export const InvoiceListTable: React.FC<SalesInvoiceHdProps> = ({
   data,
   currentPage,
@@ -36,7 +50,6 @@ export const InvoiceListTable: React.FC<SalesInvoiceHdProps> = ({
         data={data}
         href='#' //{routes.inventory.newCategory}
         hrefText='none'
-        searchTerm='customerName'
         placeholder='Type here to search invoice by id or customer name...'
         pageName='salesInvoice'
         currentPage={currentPage}
@@ -47,6 +60,8 @@ export const InvoiceListTable: React.FC<SalesInvoiceHdProps> = ({
         setLimit={setLimit}
         sorting={sorting} // Pass sorting
         setSorting={setSorting} // Pass setSorting
+        columnLabels={columnLabels} // Pass columnLabels
+        searchOptionItem={searchOptionItem} // Pass searchOptionItem
       />
     </div>
   );

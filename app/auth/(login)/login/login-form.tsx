@@ -173,6 +173,7 @@ const LogInForm = () => {
                       value={field.value}
                       onChange={field.onChange}
                       onSelect={(company) => setSelectedCompany(company)} // Simpan data perusahaan yang dipilih
+                      placeholder='Select a Company'
                       className='w-full'
                     />
                   </FormControl>

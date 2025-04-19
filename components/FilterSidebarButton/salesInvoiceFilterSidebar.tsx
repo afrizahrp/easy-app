@@ -9,6 +9,7 @@ import useSalesInvoiceHdSalesPersonOptions from '@/queryHooks/useSalesInvoiceHdS
 import { Button } from '@/components/ui/button';
 import { DataTableFacetedFilter } from '@/components/ui/data-table-faceted-filter';
 import { useSalesInvoiceHdFilterStore } from '@/store';
+// import { MonthYearPicker } from '@/components/ui/monthYearPicker';
 
 interface SalesInvoiceFilterSidebarProps<TData> {
   table: Table<TData>;
@@ -44,6 +45,10 @@ export function SalesInvoiceFilterSidebar<TData>({
   return (
     <div className='flex items-center justify-end py-2'>
       <div className='flex flex-col items-center space-y-2 w-full'>
+        {/* <div className='w-full py-3'>
+          <MonthYearPicker />
+        </div> */}
+
         <div className='w-full py-3'>
           {table.getColumn('paidStatus') && (
             <DataTableFacetedFilter

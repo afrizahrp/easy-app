@@ -32,7 +32,6 @@ interface DataTableProps<TData, TValue> {
   data: TData[];
   href: string;
   hrefText?: string;
-  searchTerm: string;
   placeholder?: string;
   pageName?: string;
   currentPage: number;
@@ -42,13 +41,12 @@ interface DataTableProps<TData, TValue> {
   limit: number;
   setLimit: (limit: number) => void;
   sorting: SortingState; // Tambah prop
-  // setSorting: (
-  //   sorting: SortingState | ((old: SortingState) => SortingState)
-  // ) => void; // Tambah prop
 
   setSorting: (
     sorting: SortingState | ((old: SortingState) => SortingState)
   ) => void;
+  columnLabels?: Record<string, string>;
+  searchOptionItem: Record<string, string>;
 }
 
 export function DataTable<TData, TValue>({
@@ -56,7 +54,6 @@ export function DataTable<TData, TValue>({
   data,
   href,
   hrefText,
-  searchTerm,
   placeholder,
   pageName,
   currentPage,
@@ -67,6 +64,8 @@ export function DataTable<TData, TValue>({
   setLimit,
   sorting, // Gunakan dari props
   setSorting, // Gunakan dari props
+  columnLabels,
+  searchOptionItem,
 }: DataTableProps<TData, TValue>) {
   const [rowSelection, setRowSelection] = React.useState({});
   const [columnVisibility, setColumnVisibility] =
@@ -75,17 +74,11 @@ export function DataTable<TData, TValue>({
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
   );
-  // const [sorting, setSorting] = React.useState<SortingState>([]);
-
-  // const [sorting, setSorting] = React.useState<SortingState>([]);
 
   const [open, setOpen] = React.useState<boolean>(false);
   const handleSheetOpen = () => {
     setOpen(!open);
   };
-
-  // console.log('DataTable sorting:', sorting); // Debug
-  // console.log('DataTable setSorting:', setSorting); // Debug
 
   const table = useReactTable({
     data,
@@ -102,10 +95,6 @@ export function DataTable<TData, TValue>({
     onRowSelectionChange: setRowSelection,
     onSortingChange: setSorting,
 
-    // onSortingChange: (updater) => {
-    //   console.log('onSortingChange:', updater);
-    //   setSorting(updater);
-    // },
     onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
     getCoreRowModel: getCoreRowModel(),
@@ -125,7 +114,6 @@ export function DataTable<TData, TValue>({
           table={table}
           href={href}
           hrefText={hrefText}
-          searchTerm={searchTerm}
           placeholder={placeholder}
           onFilterClick={handleSheetOpen}
           limit={limit}
@@ -133,6 +121,8 @@ export function DataTable<TData, TValue>({
           open={open}
           handleSheetOpen={handleSheetOpen}
           pageName={pageName}
+          columnLabels={columnLabels} // Pass columnLabels ke DataTableToolbar
+          searchOptionItem={searchOptionItem} // Pass searchOptionItem ke DataTableToolbar
         />
 
         <div className='rounded-md border'>

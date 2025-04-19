@@ -50,7 +50,7 @@ const ProfileInfo = () => {
       companyName: company.label,
       companyLogo: company.companyLogo || '',
     });
-    console.log('Selected company:', company);
+    // console.log('Selected company:', company);
   };
 
   return (
@@ -104,6 +104,7 @@ const ProfileInfo = () => {
             onChange={handleCompanyChange} // Update company_id saat dipilih
             onSelect={handleCompanySelect} // Simpan informasi perusahaan
             disabled={!user} // Nonaktifkan jika user tidak ada
+            placeholder='Switch Company'
             className='w-full text-xs'
           />
         </div>

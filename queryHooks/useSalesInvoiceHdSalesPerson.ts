@@ -53,11 +53,7 @@ export const useSalesInvoiceHdSalesPerson = () => {
         params.toString() ? `?${params.toString()}` : ''
       }`;
 
-      console.log('useSalesInvoiceHdSalesPerson: Fetching URL:', url); // Debug URL
-
       const response = await api.get<SalesInvoiceHdSalesPersonResponse>(url);
-
-      console.log('useSalesInvoiceHdSalesPerson: Response:', response.data); // Log the response data
 
       return response.data;
     },

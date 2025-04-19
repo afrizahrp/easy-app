@@ -45,7 +45,7 @@ export const columns: ColumnDef<SalesInvoiceHdColumns>[] = [
   {
     accessorKey: 'invoice_id',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Invoice Id.' />
+      <DataTableColumnHeader column={column} title='Invoice No' />
     ),
     cell: ({ row }) => (
       <Link
@@ -56,7 +56,7 @@ export const columns: ColumnDef<SalesInvoiceHdColumns>[] = [
       </Link>
     ),
     enableHiding: false,
-    enableSorting: true, // pastikan ini ada
+    enableSorting: true,
   },
   {
     accessorKey: 'invoiceDate',
@@ -70,16 +70,9 @@ export const columns: ColumnDef<SalesInvoiceHdColumns>[] = [
           ? format(rawDate, 'dd/MM/yyyy')
           : format(new Date(rawDate as string | number), 'dd/MM/yyyy');
 
-      return (
-        <Link
-          href={`/inventory/categories/${row.getValue('invoice_id')}`}
-          className='text-primary-600 dark:text-primary-400'
-        >
-          {formattedDate}
-        </Link>
-      );
+      return formattedDate;
     },
-    enableSorting: true, // pastikan ini ada
+    enableSorting: true,
     enableHiding: false,
   },
 
@@ -89,10 +82,10 @@ export const columns: ColumnDef<SalesInvoiceHdColumns>[] = [
       <DataTableColumnHeader column={column} title='Customer' />
     ),
     cell: ({ row }) => {
-      const customerName = String(row.getValue('customerName'));
+      const customerName = String(row.getValue('customerName')).trim();
       const displayName =
-        customerName.length > 30
-          ? `${customerName.substring(0, 30)}...`
+        customerName.length > 36
+          ? `${customerName.substring(0, 36)}...`
           : customerName;
 
       return (
@@ -105,7 +98,7 @@ export const columns: ColumnDef<SalesInvoiceHdColumns>[] = [
                 </span>
               </div>
             </TooltipTrigger>
-            {customerName.length > 30 && (
+            {customerName.length > 36 && (
               <TooltipContent>
                 <p>{customerName}</p>
               </TooltipContent>
@@ -138,7 +131,11 @@ export const columns: ColumnDef<SalesInvoiceHdColumns>[] = [
   {
     accessorKey: 'total_amount',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Total' />
+      <DataTableColumnHeader
+        column={column}
+        title='Total Amount'
+        align='right'
+      />
     ),
     cell: ({ row }) => {
       const amount = row.getValue('total_amount');
@@ -156,8 +153,9 @@ export const columns: ColumnDef<SalesInvoiceHdColumns>[] = [
     header: ({ column }) => (
       <DataTableColumnHeader
         column={column}
-        title='Status'
+        title='Paid Status'
         className='text-black dark:text-slate-300'
+        align='right'
       />
     ),
     cell: ({ row }) => {

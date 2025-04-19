@@ -13,7 +13,7 @@ const InvoiceHdListPage = () => {
   // const { currentPage, sorting, setCurrentPage, setSorting } = usePageStore();
   const { currentPage, sorting, limit, setCurrentPage, setSorting, setLimit } =
     usePageStore();
-  const [page, setPage] = useState(1);
+  // const [page, setPage] = useState(1);
 
   // const limit = 10;
   const sort = sorting?.[0];
@@ -65,14 +65,12 @@ const InvoiceHdListPage = () => {
           <CardContent className='p-10'>
             <InvoiceListTable
               data={formattedInvoiceHd}
-              // currentPage={currentPage}
-              currentPage={page}
+              currentPage={currentPage}
               totalPages={Math.ceil((total ?? 0) / limit)}
               totalRecords={total}
-              // onPageChange={setCurrentPage}
-              onPageChange={setPage}
+              onPageChange={setCurrentPage}
               limit={limit}
-              setLimit={() => {}}
+              setLimit={setLimit}
               sorting={sorting}
               setSorting={setSorting}
             />

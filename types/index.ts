@@ -1,3 +1,8 @@
+export type SearchOptionItem = {
+  value: string;
+  label: string;
+};
+
 export type CategoryType = {
   id: string;
   name: string;
