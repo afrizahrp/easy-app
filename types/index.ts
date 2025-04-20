@@ -45,6 +45,29 @@ export type SalesInvoiceHd = {
   totalDelivery_amount?: number;
   total_amount: number;
   paidStatus: string;
+  company_id: string;
+};
+
+export type SalesInvoiceDt = {
+  invoice_id: string;
+  line_no: number;
+  acct_id: string;
+  description?: string;
+  product_id: string;
+  productName: string;
+  uom_id: string;
+  unitPrice?: number;
+  qty?: number;
+  sellingPrice?: number;
+  base_amount?: number;
+  discount_amount?: number;
+  tax_amount?: number;
+  delivery_amount?: number;
+  total_amount?: number;
+};
+
+export type SalesInvoiceDetailResponse = SalesInvoiceHd & {
+  details: SalesInvoiceDt[];
 };
 
 export type Billboard = {

@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { InvoiceListTable } from './list-table';
 import LayoutLoader from '@/components/layout-loader';
@@ -9,13 +9,9 @@ import useSalesInvoiceHd from '@/queryHooks/useSalesInvoiceHd';
 import { SalesInvoiceHdColumns } from './list-table/components/columns';
 import { usePageStore } from '@/store';
 
-const InvoiceHdListPage = () => {
-  // const { currentPage, sorting, setCurrentPage, setSorting } = usePageStore();
+const SalesInvoiceHdPage = () => {
   const { currentPage, sorting, limit, setCurrentPage, setSorting, setLimit } =
     usePageStore();
-  // const [page, setPage] = useState(1);
-
-  // const limit = 10;
   const sort = sorting?.[0];
   const orderBy = sort?.id ?? 'invoiceDate';
   const orderDir = sort?.desc ? 'desc' : 'asc';
@@ -81,4 +77,4 @@ const InvoiceHdListPage = () => {
   );
 };
 
-export default InvoiceHdListPage;
+export default SalesInvoiceHdPage;

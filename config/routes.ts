@@ -1,7 +1,7 @@
 export const routes = {
   dashboard: {
     dashboard: '/dashboard',
-    sales: '/dsb/sls/list',
+    sales: '/dsb/sls/invoice-hd/list',
     createProduct: '/dashboard/products/create',
     productDetails: (slug: string) => `/dashboard/products/${slug}`,
     ediProduct: (slug: string) => `/dashboard/products/${slug}/edit`,
@@ -10,6 +10,18 @@ export const routes = {
     editCategory: (id: string) => `/dashboard/categories/${id}/edit`,
     orders: '/dashboard/orders',
     createOrder: '/dashboard/orders/create',
+  },
+  sales: {
+    invoiceHd: '/sls/invoice-hd',
+    invoiceList: '/sales/invoice/list',
+    invoiceDetails: (id: string) => `/sales/invoice/${id}`,
+    invoiceEdit: (id: string) => `/sales/invoice/${id}/edit`,
+    invoiceCreate: '/sales/invoice/create',
+    invoiceBuilder: '/sales/invoice/builder',
+    invoiceDt: '/sales/invoice-dt',
+    invoiceDtList: '/sales/invoice-dt/list',
+    invoiceDtDetails: (id: string) => `/sales/invoice-dt/${id}`,
+    invoiceDtEdit: (id: string) => `/sales/invoice-dt/${id}/edit`,
   },
   inventory: {
     dashboard: '/inventory',

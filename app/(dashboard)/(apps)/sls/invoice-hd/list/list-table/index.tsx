@@ -11,11 +11,11 @@ interface SalesInvoiceHdProps {
   onPageChange: (page: number) => void;
   limit: number;
   setLimit: (limit: number) => void;
-  sorting: SortingState; // Tambah props
+  sorting: SortingState;
 
   setSorting: (
     sorting: SortingState | ((old: SortingState) => SortingState)
-  ) => void; // Perbaiki tipe
+  ) => void;
 }
 
 const columnLabels = {

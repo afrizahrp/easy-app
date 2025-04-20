@@ -2,8 +2,8 @@ import { ReactNode } from 'react';
 export const metadata = {
   title: 'Sales Dashboard',
 };
-const CategoryLayout = ({ children }: { children: ReactNode }) => {
+const SalesDashboardLayout = ({ children }: { children: ReactNode }) => {
   return <>{children}</>;
 };
 
-export default CategoryLayout;
+export default SalesDashboardLayout;

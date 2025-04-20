@@ -49,7 +49,8 @@ export const columns: ColumnDef<SalesInvoiceHdColumns>[] = [
     ),
     cell: ({ row }) => (
       <Link
-        href={`/inventory/categories/${row.getValue('invoice_id')}`}
+        // href={`/sls/invoice-dt/${row.getValue('invoice_id')}`}
+        href={`/sls/invoice-dt/${encodeURIComponent(row.getValue('invoice_id'))}`}
         className='text-primary-600 dark:text-primary-400'
       >
         {row.getValue('invoice_id')}

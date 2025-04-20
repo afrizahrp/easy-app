@@ -145,7 +145,7 @@ export const useModuleStore = create<MenuModuleState>()(
   persist(
     (set) => ({
       moduleId: null,
-      setModuleId: (id: string) => set({ moduleId: id }),
+      setModuleId: (id: string) => set({ moduleId: id.toUpperCase() }), // Pastikan id dalam huruf besar
     }),
     { name: 'module-store', storage: createJSONStorage(() => localStorage) }
   )
