@@ -35,8 +35,6 @@ export function DataTablePagination<TData>({
   const { currentPage, setCurrentPage } = usePageStore();
   const [totalPagesState, setTotalPagesState] = useState(totalPages); // 🆕 State untuk total pages
 
-  // const searchParams = useSearchParamsStore((state) => state.searchParams);
-
   // Saat komponen pertama kali dimuat, baca page dari URL
   useEffect(() => {
     // Set page index to match the current URL param
@@ -102,24 +100,20 @@ export function DataTablePagination<TData>({
 
   return (
     <div className='flex items-center flex-wrap gap-2 justify-between p-5'>
-      {/* <div className='flex w-[100px] items-center justify-center text-xs'>
-        {table.getFilteredSelectedRowModel().rows.length > 0
-          ? `${table.getFilteredSelectedRowModel().rows.length} of ${totalRecords} data selected.`
-          : `Total ${totalRecords} data`}
-      </div> */}
       <div className='flex flex-wrap items-center gap-6 lg:gap-8'>
-        <div className='flex flex-col sm:flex-row sm:items-center sm:space-x-4 text-xs'>
+        <div className='hidden sm:flex sm:items-center sm:space-x-3 text-xs'>
           <PageSizeSelector
             limit={limit}
             setLimit={setLimit}
             onPageSizeChange={(value) => table.setPageSize(value)}
           />
 
-          {/* <p className='mt-2 sm:mt-0 whitespace-nowrap text-muted-foreground'>
+          {/* <span className='text-muted-foreground whitespace-nowrap'>
             Page {currentPage} of {totalPagesState.toLocaleString('id-ID')}
             {totalPagesState === 1 ? ' page' : ' pages'}
-          </p> */}
+          </span> */}
         </div>
+
         <div className='flex items-center space-x-2'>
           <Button
             variant='outline'

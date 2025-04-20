@@ -27,6 +27,7 @@ interface DataTableFacetedFilterProps<TData, TValue> {
   title?: string;
   options?: { value: string; label: string; count?: number }[];
   isLoading?: boolean;
+  disabled?: boolean;
   selectedValues: Set<string>; // 🔥 Terima selectedValues dari parent
   onSelect: (value: string) => void; // 🔥 Tambahkan handler onSelect
 }
@@ -35,6 +36,7 @@ export function DataTableFacetedFilter<TData, TValue>({
   column,
   title,
   options,
+  disabled,
   isLoading,
   selectedValues,
   onSelect, // 🔥 Gunakan onSelect
@@ -43,7 +45,7 @@ export function DataTableFacetedFilter<TData, TValue>({
     <Popover>
       <PopoverTrigger asChild>
         <Button
-          disabled={isLoading}
+          disabled={isLoading || disabled} // ✅ gabungkan dengan props.disabled
           variant='outline'
           size='sm'
           className='h-10 border-dashed text-sm text-primary w-full'
@@ -98,7 +100,8 @@ export function DataTableFacetedFilter<TData, TValue>({
                 return (
                   <CommandItem
                     key={option.value}
-                    onSelect={() => onSelect(option.value)}
+                    // onSelect={() => onSelect(option.value)}
+                    onSelect={() => !disabled && onSelect(option.value)} // ✅ hanya jika tidak disabled
                   >
                     <div
                       className={cn(
@@ -130,7 +133,8 @@ export function DataTableFacetedFilter<TData, TValue>({
                 <CommandSeparator />
                 <CommandGroup>
                   <CommandItem
-                    onSelect={() => onSelect('')}
+                    // onSelect={() => onSelect('')}
+                    onSelect={() => !disabled && onSelect('')} // ✅ hanya jika tidak disabled
                     className='justify-center text-center'
                   >
                     Clear filter

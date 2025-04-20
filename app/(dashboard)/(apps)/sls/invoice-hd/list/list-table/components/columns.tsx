@@ -19,7 +19,8 @@ export type SalesInvoiceHdColumns = {
   invoice_id: string;
   customerName: string;
   salesPersonName: string;
-  invoiceType: string;
+  invoiceTypeName: string;
+  invoicePoTypeName: string;
   paidStatus: string;
   total_amount: number;
 };

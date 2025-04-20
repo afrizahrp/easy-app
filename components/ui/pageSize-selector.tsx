@@ -27,7 +27,9 @@ export default function PageSizeSelector({
 
   return (
     <div className='flex items-center space-x-2'>
-      <p className='text-xs text-muted-foreground whitespace-nowrap'>Show</p>
+      <p className='text-xs text-muted-foreground whitespace-nowrap hidden sm:block'>
+        Show
+      </p>
       <Select value={`${limit}`} onValueChange={handleChange}>
         <SelectTrigger className='h-6 w-[70px] text-xs'>
           <SelectValue placeholder={limit} />
@@ -44,8 +46,7 @@ export default function PageSizeSelector({
           ))}
         </SelectContent>
       </Select>
-      {/* <p className='text-xs text-muted-foreground whitespace-nowrap'>
-        {' '}
+      {/* <p className='text-xs text-muted-foreground whitespace-nowrap hidden sm:block'>
         Rows perpage
       </p> */}
     </div>
