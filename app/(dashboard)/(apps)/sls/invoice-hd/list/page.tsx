@@ -47,6 +47,7 @@ const SalesInvoiceHdPage = () => {
       total_amount: item.total_amount,
       salesPersonName: item.salesPersonName.trim(),
       paidStatus: item.paidStatus,
+      monthYear: item.monthYear,
     })) ?? [];
 
   return (

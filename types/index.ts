@@ -48,6 +48,7 @@ export type SalesInvoiceHd = {
   totalDelivery_amount?: number;
   total_amount: number;
   paidStatus: string;
+  monthYear: string;
   company_id: string;
 };
 

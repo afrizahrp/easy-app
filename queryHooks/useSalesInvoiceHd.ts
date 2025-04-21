@@ -7,6 +7,7 @@ import {
   useSalesInvoiceHdFilterStore,
 } from '@/store';
 import { SalesInvoiceHd } from '@/types';
+import { format } from 'date-fns';
 
 interface SalesInvoiceHdResponse {
   data: SalesInvoiceHd[];
@@ -31,15 +32,11 @@ const useSalesInvoiceHd = ({
   orderDir,
 }: UseSalesInvoiceHdParams) => {
   const user = useSessionStore((state) => state.user);
-  const company_id = user?.company_id.toLocaleUpperCase(); // Pastikan company_id dalam huruf besar
-  const module_id = useModuleStore((state) => state.moduleId); // Ambil module_id dari store
-  // const module_id = 'SLS';
-
+  const company_id = user?.company_id.toLocaleUpperCase();
+  const module_id = useModuleStore((state) => state.moduleId);
   const searchParams = useSearchParamsStore((state) => state.searchParams);
-  const status = useSalesInvoiceHdFilterStore((state) => state.status);
-  const salesPersonName = useSalesInvoiceHdFilterStore(
-    (state) => state.salesPersonName
-  );
+  const { status, salesPersonName, startPeriod, endPeriod } =
+    useSalesInvoiceHdFilterStore();
 
   const isValidRequest = Boolean(company_id && module_id);
 
@@ -50,6 +47,8 @@ const useSalesInvoiceHd = ({
       salesPersonName?: string[];
       searchBy?: string;
       searchTerm?: string;
+      startPeriod?: Date | null;
+      endPeriod?: Date | null;
     }
   ): Record<string, any> => {
     const result = Object.fromEntries(
@@ -73,6 +72,14 @@ const useSalesInvoiceHd = ({
       result.searchTerm = extra.searchTerm;
     }
 
+    if (extra.startPeriod) {
+      result.startPeriod = format(extra.startPeriod, 'MMMyyyy');
+    }
+
+    if (extra.endPeriod) {
+      result.endPeriod = format(extra.endPeriod, 'MMMyyyy');
+    }
+
     return result;
   };
 
@@ -89,6 +96,8 @@ const useSalesInvoiceHd = ({
       JSON.stringify(searchParams),
       status,
       salesPersonName,
+      startPeriod,
+      endPeriod,
       searchBy,
       searchTerm,
       orderBy,
@@ -101,7 +110,14 @@ const useSalesInvoiceHd = ({
 
       const filteredParams = buildFilteredParams(
         { page, limit, orderBy, orderDir, ...searchParams },
-        { status, salesPersonName, searchBy, searchTerm }
+        {
+          status,
+          salesPersonName,
+          startPeriod,
+          endPeriod,
+          searchBy,
+          searchTerm,
+        }
       );
 
       const url = `${process.env.NEXT_PUBLIC_API_URL}/${company_id}/${module_id}/get-invoiceHd`;

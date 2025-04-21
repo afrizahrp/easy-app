@@ -2,15 +2,14 @@
 import { cn } from '@/lib/utils';
 import { ColumnDef } from '@tanstack/react-table';
 import { DataTableColumnHeader } from '@/components/ui/data-table-column-header';
-import { format } from 'date-fns';
+import { format, parse, isValid, startOfMonth, endOfMonth } from 'date-fns';
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from '@/components/ui/tooltip'; // Impor Tooltip
+} from '@/components/ui/tooltip';
 import { getStatusColor } from '@/utils/statusUils';
-
 import Link from 'next/link';
 
 export type SalesInvoiceHdColumns = {
@@ -23,26 +22,10 @@ export type SalesInvoiceHdColumns = {
   invoicePoTypeName: string;
   paidStatus: string;
   total_amount: number;
+  monthYear: string;
 };
 
 export const columns: ColumnDef<SalesInvoiceHdColumns>[] = [
-  // {
-  //   accessorKey: 'po_id',
-  //   header: ({ column }) => (
-  //     <DataTableColumnHeader column={column} title='Po Id.' />
-  //   ),
-  //   cell: ({ row }) => (
-  //     <Link
-  //       href={`/inventory/categories/${row.getValue('po_id')}`}
-  //       className='text-primary-600 dark:text-primary-400'
-  //     >
-  //       {row.getValue('po_id')}
-  //     </Link>
-  //   ),
-  //   enableHiding: false,
-  //   enableSorting: true, // pastikan ini ada
-  // },
-
   {
     accessorKey: 'invoice_id',
     header: ({ column }) => (
@@ -50,7 +33,6 @@ export const columns: ColumnDef<SalesInvoiceHdColumns>[] = [
     ),
     cell: ({ row }) => (
       <Link
-        // href={`/sls/invoice-dt/${row.getValue('invoice_id')}`}
         href={`/sls/invoice-dt/${encodeURIComponent(row.getValue('invoice_id'))}`}
         className='text-primary-600 dark:text-primary-400'
       >
@@ -71,13 +53,11 @@ export const columns: ColumnDef<SalesInvoiceHdColumns>[] = [
         rawDate instanceof Date
           ? format(rawDate, 'dd/MM/yyyy')
           : format(new Date(rawDate as string | number), 'dd/MM/yyyy');
-
       return formattedDate;
     },
     enableSorting: true,
     enableHiding: false,
   },
-
   {
     accessorKey: 'customerName',
     header: ({ column }) => (
@@ -110,26 +90,22 @@ export const columns: ColumnDef<SalesInvoiceHdColumns>[] = [
       );
     },
   },
-
   {
     accessorKey: 'salesPersonName',
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title='Sales Person' />
     ),
-    cell: ({ row }) => {
-      return (
-        <div className='flex space-x-1'>
-          <span className={cn('max-w-[450px] truncate font-sm')}>
-            {row.getValue('salesPersonName')}
-          </span>
-        </div>
-      );
-    },
+    cell: ({ row }) => (
+      <div className='flex space-x-1'>
+        <span className={cn('max-w-[450px] truncate font-sm')}>
+          {row.getValue('salesPersonName')}
+        </span>
+      </div>
+    ),
     filterFn: (row, id, value: string) => {
       return value.includes(row.getValue(id));
     },
   },
-
   {
     accessorKey: 'total_amount',
     header: ({ column }) => (
@@ -147,7 +123,7 @@ export const columns: ColumnDef<SalesInvoiceHdColumns>[] = [
       return <div className='text-right tabular-nums'>{formatted}</div>;
     },
     meta: {
-      align: 'right', // optional, kalau kamu pakai sistem align via meta
+      align: 'right',
     },
   },
   {
@@ -179,40 +155,32 @@ export const columns: ColumnDef<SalesInvoiceHdColumns>[] = [
       return value.includes(row.getValue(id));
     },
   },
-  // {
-  //   accessorKey: 'salesPersonName',
-  //   header: ({ column }) => (
-  //     <DataTableColumnHeader column={column} title='Sales Person' />
-  //   ),
-  //   cell: ({ row }) => {
-  //     return (
-  //       <div className='flex space-x-1'>
-  //         <span className={cn('max-w-[450px] truncate font-sm')}>
-  //           {row.getValue('salesPersonName')}
-  //         </span>
-  //       </div>
-  //     );
-  //   },
-  //   filterFn: (row, id, value: string) => {
-  //     return value.includes(row.getValue(id));
-  //   },
-  // },
-  // {
-  //   accessorKey: 'invoiceType',
-  //   header: ({ column }) => (
-  //     <DataTableColumnHeader column={column} title='Type' />
-  //   ),
-  //   cell: ({ row }) => {
-  //     return (
-  //       <div className='flex space-x-1'>
-  //         <span className={cn('max-w-[450px] truncate font-sm')}>
-  //           {row.getValue('invoiceType')}
-  //         </span>
-  //       </div>
-  //     );
-  //   },
-  //   filterFn: (row, id, value) => {
-  //     return value.includes(row.getValue(id));
-  //   },
-  // },
+  {
+    accessorKey: 'monthYear',
+    header: 'Month Year',
+    enableHiding: true,
+    filterFn: (
+      row,
+      id,
+      filterValue: { start: Date; end: Date } | undefined
+    ) => {
+      if (!filterValue || !filterValue.start || !filterValue.end) return true;
+      const rowValue = row.getValue(id) as string;
+      if (rowValue === 'N/A') return false;
+      const rowDate = parse(rowValue, 'MMM yyyy', new Date());
+      if (!isValid(rowDate)) {
+        console.warn(`Invalid monthYear format: ${rowValue}`);
+        return false;
+      }
+      const normalizedRowDate = startOfMonth(rowDate);
+      const filterStart = startOfMonth(filterValue.start);
+      const filterEnd = endOfMonth(filterValue.end);
+      const isInRange =
+        normalizedRowDate >= filterStart && normalizedRowDate <= filterEnd;
+      console.log(
+        `Filtering row: monthYear=${rowValue}, normalizedRowDate=${normalizedRowDate.toISOString()}, filterStart=${filterStart.toISOString()}, filterEnd=${filterEnd.toISOString()}, isInRange=${isInRange}`
+      );
+      return isInRange;
+    },
+  },
 ];

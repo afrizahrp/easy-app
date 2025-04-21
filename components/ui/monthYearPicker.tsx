@@ -1,3 +1,4 @@
+// MonthYearPicker.tsx
 'use client';
 
 import { useState } from 'react';
@@ -11,10 +12,14 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import './month-year-picker.css'; // kita akan custom CSS di bawah
+import './month-year-picker.css';
 
-export function MonthYearPicker() {
-  const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
+interface MonthYearPickerProps {
+  value?: Date | null;
+  onChange?: (date: Date | null) => void;
+}
+
+export function MonthYearPicker({ value, onChange }: MonthYearPickerProps) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -25,18 +30,14 @@ export function MonthYearPicker() {
           className='w-[200px] justify-start text-left font-normal'
         >
           <CalendarIcon className='mr-2 h-4 w-4' />
-          {selectedDate ? (
-            format(selectedDate, 'MMM, yyyy')
-          ) : (
-            <span>Pilih bulan</span>
-          )}
+          {value ? format(value, 'MMM, yyyy') : <span>Pilih bulan</span>}
         </Button>
       </PopoverTrigger>
       <PopoverContent className='w-auto p-2' align='start'>
         <DatePicker
-          selected={selectedDate}
-          onChange={(date) => {
-            setSelectedDate(date);
+          selected={value}
+          onChange={(date: Date | null) => {
+            onChange?.(date);
             setOpen(false);
           }}
           dateFormat='MM/yyyy'

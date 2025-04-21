@@ -1,0 +1,16 @@
+/* styles/datepicker.css */
+.react-datepicker__month-year {
+  font-size: 14px;
+  padding: 8px;
+}
+.react-datepicker__month--selected {
+  background-color: #007bff;
+  color: white;
+}
+.react-datepicker__input-container input {
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 8px;
+  height: 40px;
+  width: 200px;
+}

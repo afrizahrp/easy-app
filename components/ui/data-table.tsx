@@ -26,6 +26,10 @@ import {
 
 import { DataTablePagination } from '@/components/ui/data-table-pagination';
 import { DataTableToolbar } from '@/components/ui/data-table-toolbar';
+import {
+  SalesInvoiceHdColumns,
+  columns,
+} from '@/app/(dashboard)/(apps)/sls/invoice-hd/list/list-table/components/columns';
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -85,10 +89,12 @@ export function DataTable<TData, TValue>({
     columns,
     state: {
       sorting,
-      columnVisibility,
       columnFilters,
       rowSelection,
       globalFilter: filtering,
+      columnVisibility: {
+        monthYear: false, // Sembunyikan kolom monthYear
+      },
     },
     onGlobalFilterChange: setFiltering,
     enableRowSelection: true,

@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Filter, Plus } from 'lucide-react';
 import Link from 'next/link';
 import { DataTableViewOptions } from '@/components/ui/data-table-view-options';
-import SearchInput from '@/components/ui/seacrh-Input';
+import SearchInput from '@/components/ui/search-Input';
 import FilterSidebar from './filter-sidebar';
 import { SearchOption } from './search-Option';
 import { useSearchParamsStore } from '@/store';

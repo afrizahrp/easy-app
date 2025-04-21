@@ -23,7 +23,7 @@ export function SearchOption({
 }: SearchOptionProps) {
   return (
     <Select value={value} onValueChange={onChange}>
-      <SelectTrigger className='w-[180px]' title='Select search field'>
+      <SelectTrigger className='w-[120px]' title='Select search field'>
         <SelectValue placeholder='Search by' />
       </SelectTrigger>
       <SelectContent>

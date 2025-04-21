@@ -186,7 +186,7 @@ export default function SalesInvoiceDtPage({
                 </div>
               </div>
 
-              <div className='text-base font-medium text-default-600 mt-6'>
+              {/* <div className='text-base font-medium text-default-600 mt-6'>
                 Note:
               </div>
               <div className='text-sm text-default-800'>
@@ -195,7 +195,7 @@ export default function SalesInvoiceDtPage({
 
               <div className='mt-8 text-xs text-default-800'>
                 © 2025 Your Company Name
-              </div>
+              </div> */}
             </CardContent>
           </Card>
 

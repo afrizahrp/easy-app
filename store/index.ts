@@ -310,6 +310,10 @@ interface SalesInvoiceHdState {
   setInvoiceType: (invoiceType: string[]) => void;
   salesPersonName: string[]; // Array salesPersonName
   setSalesPersonName: (salesPersonName: string[]) => void;
+  startPeriod: Date | null;
+  setStartPeriod: (startPeriod: Date | null) => void;
+  endPeriod: Date | null;
+  setEndPeriod: (endPeriod: Date | null) => void;
 }
 
 export const useSalesInvoiceHdFilterStore = create<SalesInvoiceHdState>()(
@@ -322,7 +326,10 @@ export const useSalesInvoiceHdFilterStore = create<SalesInvoiceHdState>()(
       setInvoiceType: (invoiceType) => set({ invoiceType }),
       setSalesPersonName: (salesPersonName) => set({ salesPersonName }), // Tambahkan setter untuk salesPersonName
 
-      // Tambahkan setter untuk invoiceType
+      startPeriod: null,
+      setStartPeriod: (startPeriod) => set({ startPeriod }),
+      endPeriod: null,
+      setEndPeriod: (endPeriod) => set({ endPeriod }),
     }),
     {
       name: 'sales-invoiceHd-filter-store', // Nama kunci di localStorage
