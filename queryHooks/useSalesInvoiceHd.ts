@@ -35,7 +35,7 @@ const useSalesInvoiceHd = ({
   const company_id = user?.company_id.toLocaleUpperCase();
   const module_id = useModuleStore((state) => state.moduleId);
   const searchParams = useSearchParamsStore((state) => state.searchParams);
-  const { status, salesPersonName, startPeriod, endPeriod } =
+  const { status, salesPersonName, startPeriod, endPeriod, poType } =
     useSalesInvoiceHdFilterStore();
 
   const isValidRequest = Boolean(company_id && module_id);
@@ -45,6 +45,7 @@ const useSalesInvoiceHd = ({
     extra: {
       status?: string[];
       salesPersonName?: string[];
+      poType?: string[];
       searchBy?: string;
       searchTerm?: string;
       startPeriod?: Date | null;
@@ -67,6 +68,10 @@ const useSalesInvoiceHd = ({
       result.salesPersonName = extra.salesPersonName.join(',');
     }
 
+    if (extra.poType?.length) {
+      result.poType = extra.poType.join(',');
+    }
+
     if (extra.searchBy && extra.searchTerm) {
       result.searchBy = extra.searchBy;
       result.searchTerm = extra.searchTerm;
@@ -79,6 +84,8 @@ const useSalesInvoiceHd = ({
     if (extra.endPeriod) {
       result.endPeriod = format(extra.endPeriod, 'MMMyyyy');
     }
+
+    console.log('Filtered params:', result);
 
     return result;
   };
@@ -96,6 +103,7 @@ const useSalesInvoiceHd = ({
       JSON.stringify(searchParams),
       status,
       salesPersonName,
+      poType,
       startPeriod,
       endPeriod,
       searchBy,
@@ -113,6 +121,7 @@ const useSalesInvoiceHd = ({
         {
           status,
           salesPersonName,
+          poType,
           startPeriod,
           endPeriod,
           searchBy,
@@ -122,9 +131,13 @@ const useSalesInvoiceHd = ({
 
       const url = `${process.env.NEXT_PUBLIC_API_URL}/${company_id}/${module_id}/get-invoiceHd`;
 
+      console.log('Sending request to:', url, 'with params:', filteredParams);
+
       const response = await api.get<SalesInvoiceHdResponse>(url, {
         params: filteredParams,
       });
+
+      console.log('Backend response:', response.data);
 
       return response.data;
     },

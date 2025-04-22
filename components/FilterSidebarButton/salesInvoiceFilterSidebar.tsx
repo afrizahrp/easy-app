@@ -3,16 +3,19 @@ import { useEffect, useState } from 'react';
 import { Cross2Icon } from '@radix-ui/react-icons';
 import { Table } from '@tanstack/react-table';
 import { AlertCircle } from 'lucide-react';
-import { startOfMonth, endOfMonth, isValid, set } from 'date-fns';
+import { startOfMonth, endOfMonth, isValid, set, format } from 'date-fns';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 
 import useSalesInvoiceHdPaidStatusOptions from '@/queryHooks/useSalesInvoiceHdPaidStatusOptions';
 import useSalesInvoiceHdSalesPersonOptions from '@/queryHooks/useSalesInvoiceHdSalesPersonOptions';
+import useSalesInvoiceHdPoTypeOptions from '@/queryHooks/useSalesInvoiceHdPoTypeOptions';
 import { Button } from '@/components/ui/button';
 import { DataTableFacetedFilter } from '@/components/ui/data-table-faceted-filter';
 import { useSalesInvoiceHdFilterStore } from '@/store';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useToast } from '@/components/ui/use-toast';
+import { utcToZonedTime, zonedTimeToUtc } from 'date-fns-tz';
 
 interface SalesInvoiceFilterSidebarProps<TData> {
   table: Table<TData>;
@@ -22,47 +25,66 @@ export function SalesInvoiceFilterSidebar<TData>({
   table,
 }: SalesInvoiceFilterSidebarProps<TData>) {
   const {
-    status,
-    setStatus,
-    salesPersonName,
-    setSalesPersonName,
     startPeriod,
     setStartPeriod,
     endPeriod,
     setEndPeriod,
+    status,
+    setStatus,
+    poType,
+    setPoType,
+    salesPersonName,
+    setSalesPersonName,
   } = useSalesInvoiceHdFilterStore();
 
+  const { toast } = useToast();
   const [showAlert, setShowAlert] = useState(false);
 
   useEffect(() => {
     // Normalisasi ke UTC
     const normalizedStart = startPeriod
-      ? set(startOfMonth(startPeriod), {
-          hours: 0,
-          minutes: 0,
-          seconds: 0,
-          milliseconds: 0,
-        })
+      ? zonedTimeToUtc(startOfMonth(startPeriod), 'UTC')
       : null;
-    const normalizedEnd = endPeriod
-      ? set(endOfMonth(endPeriod), {
-          hours: 23,
-          minutes: 59,
-          seconds: 59,
-          milliseconds: 999,
-        })
+    let normalizedEnd = endPeriod
+      ? zonedTimeToUtc(endOfMonth(endPeriod), 'UTC')
       : null;
 
-    // console.log(
-    //   'useEffect triggered, salesPersonName:',
-    //   salesPersonName,
-    //   'status:',
-    //   status,
-    //   'startPeriod:',
-    //   normalizedStart?.toISOString(),
-    //   'endPeriod:',
-    //   normalizedEnd?.toISOString()
-    // );
+    // Jika endPeriod tidak ada, gunakan akhir bulan dari startPeriod
+    if (normalizedStart && !normalizedEnd && startPeriod) {
+      normalizedEnd = zonedTimeToUtc(endOfMonth(startPeriod), 'UTC');
+    }
+
+    // Validasi: Jika endPeriod lebih awal dari startPeriod, atur ulang endPeriod
+    if (normalizedStart && normalizedEnd && normalizedEnd < normalizedStart) {
+      console.warn(
+        'Invalid date range: endPeriod is before startPeriod. Resetting endPeriod.',
+        {
+          startPeriod: normalizedStart.toISOString(),
+          endPeriod: normalizedEnd.toISOString(),
+        }
+      );
+      setEndPeriod(null);
+      normalizedEnd = null;
+      toast({
+        description:
+          'End Period cannot be earlier than Start Period. End Period has been reset.',
+        color: 'destructive',
+      });
+    }
+
+    console.log('Applying filters:', {
+      startPeriod: normalizedStart?.toISOString(),
+      endPeriod: normalizedEnd?.toISOString(),
+      status,
+      salesPersonName,
+      poType,
+      formattedForBackend: {
+        startPeriod: normalizedStart
+          ? format(normalizedStart, 'MMMyyyy')
+          : null,
+        endPeriod: normalizedEnd ? format(normalizedEnd, 'MMMyyyy') : null,
+      },
+    });
 
     table
       .getColumn('paidStatus')
@@ -71,13 +93,45 @@ export function SalesInvoiceFilterSidebar<TData>({
       .getColumn('salesPersonName')
       ?.setFilterValue(salesPersonName.length ? salesPersonName : undefined);
     table
-      .getColumn('monthYear')
-      ?.setFilterValue(
-        normalizedStart && normalizedEnd && normalizedEnd >= normalizedStart
-          ? { start: normalizedStart, end: normalizedEnd }
-          : undefined
-      );
-  }, [status, salesPersonName, startPeriod, endPeriod, table]);
+      .getColumn('poType')
+      ?.setFilterValue(poType.length ? poType : undefined);
+
+    // Terapkan filter invoiceDate
+    let filterValue: { start: Date; end: Date } | undefined;
+    if (normalizedStart && normalizedEnd) {
+      filterValue = {
+        start: normalizedStart,
+        end: normalizedEnd,
+      };
+    }
+
+    console.log('Setting invoiceDate filter:', filterValue);
+
+    table.getColumn('invoiceDate')?.setFilterValue(filterValue);
+
+    // Log data yang difilter
+    const filteredRows = table.getFilteredRowModel().rows;
+    console.log('Filtered rows count:', filteredRows.length);
+    // console.log(
+    //   'Sample filtered rows:',
+    //   filteredRows.slice(0, 5).map((row) => ({
+    //     invoice_id: row.original.invoice_id,
+    //     invoiceDate: row.original.invoiceDate,
+    //     paidStatus: row.original.paidStatus,
+    //     salesPersonName: row.original.salesPersonName,
+    //     poType: row.original.poType,
+    //   }))
+    // );
+  }, [
+    startPeriod,
+    endPeriod,
+    status,
+    poType,
+    salesPersonName,
+    table,
+    setEndPeriod,
+    toast,
+  ]);
 
   useEffect(() => {
     if (salesPersonName.length > 1) {
@@ -99,6 +153,23 @@ export function SalesInvoiceFilterSidebar<TData>({
     useSalesInvoiceHdPaidStatusOptions();
   const { options: salesPersonOptionList, isLoading: isSalesPersonLoading } =
     useSalesInvoiceHdSalesPersonOptions();
+  const { options: poTypeOptionList, isLoading: isPoTypeLoading } =
+    useSalesInvoiceHdPoTypeOptions();
+
+  const handleReset = () => {
+    console.log('Resetting filters...');
+    table.resetColumnFilters();
+    setStatus([]);
+    setSalesPersonName([]);
+    setPoType([]);
+    setStartPeriod(null);
+    setEndPeriod(null);
+    console.log('Filters reset, startPeriod:', null, 'endPeriod:', null);
+    toast({
+      description: 'All filters have been cleared.',
+      color: 'success',
+    });
+  };
 
   return (
     <div className='flex items-center justify-end py-2'>
@@ -120,18 +191,37 @@ export function SalesInvoiceFilterSidebar<TData>({
             </label>
             <DatePicker
               selected={startPeriod}
-              onChange={(date) =>
-                setStartPeriod(
-                  date
-                    ? set(startOfMonth(date), {
-                        hours: 0,
-                        minutes: 0,
-                        seconds: 0,
-                        milliseconds: 0,
-                      })
-                    : null
-                )
-              }
+              onChange={(date) => {
+                const newStart = date
+                  ? set(startOfMonth(date), {
+                      hours: 0,
+                      minutes: 0,
+                      seconds: 0,
+                      milliseconds: 0,
+                    })
+                  : null;
+                setStartPeriod(newStart);
+                // Validasi: Jika endPeriod ada dan lebih awal dari newStart, reset endPeriod
+                if (
+                  newStart &&
+                  endPeriod &&
+                  startOfMonth(endPeriod) < startOfMonth(newStart)
+                ) {
+                  console.log(
+                    'Resetting endPeriod because it is before new startPeriod:',
+                    {
+                      newStart: newStart.toISOString(),
+                      endPeriod: endPeriod.toISOString(),
+                    }
+                  );
+                  setEndPeriod(null);
+                  toast({
+                    description:
+                      'End Period was reset because it was earlier than the new Start Period.',
+                    color: 'destructive',
+                  });
+                }
+              }}
               showMonthYearPicker
               dateFormat='MMM yyyy'
               placeholderText='Jan 2025'
@@ -161,7 +251,7 @@ export function SalesInvoiceFilterSidebar<TData>({
               showMonthYearPicker
               dateFormat='MMM yyyy'
               placeholderText='Mar 2025'
-              minDate={startPeriod || undefined}
+              minDate={startPeriod ? startOfMonth(startPeriod) : undefined}
               className='w-[120px] h-10 px-3 border rounded-md'
               shouldCloseOnSelect={false}
               showYearDropdown
@@ -169,6 +259,28 @@ export function SalesInvoiceFilterSidebar<TData>({
               scrollableYearDropdown
             />
           </div>
+        </div>
+
+        <div className='w-full py-3'>
+          {table.getColumn('poType') && (
+            <DataTableFacetedFilter
+              column={table.getColumn('poType')}
+              title='PO Type'
+              options={poTypeOptionList}
+              isLoading={isPoTypeLoading}
+              disabled={salesPersonName.length > 1}
+              selectedValues={new Set(poType)}
+              onSelect={(value) => {
+                const updatedValues = new Set(poType);
+                value
+                  ? updatedValues.has(value)
+                    ? updatedValues.delete(value)
+                    : updatedValues.add(value)
+                  : updatedValues.clear();
+                setPoType(Array.from(updatedValues));
+              }}
+            />
+          )}
         </div>
 
         <div className='w-full py-3'>
@@ -187,10 +299,6 @@ export function SalesInvoiceFilterSidebar<TData>({
                     ? updatedValues.delete(value)
                     : updatedValues.add(value)
                   : updatedValues.clear();
-                console.log(
-                  'SalesInvoiceFilterSidebar: Setting status:',
-                  Array.from(updatedValues)
-                );
                 setStatus(Array.from(updatedValues));
               }}
             />
@@ -225,13 +333,7 @@ export function SalesInvoiceFilterSidebar<TData>({
         {table.getState().columnFilters.length > 0 && (
           <Button
             variant='outline'
-            onClick={() => {
-              table.resetColumnFilters();
-              setStatus([]);
-              setSalesPersonName([]);
-              setStartPeriod(null);
-              setEndPeriod(null);
-            }}
+            onClick={handleReset}
             className='h-10 px-2 lg:px-3 w-full mb-5'
           >
             <Cross2Icon className='ml-2 h-4 w-4' />

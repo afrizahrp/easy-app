@@ -2,7 +2,7 @@
 import { cn } from '@/lib/utils';
 import { ColumnDef } from '@tanstack/react-table';
 import { DataTableColumnHeader } from '@/components/ui/data-table-column-header';
-import { format, parse, isValid, startOfMonth, endOfMonth } from 'date-fns';
+import { format, isValid, startOfMonth, endOfMonth } from 'date-fns';
 import {
   Tooltip,
   TooltipContent,
@@ -13,23 +13,54 @@ import { getStatusColor } from '@/utils/statusUils';
 import Link from 'next/link';
 
 export type SalesInvoiceHdColumns = {
+  poType: string;
   po_id: string;
   invoiceDate: Date;
   invoice_id: string;
   customerName: string;
   salesPersonName: string;
-  invoiceTypeName: string;
-  invoicePoTypeName: string;
   paidStatus: string;
   total_amount: number;
-  monthYear: string;
+  invoiceType: string;
 };
 
 export const columns: ColumnDef<SalesInvoiceHdColumns>[] = [
   {
+    accessorKey: 'poType',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title='PoType' />
+    ),
+    cell: ({ row }) => (
+      <div className='flex space-x-1'>
+        <span className={cn('max-w-[450px] truncate font-sm')}>
+          {row.getValue('poType')}
+        </span>
+      </div>
+    ),
+    filterFn: (row, id, value: string) => {
+      return value.includes(row.getValue(id));
+    },
+  },
+  {
+    accessorKey: 'po_id',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title='Po Id' />
+    ),
+    cell: ({ row }) => (
+      <div className='flex space-x-1'>
+        <span className={cn('max-w-[450px] truncate font-sm')}>
+          {row.getValue('po_id')}
+        </span>
+      </div>
+    ),
+    filterFn: (row, id, value: string) => {
+      return value.includes(row.getValue(id));
+    },
+  },
+  {
     accessorKey: 'invoice_id',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Invoice No' />
+      <DataTableColumnHeader column={column} title='Invoice id' />
     ),
     cell: ({ row }) => (
       <Link
@@ -49,14 +80,58 @@ export const columns: ColumnDef<SalesInvoiceHdColumns>[] = [
     ),
     cell: ({ row }) => {
       const rawDate = row.getValue('invoiceDate');
-      const formattedDate =
-        rawDate instanceof Date
-          ? format(rawDate, 'dd/MM/yyyy')
-          : format(new Date(rawDate as string | number), 'dd/MM/yyyy');
+      let formattedDate: string;
+      try {
+        const date =
+          rawDate instanceof Date ? rawDate : new Date(rawDate as string);
+        formattedDate = isValid(date)
+          ? format(date, 'dd/MM/yyyy')
+          : 'Invalid Date';
+      } catch (error) {
+        console.warn(`Error formatting invoiceDate: ${rawDate}`, error);
+        formattedDate = 'Invalid Date';
+      }
       return formattedDate;
     },
     enableSorting: true,
     enableHiding: false,
+    filterFn: (
+      row,
+      id,
+      filterValue: { start: Date; end: Date } | undefined
+    ) => {
+      if (!filterValue || !filterValue.start || !filterValue.end) {
+        console.log('No date filter applied for invoiceDate');
+        return true;
+      }
+      const rawDate = row.getValue(id);
+      let rowDate: Date;
+      try {
+        rowDate =
+          rawDate instanceof Date ? rawDate : new Date(rawDate as string);
+        if (!isValid(rowDate)) {
+          console.warn(
+            `Invalid invoiceDate for invoice_id=${row.original.invoice_id}: ${rawDate}`
+          );
+          return false;
+        }
+      } catch (error) {
+        console.warn(
+          `Error parsing invoiceDate for invoice_id=${row.original.invoice_id}: ${rawDate}`,
+          error
+        );
+        return false;
+      }
+      const isInRange =
+        rowDate >= filterValue.start && rowDate <= filterValue.end;
+      // Log hanya untuk faktur di Jan 2025
+      if (rowDate.getFullYear() === 2025 && rowDate.getMonth() === 0) {
+        console.log(
+          `Filtering Jan 2025 row: invoice_id=${row.original.invoice_id}, invoiceDate=${rowDate.toISOString()}, filterStart=${filterValue.start.toISOString()}, filterEnd=${filterValue.end.toISOString()}, isInRange=${isInRange}`
+        );
+      }
+      return isInRange;
+    },
   },
   {
     accessorKey: 'customerName',
@@ -69,7 +144,6 @@ export const columns: ColumnDef<SalesInvoiceHdColumns>[] = [
         customerName.length > 36
           ? `${customerName.substring(0, 36)}...`
           : customerName;
-
       return (
         <TooltipProvider>
           <Tooltip>
@@ -153,34 +227,6 @@ export const columns: ColumnDef<SalesInvoiceHdColumns>[] = [
     },
     filterFn: (row, id, value: string) => {
       return value.includes(row.getValue(id));
-    },
-  },
-  {
-    accessorKey: 'monthYear',
-    header: 'Month Year',
-    enableHiding: true,
-    filterFn: (
-      row,
-      id,
-      filterValue: { start: Date; end: Date } | undefined
-    ) => {
-      if (!filterValue || !filterValue.start || !filterValue.end) return true;
-      const rowValue = row.getValue(id) as string;
-      if (rowValue === 'N/A') return false;
-      const rowDate = parse(rowValue, 'MMM yyyy', new Date());
-      if (!isValid(rowDate)) {
-        console.warn(`Invalid monthYear format: ${rowValue}`);
-        return false;
-      }
-      const normalizedRowDate = startOfMonth(rowDate);
-      const filterStart = startOfMonth(filterValue.start);
-      const filterEnd = endOfMonth(filterValue.end);
-      const isInRange =
-        normalizedRowDate >= filterStart && normalizedRowDate <= filterEnd;
-      console.log(
-        `Filtering row: monthYear=${rowValue}, normalizedRowDate=${normalizedRowDate.toISOString()}, filterStart=${filterStart.toISOString()}, filterEnd=${filterEnd.toISOString()}, isInRange=${isInRange}`
-      );
-      return isInRange;
     },
   },
 ];

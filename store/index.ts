@@ -308,6 +308,9 @@ interface SalesInvoiceHdState {
   setStatus: (status: string[]) => void;
   invoiceType: string[]; // Array invoiceType
   setInvoiceType: (invoiceType: string[]) => void;
+
+  poType: string[]; // Array invoicePoType
+  setPoType: (invoicePoType: string[]) => void;
   salesPersonName: string[]; // Array salesPersonName
   setSalesPersonName: (salesPersonName: string[]) => void;
   startPeriod: Date | null;
@@ -325,6 +328,9 @@ export const useSalesInvoiceHdFilterStore = create<SalesInvoiceHdState>()(
       setStatus: (status) => set({ status }),
       setInvoiceType: (invoiceType) => set({ invoiceType }),
       setSalesPersonName: (salesPersonName) => set({ salesPersonName }), // Tambahkan setter untuk salesPersonName
+
+      poType: [],
+      setPoType: (poType) => set({ poType }),
 
       startPeriod: null,
       setStartPeriod: (startPeriod) => set({ startPeriod }),

@@ -37,17 +37,17 @@ const SalesInvoiceHdPage = () => {
 
   const formattedInvoiceHd: SalesInvoiceHdColumns[] =
     data?.map((item) => ({
+      poType: item.poType?.trim() ?? '',
       po_id: item.po_id ?? '',
       invoiceDate: item.invoiceDate,
       invoice_id: item.invoice_id.trim(),
       customerName: item.customerName.trim(),
-      invoiceTypeName: item.invoiceTypeName.trim(),
-      invoicePoTypeName: item.invoicePoTypeName.trim(),
-      invoiceType_id: item.invoiceType_id,
+      invoiceType: item.invoiceType.trim(),
+      PoType: item.poType?.trim() ?? '',
       total_amount: item.total_amount,
       salesPersonName: item.salesPersonName.trim(),
       paidStatus: item.paidStatus,
-      monthYear: item.monthYear,
+      // monthYear: item.monthYear,
     })) ?? [];
 
   return (

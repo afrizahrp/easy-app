@@ -19,17 +19,20 @@ interface SalesInvoiceHdProps {
 }
 
 const columnLabels = {
+  poType: 'Po Type',
+  po_id: 'Po Id',
   customerName: 'Customer',
   salesPersonName: 'Sales Person',
-  invoiceNo: 'Invoice No',
+  invoiceNo: 'Invoice Id',
   invoiceDate: 'Invoice Date',
   total_amount: 'Total Amount',
   paidStatus: 'Paid Status',
 };
 
 const searchOptionItem = {
-  invoice_id: 'Invoice No',
   customerName: 'Customer',
+  po_id: 'Po No',
+  invoice_id: 'Invoice No',
 };
 
 export const InvoiceListTable: React.FC<SalesInvoiceHdProps> = ({
