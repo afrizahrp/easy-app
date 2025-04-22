@@ -98,10 +98,10 @@ export function SalesInvoiceFilterSidebar<TData>({
 
     // Terapkan filter invoiceDate
     let filterValue: { start: Date; end: Date } | undefined;
-    if (normalizedStart && normalizedEnd) {
+    if (normalizedStart) {
       filterValue = {
         start: normalizedStart,
-        end: normalizedEnd,
+        end: normalizedEnd ?? zonedTimeToUtc(endOfMonth(startPeriod!), 'UTC'),
       };
     }
 
