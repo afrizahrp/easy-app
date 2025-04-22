@@ -5,6 +5,7 @@ import {
   useModuleStore,
   useSalesInvoiceHdFilterStore,
 } from '@/store';
+import { format } from 'date-fns';
 
 interface SalesInvoiceHdSalesPerson {
   id: string;
@@ -19,12 +20,14 @@ interface SalesInvoiceHdSalesPersonResponse {
 export const useSalesInvoiceHdSalesPerson = () => {
   const user = useSessionStore((state) => state.user);
   const company_id = user?.company_id.toLocaleUpperCase(); // Pastikan company_id dalam huruf besar
-  // const module_id = useModuleStore((state) => state.moduleId);
-  const module_id = 'SLS'; // Hardcode module_id untuk Sales Invoice
-  const { salesPersonName, status } = useSalesInvoiceHdFilterStore((state) => ({
-    salesPersonName: state.salesPersonName,
-    status: state.status, // Ambil status (paidStatus) dari store
-  }));
+  const module_id = useModuleStore((state) => state.moduleId);
+  const { startPeriod, endPeriod, status, poType } =
+    useSalesInvoiceHdFilterStore((state) => ({
+      startPeriod: state.startPeriod,
+      endPeriod: state.endPeriod,
+      poType: state.poType,
+      status: state.status,
+    }));
 
   const isEnabled = !!company_id && !!module_id;
 
@@ -32,24 +35,32 @@ export const useSalesInvoiceHdSalesPerson = () => {
     SalesInvoiceHdSalesPersonResponse,
     Error
   >({
-    queryKey: [
-      'salesPersonName',
-      company_id,
-      module_id,
-      salesPersonName,
-      status,
-    ], // Tambahkan status ke queryKey
+    queryKey: ['salesPersonName', company_id, module_id, status, poType], // Tambahkan status ke queryKey
     queryFn: async () => {
       // Bangun URL dengan parameter salesPersonName dan paidStatus
       const params = new URLSearchParams();
-      if (salesPersonName?.length) {
-        params.append('salesPersonName', salesPersonName.join(','));
-      }
-      if (status?.length) {
-        params.append('paidStatus', status.join(',')); // Tambahkan paidStatus ke query
+
+      // Jika ada startPeriod, tambahkan ke query string dengan format yang sesuai
+      if (startPeriod) {
+        params.append('startPeriod', format(startPeriod, 'MMMyyyy')); // Konversi Date ke string dalam format MMMyyyy
       }
 
-      const url = `${process.env.NEXT_PUBLIC_API_URL}/${company_id}/${module_id}/get-invoiceHd/salesPersonName${
+      if (endPeriod) {
+        params.append('endPeriod', format(endPeriod, 'MMMyyyy')); // Konversi Date ke string dalam format MMMyyyy
+      }
+
+      if (poType?.length) {
+        poType.forEach((name) => {
+          params.append('poType', name); // ⬅️ jadi salesPersonName=HANDOYO&salesPersonName=RISA
+        });
+      }
+
+      // Jika ada status, tambahkan ke query string
+      if (status?.length) {
+        params.append('status', status.join(','));
+      }
+
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/${company_id}/${module_id}/get-invoiceHd/getSalesPerson${
         params.toString() ? `?${params.toString()}` : ''
       }`;
 

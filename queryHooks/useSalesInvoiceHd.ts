@@ -60,23 +60,6 @@ const useSalesInvoiceHd = ({
       })
     );
 
-    if (extra.status?.length) {
-      result.status = extra.status.join(',');
-    }
-
-    if (extra.salesPersonName?.length) {
-      result.salesPersonName = extra.salesPersonName.join(',');
-    }
-
-    if (extra.poType?.length) {
-      result.poType = extra.poType.join(',');
-    }
-
-    if (extra.searchBy && extra.searchTerm) {
-      result.searchBy = extra.searchBy;
-      result.searchTerm = extra.searchTerm;
-    }
-
     if (extra.startPeriod) {
       result.startPeriod = format(extra.startPeriod, 'MMMyyyy');
     }
@@ -85,7 +68,24 @@ const useSalesInvoiceHd = ({
       result.endPeriod = format(extra.endPeriod, 'MMMyyyy');
     }
 
-    console.log('Filtered params:', result);
+    if (extra.status?.length) {
+      result.status = extra.status; //.join(',');
+    }
+
+    if (extra.salesPersonName?.length) {
+      result.salesPersonName = extra.salesPersonName; //.join(',');
+    }
+
+    if (extra.poType?.length) {
+      result.poType = extra.poType; //.join(',');
+    }
+
+    if (extra.searchBy && extra.searchTerm) {
+      result.searchBy = extra.searchBy;
+      result.searchTerm = extra.searchTerm;
+    }
+
+    // console.log('Filtered params:', result);
 
     return result;
   };
@@ -135,7 +135,21 @@ const useSalesInvoiceHd = ({
 
       const response = await api.get<SalesInvoiceHdResponse>(url, {
         params: filteredParams,
+        paramsSerializer: (params) => {
+          return new URLSearchParams(
+            Object.entries(params).flatMap(([key, value]) => {
+              if (Array.isArray(value)) {
+                return value.map((v) => [key, v]);
+              }
+              return [[key, value]];
+            })
+          ).toString();
+        },
       });
+
+      // const response = await api.get<SalesInvoiceHdResponse>(url, {
+      //   params: filteredParams,
+      // });
 
       console.log('Backend response:', response.data);
 

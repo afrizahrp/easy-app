@@ -164,7 +164,7 @@ export function SalesInvoiceFilterSidebar<TData>({
     setPoType([]);
     setStartPeriod(null);
     setEndPeriod(null);
-    console.log('Filters reset, startPeriod:', null, 'endPeriod:', null);
+    // console.log('Filters reset, startPeriod:', null, 'endPeriod:', null);
     toast({
       description: 'All filters have been cleared.',
       color: 'success',
@@ -262,28 +262,6 @@ export function SalesInvoiceFilterSidebar<TData>({
         </div>
 
         <div className='w-full py-3'>
-          {table.getColumn('poType') && (
-            <DataTableFacetedFilter
-              column={table.getColumn('poType')}
-              title='PO Type'
-              options={poTypeOptionList}
-              isLoading={isPoTypeLoading}
-              disabled={salesPersonName.length > 1}
-              selectedValues={new Set(poType)}
-              onSelect={(value) => {
-                const updatedValues = new Set(poType);
-                value
-                  ? updatedValues.has(value)
-                    ? updatedValues.delete(value)
-                    : updatedValues.add(value)
-                  : updatedValues.clear();
-                setPoType(Array.from(updatedValues));
-              }}
-            />
-          )}
-        </div>
-
-        <div className='w-full py-3'>
           {table.getColumn('paidStatus') && (
             <DataTableFacetedFilter
               column={table.getColumn('paidStatus')}
@@ -300,6 +278,28 @@ export function SalesInvoiceFilterSidebar<TData>({
                     : updatedValues.add(value)
                   : updatedValues.clear();
                 setStatus(Array.from(updatedValues));
+              }}
+            />
+          )}
+        </div>
+
+        <div className='w-full py-3'>
+          {table.getColumn('poType') && (
+            <DataTableFacetedFilter
+              column={table.getColumn('poType')}
+              title='PO Type'
+              options={poTypeOptionList}
+              isLoading={isPoTypeLoading}
+              disabled={salesPersonName.length > 1}
+              selectedValues={new Set(poType)}
+              onSelect={(value) => {
+                const updatedValues = new Set(poType);
+                value
+                  ? updatedValues.has(value)
+                    ? updatedValues.delete(value)
+                    : updatedValues.add(value)
+                  : updatedValues.clear();
+                setPoType(Array.from(updatedValues));
               }}
             />
           )}
