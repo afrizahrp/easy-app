@@ -21,7 +21,6 @@ export type SalesInvoiceHdColumns = {
   salesPersonName: string;
   paidStatus: string;
   total_amount: number;
-  invoiceType: string;
 };
 
 export const columns: ColumnDef<SalesInvoiceHdColumns>[] = [

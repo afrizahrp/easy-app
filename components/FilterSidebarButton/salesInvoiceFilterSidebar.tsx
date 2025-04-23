@@ -3,9 +3,11 @@ import { useEffect, useState } from 'react';
 import { Cross2Icon } from '@radix-ui/react-icons';
 import { Table } from '@tanstack/react-table';
 import { AlertCircle } from 'lucide-react';
-import { startOfMonth, endOfMonth, isValid, set, format } from 'date-fns';
+import { startOfMonth, endOfMonth, isValid, format } from 'date-fns';
+import { set as setDate } from 'date-fns';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
+import { zonedTimeToUtc } from 'date-fns-tz';
 
 import useSalesInvoiceHdPaidStatusOptions from '@/queryHooks/useSalesInvoiceHdPaidStatusOptions';
 import useSalesInvoiceHdSalesPersonOptions from '@/queryHooks/useSalesInvoiceHdSalesPersonOptions';
@@ -15,7 +17,6 @@ import { DataTableFacetedFilter } from '@/components/ui/data-table-faceted-filte
 import { useSalesInvoiceHdFilterStore } from '@/store';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/components/ui/use-toast';
-import { utcToZonedTime, zonedTimeToUtc } from 'date-fns-tz';
 
 interface SalesInvoiceFilterSidebarProps<TData> {
   table: Table<TData>;
@@ -29,8 +30,8 @@ export function SalesInvoiceFilterSidebar<TData>({
     setStartPeriod,
     endPeriod,
     setEndPeriod,
-    status,
-    setStatus,
+    paidStatus,
+    setPaidStatus,
     poType,
     setPoType,
     salesPersonName,
@@ -75,7 +76,7 @@ export function SalesInvoiceFilterSidebar<TData>({
     console.log('Applying filters:', {
       startPeriod: normalizedStart?.toISOString(),
       endPeriod: normalizedEnd?.toISOString(),
-      status,
+      paidStatus, // Diperbaiki dari 'status'
       salesPersonName,
       poType,
       formattedForBackend: {
@@ -88,7 +89,7 @@ export function SalesInvoiceFilterSidebar<TData>({
 
     table
       .getColumn('paidStatus')
-      ?.setFilterValue(status.length ? status : undefined);
+      ?.setFilterValue(paidStatus.length ? paidStatus : undefined);
     table
       .getColumn('salesPersonName')
       ?.setFilterValue(salesPersonName.length ? salesPersonName : undefined);
@@ -98,10 +99,10 @@ export function SalesInvoiceFilterSidebar<TData>({
 
     // Terapkan filter invoiceDate
     let filterValue: { start: Date; end: Date } | undefined;
-    if (normalizedStart) {
+    if (normalizedStart && startPeriod) {
       filterValue = {
         start: normalizedStart,
-        end: normalizedEnd ?? zonedTimeToUtc(endOfMonth(startPeriod!), 'UTC'),
+        end: normalizedEnd ?? zonedTimeToUtc(endOfMonth(startPeriod), 'UTC'),
       };
     }
 
@@ -112,20 +113,10 @@ export function SalesInvoiceFilterSidebar<TData>({
     // Log data yang difilter
     const filteredRows = table.getFilteredRowModel().rows;
     console.log('Filtered rows count:', filteredRows.length);
-    // console.log(
-    //   'Sample filtered rows:',
-    //   filteredRows.slice(0, 5).map((row) => ({
-    //     invoice_id: row.original.invoice_id,
-    //     invoiceDate: row.original.invoiceDate,
-    //     paidStatus: row.original.paidStatus,
-    //     salesPersonName: row.original.salesPersonName,
-    //     poType: row.original.poType,
-    //   }))
-    // );
   }, [
     startPeriod,
     endPeriod,
-    status,
+    paidStatus,
     poType,
     salesPersonName,
     table,
@@ -135,9 +126,9 @@ export function SalesInvoiceFilterSidebar<TData>({
 
   useEffect(() => {
     if (salesPersonName.length > 1) {
-      setStatus([]);
+      setPaidStatus([]);
     }
-  }, [salesPersonName, setStatus]);
+  }, [salesPersonName, setPaidStatus]);
 
   useEffect(() => {
     if (salesPersonName.length > 1) {
@@ -157,14 +148,28 @@ export function SalesInvoiceFilterSidebar<TData>({
     useSalesInvoiceHdPoTypeOptions();
 
   const handleReset = () => {
-    console.log('Resetting filters...');
+    // console.log('Resetting filters...');
     table.resetColumnFilters();
-    setStatus([]);
+    setPaidStatus([]);
     setSalesPersonName([]);
     setPoType([]);
-    setStartPeriod(null);
-    setEndPeriod(null);
-    // console.log('Filters reset, startPeriod:', null, 'endPeriod:', null);
+    // Atur ulang ke nilai default
+    setStartPeriod(
+      setDate(startOfMonth(new Date(2025, 0, 1)), {
+        hours: 0,
+        minutes: 0,
+        seconds: 0,
+        milliseconds: 0,
+      })
+    );
+    setEndPeriod(
+      setDate(endOfMonth(new Date()), {
+        hours: 23,
+        minutes: 59,
+        seconds: 59,
+        milliseconds: 999,
+      })
+    );
     toast({
       description: 'All filters have been cleared.',
       color: 'success',
@@ -193,7 +198,7 @@ export function SalesInvoiceFilterSidebar<TData>({
               selected={startPeriod}
               onChange={(date) => {
                 const newStart = date
-                  ? set(startOfMonth(date), {
+                  ? setDate(startOfMonth(date), {
                       hours: 0,
                       minutes: 0,
                       seconds: 0,
@@ -239,7 +244,7 @@ export function SalesInvoiceFilterSidebar<TData>({
               onChange={(date) =>
                 setEndPeriod(
                   date
-                    ? set(endOfMonth(date), {
+                    ? setDate(endOfMonth(date), {
                         hours: 23,
                         minutes: 59,
                         seconds: 59,
@@ -250,7 +255,7 @@ export function SalesInvoiceFilterSidebar<TData>({
               }
               showMonthYearPicker
               dateFormat='MMM yyyy'
-              placeholderText='Mar 2025'
+              placeholderText={format(endOfMonth(new Date()), 'MMM yyyy')} // Diperbaiki ke dinamis
               minDate={startPeriod ? startOfMonth(startPeriod) : undefined}
               className='w-[120px] h-10 px-3 border rounded-md'
               shouldCloseOnSelect={false}
@@ -269,15 +274,15 @@ export function SalesInvoiceFilterSidebar<TData>({
               options={statusOptionList}
               isLoading={isStatusLoading}
               disabled={salesPersonName.length > 1}
-              selectedValues={new Set(status)}
+              selectedValues={new Set(paidStatus)}
               onSelect={(value) => {
-                const updatedValues = new Set(status);
+                const updatedValues = new Set(paidStatus);
                 value
                   ? updatedValues.has(value)
                     ? updatedValues.delete(value)
                     : updatedValues.add(value)
                   : updatedValues.clear();
-                setStatus(Array.from(updatedValues));
+                setPaidStatus(Array.from(updatedValues));
               }}
             />
           )}
@@ -320,10 +325,6 @@ export function SalesInvoiceFilterSidebar<TData>({
                     ? updatedValues.delete(value)
                     : updatedValues.add(value)
                   : updatedValues.clear();
-                console.log(
-                  'SalesInvoiceFilterSidebar: Setting salesPersonName:',
-                  Array.from(updatedValues)
-                );
                 setSalesPersonName(Array.from(updatedValues));
               }}
             />

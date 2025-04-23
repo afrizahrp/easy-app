@@ -20,7 +20,8 @@ interface SalesInvoiceHdStatusResponse {
 export const useSalesInvoiceHdPaidStatus = () => {
   const user = useSessionStore((state) => state.user);
   const company_id = user?.company_id.toLocaleUpperCase();
-  const module_id = useModuleStore((state) => state.moduleId);
+  // const module_id = useModuleStore((state) => state.moduleId);
+  const module_id = 'SLS';
 
   // Ambil filter dari store
   const { startPeriod, endPeriod, poType, salesPersonName } =
@@ -76,7 +77,7 @@ export const useSalesInvoiceHdPaidStatus = () => {
         params.toString() ? `?${params.toString()}` : ''
       }`;
 
-      console.log('filtered params:', params.toString());
+      console.log('response url:', url);
 
       const response = await api.get<SalesInvoiceHdStatusResponse>(url);
       return response.data;

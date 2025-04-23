@@ -2,6 +2,8 @@ import { create } from 'zustand';
 import { siteConfig } from '@/config/site';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { SortingState } from '@tanstack/react-table';
+import { startOfMonth, endOfMonth } from 'date-fns';
+import { set as setDate } from 'date-fns';
 
 interface ThemeStoreState {
   theme: string;
@@ -304,42 +306,64 @@ export const useCategoryFilterStore = create<CategoryFilterState>()(
 );
 
 interface SalesInvoiceHdState {
-  status: string[]; // Array status
-  setStatus: (status: string[]) => void;
-  invoiceType: string[]; // Array invoiceType
-  setInvoiceType: (invoiceType: string[]) => void;
-
-  poType: string[]; // Array invoicePoType
-  setPoType: (invoicePoType: string[]) => void;
-  salesPersonName: string[]; // Array salesPersonName
-  setSalesPersonName: (salesPersonName: string[]) => void;
   startPeriod: Date | null;
-  setStartPeriod: (startPeriod: Date | null) => void;
+  setStartPeriod: (date: Date | null) => void;
   endPeriod: Date | null;
-  setEndPeriod: (endPeriod: Date | null) => void;
+  setEndPeriod: (date: Date | null) => void;
+  paidStatus: string[];
+  setPaidStatus: (status: string[]) => void;
+  poType: string[];
+  setPoType: (poType: string[]) => void;
+  salesPersonName: string[];
+  setSalesPersonName: (salesPersonName: string[]) => void;
 }
 
 export const useSalesInvoiceHdFilterStore = create<SalesInvoiceHdState>()(
   persist(
     (set) => ({
-      status: [],
-      invoiceType: [],
-      salesPersonName: [], // Array salesPersonName
-      setStatus: (status) => set({ status }),
-      setInvoiceType: (invoiceType) => set({ invoiceType }),
-      setSalesPersonName: (salesPersonName) => set({ salesPersonName }), // Tambahkan setter untuk salesPersonName
-
+      // Nilai default: Jan 2025
+      startPeriod: setDate(startOfMonth(new Date(2025, 0, 1)), {
+        hours: 0,
+        minutes: 0,
+        seconds: 0,
+        milliseconds: 0,
+      }),
+      setStartPeriod: (date) => set({ startPeriod: date }),
+      // Nilai default: Akhir bulan berjalan (misalnya, Apr 2025 jika sekarang Apr 2025)
+      endPeriod: setDate(endOfMonth(new Date()), {
+        hours: 23,
+        minutes: 59,
+        seconds: 59,
+        milliseconds: 999,
+      }),
+      setEndPeriod: (date) => set({ endPeriod: date }),
+      paidStatus: [],
+      setPaidStatus: (status) => set({ paidStatus: status }),
       poType: [],
       setPoType: (poType) => set({ poType }),
-
-      startPeriod: null,
-      setStartPeriod: (startPeriod) => set({ startPeriod }),
-      endPeriod: null,
-      setEndPeriod: (endPeriod) => set({ endPeriod }),
+      salesPersonName: [],
+      setSalesPersonName: (salesPersonName) => set({ salesPersonName }),
     }),
     {
-      name: 'sales-invoiceHd-filter-store', // Nama kunci di localStorage
+      name: 'sales-invoice-filter', // Nama kunci di localStorage
       storage: createJSONStorage(() => localStorage), // Gunakan localStorage
+      partialize: (state) => ({
+        // Hanya simpan properti yang relevan
+        startPeriod: state.startPeriod ? state.startPeriod.toISOString() : null,
+        endPeriod: state.endPeriod ? state.endPeriod.toISOString() : null,
+        paidStatus: state.paidStatus,
+        poType: state.poType,
+        salesPersonName: state.salesPersonName,
+      }),
+      onRehydrateStorage: () => (state) => {
+        // Konversi kembali string ISO ke Date saat memuat
+        if (state) {
+          state.startPeriod = state.startPeriod
+            ? new Date(state.startPeriod)
+            : null;
+          state.endPeriod = state.endPeriod ? new Date(state.endPeriod) : null;
+        }
+      },
     }
   )
 );

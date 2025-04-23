@@ -33,9 +33,10 @@ const useSalesInvoiceHd = ({
 }: UseSalesInvoiceHdParams) => {
   const user = useSessionStore((state) => state.user);
   const company_id = user?.company_id.toLocaleUpperCase();
-  const module_id = useModuleStore((state) => state.moduleId);
+  // const module_id = useModuleStore((state) => state.moduleId);
+  const module_id = 'SLS';
   const searchParams = useSearchParamsStore((state) => state.searchParams);
-  const { status, salesPersonName, startPeriod, endPeriod, poType } =
+  const { startPeriod, endPeriod, paidStatus, poType, salesPersonName } =
     useSalesInvoiceHdFilterStore();
 
   const isValidRequest = Boolean(company_id && module_id);
@@ -43,13 +44,13 @@ const useSalesInvoiceHd = ({
   const buildFilteredParams = (
     base: Record<string, any>,
     extra: {
-      status?: string[];
-      salesPersonName?: string[];
-      poType?: string[];
-      searchBy?: string;
-      searchTerm?: string;
       startPeriod?: Date | null;
       endPeriod?: Date | null;
+      paidStatus?: string[];
+      poType?: string[];
+      salesPersonName?: string[];
+      searchBy?: string;
+      searchTerm?: string;
     }
   ): Record<string, any> => {
     const result = Object.fromEntries(
@@ -68,8 +69,8 @@ const useSalesInvoiceHd = ({
       result.endPeriod = format(extra.endPeriod, 'MMMyyyy');
     }
 
-    if (extra.status?.length) {
-      result.status = extra.status; //.join(',');
+    if (extra.paidStatus?.length) {
+      result.paidStatus = extra.paidStatus; //.join(',');
     }
 
     if (extra.salesPersonName?.length) {
@@ -101,11 +102,11 @@ const useSalesInvoiceHd = ({
       page,
       limit,
       JSON.stringify(searchParams),
-      status,
-      salesPersonName,
-      poType,
       startPeriod,
       endPeriod,
+      paidStatus,
+      poType,
+      salesPersonName,
       searchBy,
       searchTerm,
       orderBy,
@@ -119,7 +120,7 @@ const useSalesInvoiceHd = ({
       const filteredParams = buildFilteredParams(
         { page, limit, orderBy, orderDir, ...searchParams },
         {
-          status,
+          paidStatus,
           salesPersonName,
           poType,
           startPeriod,

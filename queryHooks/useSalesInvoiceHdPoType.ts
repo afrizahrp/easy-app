@@ -20,14 +20,15 @@ interface SalesInvoiceHdPoTypeResponse {
 export const useSalesInvoiceHdPoType = () => {
   const user = useSessionStore((state) => state.user);
   const company_id = user?.company_id.toLocaleUpperCase(); // Pastikan company_id dalam huruf besar
-  const module_id = useModuleStore((state) => state.moduleId);
+  // const module_id = useModuleStore((state) => state.moduleId);
+  const module_id = 'SLS';
 
-  const { salesPersonName, startPeriod, endPeriod, status } =
+  const { salesPersonName, startPeriod, endPeriod, paidStatus } =
     useSalesInvoiceHdFilterStore((state) => ({
       salesPersonName: state.salesPersonName,
       startPeriod: state.startPeriod,
       endPeriod: state.endPeriod,
-      status: state.status,
+      paidStatus: state.paidStatus,
     }));
 
   const isEnabled = !!company_id && !!module_id && salesPersonName.length <= 1; // ✅ Update isEnabled logic
@@ -42,7 +43,7 @@ export const useSalesInvoiceHdPoType = () => {
       module_id,
       startPeriod,
       endPeriod,
-      status,
+      paidStatus,
       salesPersonName,
     ],
     queryFn: async () => {
@@ -55,9 +56,9 @@ export const useSalesInvoiceHdPoType = () => {
         });
       }
 
-      if (status?.length) {
-        status.forEach((name) => {
-          params.append('status', name); // ⬅️ jadi salesPersonName=HANDOYO&salesPersonName=RISA
+      if (paidStatus?.length) {
+        paidStatus.forEach((name: string) => {
+          params.append('paidStatus', name); // ⬅️ jadi salesPersonName=HANDOYO&salesPersonName=RISA
         });
       }
 

@@ -20,13 +20,14 @@ interface SalesInvoiceHdSalesPersonResponse {
 export const useSalesInvoiceHdSalesPerson = () => {
   const user = useSessionStore((state) => state.user);
   const company_id = user?.company_id.toLocaleUpperCase(); // Pastikan company_id dalam huruf besar
-  const module_id = useModuleStore((state) => state.moduleId);
-  const { startPeriod, endPeriod, status, poType } =
+  // const module_id = useModuleStore((state) => state.moduleId);
+  const module_id = 'SLS'; // Ganti dengan ID modul yang sesuai
+  const { startPeriod, endPeriod, paidStatus, poType } =
     useSalesInvoiceHdFilterStore((state) => ({
       startPeriod: state.startPeriod,
       endPeriod: state.endPeriod,
       poType: state.poType,
-      status: state.status,
+      paidStatus: state.paidStatus,
     }));
 
   const isEnabled = !!company_id && !!module_id;
@@ -56,8 +57,10 @@ export const useSalesInvoiceHdSalesPerson = () => {
       }
 
       // Jika ada status, tambahkan ke query string
-      if (status?.length) {
-        params.append('status', status.join(','));
+      if (paidStatus?.length) {
+        paidStatus.forEach((name: string) => {
+          params.append('paidStatus', name); // ⬅️ jadi salesPersonName=HANDOYO&salesPersonName=RISA
+        });
       }
 
       const url = `${process.env.NEXT_PUBLIC_API_URL}/${company_id}/${module_id}/get-invoiceHd/getSalesPerson${

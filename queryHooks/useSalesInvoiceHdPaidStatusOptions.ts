@@ -11,7 +11,7 @@ export default function useSalesInvoiceHdStatusOptions() {
 
   const options =
     statusData?.map((status) => ({
-      value: status.id, // Sesuaikan dengan format API
+      value: status.name, // Sesuaikan dengan format API
       label: status.name, // Tambahkan count dengan pemisah ribuan di label
       count: Number(status.count), // Pastikan count tetap number
     })) || [];
