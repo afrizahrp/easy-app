@@ -39,6 +39,7 @@ export const columns: ColumnDef<SalesInvoiceHdColumns>[] = [
     filterFn: (row, id, value: string) => {
       return value.includes(row.getValue(id));
     },
+    enableSorting: false,
   },
   {
     accessorKey: 'po_id',
@@ -227,5 +228,6 @@ export const columns: ColumnDef<SalesInvoiceHdColumns>[] = [
     filterFn: (row, id, value: string) => {
       return value.includes(row.getValue(id));
     },
+    enableSorting: false,
   },
 ];
