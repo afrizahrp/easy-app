@@ -33,7 +33,7 @@ const Providers = ({ children }: { children: React.ReactNode }) => {
   }
   return (
     <body
-      className={cn('dash-tail-app ', inter.className, 'theme-' + theme)}
+      className={cn('easyApp ', inter.className, 'theme-' + theme)}
       style={
         {
           '--radius': `${radius}rem`,

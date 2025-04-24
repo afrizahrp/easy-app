@@ -1,7 +1,9 @@
 'use client';
-import { useState } from 'react';
 import { DataTable } from '@/components/ui/data-table';
+import { SortingState } from '@tanstack/react-table';
+
 import { BillboardColumn, columns } from './columns';
+
 import { routes } from '@/config/routes';
 // import { Heading } from '@/components/ui/heading';
 // import { Separator } from '@/components/ui/separator';
@@ -16,7 +18,29 @@ interface BillboardsClientProps {
   onPageChange: (page: number) => void;
   limit: number;
   setLimit: (limit: number) => void;
+  sorting: SortingState;
+
+  setSorting: (
+    sorting: SortingState | ((old: SortingState) => SortingState)
+  ) => void;
 }
+
+const columnLabels = {
+  poType: 'Po Type',
+  po_id: 'Po Id',
+  customerName: 'Customer',
+  salesPersonName: 'Sales Person',
+  invoiceNo: 'Invoice Id',
+  invoiceDate: 'Invoice Date',
+  total_amount: 'Total Amount',
+  paidStatus: 'Paid Status',
+};
+
+const searchOptionItem = {
+  customerName: 'Customer',
+  po_id: 'Po No',
+  invoice_id: 'Invoice No',
+};
 
 export const BillboardListTable: React.FC<BillboardsClientProps> = ({
   data,
@@ -26,6 +50,8 @@ export const BillboardListTable: React.FC<BillboardsClientProps> = ({
   onPageChange,
   limit,
   setLimit,
+  sorting,
+  setSorting,
 }) => {
   return (
     <div>
@@ -41,6 +67,10 @@ export const BillboardListTable: React.FC<BillboardsClientProps> = ({
         onPageChange={onPageChange}
         limit={limit}
         setLimit={setLimit}
+        sorting={sorting} // Pass sorting
+        setSorting={setSorting} // Pass setSorting
+        columnLabels={columnLabels} // Pass columnLabels
+        searchOptionItem={searchOptionItem} // Pass searchOptionItem
       />
     </div>
   );

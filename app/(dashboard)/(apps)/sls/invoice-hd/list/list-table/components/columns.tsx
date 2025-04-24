@@ -101,7 +101,6 @@ export const columns: ColumnDef<SalesInvoiceHdColumns>[] = [
       filterValue: { start: Date; end: Date } | undefined
     ) => {
       if (!filterValue || !filterValue.start || !filterValue.end) {
-        console.log('No date filter applied for invoiceDate');
         return true;
       }
       const rawDate = row.getValue(id);
@@ -109,12 +108,6 @@ export const columns: ColumnDef<SalesInvoiceHdColumns>[] = [
       try {
         rowDate =
           rawDate instanceof Date ? rawDate : new Date(rawDate as string);
-        if (!isValid(rowDate)) {
-          console.warn(
-            `Invalid invoiceDate for invoice_id=${row.original.invoice_id}: ${rawDate}`
-          );
-          return false;
-        }
       } catch (error) {
         console.warn(
           `Error parsing invoiceDate for invoice_id=${row.original.invoice_id}: ${rawDate}`,
@@ -125,11 +118,7 @@ export const columns: ColumnDef<SalesInvoiceHdColumns>[] = [
       const isInRange =
         rowDate >= filterValue.start && rowDate <= filterValue.end;
       // Log hanya untuk faktur di Jan 2025
-      if (rowDate.getFullYear() === 2025 && rowDate.getMonth() === 0) {
-        console.log(
-          `Filtering Jan 2025 row: invoice_id=${row.original.invoice_id}, invoiceDate=${rowDate.toISOString()}, filterStart=${filterValue.start.toISOString()}, filterEnd=${filterValue.end.toISOString()}, isInRange=${isInRange}`
-        );
-      }
+
       return isInRange;
     },
   },
@@ -185,7 +174,7 @@ export const columns: ColumnDef<SalesInvoiceHdColumns>[] = [
     header: ({ column }) => (
       <DataTableColumnHeader
         column={column}
-        title='Total Amount'
+        title='Invoice Amount'
         align='right'
       />
     ),

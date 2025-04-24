@@ -14,6 +14,7 @@ import { format } from 'date-fns';
 interface SalesInvoiceHdResponse {
   data: SalesInvoiceHd[];
   totalRecords: number;
+  grandTotal_amount?: number;
 }
 
 interface UseSalesInvoiceHdParams {
@@ -163,6 +164,7 @@ const useSalesInvoiceHd = ({
   return {
     data: data?.data,
     total: data?.totalRecords,
+    grandTotal_amount: data?.grandTotal_amount,
     isLoading,
     isFetching,
     error,

@@ -20,6 +20,7 @@ import { Icon } from '@iconify/react';
 import useCompanies from '@/queryHooks/use-companies';
 import useSalesInvoiceDt from '@/queryHooks/useSalesInvoiceDt';
 import LayoutLoader from '@/components/layout-loader';
+import PageHeader from '@/components/page-header';
 
 export default function SalesInvoiceDtPage({
   params,
@@ -68,18 +69,15 @@ export default function SalesInvoiceDtPage({
       ? format(invoiceDate, 'dd/MM/yyyy')
       : format(new Date(invoiceDate as string | number), 'dd/MM/yyyy');
 
-  const companyName = companies?.find(
-    (company) => company.id === company_id
-  )?.name;
-
   return (
     <div>
-      <Breadcrumbs>
-        <BreadcrumbItem>Sales</BreadcrumbItem>
-        <BreadcrumbItem>Invoice</BreadcrumbItem>
-        <BreadcrumbItem>{invoice_id}</BreadcrumbItem>
-      </Breadcrumbs>
-
+      <PageHeader
+        title='Invoice Detail List'
+        breadcrumb={[
+          { name: 'Sales' },
+          { name: 'Invoice List', href: '/dsb/sls/invoice-hd/list' },
+        ]}
+      />
       <div className='grid grid-cols-12 gap-6 mt-6'>
         <div className='col-span-12'>
           <Card>

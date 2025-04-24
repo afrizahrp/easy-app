@@ -8,6 +8,10 @@ import PageHeader from '@/components/page-header';
 import useSalesInvoiceHd from '@/queryHooks/useSalesInvoiceHd';
 import { SalesInvoiceHdColumns } from './list-table/components/columns';
 import { usePageStore } from '@/store';
+import { FooterSummarySection } from '@/components/footer-summary-section';
+import { FooterSummaryItem } from '@/components/footer-summary-item';
+import InvoicePageFooter from './invoiceFilter-Summary';
+import InvoiceFilterSummary from './invoiceFilter-Summary';
 
 const SalesInvoiceHdPage = () => {
   const { currentPage, sorting, limit, setCurrentPage, setSorting, setLimit } =
@@ -16,12 +20,13 @@ const SalesInvoiceHdPage = () => {
   const orderBy = sort?.id ?? 'invoiceDate';
   const orderDir = sort?.desc ? 'desc' : 'asc';
 
-  const { data, total, isFetching, error } = useSalesInvoiceHd({
-    page: currentPage,
-    limit,
-    orderBy,
-    orderDir,
-  });
+  const { data, total, grandTotal_amount, isFetching, error } =
+    useSalesInvoiceHd({
+      page: currentPage,
+      limit,
+      orderBy,
+      orderDir,
+    });
 
   if (isFetching && !data) {
     return (
@@ -46,6 +51,7 @@ const SalesInvoiceHdPage = () => {
       total_amount: item.total_amount,
       salesPersonName: item.salesPersonName.trim(),
       paidStatus: item.paidStatus,
+      grandTotal_amount: item.grandTotal_amount,
       // monthYear: item.monthYear,
     })) ?? [];
 
@@ -58,6 +64,12 @@ const SalesInvoiceHdPage = () => {
           { name: 'List' },
         ]}
       />
+
+      <Card className='mt-4'>
+        <CardContent className='p-4'>
+          <InvoiceFilterSummary />
+        </CardContent>
+      </Card>
       <div>
         <Card className='mt-6'>
           <CardContent className='p-10'>
@@ -75,6 +87,17 @@ const SalesInvoiceHdPage = () => {
           </CardContent>
         </Card>
       </div>
+
+      <Card className='mt-4'>
+        <CardContent className='p-4'>
+          <FooterSummarySection className='w-full flex justify-end'>
+            <FooterSummaryItem
+              label='Total Invoice'
+              value={grandTotal_amount}
+            />
+          </FooterSummarySection>
+        </CardContent>
+      </Card>
     </>
   );
 };

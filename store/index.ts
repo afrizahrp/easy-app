@@ -304,6 +304,9 @@ export const useCategoryFilterStore = create<CategoryFilterState>()(
     }
   )
 );
+const toISOString = (date: Date | null) => (date ? date.toISOString() : null);
+const fromISOString = (dateString: string | null) =>
+  dateString ? new Date(dateString) : null;
 
 interface MonthYearPeriodState {
   startPeriod: Date | null;
@@ -335,17 +338,27 @@ export const useMonthYearPeriodStore = create<MonthYearPeriodState>()(
       setEndPeriod: (date) => set({ endPeriod: date }),
     }),
     {
-      name: 'month-year-period-store', // Nama kunci di localStorage
+      name: 'sales-invoice-filter', // Nama kunci di localStorage
       storage: createJSONStorage(() => localStorage), // Gunakan localStorage
+      partialize: (state) => ({
+        // Hanya simpan properti yang relevan
+        startPeriod: state.startPeriod ? state.startPeriod.toISOString() : null,
+        endPeriod: state.endPeriod ? state.endPeriod.toISOString() : null,
+      }),
+      onRehydrateStorage: () => (state) => {
+        // Konversi kembali string ISO ke Date saat memuat
+        if (state) {
+          state.startPeriod = state.startPeriod
+            ? new Date(state.startPeriod)
+            : null;
+          state.endPeriod = state.endPeriod ? new Date(state.endPeriod) : null;
+        }
+      },
     }
   )
 );
 
 interface SalesInvoiceHdState {
-  startPeriod: Date | null;
-  setStartPeriod: (date: Date | null) => void;
-  endPeriod: Date | null;
-  setEndPeriod: (date: Date | null) => void;
   paidStatus: string[];
   setPaidStatus: (status: string[]) => void;
   poType: string[];
@@ -357,22 +370,6 @@ interface SalesInvoiceHdState {
 export const useSalesInvoiceHdFilterStore = create<SalesInvoiceHdState>()(
   persist(
     (set) => ({
-      // Nilai default: Jan 2025
-      startPeriod: setDate(startOfMonth(new Date(2025, 0, 1)), {
-        hours: 0,
-        minutes: 0,
-        seconds: 0,
-        milliseconds: 0,
-      }),
-      setStartPeriod: (date) => set({ startPeriod: date }),
-      // Nilai default: Akhir bulan berjalan (misalnya, Apr 2025 jika sekarang Apr 2025)
-      endPeriod: setDate(endOfMonth(new Date()), {
-        hours: 23,
-        minutes: 59,
-        seconds: 59,
-        milliseconds: 999,
-      }),
-      setEndPeriod: (date) => set({ endPeriod: date }),
       paidStatus: [],
       setPaidStatus: (status) => set({ paidStatus: status }),
       poType: [],
@@ -385,21 +382,10 @@ export const useSalesInvoiceHdFilterStore = create<SalesInvoiceHdState>()(
       storage: createJSONStorage(() => localStorage), // Gunakan localStorage
       partialize: (state) => ({
         // Hanya simpan properti yang relevan
-        startPeriod: state.startPeriod ? state.startPeriod.toISOString() : null,
-        endPeriod: state.endPeriod ? state.endPeriod.toISOString() : null,
         paidStatus: state.paidStatus,
         poType: state.poType,
         salesPersonName: state.salesPersonName,
       }),
-      onRehydrateStorage: () => (state) => {
-        // Konversi kembali string ISO ke Date saat memuat
-        if (state) {
-          state.startPeriod = state.startPeriod
-            ? new Date(state.startPeriod)
-            : null;
-          state.endPeriod = state.endPeriod ? new Date(state.endPeriod) : null;
-        }
-      },
     }
   )
 );
