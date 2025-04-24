@@ -305,6 +305,42 @@ export const useCategoryFilterStore = create<CategoryFilterState>()(
   )
 );
 
+interface MonthYearPeriodState {
+  startPeriod: Date | null;
+  setStartPeriod: (date: Date | null) => void;
+  endPeriod: Date | null;
+  setEndPeriod: (date: Date | null) => void;
+}
+const currentYear = new Date().getFullYear();
+
+export const useMonthYearPeriodStore = create<MonthYearPeriodState>()(
+  persist(
+    (set) => ({
+      // Nilai default: Jan 2025
+
+      startPeriod: setDate(startOfMonth(new Date(currentYear, 0, 1)), {
+        hours: 0,
+        minutes: 0,
+        seconds: 0,
+        milliseconds: 0,
+      }),
+      setStartPeriod: (date) => set({ startPeriod: date }),
+      // Nilai default: Akhir bulan berjalan (misalnya, Apr 2025 jika sekarang Apr 2025)
+      endPeriod: setDate(endOfMonth(new Date()), {
+        hours: 23,
+        minutes: 59,
+        seconds: 59,
+        milliseconds: 999,
+      }),
+      setEndPeriod: (date) => set({ endPeriod: date }),
+    }),
+    {
+      name: 'month-year-period-store', // Nama kunci di localStorage
+      storage: createJSONStorage(() => localStorage), // Gunakan localStorage
+    }
+  )
+);
+
 interface SalesInvoiceHdState {
   startPeriod: Date | null;
   setStartPeriod: (date: Date | null) => void;

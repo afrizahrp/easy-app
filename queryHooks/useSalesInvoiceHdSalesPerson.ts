@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import {
   useSessionStore,
   useModuleStore,
+  useMonthYearPeriodStore,
   useSalesInvoiceHdFilterStore,
 } from '@/store';
 import { format } from 'date-fns';
@@ -22,13 +23,15 @@ export const useSalesInvoiceHdSalesPerson = () => {
   const company_id = user?.company_id.toLocaleUpperCase(); // Pastikan company_id dalam huruf besar
   // const module_id = useModuleStore((state) => state.moduleId);
   const module_id = 'SLS'; // Ganti dengan ID modul yang sesuai
-  const { startPeriod, endPeriod, paidStatus, poType } =
-    useSalesInvoiceHdFilterStore((state) => ({
-      startPeriod: state.startPeriod,
-      endPeriod: state.endPeriod,
-      poType: state.poType,
-      paidStatus: state.paidStatus,
-    }));
+
+  const { startPeriod, endPeriod } = useMonthYearPeriodStore();
+
+  const { paidStatus, poType } = useSalesInvoiceHdFilterStore((state) => ({
+    startPeriod: state.startPeriod,
+    endPeriod: state.endPeriod,
+    poType: state.poType,
+    paidStatus: state.paidStatus,
+  }));
 
   const isEnabled = !!company_id && !!module_id;
 

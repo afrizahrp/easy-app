@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import {
   useSessionStore,
   useModuleStore,
+  useMonthYearPeriodStore,
   useSalesInvoiceHdFilterStore,
 } from '@/store';
 import { format } from 'date-fns';
@@ -23,13 +24,16 @@ export const useSalesInvoiceHdPoType = () => {
   // const module_id = useModuleStore((state) => state.moduleId);
   const module_id = 'SLS';
 
-  const { salesPersonName, startPeriod, endPeriod, paidStatus } =
-    useSalesInvoiceHdFilterStore((state) => ({
+  const { startPeriod, endPeriod } = useMonthYearPeriodStore();
+
+  const { salesPersonName, paidStatus } = useSalesInvoiceHdFilterStore(
+    (state) => ({
       salesPersonName: state.salesPersonName,
       startPeriod: state.startPeriod,
       endPeriod: state.endPeriod,
       paidStatus: state.paidStatus,
-    }));
+    })
+  );
 
   const isEnabled = !!company_id && !!module_id && salesPersonName.length <= 1; // ✅ Update isEnabled logic
 

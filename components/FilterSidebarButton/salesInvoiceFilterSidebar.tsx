@@ -14,7 +14,7 @@ import useSalesInvoiceHdSalesPersonOptions from '@/queryHooks/useSalesInvoiceHdS
 import useSalesInvoiceHdPoTypeOptions from '@/queryHooks/useSalesInvoiceHdPoTypeOptions';
 import { Button } from '@/components/ui/button';
 import { DataTableFacetedFilter } from '@/components/ui/data-table-faceted-filter';
-import { useSalesInvoiceHdFilterStore } from '@/store';
+import { useMonthYearPeriodStore, useSalesInvoiceHdFilterStore } from '@/store';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/components/ui/use-toast';
 
@@ -25,11 +25,10 @@ interface SalesInvoiceFilterSidebarProps<TData> {
 export function SalesInvoiceFilterSidebar<TData>({
   table,
 }: SalesInvoiceFilterSidebarProps<TData>) {
+  const { startPeriod, setStartPeriod, endPeriod, setEndPeriod } =
+    useMonthYearPeriodStore();
+
   const {
-    startPeriod,
-    setStartPeriod,
-    endPeriod,
-    setEndPeriod,
     paidStatus,
     setPaidStatus,
     poType,
@@ -73,19 +72,19 @@ export function SalesInvoiceFilterSidebar<TData>({
       });
     }
 
-    console.log('Applying filters:', {
-      startPeriod: normalizedStart?.toISOString(),
-      endPeriod: normalizedEnd?.toISOString(),
-      paidStatus, // Diperbaiki dari 'status'
-      salesPersonName,
-      poType,
-      formattedForBackend: {
-        startPeriod: normalizedStart
-          ? format(normalizedStart, 'MMMyyyy')
-          : null,
-        endPeriod: normalizedEnd ? format(normalizedEnd, 'MMMyyyy') : null,
-      },
-    });
+    // console.log('Applying filters:', {
+    //   startPeriod: normalizedStart?.toISOString(),
+    //   endPeriod: normalizedEnd?.toISOString(),
+    //   paidStatus, // Diperbaiki dari 'status'
+    //   salesPersonName,
+    //   poType,
+    //   formattedForBackend: {
+    //     startPeriod: normalizedStart
+    //       ? format(normalizedStart, 'MMMyyyy')
+    //       : null,
+    //     endPeriod: normalizedEnd ? format(normalizedEnd, 'MMMyyyy') : null,
+    //   },
+    // });
 
     table
       .getColumn('paidStatus')

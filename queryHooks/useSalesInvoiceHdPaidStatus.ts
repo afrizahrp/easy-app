@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import {
   useSessionStore,
   useModuleStore,
+  useMonthYearPeriodStore,
   useSalesInvoiceHdFilterStore,
 } from '@/store';
 import { format } from 'date-fns';
@@ -24,13 +25,15 @@ export const useSalesInvoiceHdPaidStatus = () => {
   const module_id = 'SLS';
 
   // Ambil filter dari store
-  const { startPeriod, endPeriod, poType, salesPersonName } =
-    useSalesInvoiceHdFilterStore((state) => ({
-      startPeriod: state.startPeriod,
-      endPeriod: state.endPeriod,
-      poType: state.poType,
-      salesPersonName: state.salesPersonName,
-    }));
+
+  const { startPeriod, endPeriod } = useMonthYearPeriodStore();
+
+  const { poType, salesPersonName } = useSalesInvoiceHdFilterStore((state) => ({
+    startPeriod: state.startPeriod,
+    endPeriod: state.endPeriod,
+    poType: state.poType,
+    salesPersonName: state.salesPersonName,
+  }));
 
   // Pastikan enabled hanya true jika semua kondisi valid
   const isEnabled = !!company_id && !!module_id && salesPersonName.length <= 1;
@@ -76,8 +79,6 @@ export const useSalesInvoiceHdPaidStatus = () => {
       const url = `${process.env.NEXT_PUBLIC_API_URL}/${company_id}/${module_id}/get-invoiceHd/getPaidStatus${
         params.toString() ? `?${params.toString()}` : ''
       }`;
-
-      console.log('response url:', url);
 
       const response = await api.get<SalesInvoiceHdStatusResponse>(url);
       return response.data;

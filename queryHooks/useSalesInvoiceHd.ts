@@ -4,8 +4,10 @@ import {
   useSessionStore,
   useModuleStore,
   useSearchParamsStore,
+  useMonthYearPeriodStore,
   useSalesInvoiceHdFilterStore,
 } from '@/store';
+
 import { SalesInvoiceHd } from '@/types';
 import { format } from 'date-fns';
 
@@ -36,7 +38,9 @@ const useSalesInvoiceHd = ({
   // const module_id = useModuleStore((state) => state.moduleId);
   const module_id = 'SLS';
   const searchParams = useSearchParamsStore((state) => state.searchParams);
-  const { startPeriod, endPeriod, paidStatus, poType, salesPersonName } =
+
+  const { startPeriod, endPeriod } = useMonthYearPeriodStore();
+  const { paidStatus, poType, salesPersonName } =
     useSalesInvoiceHdFilterStore();
 
   const isValidRequest = Boolean(company_id && module_id);
@@ -86,8 +90,6 @@ const useSalesInvoiceHd = ({
       result.searchTerm = extra.searchTerm;
     }
 
-    // console.log('Filtered params:', result);
-
     return result;
   };
 
@@ -132,8 +134,6 @@ const useSalesInvoiceHd = ({
 
       const url = `${process.env.NEXT_PUBLIC_API_URL}/${company_id}/${module_id}/get-invoiceHd`;
 
-      console.log('Sending request to:', url, 'with params:', filteredParams);
-
       const response = await api.get<SalesInvoiceHdResponse>(url, {
         params: filteredParams,
         paramsSerializer: (params) => {
@@ -151,8 +151,6 @@ const useSalesInvoiceHd = ({
       // const response = await api.get<SalesInvoiceHdResponse>(url, {
       //   params: filteredParams,
       // });
-
-      console.log('Backend response:', response.data);
 
       return response.data;
     },
