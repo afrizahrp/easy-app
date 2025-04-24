@@ -1,6 +1,5 @@
 'use client';
 
-import { SiteLogo } from '@/components/svg';
 import { format } from 'date-fns';
 import { routes } from '@/config/routes';
 import { BreadcrumbItem, Breadcrumbs } from '@/components/ui/breadcrumbs';
