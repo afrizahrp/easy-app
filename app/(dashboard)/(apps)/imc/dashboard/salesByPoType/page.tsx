@@ -10,25 +10,17 @@ import { Label } from '@/components/ui/label'; // Impor Label untuk memberikan t
 import { Switch } from '@/components/ui/switch';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
-interface SalesByPeriodChartProps {
-  onModeChange?: (isFullPage: boolean) => void; // Prop untuk mengirimkan perubahan mode ke parent
+interface SalesByPeriodAndPoTypeChartProps {
+  isFullWidth?: boolean;
+  onModeChange?: (isFullPage: boolean) => void;
 }
 
 const SalesByPeriodAndPoTypeChart = ({
+  isFullWidth,
   onModeChange,
-}: SalesByPeriodChartProps) => {
-  const { startPeriod, endPeriod } = useMonthYearPeriodStore();
+}: SalesByPeriodAndPoTypeChartProps) => {
   const { toast } = useToast();
   const { data, isLoading, isFetching, error } = useSalesByPeriodAndPoType();
-  const [isFullWidth, setIsFullWidth] = React.useState(true); // State untuk mode full width atau half width
-
-  // Ketika Switch berubah, update state dan panggil onModeChange
-  const handleModeChange = (checked: boolean) => {
-    setIsFullWidth(checked);
-    if (onModeChange) {
-      onModeChange(checked);
-    }
-  };
 
   const chartData = React.useMemo(() => {
     if (!data || data.length === 0) return [];
@@ -82,43 +74,47 @@ const SalesByPeriodAndPoTypeChart = ({
       ) : chartData.length > 0 ? (
         <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
           {chartData.map((chart, index) => (
-            <div key={index} className='h-96'>
-              <h3 className='text-sm font-medium text-center'>
-                {chart.datasets[0].label}
-              </h3>
-              {/* <div className='flex items-center space-x-2'>
-                <Switch
-                  id='chart-mode'
-                  checked={isFullWidth}
-                  onCheckedChange={handleModeChange}
-                />
-                <Label htmlFor='chart-mode'>
-                  {isFullWidth ? 'Full Width' : 'Half Width'}
-                </Label>
-              </div> */}
-              <Pie
-                data={chart}
-                options={{
-                  responsive: true,
-                  maintainAspectRatio: false,
-                  plugins: {
-                    legend: { position: 'top' },
-                    tooltip: {
-                      callbacks: {
-                        label: (context) =>
-                          `${context.label}: ${(
-                            context.raw as number
-                          ).toLocaleString('id-ID', {
-                            style: 'currency',
-                            currency: 'IDR',
-                            minimumFractionDigits: 0,
-                            maximumFractionDigits: 0,
-                          })}`,
+            <div key={index} className='h-96 flex flex-col gap-2'>
+              <div className='flex items-center justify-between'>
+                <h3 className='text-sm font-medium text-center'>
+                  {chart.datasets[0].label}
+                </h3>
+                <div className='flex items-center space-x-2'>
+                  <Switch
+                    id={`chart-mode-potype-${index}`}
+                    checked={isFullWidth}
+                    onCheckedChange={(checked) => onModeChange?.(checked)}
+                  />
+                  <Label htmlFor={`chart-mode-potype-${index}`}>
+                    {isFullWidth ? 'Full Width' : 'Half Width'}
+                  </Label>
+                </div>
+              </div>
+              <div className='flex-1 relative'>
+                <Pie
+                  data={chart}
+                  options={{
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                      legend: { position: 'top' },
+                      tooltip: {
+                        callbacks: {
+                          label: (context) =>
+                            `${context.label}: ${(
+                              context.raw as number
+                            ).toLocaleString('id-ID', {
+                              style: 'currency',
+                              currency: 'IDR',
+                              minimumFractionDigits: 0,
+                              maximumFractionDigits: 0,
+                            })}`,
+                        },
                       },
                     },
-                  },
-                }}
-              />
+                  }}
+                />
+              </div>
             </div>
           ))}
         </div>

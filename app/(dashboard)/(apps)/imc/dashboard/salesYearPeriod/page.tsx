@@ -28,23 +28,16 @@ ChartJS.register(
 );
 
 interface SalesByPeriodChartProps {
-  onModeChange?: (isFullPage: boolean) => void; // Prop untuk mengirimkan perubahan mode ke parent
+  isFullWidth?: boolean;
+  onModeChange?: (isFullPage: boolean) => void;
 }
 
 const SalesByPeriodChart: React.FC<SalesByPeriodChartProps> = ({
+  isFullWidth,
   onModeChange,
 }) => {
   const { toast } = useToast();
   const { data, isLoading, isFetching, error } = useSalesPeriod();
-  const [isFullWidth, setIsFullWidth] = React.useState(true); // State untuk mode full width atau half width
-
-  // Ketika Switch berubah, update state dan panggil onModeChange
-  const handleModeChange = (checked: boolean) => {
-    setIsFullWidth(checked);
-    if (onModeChange) {
-      onModeChange(checked);
-    }
-  };
 
   const chartData = React.useMemo(() => {
     if (!data) return null;
@@ -64,15 +57,6 @@ const SalesByPeriodChart: React.FC<SalesByPeriodChartProps> = ({
       'Nov',
       'Dec',
     ];
-
-    const baseChartData = months.map((month) => {
-      const row: Record<string, string | number> = { month };
-      allYears.forEach((year) => {
-        const yearData = data.find((d) => d.period === year);
-        row[year] = yearData?.months[month] || 0;
-      });
-      return row;
-    });
 
     const colorPalette = [
       ['#1e3a8a', '#3b82f6'], // Navy → Blue
@@ -133,16 +117,16 @@ const SalesByPeriodChart: React.FC<SalesByPeriodChartProps> = ({
         <h2 className='text-md font-semibold'>
           Sales Comparison by Year in Millions (IDR)
         </h2>
-        {/* <div className='flex items-center space-x-2'>
+        <div className='flex items-center space-x-2'>
           <Switch
-            id='chart-mode'
+            id='chart-mode-period'
             checked={isFullWidth}
-            onCheckedChange={handleModeChange}
+            onCheckedChange={(checked) => onModeChange?.(checked)}
           />
-          <Label htmlFor='chart-mode'>
+          <Label htmlFor='chart-mode-period'>
             {isFullWidth ? 'Full Width' : 'Half Width'}
           </Label>
-        </div> */}
+        </div>
       </div>
       {isLoading || isFetching ? (
         <div className='text-center text-gray-500'>Loading...</div>
@@ -152,6 +136,11 @@ const SalesByPeriodChart: React.FC<SalesByPeriodChartProps> = ({
           options={{
             responsive: true,
             maintainAspectRatio: false,
+            layout: {
+              padding: {
+                bottom: 20,
+              },
+            },
             scales: {
               y: {
                 beginAtZero: true,
