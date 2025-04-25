@@ -338,7 +338,7 @@ export const useMonthYearPeriodStore = create<MonthYearPeriodState>()(
       setEndPeriod: (date) => set({ endPeriod: date }),
     }),
     {
-      name: 'sales-invoice-filter', // Nama kunci di localStorage
+      name: 'monthYearFilterStore', // Nama kunci di localStorage
       storage: createJSONStorage(() => localStorage), // Gunakan localStorage
       partialize: (state) => ({
         // Hanya simpan properti yang relevan
@@ -378,7 +378,7 @@ export const useSalesInvoiceHdFilterStore = create<SalesInvoiceHdState>()(
       setSalesPersonName: (salesPersonName) => set({ salesPersonName }),
     }),
     {
-      name: 'sales-invoice-filter', // Nama kunci di localStorage
+      name: 'salesInvoiceHdFilterStore', // Nama kunci di localStorage
       storage: createJSONStorage(() => localStorage), // Gunakan localStorage
       partialize: (state) => ({
         // Hanya simpan properti yang relevan

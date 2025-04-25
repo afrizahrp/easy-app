@@ -1,4 +1,4 @@
-import useSalesInvoiceHdPaidStatus from '@/queryHooks/useSalesInvoiceHdPaidStatus';
+import useSalesInvoiceHdPaidStatus from '@/queryHooks/sls/useSalesInvoiceHdPaidStatus';
 
 interface OptionType {
   value: string;

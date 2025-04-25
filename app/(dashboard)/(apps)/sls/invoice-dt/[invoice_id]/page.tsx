@@ -17,7 +17,7 @@ import { Button } from '@/components/ui/button';
 import { Download } from 'lucide-react';
 import { Icon } from '@iconify/react';
 import useCompanies from '@/queryHooks/use-companies';
-import useSalesInvoiceDt from '@/queryHooks/useSalesInvoiceDt';
+import useSalesInvoiceDt from '@/queryHooks/sls/useSalesInvoiceDt';
 import LayoutLoader from '@/components/layout-loader';
 import PageHeader from '@/components/page-header';
 

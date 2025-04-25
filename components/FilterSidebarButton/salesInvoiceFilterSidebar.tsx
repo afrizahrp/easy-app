@@ -9,9 +9,9 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { zonedTimeToUtc } from 'date-fns-tz';
 
-import useSalesInvoiceHdPaidStatusOptions from '@/queryHooks/useSalesInvoiceHdPaidStatusOptions';
-import useSalesInvoiceHdSalesPersonOptions from '@/queryHooks/useSalesInvoiceHdSalesPersonOptions';
-import useSalesInvoiceHdPoTypeOptions from '@/queryHooks/useSalesInvoiceHdPoTypeOptions';
+import useSalesInvoiceHdPaidStatusOptions from '@/queryHooks/sls/useSalesInvoiceHdPaidStatusOptions';
+import useSalesInvoiceHdSalesPersonOptions from '@/queryHooks/sls/useSalesInvoiceHdSalesPersonOptions';
+import useSalesInvoiceHdPoTypeOptions from '@/queryHooks/sls/useSalesInvoiceHdPoTypeOptions';
 import { Button } from '@/components/ui/button';
 import { DataTableFacetedFilter } from '@/components/ui/data-table-faceted-filter';
 import { useMonthYearPeriodStore, useSalesInvoiceHdFilterStore } from '@/store';

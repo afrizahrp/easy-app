@@ -5,12 +5,11 @@ import { InvoiceListTable } from './list-table';
 import LayoutLoader from '@/components/layout-loader';
 import { routes } from '@/config/routes';
 import PageHeader from '@/components/page-header';
-import useSalesInvoiceHd from '@/queryHooks/useSalesInvoiceHd';
+import useSalesInvoiceHd from '@/queryHooks/sls/useSalesInvoiceHd';
 import { SalesInvoiceHdColumns } from './list-table/components/columns';
 import { usePageStore } from '@/store';
 import { FooterSummarySection } from '@/components/footer-summary-section';
 import { FooterSummaryItem } from '@/components/footer-summary-item';
-import InvoicePageFooter from './invoiceFilter-Summary';
 import InvoiceFilterSummary from './invoiceFilter-Summary';
 
 const SalesInvoiceHdPage = () => {
