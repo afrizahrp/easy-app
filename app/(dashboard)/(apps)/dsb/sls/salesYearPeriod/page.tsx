@@ -115,7 +115,7 @@ const SalesByPeriodChart: React.FC<SalesByPeriodChartProps> = ({
     <div className='bg-white p-4 rounded-lg shadow-sm h-96'>
       <div className='flex items-center justify-between mb-2'>
         <h2 className='text-md font-semibold'>
-          Sales Comparison by Year in Millions (IDR)
+          Sales by period (in Millions IDR)
         </h2>
         <div className='flex items-center space-x-2'>
           <Switch
@@ -124,7 +124,8 @@ const SalesByPeriodChart: React.FC<SalesByPeriodChartProps> = ({
             onCheckedChange={(checked) => onModeChange?.(checked)}
           />
           <Label htmlFor='chart-mode-period'>
-            {isFullWidth ? 'Full Width' : 'Half Width'}
+            {/* {isFullWidth ? 'Full Width' : 'Half Width'} */}
+            {isFullWidth ? 'Half Width' : 'Full Width'}
           </Label>
         </div>
       </div>

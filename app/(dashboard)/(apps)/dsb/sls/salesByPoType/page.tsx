@@ -2,8 +2,6 @@
 import React from 'react';
 import { Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
-import { format } from 'date-fns';
-import { useMonthYearPeriodStore } from '@/store';
 import { useToast } from '@/components/ui/use-toast';
 import useSalesByPeriodAndPoType from '@/queryHooks/sls/dashboard/useSalesByPeriodAndPoType';
 import { Label } from '@/components/ui/label'; // Impor Label untuk memberikan teks pada Switch
@@ -65,10 +63,21 @@ const SalesByPeriodAndPoTypeChart = ({
   }, [error, toast]);
 
   return (
-    <div className='bg-white p-4 rounded-lg shadow-sm'>
+    // <div className='bg-white p-4 rounded-lg shadow-sm'>
+    <div className='bg-white p-4 rounded-lg shadow-sm relative'>
       <h2 className='text-md font-semibold mb-2'>
         Sales by Period and PO Type
       </h2>
+      <div className='absolute top-2 right-2 flex items-center space-x-2'>
+        <Switch
+          id={`chart-mode-potype}`}
+          checked={isFullWidth}
+          onCheckedChange={(checked) => onModeChange?.(checked)}
+        />
+        <Label htmlFor={`chart-mode-potype}`}>
+          {isFullWidth ? 'Half Width' : 'Full Width'}
+        </Label>
+      </div>
       {isLoading || isFetching ? (
         <div className='text-center text-gray-500'>Loading...</div>
       ) : chartData.length > 0 ? (
@@ -79,16 +88,6 @@ const SalesByPeriodAndPoTypeChart = ({
                 <h3 className='text-sm font-medium text-center'>
                   {chart.datasets[0].label}
                 </h3>
-                <div className='flex items-center space-x-2'>
-                  <Switch
-                    id={`chart-mode-potype-${index}`}
-                    checked={isFullWidth}
-                    onCheckedChange={(checked) => onModeChange?.(checked)}
-                  />
-                  <Label htmlFor={`chart-mode-potype-${index}`}>
-                    {isFullWidth ? 'Full Width' : 'Half Width'}
-                  </Label>
-                </div>
               </div>
               <div className='flex-1 relative'>
                 <Pie
@@ -101,14 +100,9 @@ const SalesByPeriodAndPoTypeChart = ({
                       tooltip: {
                         callbacks: {
                           label: (context) =>
-                            `${context.label}: ${(
-                              context.raw as number
-                            ).toLocaleString('id-ID', {
-                              style: 'currency',
-                              currency: 'IDR',
-                              minimumFractionDigits: 0,
-                              maximumFractionDigits: 0,
-                            })}`,
+                            ` ${(context.raw as number).toLocaleString(
+                              'id-ID'
+                            )}`,
                         },
                       },
                     },
