@@ -15,6 +15,8 @@ ChartJS.register(gradientPlugin);
 
 import { useToast } from '@/components/ui/use-toast';
 import useSalesPeriod from '@/queryHooks/sls/dashboard/useSalesPeriod';
+import { Switch } from '@/components/ui/switch'; // Impor Switch dari Shadcn UI
+import { Label } from '@/components/ui/label'; // Impor Label untuk memberikan teks pada Switch
 
 ChartJS.register(
   CategoryScale,
@@ -25,9 +27,24 @@ ChartJS.register(
   Legend
 );
 
-const SalesComparisonChart = () => {
+interface SalesByPeriodChartProps {
+  onModeChange?: (isFullPage: boolean) => void; // Prop untuk mengirimkan perubahan mode ke parent
+}
+
+const SalesByPeriodChart: React.FC<SalesByPeriodChartProps> = ({
+  onModeChange,
+}) => {
   const { toast } = useToast();
   const { data, isLoading, isFetching, error } = useSalesPeriod();
+  const [isFullWidth, setIsFullWidth] = React.useState(true); // State untuk mode full width atau half width
+
+  // Ketika Switch berubah, update state dan panggil onModeChange
+  const handleModeChange = (checked: boolean) => {
+    setIsFullWidth(checked);
+    if (onModeChange) {
+      onModeChange(checked);
+    }
+  };
 
   const chartData = React.useMemo(() => {
     if (!data) return null;
@@ -48,7 +65,6 @@ const SalesComparisonChart = () => {
       'Dec',
     ];
 
-    // Inisialisasi data per bulan
     const baseChartData = months.map((month) => {
       const row: Record<string, string | number> = { month };
       allYears.forEach((year) => {
@@ -79,7 +95,7 @@ const SalesComparisonChart = () => {
 
         const [from, to] = colorPalette[idx % colorPalette.length];
 
-        if (!chartArea) return to; // fallback color
+        if (!chartArea) return to;
 
         const gradient = canvasCtx.createLinearGradient(
           0,
@@ -106,14 +122,28 @@ const SalesComparisonChart = () => {
     if (error) {
       toast({
         description: 'Failed to load sales data. Please try again.',
-        color: 'destructive',
+        color: 'destructive', // Ganti color ke variant
       });
     }
   }, [error, toast]);
 
   return (
     <div className='bg-white p-4 rounded-lg shadow-sm h-96'>
-      <h2 className='text-md font-semibold mb-2'>Sales Comparison by Year</h2>
+      <div className='flex items-center justify-between mb-2'>
+        <h2 className='text-md font-semibold'>
+          Sales Comparison by Year in Millions (IDR)
+        </h2>
+        {/* <div className='flex items-center space-x-2'>
+          <Switch
+            id='chart-mode'
+            checked={isFullWidth}
+            onCheckedChange={handleModeChange}
+          />
+          <Label htmlFor='chart-mode'>
+            {isFullWidth ? 'Full Width' : 'Half Width'}
+          </Label>
+        </div> */}
+      </div>
       {isLoading || isFetching ? (
         <div className='text-center text-gray-500'>Loading...</div>
       ) : chartData ? (
@@ -121,34 +151,34 @@ const SalesComparisonChart = () => {
           data={chartData}
           options={{
             responsive: true,
-            maintainAspectRatio: false, // Biar tinggi chart bisa diatur
+            maintainAspectRatio: false,
             scales: {
               y: {
                 beginAtZero: true,
-                title: { display: true, text: 'Total Sales (IDR)' },
+                title: { display: true, text: 'Total Sales' },
                 ticks: {
-                  callback: (value: unknown) =>
-                    `${(Number(value) / 1000000).toFixed(0)}M`,
+                  callback: (value: unknown) => {
+                    const val = Number(value) / 1000000;
+                    return `${val.toLocaleString('id-ID')}`;
+                  },
                 },
               },
               x: {
-                title: { display: true, text: 'Month' },
+                title: { display: false, text: 'Month' },
                 grid: {
-                  display: false, // Hide grid lines on x-axis
+                  display: false,
                 },
               },
             },
             plugins: {
               legend: { position: 'top' },
               title: {
-                display: false, // Hapus title karena sudah ada h2
+                display: false,
               },
               tooltip: {
                 callbacks: {
                   label: (context) =>
-                    `${context.dataset.label}: ${(
-                      context.raw as number
-                    ).toLocaleString('id-ID')}`,
+                    ` ${(context.raw as number).toLocaleString('id-ID')}`,
                 },
               },
             },
@@ -161,4 +191,4 @@ const SalesComparisonChart = () => {
   );
 };
 
-export default SalesComparisonChart;
+export default SalesByPeriodChart;

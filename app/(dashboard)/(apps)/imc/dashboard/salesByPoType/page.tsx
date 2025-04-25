@@ -1,132 +1,132 @@
-// components/SalesByPoTypeAndPeriod.tsx
 'use client';
+import React from 'react';
+import { Pie } from 'react-chartjs-2';
+import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
+import { format } from 'date-fns';
+import { useMonthYearPeriodStore } from '@/store';
+import { useToast } from '@/components/ui/use-toast';
+import useSalesByPeriodAndPoType from '@/queryHooks/sls/dashboard/useSalesByPeriodAndPoType';
+import { Label } from '@/components/ui/label'; // Impor Label untuk memberikan teks pada Switch
+import { Switch } from '@/components/ui/switch';
 
-import dynamic from 'next/dynamic';
-const Chart = dynamic(() => import('react-apexcharts'), { ssr: false });
+ChartJS.register(ArcElement, Tooltip, Legend);
+interface SalesByPeriodChartProps {
+  onModeChange?: (isFullPage: boolean) => void; // Prop untuk mengirimkan perubahan mode ke parent
+}
 
-import { useThemeStore } from '@/store';
-import { useTheme } from 'next-themes';
-import { themes } from '@/config/thems';
-import {
-  getGridConfig,
-  getYAxisConfig,
-  getLabel,
-} from '@/lib/appex-chart-options';
+const SalesByPeriodAndPoTypeChart = ({
+  onModeChange,
+}: SalesByPeriodChartProps) => {
+  const { startPeriod, endPeriod } = useMonthYearPeriodStore();
+  const { toast } = useToast();
+  const { data, isLoading, isFetching, error } = useSalesByPeriodAndPoType();
+  const [isFullWidth, setIsFullWidth] = React.useState(true); // State untuk mode full width atau half width
 
-type PoTypes = { [key: string]: number };
-
-const rawData: { period: string; poTypes: PoTypes }[] = [
-  {
-    period: '2024',
-    poTypes: {
-      Regular: 33376993667,
-      eCatalog: 26367583144,
-    },
-  },
-  {
-    period: '2025',
-    poTypes: {
-      Regular: 5566666057,
-      eCatalog: 977587096,
-    },
-  },
-];
-
-// Extract unique poType keys
-const poTypeKeys = Array.from(
-  new Set(rawData.flatMap((item) => Object.keys(item.poTypes)))
-);
-
-// Categories (years)
-const categories = rawData.map((item) => item.period);
-
-// Format for ApexCharts series
-const series = poTypeKeys.map((key) => ({
-  name: key,
-  data: rawData.map((item) => item.poTypes[key] || 0),
-}));
-
-const SalesByPoTypeAndPeriod = ({ height = 300 }: { height?: number }) => {
-  const { theme: config, isRtl } = useThemeStore();
-  const { theme: mode } = useTheme();
-
-  const theme = themes.find((t) => t.name === config);
-
-  const options: any = {
-    chart: {
-      toolbar: {
-        show: false,
-      },
-      stacked: true,
-    },
-    dataLabels: {
-      enabled: false,
-    },
-    stroke: {
-      width: 2,
-    },
-    colors: [
-      `hsl(${theme?.cssVars[mode === 'dark' ? 'dark' : 'light'].info})`,
-      `hsl(${theme?.cssVars[mode === 'dark' ? 'dark' : 'light'].success})`,
-      `hsl(${theme?.cssVars[mode === 'dark' ? 'dark' : 'light'].warning})`,
-      `hsl(${theme?.cssVars[mode === 'dark' ? 'dark' : 'light'].primary})`,
-    ],
-    tooltip: {
-      theme: mode === 'dark' ? 'dark' : 'light',
-      y: {
-        formatter: (val: number) => val.toLocaleString('id-ID'),
-      },
-    },
-    grid: getGridConfig(
-      `hsl(${theme?.cssVars[mode === 'dark' ? 'dark' : 'light'].chartGird})`
-    ),
-    yaxis: getYAxisConfig(
-      `hsl(${theme?.cssVars[mode === 'dark' ? 'dark' : 'light'].chartLabel})`
-    ),
-    plotOptions: {
-      bar: {
-        columnWidth: '45%',
-        borderRadius: 2,
-      },
-    },
-    xaxis: {
-      categories,
-      labels: getLabel(
-        `hsl(${theme?.cssVars[mode === 'dark' ? 'dark' : 'light'].chartLabel})`
-      ),
-      axisBorder: { show: false },
-      axisTicks: { show: false },
-    },
-    legend: {
-      show: false, // Hide default legend
-    },
+  // Ketika Switch berubah, update state dan panggil onModeChange
+  const handleModeChange = (checked: boolean) => {
+    setIsFullWidth(checked);
+    if (onModeChange) {
+      onModeChange(checked);
+    }
   };
 
-  return (
-    <div className='space-y-4'>
-      <Chart
-        options={options}
-        series={series}
-        type='bar'
-        height={height}
-        width='100%'
-      />
+  const chartData = React.useMemo(() => {
+    if (!data || data.length === 0) return [];
 
-      <div className='flex flex-wrap gap-4'>
-        {series.map((item, index) => (
-          <div key={item.name} className='flex items-center gap-2'>
-            <div
-              className='w-3 h-3 rounded-full'
-              style={{
-                backgroundColor: options.colors[index % options.colors.length],
-              }}
-            ></div>
-            <span className='text-sm text-muted-foreground'>{item.name}</span>
-          </div>
-        ))}
-      </div>
+    return data.map((yearData) => {
+      const poTypes = Object.keys(yearData.poTypes);
+
+      const colors: Record<string, string> = {
+        eCatalog: 'rgba(75, 192, 192, 0.6)',
+        Regular: 'rgba(255, 99, 132, 0.6)',
+        Unknown: 'rgba(201, 203, 207, 0.6)',
+      };
+
+      return {
+        labels: poTypes,
+        datasets: [
+          {
+            label: `Sales ${yearData.period}`,
+            data: poTypes.map((poType) => yearData.poTypes[poType]),
+            backgroundColor: poTypes.map(
+              (poType) => colors[poType] || colors.Unknown
+            ),
+            borderColor: poTypes.map((poType) =>
+              (colors[poType] || colors.Unknown).replace('0.6', '1')
+            ),
+            borderWidth: 1,
+          },
+        ],
+      };
+    });
+  }, [data]);
+
+  React.useEffect(() => {
+    if (error) {
+      toast({
+        description:
+          error.message ||
+          'Failed to load sales by PO type data. Please try again.',
+        color: 'destructive',
+      });
+    }
+  }, [error, toast]);
+
+  return (
+    <div className='bg-white p-4 rounded-lg shadow-sm'>
+      <h2 className='text-md font-semibold mb-2'>
+        Sales by Period and PO Type
+      </h2>
+      {isLoading || isFetching ? (
+        <div className='text-center text-gray-500'>Loading...</div>
+      ) : chartData.length > 0 ? (
+        <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+          {chartData.map((chart, index) => (
+            <div key={index} className='h-96'>
+              <h3 className='text-sm font-medium text-center'>
+                {chart.datasets[0].label}
+              </h3>
+              {/* <div className='flex items-center space-x-2'>
+                <Switch
+                  id='chart-mode'
+                  checked={isFullWidth}
+                  onCheckedChange={handleModeChange}
+                />
+                <Label htmlFor='chart-mode'>
+                  {isFullWidth ? 'Full Width' : 'Half Width'}
+                </Label>
+              </div> */}
+              <Pie
+                data={chart}
+                options={{
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  plugins: {
+                    legend: { position: 'top' },
+                    tooltip: {
+                      callbacks: {
+                        label: (context) =>
+                          `${context.label}: ${(
+                            context.raw as number
+                          ).toLocaleString('id-ID', {
+                            style: 'currency',
+                            currency: 'IDR',
+                            minimumFractionDigits: 0,
+                            maximumFractionDigits: 0,
+                          })}`,
+                      },
+                    },
+                  },
+                }}
+              />
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className='text-center text-red-500'>No data available</div>
+      )}
     </div>
   );
 };
 
-export default SalesByPoTypeAndPeriod;
+export default SalesByPeriodAndPoTypeChart;

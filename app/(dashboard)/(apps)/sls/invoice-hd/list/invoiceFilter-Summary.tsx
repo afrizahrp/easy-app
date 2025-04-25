@@ -1,3 +1,5 @@
+'use client';
+import { useState } from 'react'; // Tambahkan useState
 import { useMonthYearPeriodStore, useSalesInvoiceHdFilterStore } from '@/store';
 import { FilterSummary } from '@/components/filterSummary';
 import { format } from 'date-fns';
@@ -14,6 +16,9 @@ export default function InvoiceFilterSummary() {
     setPoType,
     setSalesPersonName,
   } = useSalesInvoiceHdFilterStore();
+
+  // State untuk mengontrol visibility salesDashboardPage
+  const [showSalesDashboard, setShowSalesDashboard] = useState(true);
 
   // Fungsi untuk clear filter
   const handleClear = (filterName: string) => {
@@ -46,24 +51,18 @@ export default function InvoiceFilterSummary() {
         startPeriod && endPeriod
           ? `${format(startPeriod, 'MMM yyyy')} - ${format(endPeriod, 'MMM yyyy')}`
           : null,
-      isClearable: false, // Menambahkan isClearable untuk paidStatus
-
-      // onClear: () => {
-      //   handleClear('startPeriod');
-      //   handleClear('endPeriod');
-      // },
+      isClearable: false,
     },
     {
       label: 'Paid Status',
       value: paidStatus,
-      isClearable: true, // Menambahkan isClearable untuk paidStatus
-
+      isClearable: true,
       onClear: () => handleClear('paidStatus'),
     },
     {
       label: 'PO Type',
       value: poType,
-      isClearable: true, // Menambahkan isClearable untuk paidStatus
+      isClearable: true,
       onClear: () => handleClear('poType'),
     },
     {
@@ -83,10 +82,16 @@ export default function InvoiceFilterSummary() {
   );
 
   return (
-    <FilterSummary
-      layout='grid'
-      filters={filters}
-      className='text-muted-foreground'
-    />
+    <div>
+      {/* Render FilterSummary */}
+      <FilterSummary
+        layout='grid'
+        filters={filters}
+        className='text-muted-foreground'
+      />
+
+      {/* Render salesDashboardPage berdasarkan state */}
+      {/* {showSalesDashboard && <SalesDashboardPage />} */}
+    </div>
   );
 }

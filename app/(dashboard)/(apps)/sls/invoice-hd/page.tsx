@@ -1,16 +1,16 @@
 'use client';
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { InvoiceListTable } from './list-table';
+import { InvoiceListTable } from './list/list-table';
 import LayoutLoader from '@/components/layout-loader';
 import { routes } from '@/config/routes';
 import PageHeader from '@/components/page-header';
 import useSalesInvoiceHd from '@/queryHooks/sls/useSalesInvoiceHd';
-import { SalesInvoiceHdColumns } from './list-table/components/columns';
+import { SalesInvoiceHdColumns } from './list/list-table/components/columns';
 import { usePageStore } from '@/store';
 import { FooterSummarySection } from '@/components/footer-summary-section';
 import { FooterSummaryItem } from '@/components/footer-summary-item';
-import InvoiceFilterSummary from './invoiceFilter-Summary';
+import InvoiceFilterSummary from './list/invoiceFilter-Summary';
 import { Switch } from '@/components/ui/switch';
 
 const SalesInvoiceHdPage = () => {
