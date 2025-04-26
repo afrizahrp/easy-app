@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
+import SalesInvoiceFilterSummary from '@/components/sales/sls-invoiceFilter-Summary';
 import SalesByPeriodChart from './salesYearPeriod/page';
 import SalesByPeriodAndPoTypeChart from './salesByPoType/page';
 import SalesInvoiceHdPage from '../../sls/invoice-hd/list/page';
@@ -12,6 +13,13 @@ const SalesDashboardPage = () => {
   return (
     <div className='flex flex-col h-screen w-full p-4 gap-4'>
       {/* Bagian Chart */}
+
+      <div className='flex flex-wrap items-center gap-4 mb-6 p-4 rounded-lg bg-white shadow-sm border border-muted-200'>
+        <div className='flex-1 min-w-[200px]'>
+          <SalesInvoiceFilterSummary />
+        </div>
+      </div>
+
       <div className='flex flex-col md:flex-row w-full gap-4'>
         {(fullChart === null || fullChart === 'period') && (
           <motion.div

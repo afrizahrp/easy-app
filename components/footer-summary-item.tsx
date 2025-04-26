@@ -4,7 +4,7 @@ type FooterSummaryItemProps = {
 };
 
 export const FooterSummaryItem = ({ label, value }: FooterSummaryItemProps) => (
-  <div className='text-sm font-semibold text-muted-foreground text-right'>
+  <div className='text-md font-semibold text-black text-right'>
     {label}:{' '}
     {typeof value === 'number' ? value.toLocaleString('id-ID') : (value ?? '-')}
   </div>

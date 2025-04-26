@@ -11,7 +11,7 @@ export function FooterSummarySection({
 }: FooterSummarySectionProps) {
   return (
     <div
-      className={`w-full border-t mt-4 pt-4 flex items-center bg-muted/50 px-4 py-3 rounded-md shadow-sm ${className}`}
+      className={`w-full border-t mt-4 pt-4 flex items-center bg-[#7ed957] px-4 py-3 rounded-md shadow-sm ${className}`}
     >
       <div className='w-full flex justify-end'>
         {' '}

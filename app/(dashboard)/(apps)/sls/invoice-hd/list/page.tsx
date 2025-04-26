@@ -67,7 +67,7 @@ const SalesInvoiceHdPage = () => {
       <div>
         <Card className='mt-6'>
           <CardContent className='p-10'>
-            <div className='flex flex-wrap items-center gap-4 mb-6 p-4 rounded-lg bg-muted/70 shadow-sm border border-muted-200'>
+            {/* <div className='flex flex-wrap items-center gap-4 mb-6 p-4 rounded-lg bg-muted/70 shadow-sm border border-muted-200'>
               <div className='flex items-center gap-2'>
                 <span className='inline-flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary mr-2'>
                   <svg
@@ -92,7 +92,7 @@ const SalesInvoiceHdPage = () => {
               <div className='flex-1 min-w-[200px]'>
                 <Sls_InvoiceFilterSummary />
               </div>
-            </div>
+            </div> */}
             <InvoiceListTable
               data={formattedInvoiceHd}
               currentPage={currentPage}

@@ -1,13 +1,19 @@
+// components/Sls_InvoiceFilterSummary.tsx
 'use client';
-import { useState } from 'react'; // Tambahkan useState
+import { useState } from 'react';
 import { useMonthYearPeriodStore, useSalesInvoiceHdFilterStore } from '@/store';
 import { FilterSummary } from '@/components/filterSummary';
 import { format } from 'date-fns';
 
-export default function Sls_InvoiceFilterSummary() {
+interface SlsInvoiceFilterSummaryProps {
+  className?: string; // Tambahkan prop className untuk fleksibilitas
+}
+
+export default function Sls_InvoiceFilterSummary({
+  className = '',
+}: SlsInvoiceFilterSummaryProps) {
   const { startPeriod, endPeriod, setStartPeriod, setEndPeriod } =
     useMonthYearPeriodStore();
-
   const {
     paidStatus,
     poType,
@@ -17,7 +23,7 @@ export default function Sls_InvoiceFilterSummary() {
     setSalesPersonName,
   } = useSalesInvoiceHdFilterStore();
 
-  // State untuk mengontrol visibility salesDashboardPage
+  // State untuk mengontrol visibility salesDashboardPage (jika diperlukan)
   const [showSalesDashboard, setShowSalesDashboard] = useState(true);
 
   // Fungsi untuk clear filter
@@ -82,16 +88,16 @@ export default function Sls_InvoiceFilterSummary() {
   );
 
   return (
-    <div>
-      {/* Render FilterSummary */}
-      <FilterSummary
-        layout='grid'
-        filters={filters}
-        className='text-muted-foreground'
-      />
-
-      {/* Render salesDashboardPage berdasarkan state */}
-      {/* {showSalesDashboard && <SalesDashboardPage />} */}
+    <div
+      className={`w-full border-t mt-4 pt-4 flex items-center bg-[#7ed957] px-4 py-3 rounded-md shadow-sm ${className}`}
+    >
+      <div className='w-full flex justify-end'>
+        <FilterSummary
+          layout='grid'
+          filters={filters}
+          className='text-black text-lg'
+        />
+      </div>
     </div>
   );
 }
