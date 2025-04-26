@@ -11,6 +11,18 @@ export const routes = {
     orders: '/dashboard/orders',
     createOrder: '/dashboard/orders/create',
   },
+  analytics: {
+    analytics: '/analytics',
+    sales: '/ant/sls/invoice-hd/list',
+    createProduct: '/dashboard/products/create',
+    productDetails: (slug: string) => `/dashboard/products/${slug}`,
+    ediProduct: (slug: string) => `/dashboard/products/${slug}/edit`,
+    categories: '/dashboard/categories',
+    createCategory: '/dashboard/categories/create',
+    editCategory: (id: string) => `/dashboard/categories/${id}/edit`,
+    orders: '/dashboard/orders',
+    createOrder: '/dashboard/orders/create',
+  },
   sales: {
     invoiceHd: '/sls/invoice-hd',
     invoiceList: '/sales/invoice/list',
@@ -99,10 +111,7 @@ export const routes = {
     dashboard: '/job-board',
     jobFeed: '/job-board/feed',
   },
-  analytics: '/analytics',
-  financial: {
-    dashboard: '/financial',
-  },
+
   file: {
     dashboard: '/file',
     manager: '/file-manager',

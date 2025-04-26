@@ -81,30 +81,43 @@ const SalesByPeriodAndPoTypeChart = ({
       ) : chartData.length > 0 ? (
         <div className='grid grid-cols-1 md:grid-cols-2 gap-4 h-full'>
           {chartData.map((chart, index) => (
+            // <div
+            //   key={index}
+            //   className='flex flex-col items-center justify-center'
+            // >
+
             <div
               key={index}
-              className='flex flex-col items-center justify-center'
+              className='flex flex-col items-center justify-between h-full'
             >
               <h3 className='text-sm font-medium text-center mb-2'>
                 {chart.datasets[0].label}
               </h3>
-              <div className='flex-1 flex items-center justify-center w-full max-w-[240px] max-h-[240px]'>
-                <Pie
-                  data={chart}
-                  options={{
-                    responsive: true,
-                    maintainAspectRatio: true, // Pastikan rasio aspek dipertahankan
-                    plugins: {
-                      legend: { position: 'top' },
-                      tooltip: {
-                        callbacks: {
-                          label: (context) =>
-                            ` ${(context.raw as number).toLocaleString('id-ID')}`,
+              {/* <div className='flex-1 flex items-center justify-center w-full max-w-[240px] max-h-[240px]'> */}
+
+              <div className='flex-1 flex items-center justify-center w-full'>
+                <div
+                  className={`relative aspect-square ${
+                    isFullWidth ? 'w-80' : 'w-48'
+                  }`}
+                >
+                  <Pie
+                    data={chart}
+                    options={{
+                      responsive: true,
+                      maintainAspectRatio: true, // Pastikan rasio aspek dipertahankan
+                      plugins: {
+                        legend: { position: 'top' },
+                        tooltip: {
+                          callbacks: {
+                            label: (context) =>
+                              ` ${(context.raw as number).toLocaleString('id-ID')}`,
+                          },
                         },
                       },
-                    },
-                  }}
-                />
+                    }}
+                  />
+                </div>
               </div>
             </div>
           ))}
