@@ -20,13 +20,13 @@ import { useToast } from '@/components/ui/use-toast';
 
 // import DatePicker from 'react-datepicker';
 
-interface SalesPersonInvoiceSidebarProps<TData> {
+interface SalesPersonInvoiceFilterSidebarProps<TData> {
   table: Table<TData>;
 }
 
-export function SalesPersonInvoiceSidebar<TData>({
+export function SalesPersonInvoiceFilterSidebar<TData>({
   table,
-}: SalesPersonInvoiceSidebarProps<TData>) {
+}: SalesPersonInvoiceFilterSidebarProps<TData>) {
   const { startPeriod, setStartPeriod, endPeriod, setEndPeriod } =
     useMonthYearPeriodStore();
 

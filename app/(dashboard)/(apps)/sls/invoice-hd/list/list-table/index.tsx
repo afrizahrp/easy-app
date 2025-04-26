@@ -26,7 +26,6 @@ const columnLabels = {
   invoiceNo: 'Invoice Id',
   invoiceDate: 'Invoice Date',
   total_amount: 'Total Amount',
-  paidStatus: 'Paid Status',
 };
 
 const searchOptionItem = {
@@ -54,7 +53,7 @@ export const InvoiceListTable: React.FC<SalesInvoiceHdProps> = ({
         href='#' //{routes.inventory.newCategory}
         hrefText='none'
         placeholder='Type here to search invoice by id or customer name...'
-        pageName='salesInvoice'
+        pageName='salesinvoice'
         currentPage={currentPage}
         totalPages={totalPages}
         totalRecords={totalRecords}

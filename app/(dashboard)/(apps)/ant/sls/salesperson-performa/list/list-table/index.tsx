@@ -1,10 +1,10 @@
 'use client';
 import { DataTable } from '@/components/ui/data-table';
-import { SalesInvoiceHdColumns, columns } from './components/columns';
+import { SalesPersonInvoiceListColumns, columns } from './components/columns';
 import { SortingState } from '@tanstack/react-table';
 
 interface SalesInvoiceHdProps {
-  data: SalesInvoiceHdColumns[];
+  data: SalesPersonInvoiceListColumns[];
   currentPage: number;
   totalPages: number;
   totalRecords: number | undefined;
@@ -54,7 +54,7 @@ export const InvoiceListTable: React.FC<SalesInvoiceHdProps> = ({
         href='#' //{routes.inventory.newCategory}
         hrefText='none'
         placeholder='Type here to search invoice by id or customer name...'
-        pageName='salesInvoice'
+        pageName='salespersoninvoicelist'
         currentPage={currentPage}
         totalPages={totalPages}
         totalRecords={totalRecords}

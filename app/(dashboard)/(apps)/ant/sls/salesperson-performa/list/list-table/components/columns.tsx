@@ -9,10 +9,10 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-// import { getStatusColor } from '@/utils/statusUils';
+import { getStatusColor } from '@/utils/statusUils';
 import Link from 'next/link';
 
-export type SalesInvoiceHdColumns = {
+export type SalesPersonInvoiceListColumns = {
   poType: string;
   po_id: string;
   invoiceDate: Date;
@@ -20,10 +20,10 @@ export type SalesInvoiceHdColumns = {
   customerName: string;
   salesPersonName: string;
   total_amount: number;
-  // paidStatus: string;
+  paidStatus: string;
 };
 
-export const columns: ColumnDef<SalesInvoiceHdColumns>[] = [
+export const columns: ColumnDef<SalesPersonInvoiceListColumns>[] = [
   {
     accessorKey: 'poType',
     header: ({ column }) => (
@@ -189,34 +189,34 @@ export const columns: ColumnDef<SalesInvoiceHdColumns>[] = [
       align: 'right',
     },
   },
-  // {
-  //   accessorKey: 'paidStatus',
-  //   header: ({ column }) => (
-  //     <DataTableColumnHeader
-  //       column={column}
-  //       title='Paid Status'
-  //       className='text-black dark:text-slate-300'
-  //       align='right'
-  //     />
-  //   ),
-  //   cell: ({ row }) => {
-  //     let value: string = row.getValue('paidStatus');
-  //     const color = getStatusColor(value);
-  //     return (
-  //       <div className='w-[140px]'>
-  //         <span
-  //           className={cn(
-  //             'inline-block h-3 w-3 rounded-full mr-2 dark:text-slate-300',
-  //             color
-  //           )}
-  //         ></span>
-  //         {value}
-  //       </div>
-  //     );
-  //   },
-  //   filterFn: (row, id, value: string) => {
-  //     return value.includes(row.getValue(id));
-  //   },
-  //   enableSorting: false,
-  // },
+  {
+    accessorKey: 'paidStatus',
+    header: ({ column }) => (
+      <DataTableColumnHeader
+        column={column}
+        title='Paid Status'
+        className='text-black dark:text-slate-300'
+        align='right'
+      />
+    ),
+    cell: ({ row }) => {
+      let value: string = row.getValue('paidStatus');
+      const color = getStatusColor(value);
+      return (
+        <div className='w-[140px]'>
+          <span
+            className={cn(
+              'inline-block h-3 w-3 rounded-full mr-2 dark:text-slate-300',
+              color
+            )}
+          ></span>
+          {value}
+        </div>
+      );
+    },
+    filterFn: (row, id, value: string) => {
+      return value.includes(row.getValue(id));
+    },
+    enableSorting: false,
+  },
 ];

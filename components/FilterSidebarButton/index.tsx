@@ -4,7 +4,8 @@ import { ProductsFilterSidebarWeb } from './productsFilterSidebar-web';
 import { MaterialFilterSidebar } from './materialFilterSidebar';
 import { CategoryFilterSidebar } from './categoryFilterSidebar';
 import { CategoryFilterSidebarWeb } from './categoryFilterSidebar-web';
-import { GeneralInvoiceSidebar } from './sales/generalnvoiceFilterSidebar';
+import { GeneralInvoiceFilterSidebar } from './sales/generalnvoiceFilterSidebar';
+import { SalesPersonInvoiceFilterSidebar } from './sales/salesPersonlnvoiceFilterSidebar';
 
 interface FilterSidebarButtonProps<TData> {
   table: Table<TData>;
@@ -23,8 +24,10 @@ export function FilterSidebarButton<TData>({
       return <MaterialFilterSidebar table={table} />;
     case 'category':
       return <CategoryFilterSidebar table={table} />;
-    case 'salesInvoice':
-      return <GeneralInvoiceSidebar table={table} />;
+    case 'salesinvoice':
+      return <GeneralInvoiceFilterSidebar table={table} />;
+    case 'salespersoninvoicelist':
+      return <SalesPersonInvoiceFilterSidebar table={table} />;
     case 'category-web':
       return <CategoryFilterSidebarWeb table={table} />;
 

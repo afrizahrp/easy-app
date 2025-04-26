@@ -29,8 +29,6 @@ export const useSalesInvoiceHdPoType = () => {
   const { salesPersonName, paidStatus } = useSalesInvoiceHdFilterStore(
     (state) => ({
       salesPersonName: state.salesPersonName,
-      startPeriod: state.startPeriod,
-      endPeriod: state.endPeriod,
       paidStatus: state.paidStatus,
     })
   );
