@@ -23,7 +23,6 @@ const SalesDashboardPage = () => {
               isFullWidth={fullChart === 'period'}
               onModeChange={(isFull) => setFullChart(isFull ? 'period' : null)}
             />
-            <div className='text-center text-gray-500'>Loading...</div>
           </motion.div>
         )}
 

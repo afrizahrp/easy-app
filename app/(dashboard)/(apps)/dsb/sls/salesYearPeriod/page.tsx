@@ -148,7 +148,7 @@ const SalesByPeriodChart: React.FC<SalesByPeriodChartProps> = ({
       </div>
       {isLoading || isFetching ? (
         <div className='flex items-center justify-center h-72 text-gray-500'>
-          xxxx...
+          Loading...
         </div>
       ) : isDataReady ? (
         <Bar

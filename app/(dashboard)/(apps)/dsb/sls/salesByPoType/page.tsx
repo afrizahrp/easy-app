@@ -24,7 +24,9 @@ const SalesByPeriodAndPoTypeChart = ({
     if (!data || data.length === 0) return [];
 
     return data.map((yearData) => {
-      const poTypes = Object.keys(yearData.poTypes);
+      const poTypes = Object.keys(yearData.poTypes).sort((a, b) =>
+        a.localeCompare(b)
+      );
 
       const colors: Record<string, string> = {
         eCatalog: 'rgba(75, 192, 192, 0.6)',
@@ -63,12 +65,9 @@ const SalesByPeriodAndPoTypeChart = ({
   }, [error, toast]);
 
   return (
-    // <div className='bg-white p-4 rounded-lg shadow-sm'>
     <div className='bg-white p-4 rounded-lg shadow-sm h-96 relative'>
-      {/* <div className='bg-white p-4 rounded-lg shadow-sm relative'> */}
-      {/* <div className='bg-white p-4 rounded-lg shadow-sm relative'> */}
       <h2 className='text-md font-semibold mb-2'>
-        Sales by Period and PO Type
+        Sales by Period and PO Type (in Millions IDR)
       </h2>
       <div className='absolute top-2 right-2 flex items-center space-x-2'>
         <Switch
