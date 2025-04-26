@@ -102,6 +102,12 @@ const SalesByPeriodChart: React.FC<SalesByPeriodChartProps> = ({
     };
   }, [data]);
 
+  // Hitung nilai maksimum dari semua dataset
+  const maxValue = React.useMemo(() => {
+    if (!chartData) return 0;
+    return Math.max(...chartData.datasets.flatMap((ds) => ds.data));
+  }, [chartData]);
+
   React.useEffect(() => {
     if (error) {
       toast({
@@ -110,6 +116,17 @@ const SalesByPeriodChart: React.FC<SalesByPeriodChartProps> = ({
       });
     }
   }, [error, toast]);
+
+  // console.log('chartData:', chartData);
+
+  const isDataReady =
+    !!chartData &&
+    Array.isArray(chartData.labels) &&
+    chartData.labels.length > 0 &&
+    Array.isArray(chartData.datasets) &&
+    chartData.datasets.some(
+      (ds) => Array.isArray(ds.data) && ds.data.length > 0
+    );
 
   return (
     <div className='bg-white p-4 rounded-lg shadow-sm h-96'>
@@ -125,13 +142,15 @@ const SalesByPeriodChart: React.FC<SalesByPeriodChartProps> = ({
           />
           <Label htmlFor='chart-mode-period'>
             {/* {isFullWidth ? 'Full Width' : 'Half Width'} */}
-            {isFullWidth ? 'Half Width' : 'Full Width'}
+            {isFullWidth ? 'Full Width' : ' Half Width'}
           </Label>
         </div>
       </div>
       {isLoading || isFetching ? (
-        <div className='text-center text-gray-500'>Loading...</div>
-      ) : chartData ? (
+        <div className='flex items-center justify-center h-72 text-gray-500'>
+          xxxx...
+        </div>
+      ) : isDataReady ? (
         <Bar
           data={chartData}
           options={{
@@ -145,6 +164,8 @@ const SalesByPeriodChart: React.FC<SalesByPeriodChartProps> = ({
             scales: {
               y: {
                 beginAtZero: true,
+                min: maxValue < 1_000_000_000 ? 100_000_000 : undefined,
+
                 title: { display: true, text: 'Total Sales' },
                 ticks: {
                   callback: (value: unknown) => {
@@ -155,6 +176,12 @@ const SalesByPeriodChart: React.FC<SalesByPeriodChartProps> = ({
               },
               x: {
                 title: { display: false, text: 'Month' },
+                ticks: {
+                  callback: (value, index, ticks) => {
+                    return chartData.labels[index] ?? '';
+                  },
+                },
+
                 grid: {
                   display: false,
                 },

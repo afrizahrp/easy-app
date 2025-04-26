@@ -64,7 +64,9 @@ const SalesByPeriodAndPoTypeChart = ({
 
   return (
     // <div className='bg-white p-4 rounded-lg shadow-sm'>
-    <div className='bg-white p-4 rounded-lg shadow-sm relative'>
+    <div className='bg-white p-4 rounded-lg shadow-sm h-96 relative'>
+      {/* <div className='bg-white p-4 rounded-lg shadow-sm relative'> */}
+      {/* <div className='bg-white p-4 rounded-lg shadow-sm relative'> */}
       <h2 className='text-md font-semibold mb-2'>
         Sales by Period and PO Type
       </h2>
@@ -75,7 +77,7 @@ const SalesByPeriodAndPoTypeChart = ({
           onCheckedChange={(checked) => onModeChange?.(checked)}
         />
         <Label htmlFor={`chart-mode-potype}`}>
-          {isFullWidth ? 'Half Width' : 'Full Width'}
+          {isFullWidth ? 'Full Width' : ' Half Width'}
         </Label>
       </div>
       {isLoading || isFetching ? (
@@ -89,25 +91,27 @@ const SalesByPeriodAndPoTypeChart = ({
                   {chart.datasets[0].label}
                 </h3>
               </div>
-              <div className='flex-1 relative'>
-                <Pie
-                  data={chart}
-                  options={{
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                      legend: { position: 'top' },
-                      tooltip: {
-                        callbacks: {
-                          label: (context) =>
-                            ` ${(context.raw as number).toLocaleString(
-                              'id-ID'
-                            )}`,
+              <div className='flex-1 relative flex items-center justify-center h-60 w-full'>
+                <div className='relative h-60 w-60'>
+                  <Pie
+                    data={chart}
+                    options={{
+                      responsive: true,
+                      maintainAspectRatio: false,
+                      plugins: {
+                        legend: { position: 'top' },
+                        tooltip: {
+                          callbacks: {
+                            label: (context) =>
+                              ` ${(context.raw as number).toLocaleString(
+                                'id-ID'
+                              )}`,
+                          },
                         },
                       },
-                    },
-                  }}
-                />
+                    }}
+                  />
+                </div>
               </div>
             </div>
           ))}
