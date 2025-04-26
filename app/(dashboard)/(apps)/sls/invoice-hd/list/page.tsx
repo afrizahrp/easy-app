@@ -49,7 +49,7 @@ const SalesInvoiceHdPage = () => {
       PoType: item.poType?.trim() ?? '',
       total_amount: item.total_amount,
       salesPersonName: item.salesPersonName.trim(),
-      paidStatus: item.paidStatus,
+      // paidStatus: item.paidStatus,
       grandTotal_amount: item.grandTotal_amount,
       // monthYear: item.monthYear,
     })) ?? [];

@@ -2,14 +2,14 @@
 import { cn } from '@/lib/utils';
 import { ColumnDef } from '@tanstack/react-table';
 import { DataTableColumnHeader } from '@/components/ui/data-table-column-header';
-import { format, isValid, startOfMonth, endOfMonth } from 'date-fns';
+import { format, isValid } from 'date-fns';
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { getStatusColor } from '@/utils/statusUils';
+// import { getStatusColor } from '@/utils/statusUils';
 import Link from 'next/link';
 
 export type SalesInvoiceHdColumns = {
@@ -19,8 +19,8 @@ export type SalesInvoiceHdColumns = {
   invoice_id: string;
   customerName: string;
   salesPersonName: string;
-  paidStatus: string;
   total_amount: number;
+  // paidStatus: string;
 };
 
 export const columns: ColumnDef<SalesInvoiceHdColumns>[] = [
@@ -189,34 +189,34 @@ export const columns: ColumnDef<SalesInvoiceHdColumns>[] = [
       align: 'right',
     },
   },
-  {
-    accessorKey: 'paidStatus',
-    header: ({ column }) => (
-      <DataTableColumnHeader
-        column={column}
-        title='Paid Status'
-        className='text-black dark:text-slate-300'
-        align='right'
-      />
-    ),
-    cell: ({ row }) => {
-      let value: string = row.getValue('paidStatus');
-      const color = getStatusColor(value);
-      return (
-        <div className='w-[140px]'>
-          <span
-            className={cn(
-              'inline-block h-3 w-3 rounded-full mr-2 dark:text-slate-300',
-              color
-            )}
-          ></span>
-          {value}
-        </div>
-      );
-    },
-    filterFn: (row, id, value: string) => {
-      return value.includes(row.getValue(id));
-    },
-    enableSorting: false,
-  },
+  // {
+  //   accessorKey: 'paidStatus',
+  //   header: ({ column }) => (
+  //     <DataTableColumnHeader
+  //       column={column}
+  //       title='Paid Status'
+  //       className='text-black dark:text-slate-300'
+  //       align='right'
+  //     />
+  //   ),
+  //   cell: ({ row }) => {
+  //     let value: string = row.getValue('paidStatus');
+  //     const color = getStatusColor(value);
+  //     return (
+  //       <div className='w-[140px]'>
+  //         <span
+  //           className={cn(
+  //             'inline-block h-3 w-3 rounded-full mr-2 dark:text-slate-300',
+  //             color
+  //           )}
+  //         ></span>
+  //         {value}
+  //       </div>
+  //     );
+  //   },
+  //   filterFn: (row, id, value: string) => {
+  //     return value.includes(row.getValue(id));
+  //   },
+  //   enableSorting: false,
+  // },
 ];

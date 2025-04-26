@@ -65,7 +65,7 @@ const SalesByPeriodAndPoTypeChart = ({
   }, [error, toast]);
 
   return (
-    <div className='bg-white p-4 rounded-lg shadow-sm h-96 relative'>
+    <div className='bg-white p-4 rounded-lg shadow-sm h-140 relative'>
       <h2 className='text-md font-semibold mb-2'>
         Sales by Period and PO Type (in Millions IDR)
       </h2>
@@ -90,7 +90,7 @@ const SalesByPeriodAndPoTypeChart = ({
                   {chart.datasets[0].label}
                 </h3>
               </div>
-              <div className='flex-1 relative flex items-center justify-center h-80 w-full'>
+              <div className='flex-1 flex items-center justify-center h-80 w-full'>
                 {/* <div className='relative h-60 w-60'> */}
                 <Pie
                   data={chart}

@@ -3,28 +3,30 @@ import { useEffect, useState } from 'react';
 import { Cross2Icon } from '@radix-ui/react-icons';
 import { Table } from '@tanstack/react-table';
 import { AlertCircle } from 'lucide-react';
-import { startOfMonth, endOfMonth, isValid, format } from 'date-fns';
+import { startOfMonth, endOfMonth } from 'date-fns';
 import { set as setDate } from 'date-fns';
-import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { zonedTimeToUtc } from 'date-fns-tz';
 
 import useSalesInvoiceHdPaidStatusOptions from '@/queryHooks/sls/useSalesInvoiceHdPaidStatusOptions';
 import useSalesInvoiceHdSalesPersonOptions from '@/queryHooks/sls/useSalesInvoiceHdSalesPersonOptions';
 import useSalesInvoiceHdPoTypeOptions from '@/queryHooks/sls/useSalesInvoiceHdPoTypeOptions';
+import { PeriodFilter } from '@/components/period-filter';
 import { Button } from '@/components/ui/button';
 import { DataTableFacetedFilter } from '@/components/ui/data-table-faceted-filter';
 import { useMonthYearPeriodStore, useSalesInvoiceHdFilterStore } from '@/store';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/components/ui/use-toast';
 
-interface SalesInvoiceFilterSidebarProps<TData> {
+// import DatePicker from 'react-datepicker';
+
+interface GeneralInvoiceSidebarProps<TData> {
   table: Table<TData>;
 }
 
-export function SalesInvoiceFilterSidebar<TData>({
+export function GeneralInvoiceSidebar<TData>({
   table,
-}: SalesInvoiceFilterSidebarProps<TData>) {
+}: GeneralInvoiceSidebarProps<TData>) {
   const { startPeriod, setStartPeriod, endPeriod, setEndPeriod } =
     useMonthYearPeriodStore();
 
@@ -71,20 +73,6 @@ export function SalesInvoiceFilterSidebar<TData>({
         color: 'destructive',
       });
     }
-
-    // console.log('Applying filters:', {
-    //   startPeriod: normalizedStart?.toISOString(),
-    //   endPeriod: normalizedEnd?.toISOString(),
-    //   paidStatus, // Diperbaiki dari 'status'
-    //   salesPersonName,
-    //   poType,
-    //   formattedForBackend: {
-    //     startPeriod: normalizedStart
-    //       ? format(normalizedStart, 'MMMyyyy')
-    //       : null,
-    //     endPeriod: normalizedEnd ? format(normalizedEnd, 'MMMyyyy') : null,
-    //   },
-    // });
 
     table
       .getColumn('paidStatus')
@@ -188,7 +176,7 @@ export function SalesInvoiceFilterSidebar<TData>({
           </Alert>
         )}
 
-        <div className='w-full flex flex-wrap gap-2 py-3'>
+        {/* <div className='w-full flex flex-wrap gap-2 py-3'>
           <div className='min-w-[120px]'>
             <label className='text-sm font-medium mb-1 block'>
               Start Period
@@ -263,9 +251,13 @@ export function SalesInvoiceFilterSidebar<TData>({
               scrollableYearDropdown
             />
           </div>
+        </div> */}
+
+        <div className='flex flex-col items-center space-y-2 w-full'>
+          <PeriodFilter />
         </div>
 
-        <div className='w-full py-3'>
+        {/* <div className='w-full py-3'>
           {table.getColumn('paidStatus') && (
             <DataTableFacetedFilter
               column={table.getColumn('paidStatus')}
@@ -285,7 +277,7 @@ export function SalesInvoiceFilterSidebar<TData>({
               }}
             />
           )}
-        </div>
+        </div> */}
 
         <div className='w-full py-3'>
           {table.getColumn('poType') && (
@@ -309,7 +301,7 @@ export function SalesInvoiceFilterSidebar<TData>({
           )}
         </div>
 
-        <div className='w-full py-3'>
+        {/* <div className='w-full py-3'>
           {table.getColumn('salesPersonName') && (
             <DataTableFacetedFilter
               column={table.getColumn('salesPersonName')}
@@ -328,7 +320,7 @@ export function SalesInvoiceFilterSidebar<TData>({
               }}
             />
           )}
-        </div>
+        </div> */}
 
         {table.getState().columnFilters.length > 0 && (
           <Button
