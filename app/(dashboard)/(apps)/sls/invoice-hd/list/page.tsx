@@ -10,8 +10,7 @@ import { SalesInvoiceHdColumns } from './list-table/components/columns';
 import { usePageStore } from '@/store';
 import { FooterSummarySection } from '@/components/footer-summary-section';
 import { FooterSummaryItem } from '@/components/footer-summary-item';
-import InvoiceFilterSummary from './invoiceFilter-Summary';
-import { Switch } from '@/components/ui/switch';
+import Sls_InvoiceFilterSummary from '@/components/sales/sls-invoiceFilter-Summary';
 
 const SalesInvoiceHdPage = () => {
   const { currentPage, sorting, limit, setCurrentPage, setSorting, setLimit } =
@@ -91,7 +90,7 @@ const SalesInvoiceHdPage = () => {
                 </span>
               </div>
               <div className='flex-1 min-w-[200px]'>
-                <InvoiceFilterSummary />
+                <Sls_InvoiceFilterSummary />
               </div>
             </div>
             <InvoiceListTable

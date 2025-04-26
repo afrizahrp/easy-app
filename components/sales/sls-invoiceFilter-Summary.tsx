@@ -4,7 +4,7 @@ import { useMonthYearPeriodStore, useSalesInvoiceHdFilterStore } from '@/store';
 import { FilterSummary } from '@/components/filterSummary';
 import { format } from 'date-fns';
 
-export default function InvoiceFilterSummary() {
+export default function Sls_InvoiceFilterSummary() {
   const { startPeriod, endPeriod, setStartPeriod, setEndPeriod } =
     useMonthYearPeriodStore();
 

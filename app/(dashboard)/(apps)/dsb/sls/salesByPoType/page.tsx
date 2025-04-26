@@ -90,28 +90,28 @@ const SalesByPeriodAndPoTypeChart = ({
                   {chart.datasets[0].label}
                 </h3>
               </div>
-              <div className='flex-1 relative flex items-center justify-center h-60 w-full'>
-                <div className='relative h-60 w-60'>
-                  <Pie
-                    data={chart}
-                    options={{
-                      responsive: true,
-                      maintainAspectRatio: false,
-                      plugins: {
-                        legend: { position: 'top' },
-                        tooltip: {
-                          callbacks: {
-                            label: (context) =>
-                              ` ${(context.raw as number).toLocaleString(
-                                'id-ID'
-                              )}`,
-                          },
+              <div className='flex-1 relative flex items-center justify-center h-80 w-full'>
+                {/* <div className='relative h-60 w-60'> */}
+                <Pie
+                  data={chart}
+                  options={{
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                      legend: { position: 'top' },
+                      tooltip: {
+                        callbacks: {
+                          label: (context) =>
+                            ` ${(context.raw as number).toLocaleString(
+                              'id-ID'
+                            )}`,
                         },
                       },
-                    }}
-                  />
-                </div>
+                    },
+                  }}
+                />
               </div>
+              {/* </div> */}
             </div>
           ))}
         </div>
