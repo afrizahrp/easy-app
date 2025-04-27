@@ -19,6 +19,8 @@ export default function RootLayout({
   return (
     <html lang='en'>
       <body className={inter.className}>
+        {/* <body className="easyApp" suppressHydrationWarning>{children}</body> */}
+
         <AuthProvider>
           <TanstackProvider>
             <Providers>

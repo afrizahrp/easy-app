@@ -149,6 +149,8 @@ const useSalesInvoiceHd = ({
         },
       });
 
+      // console.log('response data', response.data);
+
       // const response = await api.get<SalesInvoiceHdResponse>(url, {
       //   params: filteredParams,
       // });
