@@ -11,7 +11,7 @@ interface SalesBySalesPersonByPeriodChartProps {
 
 const SalesBySalesPersonByPeriodChart: React.FC<
   SalesBySalesPersonByPeriodChartProps
-> = ({ isFullWidth = false, onModeChange, salesPersonNames }) => {
+> = ({ isFullWidth = true, onModeChange, salesPersonNames }) => {
   if (salesPersonNames && salesPersonNames.length > 0) {
     return (
       <SalesBySalesPersonFilteredChart

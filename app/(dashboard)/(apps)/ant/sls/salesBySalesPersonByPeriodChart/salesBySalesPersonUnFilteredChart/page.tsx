@@ -18,6 +18,10 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
+import {
+  salesPersonColorMap,
+  getFallbackColor,
+} from '@/utils/salesPersonColorMap';
 
 ChartJS.register(
   CategoryScale,
@@ -50,7 +54,7 @@ const SalesBySalesPersonUnFilteredChart: React.FC<
   const { data, isLoading, isFetching, error } = useSalesByPeriodUnfiltered();
 
   React.useEffect(() => {
-    console.log('Data dari TopNSalesPersonChart:', data);
+    console.log('Data dari SalesBySalesPersonUnFilteredChart:', data);
   }, [data]);
 
   const chartData = React.useMemo(() => {
@@ -71,15 +75,6 @@ const SalesBySalesPersonUnFilteredChart: React.FC<
       'Dec',
     ];
 
-    const colorPalette = [
-      ['#1e3a8a', '#3b82f6'],
-      ['#10b981', '#6ee7b7'],
-      ['#e11d48', '#f472b6'],
-      ['#9333ea', '#c084fc'],
-      ['#f59e0b', '#fcd34d'],
-      ['#0ea5e9', '#7dd3fc'],
-    ];
-
     const allSalesPersons = Array.from(
       new Set(
         (data as SalesDataWithoutFilter[])
@@ -88,40 +83,45 @@ const SalesBySalesPersonUnFilteredChart: React.FC<
       )
     );
 
-    const datasets = allSalesPersons.map((salesPersonName, spIdx) => ({
-      label: salesPersonName,
-      data: months.map((month) => {
-        let totalAmount = 0;
-        (data as SalesDataWithoutFilter[]).forEach((yearData) => {
-          const monthData = yearData.months.find((m) => m.month === month);
-          if (monthData) {
-            const salesPersonData = monthData.sales.find(
-              (s) => s.salesPersonName === salesPersonName
-            );
-            if (salesPersonData) {
-              totalAmount += salesPersonData.amount;
+    const datasets = allSalesPersons.map((salesPersonName) => {
+      const color =
+        salesPersonColorMap[salesPersonName.toLocaleUpperCase()] ||
+        getFallbackColor(salesPersonName.toLocaleUpperCase());
+
+      return {
+        label: salesPersonName,
+        data: months.map((month) => {
+          let totalAmount = 0;
+          (data as SalesDataWithoutFilter[]).forEach((yearData) => {
+            const monthData = yearData.months.find((m) => m.month === month);
+            if (monthData) {
+              const salesPersonData = monthData.sales.find(
+                (s) => s.salesPersonName === salesPersonName
+              );
+              if (salesPersonData) {
+                totalAmount += salesPersonData.amount;
+              }
             }
-          }
-        });
-        return totalAmount;
-      }),
-      backgroundColor: (ctx: ScriptableContext<'bar'>) => {
-        const { chartArea, ctx: canvasCtx } = ctx.chart;
-        const [from, to] = colorPalette[spIdx % colorPalette.length];
-        if (!chartArea) return to;
-        const gradient = canvasCtx.createLinearGradient(
-          0,
-          chartArea.bottom,
-          0,
-          chartArea.top
-        );
-        gradient.addColorStop(0, from);
-        gradient.addColorStop(1, to);
-        return gradient;
-      },
-      borderColor: colorPalette[spIdx % colorPalette.length][0],
-      borderWidth: 1,
-    }));
+          });
+          return totalAmount;
+        }),
+        backgroundColor: (ctx: ScriptableContext<'bar'>) => {
+          const { chartArea, ctx: canvasCtx } = ctx.chart;
+          if (!chartArea) return color.to;
+          const gradient = canvasCtx.createLinearGradient(
+            0,
+            chartArea.bottom,
+            0,
+            chartArea.top
+          );
+          gradient.addColorStop(0, color.from);
+          gradient.addColorStop(1, color.to);
+          return gradient;
+        },
+        borderColor: color.border,
+        borderWidth: 1,
+      };
+    });
 
     return { labels: months, datasets };
   }, [data]);

@@ -92,7 +92,7 @@ const useSalesByPeriodFiltered = ({
         params.append('salesPersonName', name);
       });
 
-      const url = `http://localhost:8000/BIS/SLS/sls/get-dashboard/getBySalesPersonByPeriod`;
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/${company_id}/${module_id}/${subModule_id}/get-dashboard/getBySalesPersonByPeriod`;
       const finalUrl = `${url}${params.toString() ? `?${params.toString()}` : ''}`;
 
       console.log('validSalesPersonNames:', validSalesPersonNames);

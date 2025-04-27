@@ -18,6 +18,10 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
+import {
+  salesPersonColorMap,
+  getFallbackColor,
+} from '@/utils/salesPersonColorMap';
 
 ChartJS.register(
   CategoryScale,
@@ -39,7 +43,7 @@ interface SalesDataWithFilter {
 interface SalesBySalesPersonFilteredProps {
   isFullWidth?: boolean;
   onModeChange?: (isFullPage: boolean) => void;
-  salesPersonNames: string[]; // Wajib untuk filtered
+  salesPersonNames: string[];
 }
 
 const SalesBySalesPersonFilteredChart: React.FC<
@@ -51,7 +55,7 @@ const SalesBySalesPersonFilteredChart: React.FC<
   });
 
   React.useEffect(() => {
-    console.log('Data dari FilteredSalesPersonChart:', data);
+    console.log('Data dari SalesBySalesPersonFilteredChart:', data);
   }, [data]);
 
   const chartData = React.useMemo(() => {
@@ -72,35 +76,28 @@ const SalesBySalesPersonFilteredChart: React.FC<
       'Dec',
     ];
 
-    const colorPalette = [
-      ['#1e3a8a', '#3b82f6'],
-      ['#10b981', '#6ee7b7'],
-      ['#e11d48', '#f472b6'],
-      ['#9333ea', '#c084fc'],
-      ['#f59e0b', '#fcd34d'],
-      ['#0ea5e9', '#7dd3fc'],
-    ];
-
-    const datasets = data.map((entry: SalesDataWithFilter, idx: number) => {
+    const datasets = data.map((entry: SalesDataWithFilter) => {
       const monthsData = entry.months || {};
+      const color =
+        salesPersonColorMap[entry.salesPersonName.toLocaleUpperCase()] ||
+        getFallbackColor(entry.salesPersonName.toLocaleUpperCase());
       return {
         label: entry.salesPersonName,
         data: months.map((month) => monthsData[month] || 0),
         backgroundColor: (ctx: ScriptableContext<'bar'>) => {
           const { chartArea, ctx: canvasCtx } = ctx.chart;
-          const [from, to] = colorPalette[idx % colorPalette.length];
-          if (!chartArea) return to;
+          if (!chartArea) return color.to;
           const gradient = canvasCtx.createLinearGradient(
             0,
             chartArea.bottom,
             0,
             chartArea.top
           );
-          gradient.addColorStop(0, from);
-          gradient.addColorStop(1, to);
+          gradient.addColorStop(0, color.from);
+          gradient.addColorStop(1, color.to);
           return gradient;
         },
-        borderColor: colorPalette[idx % colorPalette.length][0],
+        borderColor: color.border,
         borderWidth: 1,
       };
     });

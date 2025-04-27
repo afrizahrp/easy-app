@@ -61,7 +61,7 @@ const useSalesByPeriodUnfiltered = () => {
         params.append('endPeriod', format(endPeriod, 'MMMyyyy'));
       }
 
-      const url = `http://localhost:8000/BIS/SLS/sls/get-dashboard/getByTopNSalesPersonByPeriod`;
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/${company_id}/${module_id}/${subModule_id}/get-dashboard/getByTopNSalesPersonByPeriod`;
       const finalUrl = `${url}${params.toString() ? `?${params.toString()}` : ''}`;
 
       console.log('Query params:', params.toString());
