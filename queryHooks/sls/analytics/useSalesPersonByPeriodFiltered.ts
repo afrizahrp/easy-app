@@ -8,68 +8,55 @@ import {
 import { format } from 'date-fns';
 import { AxiosError } from 'axios';
 
-// Tipe untuk respons
-interface SalesDataWithoutFilter {
-  period: string;
-  totalInvoice: number;
-  months: {
-    month: string;
-    sales: { salesPersonName: string; amount: number }[];
-  }[];
-}
-
 interface SalesDataWithFilter {
   period: string;
   totalInvoice: number;
   salesPersonName: string;
-  months: { month: string; amount: number }[];
+  months: { [month: string]: number }; // Sesuai dengan response backend
 }
 
 interface SalesPeriodResponse {
   company_id: string;
   module_id: string;
   subModule_id: string;
-  data: SalesDataWithoutFilter[] | SalesDataWithFilter[];
+  data: SalesDataWithFilter[];
 }
 
-interface UseSalesPersonByPeriodProps {
-  salesPersonNames?: string[];
+interface UseSalesByPeriodFilteredProps {
+  salesPersonNames: string[];
 }
 
-const useSalesPersonByPeriod = ({
-  salesPersonNames: propSalesPersonNames,
-}: UseSalesPersonByPeriodProps = {}) => {
+const useSalesByPeriodFiltered = ({
+  salesPersonNames,
+}: UseSalesByPeriodFilteredProps) => {
   const user = useSessionStore((state) => state.user);
   const company_id = user?.company_id?.toUpperCase();
   const module_id = 'SLS';
   const subModule_id = 'sls';
 
   const { startPeriod, endPeriod } = useMonthYearPeriodStore();
-  const { salesPersonName, paidStatus, poType } = useSalesInvoiceHdFilterStore(
-    (state) => ({
+  const { salesPersonName: storeSalesPersonName } =
+    useSalesInvoiceHdFilterStore((state) => ({
       salesPersonName: state.salesPersonName,
       poType: state.poType,
       paidStatus: state.paidStatus,
-    })
-  );
+    }));
 
   const isValidRequest = Boolean(
     company_id &&
       module_id &&
       startPeriod instanceof Date &&
-      endPeriod instanceof Date
+      endPeriod instanceof Date &&
+      salesPersonNames &&
+      salesPersonNames.length > 0
   );
 
-  // Gunakan salesPersonName dari store jika propSalesPersonNames tidak diberikan
-  const salesPersonNames = propSalesPersonNames ?? salesPersonName;
-
-  // Validasi salesPersonNames
-  const validSalesPersonNames = Array.isArray(salesPersonNames)
+  const validSalesPersonNames = salesPersonNames.length
     ? salesPersonNames.filter((name) => typeof name === 'string' && name.trim())
-    : salesPersonNames &&
-        typeof salesPersonNames === 'string' &&
-        salesPersonNames
-      ? [salesPersonNames]
+    : storeSalesPersonName.length
+      ? storeSalesPersonName.filter(
+          (name) => typeof name === 'string' && name.trim()
+        )
       : [];
 
   const { data, isLoading, isFetching, error, ...rest } = useQuery<
@@ -77,7 +64,7 @@ const useSalesPersonByPeriod = ({
     AxiosError<{ message?: string }>
   >({
     queryKey: [
-      'salesPersonChart',
+      'salesPersonChartFiltered',
       company_id,
       module_id,
       subModule_id,
@@ -86,15 +73,14 @@ const useSalesPersonByPeriod = ({
       validSalesPersonNames,
     ],
     queryFn: async () => {
-      if (!isValidRequest) {
-        throw new Error('Invalid request parameters');
+      if (!isValidRequest || !validSalesPersonNames.length) {
+        throw new Error(
+          'Invalid request parameters: salesPersonNames is required'
+        );
       }
-
-      const hasSalesPersonNames = validSalesPersonNames.length > 0;
 
       const params = new URLSearchParams();
 
-      // Tambahkan startPeriod dan endPeriod
       if (startPeriod) {
         params.append('startPeriod', format(startPeriod, 'MMMyyyy'));
       }
@@ -102,30 +88,20 @@ const useSalesPersonByPeriod = ({
         params.append('endPeriod', format(endPeriod, 'MMMyyyy'));
       }
 
-      let url = '';
+      validSalesPersonNames.forEach((name) => {
+        params.append('salesPersonName', name);
+      });
 
-      if (hasSalesPersonNames) {
-        // Tambahkan setiap salesPersonName sebagai parameter terpisah
-        validSalesPersonNames.forEach((name) => {
-          params.append('salesPersonName', name); // Menghasilkan salesPersonName=HANDOYO&salesPersonName=ORIT
-        });
-        url = `http://localhost:8000/BIS/SLS/sls/get-dashboard/getBySalesPersonByPeriod`;
-      } else {
-        url = `http://localhost:8000/BIS/SLS/sls/get-dashboard/getByTopNSalesPersonByPeriod`;
-      }
-
-      // Bangun URL dengan query string
+      const url = `http://localhost:8000/BIS/SLS/sls/get-dashboard/getBySalesPersonByPeriod`;
       const finalUrl = `${url}${params.toString() ? `?${params.toString()}` : ''}`;
 
-      // Debugging: Log URL dan params
       console.log('validSalesPersonNames:', validSalesPersonNames);
       console.log('Query params:', params.toString());
       console.log('finalUrl:', finalUrl);
 
       try {
-        // Kirim request tanpa params tambahan untuk menghindari paramsSerializer
         const response = await api.get<SalesPeriodResponse>(finalUrl, {
-          paramsSerializer: (params) => params.toString(), // Pastikan tidak ada modifikasi
+          paramsSerializer: (params) => params.toString(),
         });
         return response.data;
       } catch (err) {
@@ -135,7 +111,7 @@ const useSalesPersonByPeriod = ({
         );
       }
     },
-    enabled: isValidRequest,
+    enabled: isValidRequest && validSalesPersonNames.length > 0,
     staleTime: 60 * 1000,
     retry: (failureCount, err) => {
       if (err instanceof AxiosError && err.response?.status === 400) {
@@ -154,4 +130,4 @@ const useSalesPersonByPeriod = ({
   };
 };
 
-export default useSalesPersonByPeriod;
+export default useSalesByPeriodFiltered;

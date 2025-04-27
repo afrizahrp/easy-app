@@ -13,13 +13,12 @@ import {
 } from 'chart.js';
 import gradientPlugin from 'chartjs-plugin-gradient';
 import { useToast } from '@/components/ui/use-toast';
-import useSalesPersonByPeriod from '@/queryHooks/sls/analytics/useSalesPersonByPeriod';
+import useSalesByPeriodUnfiltered from '@/queryHooks/sls/analytics/useSalesPersonByPeriodUnFiltered';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
 
-// Daftarkan semua plugin dan komponen sekali
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -30,7 +29,6 @@ ChartJS.register(
   gradientPlugin
 );
 
-// Gunakan tipe dari hook
 interface SalesDataWithoutFilter {
   period: string;
   totalInvoice: number;
@@ -40,30 +38,20 @@ interface SalesDataWithoutFilter {
   }[];
 }
 
-interface SalesDataWithFilter {
-  period: string;
-  totalInvoice: number;
-  salesPersonName: string;
-  months: { month: string; amount: number }[];
-}
-
-type SalesData = SalesDataWithoutFilter | SalesDataWithFilter;
-
-interface SalesPersonByPeriodChartProps {
+interface SalesBySalesPersonUnFilteredProps {
   isFullWidth?: boolean;
   onModeChange?: (isFullPage: boolean) => void;
-  salesPersonNames?: string[]; // Tambahkan untuk mendukung filter
 }
 
-const SalesPersonByPeriodChart: React.FC<SalesPersonByPeriodChartProps> = ({
-  isFullWidth = false,
-  onModeChange,
-  salesPersonNames,
-}) => {
+const SalesBySalesPersonUnFilteredChart: React.FC<
+  SalesBySalesPersonUnFilteredProps
+> = ({ isFullWidth = false, onModeChange }) => {
   const { toast } = useToast();
-  const { data, isLoading, isFetching, error } = useSalesPersonByPeriod({
-    salesPersonNames,
-  });
+  const { data, isLoading, isFetching, error } = useSalesByPeriodUnfiltered();
+
+  React.useEffect(() => {
+    console.log('Data dari TopNSalesPersonChart:', data);
+  }, [data]);
 
   const chartData = React.useMemo(() => {
     if (!data || !data.length) return null;
@@ -84,46 +72,14 @@ const SalesPersonByPeriodChart: React.FC<SalesPersonByPeriodChartProps> = ({
     ];
 
     const colorPalette = [
-      ['#1e3a8a', '#3b82f6'], // Navy → Blue
-      ['#10b981', '#6ee7b7'], // Green → Light Green
-      ['#e11d48', '#f472b6'], // Red → Pink
-      ['#9333ea', '#c084fc'], // Purple
-      ['#f59e0b', '#fcd34d'], // Amber
-      ['#0ea5e9', '#7dd3fc'], // Sky
+      ['#1e3a8a', '#3b82f6'],
+      ['#10b981', '#6ee7b7'],
+      ['#e11d48', '#f472b6'],
+      ['#9333ea', '#c084fc'],
+      ['#f59e0b', '#fcd34d'],
+      ['#0ea5e9', '#7dd3fc'],
     ];
 
-    // Deteksi apakah data menggunakan struktur dengan filter
-    const isFilteredData = 'salesPersonName' in data[0];
-
-    if (isFilteredData) {
-      const datasets = (data as SalesDataWithFilter[]).map((entry, idx) => ({
-        label: entry.salesPersonName,
-        data: months.map((month) => {
-          const monthData = entry.months.find((m) => m.month === month);
-          return monthData ? monthData.amount : 0;
-        }),
-        backgroundColor: (ctx: ScriptableContext<'bar'>) => {
-          const { chartArea, ctx: canvasCtx } = ctx.chart;
-          const [from, to] = colorPalette[idx % colorPalette.length];
-          if (!chartArea) return to;
-          const gradient = canvasCtx.createLinearGradient(
-            0,
-            chartArea.bottom,
-            0,
-            chartArea.top
-          );
-          gradient.addColorStop(0, from);
-          gradient.addColorStop(1, to);
-          return gradient;
-        },
-        borderColor: colorPalette[idx % colorPalette.length][0],
-        borderWidth: 1,
-      }));
-
-      return { labels: months, datasets };
-    }
-
-    // Logika untuk data tanpa filter
     const allSalesPersons = Array.from(
       new Set(
         (data as SalesDataWithoutFilter[])
@@ -170,11 +126,10 @@ const SalesPersonByPeriodChart: React.FC<SalesPersonByPeriodChartProps> = ({
     return { labels: months, datasets };
   }, [data]);
 
-  // Hitung nilai maksimum untuk skala y
   const maxValue = React.useMemo(() => {
     if (!chartData || !chartData.datasets.length) return 100_000_000;
     const max = Math.max(...chartData.datasets.flatMap((ds) => ds.data), 0);
-    return max || 100_000_000; // Default jika semua nilai 0
+    return max || 100_000_000;
   }, [chartData]);
 
   React.useEffect(() => {
@@ -198,7 +153,7 @@ const SalesPersonByPeriodChart: React.FC<SalesPersonByPeriodChartProps> = ({
     <div className='bg-white p-4 rounded-lg shadow-sm h-96'>
       <div className='flex items-center justify-between mb-2'>
         <h2 className='text-md font-semibold'>
-          Sales by Period (in Millions IDR)
+          Top Sales by Period (in Millions IDR)
         </h2>
         <div className='flex items-center space-x-2'>
           <Switch
@@ -257,7 +212,7 @@ const SalesPersonByPeriodChart: React.FC<SalesPersonByPeriodChartProps> = ({
       ) : (
         <Alert color='destructive'>
           <AlertDescription>
-            <div> No data available for the selected period.</div>
+            <div>No data available for the selected period.</div>
           </AlertDescription>
         </Alert>
       )}
@@ -265,4 +220,4 @@ const SalesPersonByPeriodChart: React.FC<SalesPersonByPeriodChartProps> = ({
   );
 };
 
-export default SalesPersonByPeriodChart;
+export default SalesBySalesPersonUnFilteredChart;
