@@ -261,7 +261,7 @@ export function SalesPersonInvoiceFilterSidebar<TData>({
           {table.getColumn('paidStatus') && (
             <DataTableFacetedFilter
               column={table.getColumn('paidStatus')}
-              title='Status'
+              title='Paid Status'
               options={statusOptionList}
               isLoading={isStatusLoading}
               disabled={salesPersonName.length > 1}
@@ -279,7 +279,7 @@ export function SalesPersonInvoiceFilterSidebar<TData>({
           )}
         </div>
 
-        <div className='w-full py-3'>
+        {/* <div className='w-full py-3'>
           {table.getColumn('poType') && (
             <DataTableFacetedFilter
               column={table.getColumn('poType')}
@@ -299,7 +299,7 @@ export function SalesPersonInvoiceFilterSidebar<TData>({
               }}
             />
           )}
-        </div>
+        </div> */}
 
         <div className='w-full py-3'>
           {table.getColumn('salesPersonName') && (

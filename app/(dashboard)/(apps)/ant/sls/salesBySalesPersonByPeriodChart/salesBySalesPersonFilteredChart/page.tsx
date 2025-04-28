@@ -132,7 +132,15 @@ const SalesBySalesPersonFilteredChart: React.FC<
     <div className='bg-white p-4 rounded-lg shadow-sm h-96'>
       <div className='flex items-center justify-between mb-2'>
         <h2 className='text-md font-semibold'>
-          Sales by Period (in Millions IDR)
+          {salesPersonNames.length === 1
+            ? `Sales Performance by ${salesPersonNames[0]} (in Millions IDR)`
+            : salesPersonNames.length === 2
+              ? `Sales Performance by ${salesPersonNames.join(' and ')} (in Millions IDR)`
+              : `Sales Performance by ${salesPersonNames
+                  .slice(0, salesPersonNames.length - 1)
+                  .join(
+                    ', '
+                  )} and ${salesPersonNames[salesPersonNames.length - 1]} (in Millions IDR)`}
         </h2>
         <div className='flex items-center space-x-2'>
           <Switch
@@ -147,10 +155,8 @@ const SalesBySalesPersonFilteredChart: React.FC<
         </div>
       </div>
       {isLoading || isFetching ? (
-        <div className='h-72 flex flex-col gap-2'>
-          <Skeleton className='h-8 w-full' />
-          <Skeleton className='h-8 w-full' />
-          <Skeleton className='h-48 w-full' />
+        <div className='flex items-center justify-center h-full'>
+          <div className='w-3/4 h-1/2 rounded-lg shimmer' />
         </div>
       ) : isDataReady ? (
         <Bar
@@ -165,7 +171,7 @@ const SalesBySalesPersonFilteredChart: React.FC<
               y: {
                 beginAtZero: true,
                 max: maxValue * 1.1,
-                title: { display: true, text: 'Total Sales (Million IDR)' },
+                title: { display: true, text: 'Total Sales' },
                 ticks: {
                   callback: (value) =>
                     `${(Number(value) / 1_000_000).toLocaleString('id-ID')}`,
@@ -189,11 +195,23 @@ const SalesBySalesPersonFilteredChart: React.FC<
           }}
         />
       ) : (
-        <Alert color='destructive'>
-          <AlertDescription>
-            <div>No data available for the selected period.</div>
-          </AlertDescription>
-        </Alert>
+        <div className='flex flex-col items-center justify-center h-full text-gray-400'>
+          <svg
+            xmlns='http://www.w3.org/2000/svg'
+            className='w-24 h-24 mb-4 animate-bounce'
+            fill='none'
+            viewBox='0 0 24 24'
+            stroke='currentColor'
+            strokeWidth={1.5}
+          >
+            <path
+              strokeLinecap='round'
+              strokeLinejoin='round'
+              d='M3 3v18h18V3H3zm5 14h8m-8-4h8m-8-4h8'
+            />
+          </svg>
+          <p className='text-sm font-medium'>No data available</p>
+        </div>
       )}
     </div>
   );

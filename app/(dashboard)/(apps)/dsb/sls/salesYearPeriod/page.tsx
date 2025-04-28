@@ -129,7 +129,7 @@ const SalesByPeriodChart: React.FC<SalesByPeriodChartProps> = ({
     );
 
   return (
-    <div className='bg-white p-4 rounded-lg shadow-sm h-96'>
+    <div className='bg-white p-4 rounded-lg shadow-sm h-96 flex flex-col'>
       <div className='flex items-center justify-between mb-2'>
         <h2 className='text-md font-semibold'>
           Sales by period (in Millions IDR)
@@ -146,64 +146,82 @@ const SalesByPeriodChart: React.FC<SalesByPeriodChartProps> = ({
           </Label>
         </div>
       </div>
-      {isLoading || isFetching ? (
-        <div className='flex items-center justify-center h-72 text-gray-500'>
-          Loading...
-        </div>
-      ) : isDataReady ? (
-        <Bar
-          data={chartData}
-          options={{
-            responsive: true,
-            maintainAspectRatio: false,
-            layout: {
-              padding: {
-                bottom: 20,
+      <div className='flex-1 relative'>
+        {isLoading || isFetching ? (
+          <div className='flex items-center justify-center h-full'>
+            <div className='w-3/4 h-1/2 rounded-lg shimmer' />
+          </div>
+        ) : isDataReady ? (
+          <Bar
+            data={chartData}
+            options={{
+              responsive: true,
+              maintainAspectRatio: false,
+              layout: {
+                padding: {
+                  bottom: 20,
+                },
               },
-            },
-            scales: {
-              y: {
-                beginAtZero: true,
-                min: maxValue < 1_000_000_000 ? 100_000_000 : undefined,
+              scales: {
+                y: {
+                  beginAtZero: true,
+                  min: maxValue < 1_000_000_000 ? 100_000_000 : undefined,
 
-                title: { display: true, text: 'Total Sales' },
-                ticks: {
-                  callback: (value: unknown) => {
-                    const val = Number(value) / 1000000;
-                    return `${val.toLocaleString('id-ID')}`;
+                  title: { display: true, text: 'Total Sales' },
+                  ticks: {
+                    callback: (value: unknown) => {
+                      const val = Number(value) / 1000000;
+                      return `${val.toLocaleString('id-ID')}`;
+                    },
+                  },
+                },
+                x: {
+                  title: { display: false, text: 'Month' },
+                  ticks: {
+                    callback: (value, index, ticks) => {
+                      return chartData.labels[index] ?? '';
+                    },
+                  },
+
+                  grid: {
+                    display: false,
                   },
                 },
               },
-              x: {
-                title: { display: false, text: 'Month' },
-                ticks: {
-                  callback: (value, index, ticks) => {
-                    return chartData.labels[index] ?? '';
-                  },
-                },
-
-                grid: {
+              plugins: {
+                legend: { position: 'top' },
+                title: {
                   display: false,
                 },
-              },
-            },
-            plugins: {
-              legend: { position: 'top' },
-              title: {
-                display: false,
-              },
-              tooltip: {
-                callbacks: {
-                  label: (context) =>
-                    ` ${(context.raw as number).toLocaleString('id-ID')}`,
+                tooltip: {
+                  callbacks: {
+                    label: (context) =>
+                      ` ${(context.raw as number).toLocaleString('id-ID')}`,
+                  },
                 },
               },
-            },
-          }}
-        />
-      ) : (
-        <div className='text-center text-red-500'>No data available</div>
-      )}
+            }}
+          />
+        ) : (
+          <div className='flex flex-col items-center justify-center h-full text-gray-400'>
+            <svg
+              xmlns='http://www.w3.org/2000/svg'
+              className='w-24 h-24 mb-4 animate-bounce'
+              fill='none'
+              viewBox='0 0 24 24'
+              stroke='currentColor'
+              strokeWidth={1.5}
+            >
+              <path
+                strokeLinecap='round'
+                strokeLinejoin='round'
+                d='M3 3v18h18V3H3zm5 14h8m-8-4h8m-8-4h8'
+              />
+            </svg>
+            <p className='text-sm font-medium'>No data available</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

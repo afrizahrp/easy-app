@@ -53,7 +53,7 @@ export function FilterSidebar<TData>({
                 className='w-full'
                 type='button'
                 color='primary'
-                variant='outline'
+                // variant='outline'
               >
                 Back
               </Button>

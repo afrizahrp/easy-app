@@ -62,7 +62,8 @@ const SalesByPeriodAndPoTypeChart = ({
   }, [error, toast]);
 
   return (
-    <div className='bg-white p-4 rounded-lg shadow-sm h-96 relative'>
+    // <div className='bg-white p-4 rounded-lg shadow-sm h-96 relative'>
+    <div className='bg-white p-4 rounded-lg shadow-sm min-h-96 relative flex flex-col'>
       <h2 className='text-md font-semibold mb-2'>
         Sales by Period and PO Type
       </h2>
@@ -77,29 +78,31 @@ const SalesByPeriodAndPoTypeChart = ({
         </Label>
       </div>
       {isLoading || isFetching ? (
-        <div className='text-center text-gray-500'>Loading...</div>
+        <div className='flex items-center justify-center h-full'>
+          <div className='w-3/4 h-1/2 rounded-lg shimmer' />
+        </div>
       ) : chartData.length > 0 ? (
-        <div className='grid grid-cols-1 md:grid-cols-2 gap-4 h-full'>
+        <div
+          className={`flex-1 mt-4 ${
+            chartData.length === 1
+              ? 'flex items-center justify-center'
+              : 'grid grid-cols-1 md:grid-cols-2 gap-4'
+          }`}
+        >
           {chartData.map((chart, index) => (
-            // <div
-            //   key={index}
-            //   className='flex flex-col items-center justify-center'
-            // >
-
             <div
               key={index}
-              className='flex flex-col items-center justify-between h-full'
+              className='flex flex-col items-center justify-center'
             >
               <h3 className='text-sm font-medium text-center mb-2'>
                 {chart.datasets[0].label}
               </h3>
-              {/* <div className='flex-1 flex items-center justify-center w-full max-w-[240px] max-h-[240px]'> */}
 
-              <div className='flex-1 flex items-center justify-center w-full'>
+              <div className='flex items-center justify-center w-full'>
                 <div
                   className={`relative aspect-square ${
                     isFullWidth ? 'w-80' : 'w-48'
-                  }`}
+                  } flex items-center justify-center`}
                 >
                   <Pie
                     data={chart}
@@ -123,7 +126,23 @@ const SalesByPeriodAndPoTypeChart = ({
           ))}
         </div>
       ) : (
-        <div className='text-center text-red-500'>No data available</div>
+        <div className='flex flex-col items-center justify-center h-full text-gray-400'>
+          <svg
+            xmlns='http://www.w3.org/2000/svg'
+            className='w-24 h-24 mb-4 animate-bounce'
+            fill='none'
+            viewBox='0 0 24 24'
+            stroke='currentColor'
+            strokeWidth={1.5}
+          >
+            <path
+              strokeLinecap='round'
+              strokeLinejoin='round'
+              d='M3 3v18h18V3H3zm5 14h8m-8-4h8m-8-4h8'
+            />
+          </svg>
+          <p className='text-sm font-medium'>No data available</p>
+        </div>
       )}
     </div>
   );

@@ -35,7 +35,8 @@ export const salesPersonColorMap: Record<
   arman: { from: '#9333ea', to: '#c084fc', border: '#9333ea' },
   'udin mio': { from: '#6b7280', to: '#9ca3af', border: '#6b7280' },
   bowo: { from: '#4ade80', to: '#34d399', border: '#4ade80' },
-  ariq: { from: '#9d174d', to: '#e11d48', border: '#9d174d' },
+  ariq: { from: '#6366f1', to: '#a5b4fc', border: '#6366f1' },
+
   'direct/defvi': { from: '#d97706', to: '#facc15', border: '#d97706' },
   'dani pakai yg satunya': {
     from: '#1d4ed8',
@@ -45,7 +46,9 @@ export const salesPersonColorMap: Record<
   dimas: { from: '#fbbf24', to: '#fcd34d', border: '#fbbf24' },
   'direct/yetty': { from: '#f97316', to: '#fdba74', border: '#f97316' },
   slamet: { from: '#ef4444', to: '#f87171', border: '#ef4444' },
-  herman: { from: '#6366f1', to: '#a5b4fc', border: '#6366f1' },
+
+  herman: { from: '#9d174d', to: '#e11d48', border: '#9d174d' },
+
   iwan: { from: '#22d3ee', to: '#38bdf8', border: '#22d3ee' },
   hans: { from: '#1e3a8a', to: '#3b82f6', border: '#1e3a8a' },
   seta: { from: '#9333ea', to: '#c084fc', border: '#9333ea' },
