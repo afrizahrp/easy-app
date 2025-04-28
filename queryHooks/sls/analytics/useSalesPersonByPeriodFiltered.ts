@@ -95,10 +95,6 @@ const useSalesByPeriodFiltered = ({
       const url = `${process.env.NEXT_PUBLIC_API_URL}/${company_id}/${module_id}/${subModule_id}/get-analytics/getBySalesPersonByPeriod`;
       const finalUrl = `${url}${params.toString() ? `?${params.toString()}` : ''}`;
 
-      console.log('validSalesPersonNames:', validSalesPersonNames);
-      console.log('Query params:', params.toString());
-      console.log('finalUrl:', finalUrl);
-
       try {
         const response = await api.get<SalesPeriodResponse>(finalUrl, {
           paramsSerializer: (params) => params.toString(),

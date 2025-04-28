@@ -313,6 +313,8 @@ interface MonthYearPeriodState {
   setStartPeriod: (date: Date | null) => void;
   endPeriod: Date | null;
   setEndPeriod: (date: Date | null) => void;
+  period: string;
+  setPeriod: (period: string) => void;
 }
 const currentYear = new Date().getFullYear();
 
@@ -336,7 +338,11 @@ export const useMonthYearPeriodStore = create<MonthYearPeriodState>()(
         milliseconds: 999,
       }),
       setEndPeriod: (date) => set({ endPeriod: date }),
+
+      period: '', // default value bisa dikosongkan atau diisi
+      setPeriod: (period: string) => set({ period }),
     }),
+
     {
       name: 'monthYearFilterStore', // Nama kunci di localStorage
       storage: createJSONStorage(() => localStorage), // Gunakan localStorage
