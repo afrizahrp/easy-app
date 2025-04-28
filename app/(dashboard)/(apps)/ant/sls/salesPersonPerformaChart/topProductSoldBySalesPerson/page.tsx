@@ -12,12 +12,21 @@ import {
   Legend,
   ScriptableContext,
 } from 'chart.js';
+import { getGridConfig, getLabel } from '@/lib/appex-chart-options';
+import { useTheme } from 'next-themes';
+
+import { useThemeStore } from '@/store';
+import { themes } from '@/config/thems';
+
 import gradientPlugin from 'chartjs-plugin-gradient';
 import { useToast } from '@/components/ui/use-toast';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import dynamic from 'next/dynamic';
+
+const Chart = dynamic(() => import('react-apexcharts'), { ssr: false });
 
 ChartJS.register(
   CategoryScale,
@@ -41,6 +50,11 @@ const TopProductSoldBySalesPerson: React.FC<
   TopProductSoldBySalesPersonProps
 > = ({ salesPersonName, year, month, sortBy, onClose }) => {
   const { toast } = useToast();
+
+  const { theme: config, isRtl } = useThemeStore();
+  const { theme: mode } = useTheme();
+  const theme = themes.find((theme) => theme.name === config);
+
   const [chartMode, setChartMode] = useState<'qty' | 'total_amount'>('qty');
 
   // Extract year and month period from the month prop (assuming format "YYYY-MM")
@@ -114,6 +128,105 @@ const TopProductSoldBySalesPerson: React.FC<
     return max || (chartMode === 'qty' ? 100 : 100_000_000);
   }, [productChartData, chartMode]);
 
+  const series = productData
+    ? [
+        {
+          data: productData.map((item) =>
+            chartMode === 'qty' ? item.qty : item.total_amount
+          ),
+        },
+      ]
+    : [];
+
+  const options: any = {
+    chart: {
+      toolbar: { show: false },
+    },
+    plotOptions: {
+      bar: {
+        barHeight: '100%',
+        distributed: true,
+        horizontal: true,
+        dataLabels: { position: 'bottom' },
+      },
+    },
+    dataLabels: {
+      enabled: true,
+      textAnchor: 'start',
+      style: {
+        colors: ['#fff'],
+      },
+      formatter: function (val: number, opt: any) {
+        return (
+          opt.w.globals.labels[opt.dataPointIndex] +
+          ': ' +
+          val.toLocaleString('id-ID')
+        );
+      },
+      offsetX: 0,
+      dropShadow: { enabled: true },
+    },
+    stroke: {
+      show: false,
+      width: 1,
+      colors: [
+        `hsl(${
+          theme?.cssVars[
+            mode === 'dark' || mode === 'system' ? 'dark' : 'light'
+          ].chartLabel
+        })`,
+      ],
+    },
+    colors: [
+      `hsl(${theme?.cssVars[mode === 'dark' ? 'dark' : 'light'].primary})`,
+      `hsl(${theme?.cssVars[mode === 'dark' ? 'dark' : 'light'].info})`,
+      `hsl(${theme?.cssVars[mode === 'dark' ? 'dark' : 'light'].success})`,
+      `hsl(${theme?.cssVars[mode === 'dark' ? 'dark' : 'light'].warning})`,
+    ],
+    tooltip: { theme: mode === 'dark' ? 'dark' : 'light' },
+    grid: getGridConfig(
+      `hsl(${theme?.cssVars[mode === 'dark' ? 'dark' : 'light'].chartGird})`
+    ),
+    yaxis: {
+      show: false,
+      labels: {
+        style: {
+          colors: [
+            `hsl(${
+              theme?.cssVars[
+                mode === 'dark' || mode === 'system' ? 'dark' : 'light'
+              ].chartLabel
+            })`,
+          ],
+        },
+      },
+    },
+    xaxis: {
+      categories: productData?.map((item) => item.productName) ?? [],
+      axisBorder: { show: false },
+      axisTicks: { show: false },
+      labels: getLabel(
+        `hsl(${
+          theme?.cssVars[
+            mode === 'dark' || mode === 'system' ? 'dark' : 'light'
+          ].chartLabel
+        })`
+      ),
+    },
+    legend: {
+      labels: {
+        colors: `hsl(${
+          theme?.cssVars[
+            mode === 'dark' || mode === 'system' ? 'dark' : 'light'
+          ].chartLabel
+        })`,
+      },
+      itemMargin: { horizontal: 5, vertical: 5 },
+      markers: { width: 10, height: 10, radius: 10, offsetX: isRtl ? 5 : -5 },
+    },
+    padding: { top: 0, right: 0, bottom: 0, left: 0 },
+  };
+
   const isProductDataReady =
     !!productChartData &&
     Array.isArray(productChartData.labels) &&
@@ -125,8 +238,7 @@ const TopProductSoldBySalesPerson: React.FC<
     <div className='bg-white p-4 rounded-lg shadow-sm h-full'>
       <div className='flex items-center justify-between mb-2'>
         <h3 className='text-md font-semibold'>
-          Top 10 Products Sold by {salesPersonName} in {month}
-          {year} sortBy {sortBy}
+          Top 10 Products Sold by {salesPersonName} in {month} {year}
         </h3>
         <div className='flex items-center space-x-2'>
           <Switch
@@ -151,56 +263,15 @@ const TopProductSoldBySalesPerson: React.FC<
         </div>
       ) : isProductDataReady ? (
         <div className='h-64'>
-          <Bar
-            data={productChartData}
-            options={{
-              responsive: true,
-              maintainAspectRatio: false,
-              layout: {
-                padding: { bottom: 20 },
-              },
-              scales: {
-                y: {
-                  beginAtZero: true,
-                  max: productMaxValue * 1.1,
-                  title: {
-                    display: true,
-                    text:
-                      chartMode === 'qty'
-                        ? 'Quantity Sold'
-                        : 'Total Amount (IDR)',
-                  },
-                  ticks: {
-                    callback: (value) =>
-                      chartMode === 'qty'
-                        ? Number(value).toLocaleString('id-ID')
-                        : `${(Number(value) / 1_000_000).toLocaleString('id-ID')}M`,
-                  },
-                },
-                x: {
-                  title: { display: true, text: 'Product Name' },
-                  grid: { display: false },
-                  ticks: {
-                    autoSkip: false,
-                    maxRotation: 45,
-                    minRotation: 45,
-                  },
-                },
-              },
-              plugins: {
-                legend: { position: 'top' },
-                title: { display: false },
-                tooltip: {
-                  callbacks: {
-                    label: (context) =>
-                      chartMode === 'qty'
-                        ? `${(context.raw as number).toLocaleString('id-ID')} units`
-                        : `${(context.raw as number).toLocaleString('id-ID')} IDR`,
-                  },
-                },
-              },
-            }}
-          />
+          <div className='h-64'>
+            <Chart
+              options={options}
+              series={series}
+              type='bar'
+              height={'100%'}
+              width={'100%'}
+            />
+          </div>
         </div>
       ) : (
         <div className='flex flex-col items-center justify-center h-80 text-gray-400'>
