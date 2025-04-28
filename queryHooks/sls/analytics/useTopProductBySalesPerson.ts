@@ -24,11 +24,13 @@ interface ProductSoldCountResponse {
 
 interface UseTopProductsBySalesPersonProps {
   salesPersonName?: string; // Opsional, bisa diambil dari store jika tidak diberikan
+  month?: string; // Parameter baru untuk filter bulan
   enabled?: boolean;
 }
 
 const useTopProductsBySalesPerson = ({
   salesPersonName: propSalesPersonName,
+  month,
   enabled = true,
 }: UseTopProductsBySalesPersonProps) => {
   const user = useSessionStore((state) => state.user);
@@ -54,8 +56,7 @@ const useTopProductsBySalesPerson = ({
       module_id &&
       subModule_id &&
       finalSalesPersonName &&
-      startPeriod instanceof Date &&
-      endPeriod instanceof Date
+      (month || (startPeriod instanceof Date && endPeriod instanceof Date))
   );
 
   const { data, isLoading, isFetching, error, ...rest } = useQuery<
@@ -68,29 +69,34 @@ const useTopProductsBySalesPerson = ({
       module_id,
       subModule_id,
       finalSalesPersonName,
-      startPeriod,
-      endPeriod,
+      month || [startPeriod, endPeriod], // Sertakan month di queryKey
     ],
     queryFn: async () => {
       if (!isValidRequest) {
         throw new Error(
-          'Invalid request parameters: salesPersonName, startPeriod, and endPeriod are required'
+          'Invalid request parameters: salesPersonName and either month or startPeriod/endPeriod are required'
         );
       }
 
       const params = new URLSearchParams();
       params.append('salesPersonName', finalSalesPersonName);
-      if (startPeriod) {
-        params.append('startPeriod', format(startPeriod, 'MMMyyyy'));
-      }
-      if (endPeriod) {
-        params.append('endPeriod', format(endPeriod, 'MMMyyyy'));
+
+      if (month) {
+        params.append('month', month); // Tambahkan parameter month
+      } else {
+        if (startPeriod) {
+          params.append('startPeriod', format(startPeriod, 'MMMyyyy'));
+        }
+        if (endPeriod) {
+          params.append('endPeriod', format(endPeriod, 'MMMyyyy'));
+        }
       }
 
       const url = `${process.env.NEXT_PUBLIC_API_URL}/${company_id}/${module_id}/${subModule_id}/get-analytics/getProductSoldCountBySalesPerson`;
       const finalUrl = `${url}${params.toString() ? `?${params.toString()}` : ''}`;
 
       console.log('salesPersonName:', finalSalesPersonName);
+      console.log('month:', month);
       console.log('Query params:', params.toString());
       console.log('finalUrl:', finalUrl);
 

@@ -1,7 +1,7 @@
 'use client';
 import React from 'react';
-import SalesBySalesPersonFilteredChart from '../sls/salesPersonPerformaChart/salesBySalesPersonUnFilteredChart/page';
-import SalesBySalesPersonUnFilteredChart from '../sls/salesPersonPerformaChart/salesBySalesPersonUnFilteredChart/page';
+import SalesBySalesPersonFilteredChart from './salesBySalesPersonFilteredChart/page';
+import SalesBySalesPersonUnFilteredChart from './salesBySalesPersonUnFilteredChart/page';
 import { useSalesInvoiceHdFilterStore } from '@/store';
 
 interface SalesPersonPerformaChartProps {

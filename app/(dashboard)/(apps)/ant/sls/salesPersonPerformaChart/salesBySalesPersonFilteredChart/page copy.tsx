@@ -46,7 +46,7 @@ interface SalesBySalesPersonFilteredProps {
   salesPersonNames: string[];
 }
 
-const SalesBySalesPersonFilteredChart: React.FC<
+const SalesBySalesPersonFilteredChartBack: React.FC<
   SalesBySalesPersonFilteredProps
 > = ({ isFullWidth = false, onModeChange, salesPersonNames }) => {
   const { toast } = useToast();
@@ -217,4 +217,4 @@ const SalesBySalesPersonFilteredChart: React.FC<
   );
 };
 
-export default SalesBySalesPersonFilteredChart;
+export default SalesBySalesPersonFilteredChartBack;
