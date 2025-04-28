@@ -2,33 +2,35 @@ import { api } from '@/config/axios.config';
 import { useQuery } from '@tanstack/react-query';
 import {
   useSessionStore,
-  useSalesInvoiceHdFilterStore,
   useMonthYearPeriodStore,
+  useSalesInvoiceHdFilterStore,
 } from '@/store';
 import { format } from 'date-fns';
 import { AxiosError } from 'axios';
 
-interface SalesDataWithFilter {
-  period: string;
-  totalInvoice: number;
-  salesPersonName: string;
-  months: { [month: string]: number }; // Sesuai dengan response backend
+interface ProductSoldItem {
+  productName: string;
+  qty: number;
+  total_amount: number;
 }
 
-interface SalesPeriodResponse {
+interface ProductSoldCountResponse {
   company_id: string;
   module_id: string;
   subModule_id: string;
-  data: SalesDataWithFilter[];
+  salesPersonName: string;
+  data: ProductSoldItem[];
 }
 
-interface UseSalesByPeriodFilteredProps {
-  salesPersonNames: string[];
+interface UseTopProductsBySalesPersonProps {
+  salesPersonName?: string; // Opsional, bisa diambil dari store jika tidak diberikan
+  enabled?: boolean;
 }
 
-const useSalesByPeriodFiltered = ({
-  salesPersonNames,
-}: UseSalesByPeriodFilteredProps) => {
+const useTopProductsBySalesPerson = ({
+  salesPersonName: propSalesPersonName,
+  enabled = true,
+}: UseTopProductsBySalesPersonProps) => {
   const user = useSessionStore((state) => state.user);
   const company_id = user?.company_id?.toUpperCase();
   const module_id = 'ANT';
@@ -42,45 +44,42 @@ const useSalesByPeriodFiltered = ({
       paidStatus: state.paidStatus,
     }));
 
+  // Gunakan salesPersonName dari props jika ada, kalau tidak dari store
+  const finalSalesPersonName =
+    propSalesPersonName?.trim() ||
+    (storeSalesPersonName.length > 0 ? storeSalesPersonName[0]?.trim() : '');
+
   const isValidRequest = Boolean(
     company_id &&
       module_id &&
+      subModule_id &&
+      finalSalesPersonName &&
       startPeriod instanceof Date &&
-      endPeriod instanceof Date &&
-      salesPersonNames &&
-      salesPersonNames.length > 0
+      endPeriod instanceof Date
   );
 
-  const validSalesPersonNames = salesPersonNames.length
-    ? salesPersonNames.filter((name) => typeof name === 'string' && name.trim())
-    : storeSalesPersonName.length
-      ? storeSalesPersonName.filter(
-          (name) => typeof name === 'string' && name.trim()
-        )
-      : [];
-
   const { data, isLoading, isFetching, error, ...rest } = useQuery<
-    SalesPeriodResponse,
+    ProductSoldCountResponse,
     AxiosError<{ message?: string }>
   >({
     queryKey: [
-      'salesPersonChartFiltered',
+      'topProductsBySalesPerson',
       company_id,
       module_id,
       subModule_id,
+      finalSalesPersonName,
       startPeriod,
       endPeriod,
-      validSalesPersonNames,
     ],
     queryFn: async () => {
-      if (!isValidRequest || !validSalesPersonNames.length) {
+      if (!isValidRequest) {
         throw new Error(
-          'Invalid request parameters: salesPersonNames is required'
+          'Invalid request parameters: salesPersonName, startPeriod, and endPeriod are required'
         );
       }
 
       const params = new URLSearchParams();
-
+      params.append('salesPersonName', finalSalesPersonName);
       if (startPeriod) {
         params.append('startPeriod', format(startPeriod, 'MMMyyyy'));
       }
@@ -88,30 +87,27 @@ const useSalesByPeriodFiltered = ({
         params.append('endPeriod', format(endPeriod, 'MMMyyyy'));
       }
 
-      validSalesPersonNames.forEach((name) => {
-        params.append('salesPersonName', name);
-      });
-
-      const url = `${process.env.NEXT_PUBLIC_API_URL}/${company_id}/${module_id}/${subModule_id}/get-analytics/getBySalesPersonByPeriod`;
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/${company_id}/${module_id}/${subModule_id}/get-analytics/getProductSoldCountBySalesPerson`;
       const finalUrl = `${url}${params.toString() ? `?${params.toString()}` : ''}`;
 
-      console.log('validSalesPersonNames:', validSalesPersonNames);
+      console.log('salesPersonName:', finalSalesPersonName);
       console.log('Query params:', params.toString());
       console.log('finalUrl:', finalUrl);
 
       try {
-        const response = await api.get<SalesPeriodResponse>(finalUrl, {
+        const response = await api.get<ProductSoldCountResponse>(finalUrl, {
           paramsSerializer: (params) => params.toString(),
         });
         return response.data;
       } catch (err) {
         const axiosError = err as AxiosError<{ message?: string }>;
         throw new Error(
-          axiosError.response?.data?.message || 'Failed to fetch sales data'
+          axiosError.response?.data?.message ||
+            'Failed to fetch top products data'
         );
       }
     },
-    enabled: isValidRequest && validSalesPersonNames.length > 0,
+    enabled: isValidRequest && enabled,
     staleTime: 60 * 1000,
     retry: (failureCount, err) => {
       if (err instanceof AxiosError && err.response?.status === 400) {
@@ -130,4 +126,4 @@ const useSalesByPeriodFiltered = ({
   };
 };
 
-export default useSalesByPeriodFiltered;
+export default useTopProductsBySalesPerson;

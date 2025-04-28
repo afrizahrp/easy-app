@@ -23,7 +23,7 @@ interface SalesPeriodResponse {
 const useSalesByPeriodUnfiltered = () => {
   const user = useSessionStore((state) => state.user);
   const company_id = user?.company_id?.toUpperCase();
-  const module_id = 'SLS';
+  const module_id = 'ANT';
   const subModule_id = 'sls';
 
   const { startPeriod, endPeriod } = useMonthYearPeriodStore();
@@ -61,11 +61,11 @@ const useSalesByPeriodUnfiltered = () => {
         params.append('endPeriod', format(endPeriod, 'MMMyyyy'));
       }
 
-      const url = `${process.env.NEXT_PUBLIC_API_URL}/${company_id}/${module_id}/${subModule_id}/get-dashboard/getByTopNSalesPersonByPeriod`;
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/${company_id}/${module_id}/${subModule_id}/get-analytics/getByTopNSalesPersonByPeriod`;
       const finalUrl = `${url}${params.toString() ? `?${params.toString()}` : ''}`;
 
-      console.log('Query params:', params.toString());
-      console.log('finalUrl:', finalUrl);
+      // console.log('Query params:', params.toString());
+      // console.log('finalUrl:', finalUrl);
 
       try {
         const response = await api.get<SalesPeriodResponse>(finalUrl);
