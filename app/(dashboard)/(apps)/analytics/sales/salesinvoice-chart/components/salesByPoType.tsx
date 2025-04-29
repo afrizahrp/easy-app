@@ -1,3 +1,4 @@
+// analytics/sales/salesinvoice-chart/components/SalesByPoType.tsx
 'use client';
 import React from 'react';
 import { Pie } from 'react-chartjs-2';
@@ -9,15 +10,15 @@ import { Switch } from '@/components/ui/switch';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
-interface SalesByPeriodAndPoTypeChartProps {
+interface SalesByPoTypeProps {
   isFullWidth?: boolean;
-  onModeChange?: (isFullPage: boolean) => void;
+  onModeChange?: (isFull: boolean) => void;
 }
 
-const SalesByPoType = ({
+const SalesByPoType: React.FC<SalesByPoTypeProps> = ({
   isFullWidth,
   onModeChange,
-}: SalesByPeriodAndPoTypeChartProps) => {
+}) => {
   const { toast } = useToast();
   const { data, isLoading, isFetching, error } = useSalesByPeriodAndPoType();
 
@@ -62,7 +63,6 @@ const SalesByPoType = ({
   }, [error, toast]);
 
   return (
-    // <div className='bg-white p-4 rounded-lg shadow-sm h-96 relative'>
     <div className='bg-white p-4 rounded-lg shadow-sm min-h-96 relative flex flex-col'>
       <h2 className='text-md font-semibold mb-2'>Sales by PO Type</h2>
       <div className='absolute top-2 right-2 flex items-center space-x-2 z-10'>
@@ -95,18 +95,15 @@ const SalesByPoType = ({
               <h3 className='text-sm font-medium text-center mb-2'>
                 {chart.datasets[0].label}
               </h3>
-
               <div className='flex items-center justify-center w-full'>
                 <div
-                  className={`relative aspect-square ${
-                    isFullWidth ? 'w-80' : 'w-48'
-                  } flex items-center justify-center`}
+                  className={`relative aspect-square ${isFullWidth ? 'w-80' : 'w-48'} flex items-center justify-center`}
                 >
                   <Pie
                     data={chart}
                     options={{
                       responsive: true,
-                      maintainAspectRatio: true, // Pastikan rasio aspek dipertahankan
+                      maintainAspectRatio: true,
                       plugins: {
                         legend: { position: 'top' },
                         tooltip: {

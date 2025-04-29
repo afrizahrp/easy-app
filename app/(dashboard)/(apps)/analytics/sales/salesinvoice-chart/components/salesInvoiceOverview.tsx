@@ -1,11 +1,10 @@
 // analytics/sales/salesinvoice-chart/components/SalesInvoiceOverview.tsx
 'use client';
 import { motion } from 'framer-motion';
-import SalesInvoiceFilterSummary from '@/components/sales/sls-invoiceFilter-Summary';
-import SalesByPeriodChart from '../components/salesByPeriod';
+import SalesInvoiceFilterSummary from '@/components/sales/salesInvoiceFilterSummary';
+import SalesByPeriod from '../components/salesByPeriod';
 import SalesByPoType from '../components/salesByPoType';
-import SalesInvoiceHdPage from '@/components/sales/SalesInvoiceHdList'; // Dipindah ke components
-
+import SalesInvoiceHdList from '@/app/(dashboard)/(apps)/sales/invoice-hd/list/page';
 interface SalesInvoiceOverviewProps {
   fullChart?: 'period' | 'poType' | null;
   onFilterChange?: (filters: { period?: string; poType?: string }) => void;
@@ -32,10 +31,10 @@ const SalesInvoiceOverview: React.FC<SalesInvoiceOverviewProps> = ({
             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
             className={fullChart === 'period' ? 'w-full' : 'w-full md:w-1/2'}
           >
-            <SalesByPeriodChart
+            <SalesByPeriod
               isFullWidth={fullChart === 'period'}
               onModeChange={(isFull) =>
-                onFilterChange?.({ period: isFull ? 'full' : null })
+                onFilterChange?.({ period: isFull ? 'full' : undefined })
               }
             />
           </motion.div>
@@ -50,7 +49,7 @@ const SalesInvoiceOverview: React.FC<SalesInvoiceOverviewProps> = ({
             <SalesByPoType
               isFullWidth={fullChart === 'poType'}
               onModeChange={(isFull) =>
-                onFilterChange?.({ poType: isFull ? 'full' : null })
+                onFilterChange?.({ poType: isFull ? 'full' : undefined })
               }
             />
           </motion.div>
@@ -63,7 +62,7 @@ const SalesInvoiceOverview: React.FC<SalesInvoiceOverviewProps> = ({
         transition={{ type: 'spring', stiffness: 250, damping: 25 }}
         className='w-full flex-1'
       >
-        <SalesInvoiceHdPage />
+        <SalesInvoiceHdList />
       </motion.div>
     </div>
   );

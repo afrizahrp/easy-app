@@ -2,10 +2,10 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import SalesInvoiceFilterSummary from '@/components/sales/sls-invoiceFilter-Summary';
+import SalesInvoiceFilterSummary from '@/components/sales/salesInvoiceFilterSummary';
 import SalesByPeriodChart from '../../analytics/sales/salesinvoice-chart/components/salesByPeriod';
 import SalesByPeriodAndPoTypeChart from '../../analytics/sales/salesinvoice-chart/components/salesByPoType';
-import SalesInvoiceHdPage from '../../sls/invoice-hd/list/page';
+import SalesInvoiceHdPage from '../../sales/invoice-hd/list/page';
 
 const SalesDashboardPage = () => {
   const [fullChart, setFullChart] = useState<'period' | 'poType' | null>(null);

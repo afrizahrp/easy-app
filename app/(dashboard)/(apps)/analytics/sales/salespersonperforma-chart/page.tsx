@@ -2,10 +2,10 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useSalesInvoiceHdFilterStore } from '@/store';
-import SalesInvoiceFilterSummary from '@/components/sales/sls-invoiceFilter-Summary';
+import SalesInvoiceFilterSummary from '@/components/sales/salesInvoiceFilterSummary';
 import SalesPersonPerformaOverview from '../salespersonperforma-chart/components/salesPersonPerformaOverview';
 import TopProductSoldBySalesPerson from '../salespersonperforma-chart/components/topProductSoldBySalesPerson';
-import SalesPersonInvoiceList from '../../../sls/salespersonInvoice/list/page';
+import SalesPersonInvoiceList from '../../../sales/salespersonInvoice/list/page';
 
 interface SalesPersonSelection {
   salesPersonName: string;

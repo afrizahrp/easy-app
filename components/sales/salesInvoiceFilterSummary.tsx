@@ -5,13 +5,13 @@ import { useMonthYearPeriodStore, useSalesInvoiceHdFilterStore } from '@/store';
 import { FilterSummary } from '@/components/filterSummary';
 import { format } from 'date-fns';
 
-interface SlsInvoiceFilterSummaryProps {
+interface SalesInvoiceFilterSummaryProps {
   className?: string; // Tambahkan prop className untuk fleksibilitas
 }
 
-export default function Sls_InvoiceFilterSummary({
+export default function SalesInvoiceFilterSummary({
   className = '',
-}: SlsInvoiceFilterSummaryProps) {
+}: SalesInvoiceFilterSummaryProps) {
   const { startPeriod, endPeriod, setStartPeriod, setEndPeriod } =
     useMonthYearPeriodStore();
   const {
