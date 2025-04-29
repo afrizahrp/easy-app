@@ -3,8 +3,8 @@ import { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useSalesInvoiceHdFilterStore } from '@/store';
 import SalesInvoiceFilterSummary from '@/components/sales/sls-invoiceFilter-Summary';
-import SalesPersonPerformaChart from '../sls/salesPersonPerformaChart/page';
-import TopProductSoldBySalesPerson from '../sls/salesPersonPerformaChart/topProductSoldBySalesPerson/page';
+import SalesPersonPerformaChart from './salespersonperforma-chart/page';
+import TopProductSoldBySalesPerson from './salespersonperforma-chart/topProductSoldBySalesPerson/page';
 import SalesPersonInvoiceList from '../../sls/salespersonInvoice/list/page';
 
 interface SalesPersonSelection {

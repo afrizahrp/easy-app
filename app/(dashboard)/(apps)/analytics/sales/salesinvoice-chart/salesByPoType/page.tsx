@@ -64,18 +64,16 @@ const SalesByPeriodAndPoTypeChart = ({
   return (
     // <div className='bg-white p-4 rounded-lg shadow-sm h-96 relative'>
     <div className='bg-white p-4 rounded-lg shadow-sm min-h-96 relative flex flex-col'>
-      <h2 className='text-md font-semibold mb-2'>
-        Sales by Period and PO Type
-      </h2>
+      <h2 className='text-md font-semibold mb-2'>Sales by PO Type</h2>
       <div className='absolute top-2 right-2 flex items-center space-x-2 z-10'>
+        <Label htmlFor='chart-mode-potype'>
+          {isFullWidth ? 'Full Width' : 'Half Width'}
+        </Label>
         <Switch
           id='chart-mode-potype'
           checked={isFullWidth}
           onCheckedChange={(checked) => onModeChange?.(checked)}
         />
-        <Label htmlFor='chart-mode-potype'>
-          {isFullWidth ? 'Full Width' : 'Half Width'}
-        </Label>
       </div>
       {isLoading || isFetching ? (
         <div className='flex items-center justify-center h-full'>

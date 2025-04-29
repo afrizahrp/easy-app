@@ -1,8 +1,8 @@
 'use client';
 import React from 'react';
 import { motion } from 'framer-motion';
-import SalesBySalesPersonFilteredChart from '../salesPersonPerformaChart/salesBySalesPersonFilteredChart/page';
-import SalesBySalesPersonUnFilteredChart from '../salesPersonPerformaChart/salesBySalesPersonUnFilteredChart/page';
+import SalesBySalesPersonFilteredChart from './salesBySalesPersonFilteredChart/page';
+import SalesBySalesPersonUnFilteredChart from './salesBySalesPersonUnFilteredChart/page';
 import { useSalesInvoiceHdFilterStore } from '@/store';
 
 interface SalesPersonSelection {
