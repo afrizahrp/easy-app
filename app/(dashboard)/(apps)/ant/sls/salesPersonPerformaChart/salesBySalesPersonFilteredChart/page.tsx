@@ -11,6 +11,7 @@ import {
   Legend,
   ScriptableContext,
 } from 'chart.js';
+
 import { Search } from 'lucide-react';
 import gradientPlugin from 'chartjs-plugin-gradient';
 import { useToast } from '@/components/ui/use-toast';
@@ -260,6 +261,7 @@ const SalesBySalesPersonFilteredChart: React.FC<
                       },
                     },
                   },
+
                   onClick: handleChartClick,
                 }}
               />
