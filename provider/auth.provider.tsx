@@ -1,3 +1,4 @@
+// provider/auth.provider.tsx
 'use client';
 import React, {
   createContext,
@@ -8,8 +9,12 @@ import React, {
 } from 'react';
 import { getSession, Session } from '@/lib/session';
 
-const AuthContext = createContext<{ session: Session | null }>({
+const AuthContext = createContext<{
+  session: Session | null;
+  isLoading: boolean;
+}>({
   session: null,
+  isLoading: true,
 });
 
 interface AuthProviderProps {
@@ -18,20 +23,27 @@ interface AuthProviderProps {
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [session, setSession] = useState<Session | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchSession = async () => {
-      const session = await getSession();
-      // console.log('fetchedSession', session);
-
-      setSession(session);
+      try {
+        const session = await getSession();
+        setSession(session);
+      } catch (error) {
+        console.error('Failed to fetch session:', error);
+      } finally {
+        setIsLoading(false);
+      }
     };
 
     fetchSession();
   }, []);
 
   return (
-    <AuthContext.Provider value={{ session }}>{children}</AuthContext.Provider>
+    <AuthContext.Provider value={{ session, isLoading }}>
+      {children}
+    </AuthContext.Provider>
   );
 };
 

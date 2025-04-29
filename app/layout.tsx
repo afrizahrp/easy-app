@@ -1,5 +1,8 @@
-import '@/app/globals.css';
-import '@/app/theme.css';
+// app/layout.tsx
+import '@/app/globals.scss';
+import '@/app/theme.scss';
+import { cn } from '@/lib/utils';
+
 import { Inter } from 'next/font/google';
 import 'simplebar-react/dist/simplebar.min.css';
 import TanstackProvider from '@/provider/providers.client';
@@ -7,7 +10,6 @@ import { AuthProvider } from '@/provider/auth.provider';
 import 'flatpickr/dist/themes/light.css';
 import DirectionProvider from '@/provider/direction.provider';
 import Providers from '@/provider/providers';
-// import ModalProvider from '@/provider/modal-provider';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -18,16 +20,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang='en'>
-      <body className={inter.className}>
-        {/* <body className="easyApp" suppressHydrationWarning>{children}</body> */}
-
+      <body className={cn('easyApp', inter.className)}>
         <AuthProvider>
           <TanstackProvider>
             <Providers>
-              <DirectionProvider>
-                {/* <ModalProvider /> */}
-                {children}
-              </DirectionProvider>
+              <DirectionProvider>{children}</DirectionProvider>
             </Providers>
           </TanstackProvider>
         </AuthProvider>

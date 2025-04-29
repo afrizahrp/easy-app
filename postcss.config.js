@@ -3,4 +3,5 @@ module.exports = {
     tailwindcss: {},
     autoprefixer: {},
   },
-}
+  map: false, // Nonaktifkan source maps
+};
