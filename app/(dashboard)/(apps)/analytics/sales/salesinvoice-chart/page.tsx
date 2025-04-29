@@ -1,63 +1,34 @@
+// analytics/sales/salesinvoice-chart/page.tsx
 'use client';
-
 import { useState } from 'react';
-import { motion } from 'framer-motion';
-import SalesInvoiceFilterSummary from '@/components/sales/sls-invoiceFilter-Summary';
-import SalesByPeriodChart from './components/salesByPeriod';
-import SalesByPeriodAndPoTypeChart from './components/salesByPoType';
-import SalesInvoiceHdPage from '../../../sls/invoice-hd/list/page';
+import Link from 'next/link';
+import SalesInvoiceOverview from './components/salesInvoiceOverview';
+// import AnalyticsNav from '@/components/AnalyticsNav'; // Opsional untuk navigasi
 
-const SalesInvoiceOverview = () => {
-  const [fullChart, setFullChart] = useState<'period' | 'poType' | null>(null);
+export default function SalesInvoiceAnalytics() {
+  const [isFullWidth, setIsFullWidth] = useState(true);
+
+  const handleFilterChange = (filters: {
+    period?: string;
+    poType?: string;
+  }) => {
+    console.log('Filter changed:', filters);
+    // Tambahkan logika jika perlu, misalnya update state atau fetch data baru
+  };
 
   return (
     <div className='flex flex-col h-screen w-full p-4 gap-4'>
-      {/* Bagian Chart */}
-
-      <div className='flex flex-wrap items-center gap-4 mb-6 p-4 rounded-lg bg-white shadow-sm border border-muted-200'>
-        <div className='flex-1 min-w-[200px]'>
-          <SalesInvoiceFilterSummary />
-        </div>
-      </div>
-
-      <div className='flex flex-col md:flex-row w-full gap-4'>
-        {(fullChart === null || fullChart === 'period') && (
-          <motion.div
-            layout
-            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-            className={fullChart === 'period' ? 'w-full' : 'w-full md:w-1/2'}
-          >
-            <SalesByPeriodChart
-              isFullWidth={fullChart === 'period'}
-              onModeChange={(isFull) => setFullChart(isFull ? 'period' : null)}
-            />
-          </motion.div>
-        )}
-
-        {(fullChart === null || fullChart === 'poType') && (
-          <motion.div
-            layout
-            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-            className={fullChart === 'poType' ? 'w-full' : 'w-full md:w-1/2'}
-          >
-            <SalesByPeriodAndPoTypeChart
-              isFullWidth={fullChart === 'poType'}
-              onModeChange={(isFull) => setFullChart(isFull ? 'poType' : null)}
-            />
-          </motion.div>
-        )}
-      </div>
-
-      {/* Bagian Table */}
-      <motion.div
-        layout
-        transition={{ type: 'spring', stiffness: 250, damping: 25 }}
-        className='w-full flex-1'
-      >
-        <SalesInvoiceHdPage />
-      </motion.div>
+      {/* Navigasi manual atau komponen navigasi */}
+      <AnalyticsNav /> {/* Atau gunakan navigasi inline */}
+      {/* <nav className="mb-4">
+        <Link href="/analytics" className="text-blue-600 hover:underline">Dashboard</Link>
+        <Link href="/analytics/sales" className="ml-4 text-blue-600 hover:underline">Sales</Link>
+      </nav> */}
+      <h1 className='text-2xl font-bold mb-4'>Sales Invoice Analytics</h1>
+      <SalesInvoiceOverview
+        fullChart={isFullWidth}
+        onFilterChange={handleFilterChange}
+      />
     </div>
   );
-};
-
-export default SalesInvoiceOverview;
+}
