@@ -16,7 +16,6 @@ import { useToast } from '@/components/ui/use-toast';
 import useSalesByPeriodUnfiltered from '@/queryHooks/sls/analytics/useSalesPersonByPeriodUnFiltered';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { Skeleton } from '@/components/ui/skeleton';
 import {
   salesPersonColorMap,
   getFallbackColor,
@@ -195,17 +194,17 @@ const SalesBySalesPersonUnFilteredChart: React.FC<
         <h2 className='text-md font-semibold'>
           Top 5 Sales Performers (in Millions IDR)
         </h2>
-        <div className='flex items-center space-x-2'>
+        {/* <div className='flex items-center space-x-2'>
+          <Label htmlFor='chart-mode-period'>
+            {isFullWidth ? 'Full Width' : 'Half Width'}
+          </Label>
           <Switch
             id='chart-mode-period'
             checked={isFullWidth}
             onCheckedChange={(checked) => onModeChange?.(checked)}
             aria-label='Toggle full width chart'
           />
-          <Label htmlFor='chart-mode-period'>
-            {isFullWidth ? 'Full Width' : 'Half Width'}
-          </Label>
-        </div>
+        </div> */}
       </div>
       {isLoading || isFetching ? (
         <div className='flex items-center justify-center h-full'>

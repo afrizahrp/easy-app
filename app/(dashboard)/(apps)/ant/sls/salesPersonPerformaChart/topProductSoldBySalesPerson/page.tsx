@@ -22,6 +22,7 @@ import { getGridConfig, getLabel } from '@/lib/appex-chart-options';
 import { useTheme } from 'next-themes';
 import { useThemeStore } from '@/store';
 import { themes } from '@/config/thems';
+import { X } from 'lucide-react';
 
 const Chart = dynamic(() => import('react-apexcharts'), { ssr: false });
 
@@ -183,6 +184,7 @@ const TopProductSoldBySalesPerson: React.FC<
         if (!isNaN(num)) {
           return num.toLocaleString('id-ID');
         }
+
         return value;
       },
     },
@@ -192,12 +194,11 @@ const TopProductSoldBySalesPerson: React.FC<
         `hsl(${theme?.cssVars[mode === 'dark' ? 'dark' : 'light'].chartLabel})`
       ),
       formatter: function (value: string | number) {
-        if (typeof value === 'number') {
-          return value.toLocaleString('id-ID');
-        }
-        const num = Number(value);
-        if (!isNaN(num)) {
-          return num.toLocaleString('id-ID');
+        if (chartMode === 'total_amount') {
+          const num = typeof value === 'number' ? value : Number(value);
+          if (!isNaN(num)) {
+            return num.toLocaleString('id-ID');
+          }
         }
         return value;
       },
@@ -214,9 +215,15 @@ const TopProductSoldBySalesPerson: React.FC<
     >
       <div className='flex items-center justify-between mb-4'>
         <h3 className='text-md font-semibold'>
-          Top 3 Products Sold by {salesPersonName} in {month} {year}
+          Top 3 Products Sold by
+          <span className='block text-sm font-normal mt-1'>
+            {salesPersonName} in {month} {year}
+          </span>
         </h3>
         <div className='flex items-center gap-2'>
+          <Label htmlFor='chart-mode-product'>
+            {chartMode === 'qty' ? ' By Qty (in Unit)' : 'By Amount (in IDR)'}
+          </Label>
           <Switch
             id='chart-mode-product'
             checked={chartMode === 'total_amount'}
@@ -225,12 +232,15 @@ const TopProductSoldBySalesPerson: React.FC<
             }
             aria-label='Toggle chart mode'
           />
-          <Label htmlFor='chart-mode-product'>
-            {chartMode === 'qty' ? 'Quantity' : 'Total Amount'}
-          </Label>
-          <Button variant='outline' size='sm' onClick={onClose}>
-            Close
-          </Button>
+
+          <button
+            type='button'
+            onClick={onClose}
+            className='absolute top-4 right-4 p-1 rounded hover:bg-red-50'
+            aria-label='Close'
+          >
+            <X className='w-5 h-5 text-red-500' />
+          </button>
         </div>
       </div>
 

@@ -24,6 +24,7 @@ import {
   salesPersonColorMap,
   getFallbackColor,
 } from '@/utils/salesPersonColorMap';
+import { months } from '@/utils/monthNameMap';
 
 ChartJS.register(
   CategoryScale,
@@ -90,21 +91,6 @@ const SalesBySalesPersonFilteredChart: React.FC<
 
   const chartData = React.useMemo(() => {
     if (!data || !data.length) return null;
-
-    const months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
-    ];
 
     const datasets = data.map((entry: SalesDataWithFilter) => {
       const monthsData = entry.months || {};
@@ -181,22 +167,35 @@ const SalesBySalesPersonFilteredChart: React.FC<
       ref={containerRef}
       className={`bg-white p-4 rounded-lg shadow-sm h-96 w-full`}
     >
-      <div className='flex items-center justify-between mb-2'>
-        <h2 className='text-md font-semibold'>
-          {validSalesPersonNames.length === 1
-            ? `Sales Performance by ${validSalesPersonNames[0]} (in Millions IDR)`
-            : validSalesPersonNames.length === 2
-              ? `Sales Performance by ${validSalesPersonNames.join(' and ')} (in Millions IDR)`
-              : validSalesPersonNames.length > 2
-                ? `Sales Performance by ${validSalesPersonNames
-                    .slice(0, validSalesPersonNames.length - 1)
-                    .join(
-                      ', '
-                    )} and ${validSalesPersonNames[validSalesPersonNames.length - 1]} (in Millions IDR)`
-                : 'Sales Performance (in Millions IDR)'}
-        </h2>
-        <div className='flex items-center space-x-2'>
-          <div className='flex justify-center mt-4'>
+      <div className='flex flex-col mb-2'>
+        <div className='flex items-center justify-between'>
+          <h2 className='text-md font-semibold'>
+            {validSalesPersonNames.length === 1
+              ? `Sales Performance by ${validSalesPersonNames[0]} (in Millions IDR)`
+              : validSalesPersonNames.length === 2
+                ? `Sales Performance by ${validSalesPersonNames.join(' and ')} (in Millions IDR)`
+                : validSalesPersonNames.length > 2
+                  ? `Sales Performance by ${validSalesPersonNames
+                      .slice(0, validSalesPersonNames.length - 1)
+                      .join(
+                        ', '
+                      )} and ${validSalesPersonNames[validSalesPersonNames.length - 1]} (in Millions IDR)`
+                  : 'Sales Performance (in Millions IDR)'}
+          </h2>
+
+          {/* Switch + Label + Back Button */}
+          <div className='flex flex-col items-end space-y-2'>
+            <div className='flex items-center space-x-2'>
+              <Label htmlFor='chart-mode-period'>
+                {isFullWidth ? 'Full Width' : 'Half Width'}
+              </Label>
+              <Switch
+                id='chart-mode-period'
+                checked={isFullWidth}
+                onCheckedChange={(checked) => onModeChange?.(checked)}
+                aria-label='Toggle full width chart'
+              />
+            </div>
             <button
               onClick={() => {
                 setSalesPersonName([]);
@@ -208,18 +207,9 @@ const SalesBySalesPersonFilteredChart: React.FC<
               ← Back
             </button>
           </div>
-
-          <Switch
-            id='chart-mode-period'
-            checked={isFullWidth}
-            onCheckedChange={(checked) => onModeChange?.(checked)}
-            aria-label='Toggle full width chart'
-          />
-          <Label htmlFor='chart-mode-period'>
-            {isFullWidth ? 'Full Width' : 'Half Width'}
-          </Label>
         </div>
       </div>
+
       <div className='flex flex-col'>
         <div className='w-full'>
           {isLoading || isFetching ? (

@@ -17,6 +17,7 @@ import { useToast } from '@/components/ui/use-toast';
 import useSalesPeriod from '@/queryHooks/sls/dashboard/useSalesPeriod';
 import { Switch } from '@/components/ui/switch'; // Impor Switch dari Shadcn UI
 import { Label } from '@/components/ui/label'; // Impor Label untuk memberikan teks pada Switch
+import { months } from '@/utils/monthNameMap';
 
 ChartJS.register(
   CategoryScale,
@@ -43,20 +44,6 @@ const SalesByPeriodChart: React.FC<SalesByPeriodChartProps> = ({
     if (!data) return null;
 
     const allYears = data.map((d) => d.period);
-    const months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
-    ];
 
     const colorPalette = [
       ['#1e3a8a', '#3b82f6'], // Navy → Blue
