@@ -14,7 +14,7 @@ interface SalesByPeriodAndPoTypeChartProps {
   onModeChange?: (isFullPage: boolean) => void;
 }
 
-const SalesByPeriodAndPoTypeChart = ({
+const SalesByPoType = ({
   isFullWidth,
   onModeChange,
 }: SalesByPeriodAndPoTypeChartProps) => {
@@ -146,4 +146,4 @@ const SalesByPeriodAndPoTypeChart = ({
   );
 };
 
-export default SalesByPeriodAndPoTypeChart;
+export default SalesByPoType;

@@ -28,12 +28,12 @@ ChartJS.register(
   Legend
 );
 
-interface SalesByPeriodChartProps {
+interface SalesByPeriodProps {
   isFullWidth?: boolean;
   onModeChange?: (isFullPage: boolean) => void;
 }
 
-const SalesByPeriodChart: React.FC<SalesByPeriodChartProps> = ({
+const SalesByPeriod: React.FC<SalesByPeriodProps> = ({
   isFullWidth,
   onModeChange,
 }) => {
@@ -213,4 +213,4 @@ const SalesByPeriodChart: React.FC<SalesByPeriodChartProps> = ({
   );
 };
 
-export default SalesByPeriodChart;
+export default SalesByPeriod;

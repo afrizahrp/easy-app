@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import SalesInvoiceFilterSummary from '@/components/sales/sls-invoiceFilter-Summary';
-import SalesByPeriodChart from '../../analytics/sales/salesinvoice-chart/salesYearPeriod/page';
-import SalesByPeriodAndPoTypeChart from '../../analytics/sales/salesinvoice-chart/salesByPoType/page';
+import SalesByPeriodChart from '../../analytics/sales/salesinvoice-chart/components/salesByPeriod';
+import SalesByPeriodAndPoTypeChart from '../../analytics/sales/salesinvoice-chart/components/salesByPoType';
 import SalesInvoiceHdPage from '../../sls/invoice-hd/list/page';
 
 const SalesDashboardPage = () => {

@@ -3,11 +3,11 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import SalesInvoiceFilterSummary from '@/components/sales/sls-invoiceFilter-Summary';
-import SalesByPeriodChart from './salesYearPeriod/page';
-import SalesByPeriodAndPoTypeChart from './salesByPoType/page';
+import SalesByPeriodChart from './components/salesByPeriod';
+import SalesByPeriodAndPoTypeChart from './components/salesByPoType';
 import SalesInvoiceHdPage from '../../../sls/invoice-hd/list/page';
 
-const SalesInvoiceAnalyticPage = () => {
+const SalesInvoiceOverview = () => {
   const [fullChart, setFullChart] = useState<'period' | 'poType' | null>(null);
 
   return (
@@ -60,4 +60,4 @@ const SalesInvoiceAnalyticPage = () => {
   );
 };
 
-export default SalesInvoiceAnalyticPage;
+export default SalesInvoiceOverview;
