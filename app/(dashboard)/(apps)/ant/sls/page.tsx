@@ -34,17 +34,6 @@ const SalesPersonPerformaAnalytics = () => {
       : [];
 
   useEffect(() => {
-    // console.log('isFullWidth:', fullChart === 'period');
-    // console.log('validSalesPersonNames:', validSalesPersonNames);
-    // console.log(
-    //   'selectedSalesPerson:',
-    //   selectedSalesPerson,
-    //   'selectedYear:',
-    //   selectedYear,
-    //   'selectedMonth:',
-    //   selectedMonth
-    // );
-    // console.log('fullChart:', fullChart);
     if (chartRef.current) {
       console.log(
         'Chart actual width:',

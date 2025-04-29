@@ -37,22 +37,24 @@ const SubMenuHandler = ({
             </span>
             <div>{title}</div>
           </div>
-          <div className='flex-0'>
-            <div
-              className={cn(
-                ' text-base rounded-full flex justify-center items-center transition-all duration-300 group-hover:text-primary-foreground',
-                {
-                  'rotate-90  ': activeSubmenu === index,
-                  ' text-default-500  ': activeSubmenu !== index,
-                }
-              )}
-            >
-              <Icon
-                icon='heroicons:chevron-right-20-solid'
-                className='h-5 w-5'
-              />
+          {item.child && item.child.length > 0 && (
+            <div className='flex-0'>
+              <div
+                className={cn(
+                  ' text-base rounded-full flex justify-center items-center transition-all duration-300 group-hover:text-primary-foreground',
+                  {
+                    'rotate-90  ': activeSubmenu === index,
+                    ' text-default-500  ': activeSubmenu !== index,
+                  }
+                )}
+              >
+                <Icon
+                  icon='heroicons:chevron-right-20-solid'
+                  className='h-5 w-5'
+                />
+              </div>
             </div>
-          </div>
+          )}
         </div>
       ) : (
         <div className='inline-flex cursor-pointer items-center justify-center data-[state=open]:bg-primary-100 data-[state=open]:text-primary  w-12 h-12  rounded-md'>
