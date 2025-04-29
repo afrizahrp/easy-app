@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import {
   Chart as ChartJS,
@@ -43,7 +43,7 @@ interface TopProductSoldBySalesPersonProps {
   onClose: () => void;
 }
 
-const TopProductSoldBySalesPerson: React.FC<
+const TopProductSoldBySalesPersonBack: React.FC<
   TopProductSoldBySalesPersonProps
 > = ({ salesPersonName, year, month, sortBy, onClose }) => {
   const { toast } = useToast();
@@ -52,7 +52,6 @@ const TopProductSoldBySalesPerson: React.FC<
   const theme = themes.find((t) => t.name === config);
 
   const [chartMode, setChartMode] = useState<'qty' | 'total_amount'>('qty');
-  const containerRef = useRef<HTMLDivElement>(null);
 
   const [yearPeriod, monthPeriod] = [year, month];
   const {
@@ -75,15 +74,6 @@ const TopProductSoldBySalesPerson: React.FC<
       });
     }
   }, [error?.message]);
-
-  useEffect(() => {
-    if (containerRef.current) {
-      console.log(
-        'TopProduct container width:',
-        containerRef.current.getBoundingClientRect().width
-      );
-    }
-  }, [productData]);
 
   const labels = productData?.map((item) => item.productName) || [];
   const series = [
@@ -109,15 +99,16 @@ const TopProductSoldBySalesPerson: React.FC<
         dataLabels: {
           position: 'bottom',
         },
+        // Menambahkan gradient pada bar
         colors: {
           backgroundBarColor: 'rgba(0,0,0,0.1)',
           gradient: {
-            enabled: true,
-            shade: 'light',
-            type: 'horizontal',
-            shadeIntensity: 0.2,
-            gradientToColors: ['#4F6D7A', '#D0E1F9'],
-            stops: [0, 100],
+            enabled: true, // Mengaktifkan gradient
+            shade: 'light', // Menggunakan shade terang
+            type: 'horizontal', // Gradient horizontal
+            shadeIntensity: 0.2, // Intensitas bayangan
+            gradientToColors: ['#4F6D7A', '#D0E1F9'], // Warna gradasi akhir
+            stops: [0, 100], // Posisi gradasi
           },
         },
       },
@@ -176,13 +167,16 @@ const TopProductSoldBySalesPerson: React.FC<
         },
       },
       formatter: function (value: string | number) {
+        // Jika value adalah angka, beri pemisah ribuan
         if (typeof value === 'number') {
           return value.toLocaleString('id-ID');
         }
+        // Jika value string, cek apakah bisa diubah ke angka
         const num = Number(value);
         if (!isNaN(num)) {
           return num.toLocaleString('id-ID');
         }
+        // Jika bukan angka, tampilkan apa adanya (misal nama produk)
         return value;
       },
     },
@@ -192,13 +186,16 @@ const TopProductSoldBySalesPerson: React.FC<
         `hsl(${theme?.cssVars[mode === 'dark' ? 'dark' : 'light'].chartLabel})`
       ),
       formatter: function (value: string | number) {
+        // Jika value adalah angka, beri pemisah ribuan
         if (typeof value === 'number') {
           return value.toLocaleString('id-ID');
         }
+        // Jika value string, cek apakah bisa diubah ke angka
         const num = Number(value);
         if (!isNaN(num)) {
           return num.toLocaleString('id-ID');
         }
+        // Jika bukan angka, tampilkan apa adanya (misal nama produk)
         return value;
       },
     },
@@ -208,10 +205,7 @@ const TopProductSoldBySalesPerson: React.FC<
     !!productData?.length && series[0].data.some((v) => v > 0);
 
   return (
-    <div
-      ref={containerRef}
-      className='bg-white p-4 rounded-lg shadow-md h-full w-full'
-    >
+    <div className='bg-white p-4 rounded-lg shadow-md h-full'>
       <div className='flex items-center justify-between mb-4'>
         <h3 className='text-md font-semibold'>
           Top 3 Products Sold by {salesPersonName} in {month} {year}
@@ -239,7 +233,7 @@ const TopProductSoldBySalesPerson: React.FC<
           <Skeleton className='w-3/4 h-1/2 rounded-lg' />
         </div>
       ) : isDataReady ? (
-        <div className='h-64 w-full'>
+        <div className='h-64'>
           <Chart
             options={options}
             series={series}
@@ -257,4 +251,4 @@ const TopProductSoldBySalesPerson: React.FC<
   );
 };
 
-export default TopProductSoldBySalesPerson;
+export default TopProductSoldBySalesPersonBack;

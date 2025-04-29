@@ -16,12 +16,12 @@ import { useToast } from '@/components/ui/use-toast';
 import useSalesByPeriodUnfiltered from '@/queryHooks/sls/analytics/useSalesPersonByPeriodUnFiltered';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   salesPersonColorMap,
   getFallbackColor,
 } from '@/utils/salesPersonColorMap';
+import { useSalesInvoiceHdFilterStore } from '@/store';
 
 ChartJS.register(
   CategoryScale,
@@ -42,16 +42,29 @@ interface SalesDataWithoutFilter {
   }[];
 }
 
+interface SalesPersonSelection {
+  salesPersonName: string;
+  year?: string;
+  month?: string;
+}
+
 interface SalesBySalesPersonUnFilteredProps {
   isFullWidth?: boolean;
   onModeChange?: (isFullPage: boolean) => void;
+  onSalesPersonSelect?: (selection: SalesPersonSelection | null) => void;
 }
 
 const SalesBySalesPersonUnFilteredChart: React.FC<
   SalesBySalesPersonUnFilteredProps
-> = ({ isFullWidth = false, onModeChange }) => {
+> = ({ isFullWidth = true, onModeChange, onSalesPersonSelect }) => {
   const { toast } = useToast();
   const { data, isLoading, isFetching, error } = useSalesByPeriodUnfiltered();
+  const { salesPersonName, setSalesPersonName } = useSalesInvoiceHdFilterStore(
+    (state) => ({
+      salesPersonName: state.salesPersonName,
+      setSalesPersonName: state.setSalesPersonName,
+    })
+  );
 
   React.useEffect(() => {
     console.log('Data dari SalesBySalesPersonUnFilteredChart:', data);
@@ -120,6 +133,7 @@ const SalesBySalesPersonUnFilteredChart: React.FC<
         },
         borderColor: color.border,
         borderWidth: 1,
+        period: data && data.length > 0 ? data[0].period : undefined,
       };
     });
 
@@ -149,11 +163,37 @@ const SalesBySalesPersonUnFilteredChart: React.FC<
     Array.isArray(chartData.datasets) &&
     chartData.datasets.some((ds) => ds.data.some((value) => value > 0));
 
+  const handleChartClick = (event: any, elements: any[]) => {
+    if (elements.length > 0) {
+      const element = elements[0];
+      const datasetIndex = element.datasetIndex;
+      const monthIndex = element.index;
+      const salesPersonName = chartData?.datasets[datasetIndex]?.label;
+      const year = chartData?.datasets[datasetIndex]?.period;
+      const month = chartData?.labels[monthIndex] as string;
+
+      if (salesPersonName) {
+        console.log('UnFilteredChart Clicked:', {
+          salesPersonName,
+          year,
+          month,
+        });
+        setSalesPersonName([salesPersonName]);
+        onSalesPersonSelect?.({ salesPersonName, year, month });
+        // Tidak memanggil onModeChange, biarkan full-width
+      }
+    }
+  };
+
   return (
-    <div className='bg-white p-4 rounded-lg shadow-sm h-96'>
+    <div
+      className={`bg-white p-4 rounded-lg shadow-sm h-96 ${
+        isFullWidth ? 'w-full' : 'w-full md:w-1/2'
+      }`}
+    >
       <div className='flex items-center justify-between mb-2'>
         <h2 className='text-md font-semibold'>
-          Top 5 Sales Performers (in Millions IDR){' '}
+          Top 5 Sales Performers (in Millions IDR)
         </h2>
         <div className='flex items-center space-x-2'>
           <Switch
@@ -168,12 +208,6 @@ const SalesBySalesPersonUnFilteredChart: React.FC<
         </div>
       </div>
       {isLoading || isFetching ? (
-        // <div className='h-72 flex flex-col gap-2'>
-        //   <Skeleton className='h-8 w-full' />
-        //   <Skeleton className='h-8 w-full' />
-        //   <Skeleton className='h-48 w-full' />
-        // </div>
-
         <div className='flex items-center justify-center h-full'>
           <div className='w-3/4 h-1/2 rounded-lg shimmer' />
         </div>
@@ -211,6 +245,7 @@ const SalesBySalesPersonUnFilteredChart: React.FC<
                 },
               },
             },
+            onClick: handleChartClick,
           }}
         />
       ) : (

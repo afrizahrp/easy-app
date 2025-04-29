@@ -3,11 +3,11 @@
 import { useEffect } from 'react';
 import { startOfMonth, endOfMonth, format } from 'date-fns';
 import { set as setDate } from 'date-fns';
-import { zonedTimeToUtc } from 'date-fns-tz';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { useMonthYearPeriodStore } from '@/store';
 import { useToast } from '@/components/ui/use-toast';
+// import { zonedTimeToUtc } from 'date-fns-tz';
 
 interface PeriodFilterProps {
   onPeriodChange?: () => void; // Callback opsional saat periode berubah
@@ -59,6 +59,7 @@ export function PeriodFilter({ onPeriodChange }: PeriodFilterProps) {
           showYearDropdown
           yearDropdownItemNumber={15}
           scrollableYearDropdown
+          maxDate={endOfMonth(new Date())} // <-- Batasi tahun maksimal
         />
       </div>
       <div className='min-w-[120px]'>
@@ -86,6 +87,7 @@ export function PeriodFilter({ onPeriodChange }: PeriodFilterProps) {
           showYearDropdown
           yearDropdownItemNumber={15}
           scrollableYearDropdown
+          maxDate={endOfMonth(new Date())} // <-- Batasi tahun maksimal
         />
       </div>
     </div>

@@ -4,7 +4,6 @@ import { Cross2Icon } from '@radix-ui/react-icons';
 import { Table } from '@tanstack/react-table';
 import { AlertCircle } from 'lucide-react';
 import { startOfMonth, endOfMonth } from 'date-fns';
-import { set as setDate } from 'date-fns';
 import 'react-datepicker/dist/react-datepicker.css';
 import { zonedTimeToUtc } from 'date-fns-tz';
 
@@ -12,6 +11,9 @@ import useSalesInvoiceHdPaidStatusOptions from '@/queryHooks/sls/useSalesInvoice
 import useSalesInvoiceHdSalesPersonOptions from '@/queryHooks/sls/useSalesInvoiceHdSalesPersonOptions';
 import useSalesInvoiceHdPoTypeOptions from '@/queryHooks/sls/useSalesInvoiceHdPoTypeOptions';
 import { PeriodFilter } from '@/components/period-filter';
+
+import { ResetSalesInvoiceFilterStore } from '@/utils/reset-filter-state/sls/resetSalesInvoiceFilterStore';
+
 import { Button } from '@/components/ui/button';
 import { DataTableFacetedFilter } from '@/components/ui/data-table-faceted-filter';
 import { useMonthYearPeriodStore, useSalesInvoiceHdFilterStore } from '@/store';
@@ -27,7 +29,7 @@ interface SalesPersonInvoiceFilterSidebarProps<TData> {
 export function SalesPersonInvoiceFilterSidebar<TData>({
   table,
 }: SalesPersonInvoiceFilterSidebarProps<TData>) {
-  const { startPeriod, setStartPeriod, endPeriod, setEndPeriod } =
+  const { startPeriod, setStartPeriod, endPeriod, setEndPeriod, reset } =
     useMonthYearPeriodStore();
 
   const {
@@ -93,7 +95,7 @@ export function SalesPersonInvoiceFilterSidebar<TData>({
       };
     }
 
-    console.log('Setting invoiceDate filter:', filterValue);
+    // console.log('Setting invoiceDate filter:', filterValue);
 
     table.getColumn('invoiceDate')?.setFilterValue(filterValue);
 
@@ -135,31 +137,13 @@ export function SalesPersonInvoiceFilterSidebar<TData>({
     useSalesInvoiceHdPoTypeOptions();
 
   const handleReset = () => {
-    // console.log('Resetting filters...');
-    table.resetColumnFilters();
-    setPaidStatus([]);
-    setSalesPersonName([]);
-    setPoType([]);
-    // Atur ulang ke nilai default
-    setStartPeriod(
-      setDate(startOfMonth(new Date(2025, 0, 1)), {
-        hours: 0,
-        minutes: 0,
-        seconds: 0,
-        milliseconds: 0,
-      })
-    );
-    setEndPeriod(
-      setDate(endOfMonth(new Date()), {
-        hours: 23,
-        minutes: 59,
-        seconds: 59,
-        milliseconds: 999,
-      })
-    );
-    toast({
-      description: 'All filters have been cleared.',
-      color: 'success',
+    ResetSalesInvoiceFilterStore({
+      table,
+      setPaidStatus,
+      setSalesPersonName,
+      setPoType,
+      resetPeriod: reset,
+      toast,
     });
   };
 

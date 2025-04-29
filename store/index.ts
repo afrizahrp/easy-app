@@ -2,8 +2,8 @@ import { create } from 'zustand';
 import { siteConfig } from '@/config/site';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { SortingState } from '@tanstack/react-table';
-import { startOfMonth, endOfMonth } from 'date-fns';
-import { set as setDate } from 'date-fns';
+// import { startOfMonth, endOfMonth } from 'date-fns';
+import { startOfMonth, endOfMonth, set as setDate } from 'date-fns';
 
 interface ThemeStoreState {
   theme: string;
@@ -304,9 +304,21 @@ export const useCategoryFilterStore = create<CategoryFilterState>()(
     }
   )
 );
-const toISOString = (date: Date | null) => (date ? date.toISOString() : null);
-const fromISOString = (dateString: string | null) =>
-  dateString ? new Date(dateString) : null;
+
+// Fungsi kustom setDate untuk mengatur waktu
+// const setDate = (
+//   date: Date,
+//   time: {
+//     hours: number;
+//     minutes: number;
+//     seconds: number;
+//     milliseconds: number;
+//   }
+// ): Date => {
+//   const newDate = new Date(date);
+//   newDate.setHours(time.hours, time.minutes, time.seconds, time.milliseconds);
+//   return newDate;
+// };
 
 interface MonthYearPeriodState {
   startPeriod: Date | null;
@@ -315,14 +327,17 @@ interface MonthYearPeriodState {
   setEndPeriod: (date: Date | null) => void;
   period: string;
   setPeriod: (period: string) => void;
+  reset: () => void;
 }
+
 const currentYear = new Date().getFullYear();
+const toISOString = (date: Date | null) => (date ? date.toISOString() : null);
+const fromISOString = (dateString: string | null) =>
+  dateString ? new Date(dateString) : null;
 
 export const useMonthYearPeriodStore = create<MonthYearPeriodState>()(
   persist(
     (set) => ({
-      // Nilai default: Jan 2025
-
       startPeriod: setDate(startOfMonth(new Date(currentYear, 0, 1)), {
         hours: 0,
         minutes: 0,
@@ -330,7 +345,6 @@ export const useMonthYearPeriodStore = create<MonthYearPeriodState>()(
         milliseconds: 0,
       }),
       setStartPeriod: (date) => set({ startPeriod: date }),
-      // Nilai default: Akhir bulan berjalan (misalnya, Apr 2025 jika sekarang Apr 2025)
       endPeriod: setDate(endOfMonth(new Date()), {
         hours: 23,
         minutes: 59,
@@ -338,26 +352,37 @@ export const useMonthYearPeriodStore = create<MonthYearPeriodState>()(
         milliseconds: 999,
       }),
       setEndPeriod: (date) => set({ endPeriod: date }),
-
-      period: '', // default value bisa dikosongkan atau diisi
+      period: '',
       setPeriod: (period: string) => set({ period }),
+      reset: () =>
+        set({
+          startPeriod: setDate(startOfMonth(new Date(currentYear, 0, 1)), {
+            hours: 0,
+            minutes: 0,
+            seconds: 0,
+            milliseconds: 0,
+          }),
+          endPeriod: setDate(endOfMonth(new Date()), {
+            hours: 23,
+            minutes: 59,
+            seconds: 59,
+            milliseconds: 999,
+          }),
+          period: '',
+        }),
     }),
-
     {
-      name: 'monthYearFilterStore', // Nama kunci di localStorage
-      storage: createJSONStorage(() => localStorage), // Gunakan localStorage
+      name: 'monthYearFilterStore',
+      storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
-        // Hanya simpan properti yang relevan
-        startPeriod: state.startPeriod ? state.startPeriod.toISOString() : null,
-        endPeriod: state.endPeriod ? state.endPeriod.toISOString() : null,
+        startPeriod: toISOString(state.startPeriod),
+        endPeriod: toISOString(state.endPeriod),
       }),
       onRehydrateStorage: () => (state) => {
-        // Konversi kembali string ISO ke Date saat memuat
         if (state) {
-          state.startPeriod = state.startPeriod
-            ? new Date(state.startPeriod)
-            : null;
-          state.endPeriod = state.endPeriod ? new Date(state.endPeriod) : null;
+          // state.startPeriod dan state.endPeriod adalah string | null dari localStorage
+          state.startPeriod = fromISOString(state.startPeriod as string | null);
+          state.endPeriod = fromISOString(state.endPeriod as string | null);
         }
       },
     }

@@ -11,8 +11,7 @@ import {
   Legend,
   ScriptableContext,
 } from 'chart.js';
-import { Search } from 'lucide-react'; // atau import { FiSearch } from 'react-icons/fi'
-
+import { Search } from 'lucide-react';
 import gradientPlugin from 'chartjs-plugin-gradient';
 import { useToast } from '@/components/ui/use-toast';
 import useSalesByPeriodFiltered from '@/queryHooks/sls/analytics/useSalesPersonByPeriodFiltered';
@@ -42,27 +41,29 @@ interface SalesDataWithFilter {
   months: { [month: string]: number };
 }
 
+interface SalesPersonSelection {
+  salesPersonName: string;
+  year?: string;
+  month?: string;
+}
+
 interface SalesBySalesPersonFilteredProps {
   isFullWidth?: boolean;
   onModeChange?: (isFullPage: boolean) => void;
-  onSalesPersonSelect?: (
-    selection: {
-      salesPersonName: string;
-      year: string;
-      month: string;
-    } | null
-  ) => void;
+  onSalesPersonSelect?: (selection: SalesPersonSelection | null) => void;
 }
 
 const SalesBySalesPersonFilteredChart: React.FC<
   SalesBySalesPersonFilteredProps
-> = ({ isFullWidth = false, onModeChange, onSalesPersonSelect }) => {
+> = ({ isFullWidth = true, onModeChange, onSalesPersonSelect }) => {
   const { toast } = useToast();
-  const { salesPersonName } = useSalesInvoiceHdFilterStore((state) => ({
-    salesPersonName: state.salesPersonName,
-  }));
+  const { salesPersonName, setSalesPersonName } = useSalesInvoiceHdFilterStore(
+    (state) => ({
+      salesPersonName: state.salesPersonName,
+      setSalesPersonName: state.setSalesPersonName,
+    })
+  );
 
-  // Validasi salesPersonName
   const validSalesPersonNames = Array.isArray(salesPersonName)
     ? salesPersonName.filter((name) => typeof name === 'string' && name.trim())
     : salesPersonName && typeof salesPersonName === 'string' && salesPersonName
@@ -75,9 +76,16 @@ const SalesBySalesPersonFilteredChart: React.FC<
 
   const containerRef = useRef<HTMLDivElement>(null);
 
-  React.useEffect(() => {
+  useEffect(() => {
     console.log('Data dari SalesBySalesPersonFilteredChart:', data);
-  }, [data]);
+    console.log('isFullWidth in FilteredChart:', isFullWidth);
+    if (containerRef.current) {
+      console.log(
+        'FilteredChart actual width:',
+        containerRef.current.getBoundingClientRect().width
+      );
+    }
+  }, [data, isFullWidth]);
 
   const chartData = React.useMemo(() => {
     if (!data || !data.length) return null;
@@ -120,7 +128,7 @@ const SalesBySalesPersonFilteredChart: React.FC<
         },
         borderColor: color.border,
         borderWidth: 1,
-        period: entry.period, // Tambahkan tahun (period) ke dataset
+        period: entry.period,
       };
     });
 
@@ -133,13 +141,6 @@ const SalesBySalesPersonFilteredChart: React.FC<
     return max || 100_000_000;
   }, [chartData]);
 
-  const [isTopNProductVisible, setIsTopNProductVisible] = React.useState(false);
-  const [topNProductFilter, setTopNProductFilter] = React.useState<{
-    salesPersonName: string;
-    year: string;
-    month: string;
-  } | null>(null);
-
   const handleChartClick = (event: any, elements: any[]) => {
     if (elements.length > 0) {
       const element = elements[0];
@@ -150,16 +151,14 @@ const SalesBySalesPersonFilteredChart: React.FC<
       const month = chartData?.labels[monthIndex] as string;
 
       if (salesPersonName && year && month) {
-        // console.log('Clicked:', { salesPersonName, year, month });
-        setTopNProductFilter({ salesPersonName, year, month });
-        setIsTopNProductVisible(true);
+        console.log('FilteredChart Clicked:', { salesPersonName, year, month });
         onSalesPersonSelect?.({ salesPersonName, year, month });
-        onModeChange?.(false); // Set ke half-width
+        onModeChange?.(false); // Set ke half-width untuk TopProductSoldBySalesPerson
       }
     }
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (error) {
       toast({
         description:
@@ -179,20 +178,8 @@ const SalesBySalesPersonFilteredChart: React.FC<
   return (
     <div
       ref={containerRef}
-      className='bg-white p-4 rounded-lg shadow-sm min-h-[24rem]'
+      className={`bg-white p-4 rounded-lg shadow-sm h-96 w-full`}
     >
-      <button
-        className='absolute top-4 right-4 z-10 p-2 rounded-full hover:bg-gray-100 transition'
-        onClick={() => {
-          // Aksi saat diklik, misal: buka modal/fullscreen
-          if (onModeChange) onModeChange(true);
-        }}
-        aria-label='Zoom chart'
-        type='button'
-      >
-        <Search className='w-5 h-5 text-gray-500' />
-        {/* atau <FiSearch className="w-5 h-5 text-gray-500" /> */}
-      </button>
       <div className='flex items-center justify-between mb-2'>
         <h2 className='text-md font-semibold'>
           {validSalesPersonNames.length === 1
@@ -208,6 +195,19 @@ const SalesBySalesPersonFilteredChart: React.FC<
                 : 'Sales Performance (in Millions IDR)'}
         </h2>
         <div className='flex items-center space-x-2'>
+          <div className='flex justify-center mt-4'>
+            <button
+              onClick={() => {
+                setSalesPersonName([]);
+                onSalesPersonSelect?.(null);
+                onModeChange?.(true);
+              }}
+              className='px-4 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 text-xs transition'
+            >
+              ← Back
+            </button>
+          </div>
+
           <Switch
             id='chart-mode-period'
             checked={isFullWidth}
@@ -226,7 +226,7 @@ const SalesBySalesPersonFilteredChart: React.FC<
               <Skeleton className='w-3/4 h-1/2 rounded-lg' />
             </div>
           ) : isDataReady ? (
-            <div className='h-80'>
+            <div className='h-80 w-full'>
               <Bar
                 data={chartData}
                 options={{

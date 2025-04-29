@@ -1,0 +1,22 @@
+/* styles/salesChart.css */
+.sales-chart {
+  height: 24rem; /* h-96 */
+  background-color: white;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.sales-chart--full {
+  width: 100%;
+}
+
+.sales-chart--half {
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  .sales-chart--half {
+    width: 50%;
+  }
+}
