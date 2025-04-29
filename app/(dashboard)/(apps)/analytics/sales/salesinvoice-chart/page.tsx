@@ -7,7 +7,7 @@ import SalesByPeriodChart from './salesYearPeriod/page';
 import SalesByPeriodAndPoTypeChart from './salesByPoType/page';
 import SalesInvoiceHdPage from '../../../sls/invoice-hd/list/page';
 
-const SalesDashboardPage = () => {
+const SalesInvoiceAnalyticPage = () => {
   const [fullChart, setFullChart] = useState<'period' | 'poType' | null>(null);
 
   return (
@@ -60,4 +60,4 @@ const SalesDashboardPage = () => {
   );
 };
 
-export default SalesDashboardPage;
+export default SalesInvoiceAnalyticPage;
