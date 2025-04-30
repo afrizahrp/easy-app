@@ -14,7 +14,6 @@ import {
 import gradientPlugin from 'chartjs-plugin-gradient';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/components/ui/use-toast';
 import useTopProductsBySalesPerson from '@/queryHooks/sls/analytics/useTopProductBySalesPerson';
@@ -55,7 +54,17 @@ const TopProductSoldBySalesPerson: React.FC<
   const [chartMode, setChartMode] = useState<'qty' | 'total_amount'>('qty');
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const [yearPeriod, monthPeriod] = [year, month];
+  // Gunakan month langsung sebagai monthPeriod
+  const monthPeriod = month;
+  const yearPeriod = year;
+
+  console.log('TopProductSoldBySalesPerson props:', {
+    salesPersonName,
+    year,
+    month,
+    monthPeriod,
+  });
+
   const {
     data: productData,
     isLoading,
@@ -75,7 +84,7 @@ const TopProductSoldBySalesPerson: React.FC<
         color: 'destructive',
       });
     }
-  }, [error?.message]);
+  }, [error, toast]);
 
   useEffect(() => {
     if (containerRef.current) {
@@ -184,7 +193,6 @@ const TopProductSoldBySalesPerson: React.FC<
         if (!isNaN(num)) {
           return num.toLocaleString('id-ID');
         }
-
         return value;
       },
     },

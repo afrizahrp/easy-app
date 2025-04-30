@@ -1,21 +1,21 @@
 // components/HeaderPeriodFilterSection.tsx
 'use client';
 
-import { HeaderFilterSection } from '@/components/header-filter-section';
 import { PeriodFilter } from '@/components/period-filter';
-
 interface HeaderPeriodFilterSectionProps {
-  onPeriodChange?: () => void;
-  className?: string;
+  onPeriodChange?: (period: {
+    startPeriod: Date | null;
+    endPeriod: Date | null;
+  }) => void;
 }
 
 export function HeaderPeriodFilterSection({
   onPeriodChange,
-  className = '',
 }: HeaderPeriodFilterSectionProps) {
+  console.log('HeaderPeriodFilterSection rendered');
   return (
-    <HeaderFilterSection className={className}>
+    <div className='w-full'>
       <PeriodFilter onPeriodChange={onPeriodChange} />
-    </HeaderFilterSection>
+    </div>
   );
 }

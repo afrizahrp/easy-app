@@ -1,42 +1,47 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { useSalesInvoiceHdFilterStore } from '@/store';
+import { useSalesInvoiceHdFilterStore, useMonthYearPeriodStore } from '@/store';
 import SalesInvoiceFilterSummary from '@/components/sales/salesInvoiceFilterSummary';
 import SalesPersonPerformaOverview from '../salespersonperforma-chart/components/salesPersonPerformaOverview';
 import TopProductSoldBySalesPerson from '../salespersonperforma-chart/components/topProductSoldBySalesPerson';
 import SalesPersonInvoiceList from '../../../sales/salespersonInvoice/list/page';
 import { HeaderPeriodFilterSection } from '@/components/sales/HeaderPeriodFilterSection';
-
-interface SalesPersonSelection {
-  salesPersonName: string;
-  year?: string;
-  month?: string;
-}
+import { useToast } from '@/components/ui/use-toast';
+import { format } from 'date-fns';
 
 const SalesPersonPerformaAnalytics = () => {
   const [fullChart, setFullChart] = useState<'period' | null>('period');
   const [selectedSalesPerson, setSelectedSalesPerson] = useState<string | null>(
     null
   );
-  const [selectedYear, setSelectedYear] = useState<string | null>(null);
-  const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const { salesPersonName } = useSalesInvoiceHdFilterStore((state) => ({
     salesPersonName: state.salesPersonName,
   }));
 
-  const chartRef = useRef<HTMLDivElement>(null);
-  const topProductRef = useRef<HTMLDivElement>(null);
+  const { startPeriod, endPeriod } = useMonthYearPeriodStore();
+  const { toast } = useToast();
 
   const validSalesPersonNames = Array.isArray(salesPersonName)
     ? salesPersonName.filter((name) => typeof name === 'string' && name.trim())
-    : salesPersonName && typeof salesPersonName === 'string'
+    : salesPersonName && typeof salesPersonName === 'string' && salesPersonName
       ? [salesPersonName]
       : [];
 
+  const chartRef = useRef<HTMLDivElement>(null);
+  const topProductRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
+    // console.log('Analytics useEffect triggered with:', {
+    //   fullChart,
+    //   validSalesPersonNames,
+    //   selectedSalesPerson,
+    //   startPeriod,
+    //   endPeriod,
+    // });
     if (chartRef.current) {
       console.log(
         'Chart actual width:',
@@ -53,44 +58,59 @@ const SalesPersonPerformaAnalytics = () => {
     fullChart,
     validSalesPersonNames,
     selectedSalesPerson,
-    selectedYear,
-    selectedMonth,
+    startPeriod,
+    endPeriod,
   ]);
 
-  const handleModeChange = (isFull: boolean) => {
+  const handleModeChange = useCallback((isFull: boolean) => {
+    // console.log('handleModeChange called with:', isFull);
     setFullChart(isFull ? 'period' : null);
-  };
+  }, []);
 
-  const handleSalesPersonSelect = (selection: SalesPersonSelection | null) => {
-    if (selection) {
-      setSelectedSalesPerson(selection.salesPersonName);
-      setSelectedYear(selection.year || null);
-      setSelectedMonth(selection.month || null);
-    } else {
-      setSelectedSalesPerson(null);
-      setSelectedYear(null);
-      setSelectedMonth(null);
-      setFullChart('period');
-    }
-  };
+  const handleSalesPersonSelect = useCallback(
+    (salesPersonName: string | null) => {
+      // console.log(
+      //   'handleSalesPersonSelect in Analytics called with:',
+      //   salesPersonName
+      // );
+      setSelectedSalesPerson(salesPersonName);
+      if (!salesPersonName) {
+        setFullChart('period');
+      }
+    },
+    []
+  );
+
+  const selectedYear = startPeriod ? format(startPeriod, 'yyyy') : undefined;
+  const selectedMonth = startPeriod ? format(startPeriod, 'MM') : undefined;
 
   return (
     <div className='flex flex-col h-screen w-full p-4 gap-4'>
-      {/* Section: Header Summary & Filter */}
       <section className='rounded-lg bg-white shadow-sm border border-muted-200 p-4 flex flex-col gap-4'>
+        <SalesInvoiceFilterSummary />
         <HeaderPeriodFilterSection
-          onPeriodChange={() => {
-            // Optionally refetch data
+          onPeriodChange={async ({ startPeriod, endPeriod }) => {
+            // console.log('onPeriodChange called with:', {
+            //   startPeriod,
+            //   endPeriod,
+            // });
+            setIsLoading(true);
+            try {
+              // Contoh: await fetchSalesData(startPeriod, endPeriod);
+            } catch (error) {
+              toast({
+                description: 'Gagal memuat data untuk periode yang dipilih.',
+                color: 'destructive',
+              });
+            } finally {
+              setIsLoading(false);
+            }
           }}
         />
-        <SalesInvoiceFilterSummary />
       </section>
 
-      {/* Section: Chart + Top Product */}
       <section
-        className={`w-full gap-4 ${
-          fullChart === 'period' ? '' : 'grid grid-cols-1 md:grid-cols-2'
-        }`}
+        className={`w-full gap-4 ${fullChart === 'period' ? '' : 'grid grid-cols-1 md:grid-cols-2'}`}
       >
         <motion.div
           ref={chartRef}
@@ -121,12 +141,11 @@ const SalesPersonPerformaAnalytics = () => {
           >
             <TopProductSoldBySalesPerson
               salesPersonName={selectedSalesPerson}
-              year={selectedYear ?? undefined}
-              month={selectedMonth ?? undefined}
+              year={selectedYear}
+              month={selectedMonth}
               onClose={() => {
+                // console.log('TopProductSoldBySalesPerson onClose called');
                 setSelectedSalesPerson(null);
-                setSelectedYear(null);
-                setSelectedMonth(null);
                 setFullChart('period');
               }}
             />
@@ -134,7 +153,6 @@ const SalesPersonPerformaAnalytics = () => {
         )}
       </section>
 
-      {/* Section: Invoice List */}
       <motion.section
         layout
         transition={{ type: 'spring', stiffness: 250, damping: 25 }}
