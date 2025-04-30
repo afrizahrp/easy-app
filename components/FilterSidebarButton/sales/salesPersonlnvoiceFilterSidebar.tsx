@@ -6,24 +6,19 @@ import { AlertCircle } from 'lucide-react';
 import { startOfMonth, endOfMonth } from 'date-fns';
 import 'react-datepicker/dist/react-datepicker.css';
 import { zonedTimeToUtc } from 'date-fns-tz';
-
 import useSalesInvoiceHdPaidStatusOptions from '@/queryHooks/sls/useSalesInvoiceHdPaidStatusOptions';
 import useSalesInvoiceHdSalesPersonOptions from '@/queryHooks/sls/useSalesInvoiceHdSalesPersonOptions';
 import useSalesInvoiceHdPoTypeOptions from '@/queryHooks/sls/useSalesInvoiceHdPoTypeOptions';
 import { PeriodFilter } from '@/components/period-filter';
-
 import { ResetSalesInvoiceFilterStore } from '@/utils/reset-filter-state/sls/resetSalesInvoiceFilterStore';
-
 import { Button } from '@/components/ui/button';
 import { DataTableFacetedFilter } from '@/components/ui/data-table-faceted-filter';
 import { useMonthYearPeriodStore, useSalesInvoiceHdFilterStore } from '@/store';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/components/ui/use-toast';
 
-// import DatePicker from 'react-datepicker';
-
 interface SalesPersonInvoiceFilterSidebarProps<TData> {
-  table: Table<TData>;
+  table?: Table<TData>;
 }
 
 export function SalesPersonInvoiceFilterSidebar<TData>({
@@ -31,7 +26,6 @@ export function SalesPersonInvoiceFilterSidebar<TData>({
 }: SalesPersonInvoiceFilterSidebarProps<TData>) {
   const { startPeriod, setStartPeriod, endPeriod, setEndPeriod, reset } =
     useMonthYearPeriodStore();
-
   const {
     paidStatus,
     setPaidStatus,
@@ -40,12 +34,10 @@ export function SalesPersonInvoiceFilterSidebar<TData>({
     salesPersonName,
     setSalesPersonName,
   } = useSalesInvoiceHdFilterStore();
-
   const { toast } = useToast();
   const [showAlert, setShowAlert] = useState(false);
 
   useEffect(() => {
-    // Normalisasi ke UTC
     const normalizedStart = startPeriod
       ? zonedTimeToUtc(startOfMonth(startPeriod), 'UTC')
       : null;
@@ -53,12 +45,10 @@ export function SalesPersonInvoiceFilterSidebar<TData>({
       ? zonedTimeToUtc(endOfMonth(endPeriod), 'UTC')
       : null;
 
-    // Jika endPeriod tidak ada, gunakan akhir bulan dari startPeriod
     if (normalizedStart && !normalizedEnd && startPeriod) {
       normalizedEnd = zonedTimeToUtc(endOfMonth(startPeriod), 'UTC');
     }
 
-    // Validasi: Jika endPeriod lebih awal dari startPeriod, atur ulang endPeriod
     if (normalizedStart && normalizedEnd && normalizedEnd < normalizedStart) {
       console.warn(
         'Invalid date range: endPeriod is before startPeriod. Resetting endPeriod.',
@@ -76,31 +66,28 @@ export function SalesPersonInvoiceFilterSidebar<TData>({
       });
     }
 
-    table
-      .getColumn('paidStatus')
-      ?.setFilterValue(paidStatus.length ? paidStatus : undefined);
-    table
-      .getColumn('salesPersonName')
-      ?.setFilterValue(salesPersonName.length ? salesPersonName : undefined);
-    table
-      .getColumn('poType')
-      ?.setFilterValue(poType.length ? poType : undefined);
+    if (table) {
+      table
+        .getColumn('paidStatus')
+        ?.setFilterValue(paidStatus.length ? paidStatus : undefined);
+      table
+        .getColumn('salesPersonName')
+        ?.setFilterValue(salesPersonName.length ? salesPersonName : undefined);
+      table
+        .getColumn('poType')
+        ?.setFilterValue(poType.length ? poType : undefined);
 
-    // Terapkan filter invoiceDate
-    let filterValue: { start: Date; end: Date } | undefined;
-    if (normalizedStart && startPeriod) {
-      filterValue = {
-        start: normalizedStart,
-        end: normalizedEnd ?? zonedTimeToUtc(endOfMonth(startPeriod), 'UTC'),
-      };
+      let filterValue: { start: Date; end: Date } | undefined;
+      if (normalizedStart && startPeriod) {
+        filterValue = {
+          start: normalizedStart,
+          end: normalizedEnd ?? zonedTimeToUtc(endOfMonth(startPeriod), 'UTC'),
+        };
+      }
+      table.getColumn('invoiceDate')?.setFilterValue(filterValue);
     }
 
-    // console.log('Setting invoiceDate filter:', filterValue);
-
-    table.getColumn('invoiceDate')?.setFilterValue(filterValue);
-
-    // Log data yang difilter
-    const filteredRows = table.getFilteredRowModel().rows;
+    const filteredRows = table ? table.getFilteredRowModel().rows : [];
     console.log('Filtered rows count:', filteredRows.length);
   }, [
     startPeriod,
@@ -147,176 +134,96 @@ export function SalesPersonInvoiceFilterSidebar<TData>({
     });
   };
 
+  // Cek apakah ada filter aktif dengan optional chaining
+  const hasActiveFilters =
+    (table?.getState?.().columnFilters?.length ?? 0) > 0 ||
+    salesPersonName.length > 0;
+
   return (
-    <div className='flex items-center justify-end py-2'>
-      <div className='flex flex-col items-center space-y-2 w-full'>
-        {showAlert && (
-          <Alert variant='destructiveDark' className='w-full'>
-            <AlertCircle className='h-4 w-4' />
-            <AlertDescription>
-              The Status filter is disabled when multiple Sales Persons are
-              selected.
-            </AlertDescription>
-          </Alert>
-        )}
+    <div className='flex flex-col space-y-4 w-full py-2'>
+      {showAlert && (
+        <Alert variant='destructiveDark' className='w-full'>
+          <AlertCircle className='h-4 w-4' />
+          <AlertDescription>
+            The Status filter is disabled when multiple Sales Persons are
+            selected.
+          </AlertDescription>
+        </Alert>
+      )}
+      <PeriodFilter />
 
-        {/* <div className='w-full flex flex-wrap gap-2 py-3'>
-          <div className='min-w-[120px]'>
-            <label className='text-sm font-medium mb-1 block'>
-              Start Period
-            </label>
-            <DatePicker
-              selected={startPeriod}
-              onChange={(date) => {
-                const newStart = date
-                  ? setDate(startOfMonth(date), {
-                      hours: 0,
-                      minutes: 0,
-                      seconds: 0,
-                      milliseconds: 0,
-                    })
-                  : null;
-                setStartPeriod(newStart);
-                // Validasi: Jika endPeriod ada dan lebih awal dari newStart, reset endPeriod
-                if (
-                  newStart &&
-                  endPeriod &&
-                  startOfMonth(endPeriod) < startOfMonth(newStart)
-                ) {
-                  console.log(
-                    'Resetting endPeriod because it is before new startPeriod:',
-                    {
-                      newStart: newStart.toISOString(),
-                      endPeriod: endPeriod.toISOString(),
-                    }
-                  );
-                  setEndPeriod(null);
-                  toast({
-                    description:
-                      'End Period was reset because it was earlier than the new Start Period.',
-                    color: 'destructive',
-                  });
-                }
-              }}
-              showMonthYearPicker
-              dateFormat='MMM yyyy'
-              placeholderText='Jan 2025'
-              className='w-[120px] h-10 px-3 border rounded-md'
-              shouldCloseOnSelect={false}
-              showYearDropdown
-              yearDropdownItemNumber={15}
-              scrollableYearDropdown
-            />
-          </div>
-          <div className='min-w-[120px]'>
-            <label className='text-sm font-medium mb-1 block'>End Period</label>
-            <DatePicker
-              selected={endPeriod}
-              onChange={(date) =>
-                setEndPeriod(
-                  date
-                    ? setDate(endOfMonth(date), {
-                        hours: 23,
-                        minutes: 59,
-                        seconds: 59,
-                        milliseconds: 999,
-                      })
-                    : null
-                )
-              }
-              showMonthYearPicker
-              dateFormat='MMM yyyy'
-              placeholderText={format(endOfMonth(new Date()), 'MMM yyyy')} // Diperbaiki ke dinamis
-              minDate={startPeriod ? startOfMonth(startPeriod) : undefined}
-              className='w-[120px] h-10 px-3 border rounded-md'
-              shouldCloseOnSelect={false}
-              showYearDropdown
-              yearDropdownItemNumber={15}
-              scrollableYearDropdown
-            />
-          </div>
-        </div> */}
+      <div className='w-full py-3'>
+        <DataTableFacetedFilter
+          column={table?.getColumn('salesPersonName')}
+          title='Sales Person'
+          options={salesPersonOptionList}
+          isLoading={isSalesPersonLoading}
+          selectedValues={new Set(salesPersonName)}
+          onSelect={(value) => {
+            const updatedValues = new Set(salesPersonName);
+            value
+              ? updatedValues.has(value)
+                ? updatedValues.delete(value)
+                : updatedValues.add(value)
+              : updatedValues.clear();
+            setSalesPersonName(Array.from(updatedValues));
+          }}
+        />
+      </div>
 
-        <div className='flex flex-col items-center space-y-2 w-full'>
-          <PeriodFilter />
-        </div>
-
-        <div className='w-full py-3'>
-          {table.getColumn('paidStatus') && (
-            <DataTableFacetedFilter
-              column={table.getColumn('paidStatus')}
-              title='Paid Status'
-              options={statusOptionList}
-              isLoading={isStatusLoading}
-              disabled={salesPersonName.length > 1}
-              selectedValues={new Set(paidStatus)}
-              onSelect={(value) => {
-                const updatedValues = new Set(paidStatus);
-                value
-                  ? updatedValues.has(value)
-                    ? updatedValues.delete(value)
-                    : updatedValues.add(value)
-                  : updatedValues.clear();
-                setPaidStatus(Array.from(updatedValues));
-              }}
-            />
-          )}
-        </div>
-
-        {/* <div className='w-full py-3'>
-          {table.getColumn('poType') && (
-            <DataTableFacetedFilter
-              column={table.getColumn('poType')}
-              title='PO Type'
-              options={poTypeOptionList}
-              isLoading={isPoTypeLoading}
-              disabled={salesPersonName.length > 1}
-              selectedValues={new Set(poType)}
-              onSelect={(value) => {
-                const updatedValues = new Set(poType);
-                value
-                  ? updatedValues.has(value)
-                    ? updatedValues.delete(value)
-                    : updatedValues.add(value)
-                  : updatedValues.clear();
-                setPoType(Array.from(updatedValues));
-              }}
-            />
-          )}
-        </div> */}
-
-        <div className='w-full py-3'>
-          {table.getColumn('salesPersonName') && (
-            <DataTableFacetedFilter
-              column={table.getColumn('salesPersonName')}
-              title='Sales Person'
-              options={salesPersonOptionList}
-              isLoading={isSalesPersonLoading}
-              selectedValues={new Set(salesPersonName)}
-              onSelect={(value) => {
-                const updatedValues = new Set(salesPersonName);
-                value
-                  ? updatedValues.has(value)
-                    ? updatedValues.delete(value)
-                    : updatedValues.add(value)
-                  : updatedValues.clear();
-                setSalesPersonName(Array.from(updatedValues));
-              }}
-            />
-          )}
-        </div>
-
-        {table.getState().columnFilters.length > 0 && (
-          <Button
-            variant='outline'
-            onClick={handleReset}
-            className='h-10 px-2 lg:px-3 w-full mb-5'
-          >
-            <Cross2Icon className='ml-2 h-4 w-4' />
-            Reset Filter
-          </Button>
+      <div className='w-full py-3'>
+        {table?.getColumn('paidStatus') && (
+          <DataTableFacetedFilter
+            column={table.getColumn('paidStatus')}
+            title='Paid Status'
+            options={statusOptionList}
+            isLoading={isStatusLoading}
+            disabled={salesPersonName.length > 1}
+            selectedValues={new Set(paidStatus)}
+            onSelect={(value) => {
+              const updatedValues = new Set(paidStatus);
+              value
+                ? updatedValues.has(value)
+                  ? updatedValues.delete(value)
+                  : updatedValues.add(value)
+                : updatedValues.clear();
+              setPaidStatus(Array.from(updatedValues));
+            }}
+          />
         )}
       </div>
+      {/* <div className='w-full py-3'>
+        {table?.getColumn('poType') && (
+          <DataTableFacetedFilter
+            column={table.getColumn('poType')}
+            title='PO Type'
+            options={poTypeOptionList}
+            isLoading={isPoTypeLoading}
+            disabled={salesPersonName.length > 1}
+            selectedValues={new Set(poType)}
+            onSelect={(value) => {
+              const updatedValues = new Set(poType);
+              value
+                ? updatedValues.has(value)
+                  ? updatedValues.delete(value)
+                  : updatedValues.add(value)
+                : updatedValues.clear();
+              setPoType(Array.from(updatedValues));
+            }}
+          />
+        )}
+      </div> */}
+
+      {hasActiveFilters && (
+        <Button
+          variant='outline'
+          onClick={handleReset}
+          className='h-10 px-2 w-full mb-5'
+        >
+          <Cross2Icon className='ml-2 h-4 w-4' />
+          Reset Filter
+        </Button>
+      )}
     </div>
   );
 }

@@ -1,6 +1,7 @@
+// components/filterSummary.tsx
 import { Badge } from '@/components/ui/badge';
 import clsx from 'clsx';
-import { X } from 'lucide-react'; // Kamu bisa pakai ikon lainnya, atau import yang sesuai
+import { X } from 'lucide-react';
 
 type FilterValue = string | number | null | undefined;
 
@@ -8,10 +9,10 @@ interface FilterSummaryProps {
   filters: {
     label: string;
     value: FilterValue | FilterValue[];
-    isClearable?: boolean; // Properti isClearable untuk pengecualian field yang tidak bisa di-clear
-    onClear?: () => void; // Tambahkan prop onClear untuk reset
+    isClearable?: boolean;
+    onClear?: () => void;
   }[];
-  layout?: 'grid' | 'inline' | 'badge'; // default: 'grid'
+  layout?: 'grid' | 'inline' | 'badge';
   className?: string;
 }
 
@@ -32,8 +33,8 @@ export function FilterSummary({
       <div className={clsx('flex flex-wrap gap-2', className)}>
         {filters.map((f, i) => (
           <Badge key={i} variant='secondary' className='flex items-center'>
-            {f.label}: {renderValue(f.value)}
-            {/* Tambahkan tombol clear jika ada onClear */}
+            {f.label === 'Invoice Period' ? '' : `Selected ${f.label}: `}
+            {renderValue(f.value)}
             {f.isClearable && f.onClear && (
               <button
                 onClick={f.onClear}
@@ -51,10 +52,13 @@ export function FilterSummary({
 
   if (layout === 'inline') {
     return (
-      <div className={clsx('text-sm space-x-4', className)}>
+      <div className={clsx('text-sm space-y-1', className)}>
         {filters.map((f, i) => (
-          <span key={i} className='flex items-center'>
-            <strong>{f.label}</strong>: {renderValue(f.value)}
+          <div key={i} className='flex items-center'>
+            <span>
+              {f.label === 'Invoice Period' ? '' : `Selected ${f.label}: `}
+              {renderValue(f.value)}
+            </span>
             {f.isClearable && f.onClear && (
               <button
                 onClick={f.onClear}
@@ -64,23 +68,21 @@ export function FilterSummary({
                 <X size={12} />
               </button>
             )}
-          </span>
+          </div>
         ))}
       </div>
     );
   }
 
-  // Default layout: grid
+  // Default layout
   return (
-    <div
-      className={clsx(
-        'grid grid-cols-2 md:grid-cols-3 gap-y-1 text-sm',
-        className
-      )}
-    >
+    <div className={clsx('text-sm space-y-1', className)}>
       {filters.map((f, i) => (
         <div key={i} className='flex items-center'>
-          <strong>{f.label}</strong>: {renderValue(f.value)}
+          <span>
+            {f.label === 'Invoice Period' ? '' : `Selected ${f.label}: `}
+            {renderValue(f.value)}
+          </span>
           {f.isClearable && f.onClear && (
             <button
               onClick={f.onClear}

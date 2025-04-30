@@ -80,16 +80,13 @@ const SalesPersonInvoiceList = () => {
         </Card>
       </div>
 
-      <Card className='mt-4'>
-        <CardContent className='p-4'>
-          <FooterSummarySection className='w-full flex justify-end'>
-            <FooterSummaryItem
-              label='Total Invoice'
-              value={grandTotal_amount}
-            />
-          </FooterSummarySection>
-        </CardContent>
-      </Card>
+      {/* <Card className='mt-4'>
+        <CardContent className='p-4'> */}
+      <FooterSummarySection className='w-full flex justify-end'>
+        <FooterSummaryItem label='Total Invoice' value={grandTotal_amount} />
+      </FooterSummarySection>
+      {/* </CardContent>
+      </Card> */}
     </>
   );
 };

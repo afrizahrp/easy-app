@@ -26,6 +26,8 @@ import {
 } from '@/utils/salesPersonColorMap';
 import { useSalesInvoiceHdFilterStore } from '@/store';
 import { months } from '@/utils/monthNameMap';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 
 ChartJS.register(
   CategoryScale,
@@ -54,28 +56,24 @@ interface SalesPersonSelection {
 }
 
 interface SalesBySalesPersonUnFilteredProps {
-  isFullWidth?: boolean;
+  isFullScreen?: boolean;
   onModeChange?: (isFullPage: boolean) => void;
   onSalesPersonSelect?: (selection: SalesPersonSelection | null) => void;
 }
 
 const SalesBySalesPersonUnFilteredChart: React.FC<
   SalesBySalesPersonUnFilteredProps
-> = ({ isFullWidth = true, onModeChange, onSalesPersonSelect }) => {
+> = ({ isFullScreen = false, onModeChange, onSalesPersonSelect }) => {
   const { theme: config, setTheme: setConfig } = useThemeStore();
   const { theme: mode } = useTheme();
 
   const theme = themes.find((theme) => theme.name === config);
 
-  const hslPrimary = `hsla(${
-    theme?.cssVars[mode === 'dark' ? 'dark' : 'light'].primary
-  })`;
-  const hslSuccess = `hsla(${
-    theme?.cssVars[mode === 'dark' ? 'dark' : 'light'].success
+  const hslBackground = `hsla(${
+    theme?.cssVars[mode === 'dark' ? 'dark' : 'light'].background
   })`;
 
-  const hexPrimary = hslToHex(hslPrimary);
-  const hexSuccess = hslToHex(hslSuccess);
+  const hexBackground = hslToHex(hslBackground);
 
   const { toast } = useToast();
   const { data, isLoading, isFetching, error } = useSalesByPeriodUnfiltered();
@@ -195,15 +193,44 @@ const SalesBySalesPersonUnFilteredChart: React.FC<
 
   return (
     <div
-      className={`bg-white p-4 rounded-lg shadow-sm h-96 ${
-        isFullWidth ? 'w-full' : 'w-full md:w-1/2'
-      }`}
+      className={
+        isFullScreen
+          ? 'fixed inset-0 z-50 bg-white dark:bg-[#18181b] p-4 flex flex-col rounded-none shadow-lg'
+          : 'p-4 rounded-lg shadow-sm h-96 w-full'
+      }
+      style={{
+        backgroundColor: hexBackground,
+        height: isFullScreen ? '100vh' : undefined,
+        width: isFullScreen ? '100vw' : undefined,
+        top: isFullScreen ? 0 : undefined,
+        left: isFullScreen ? 0 : undefined,
+      }}
     >
       <div className='flex items-center justify-between mb-2'>
         <h2 className='text-md text-muted-foreground font-semibold'>
           Top 5 Sales Performers (in Millions IDR)
         </h2>
+        <div className='flex items-center space-x-2'>
+          <Label htmlFor='chart-mode-period'>
+            {isFullScreen ? 'Full Page' : 'Full Width'}
+          </Label>
+          <Switch
+            id='chart-mode-period'
+            checked={isFullScreen}
+            onCheckedChange={(checked) => onModeChange?.(checked)}
+            aria-label='Toggle full screen chart'
+          />
+        </div>
       </div>
+      {/* {isFullScreen && (
+        <button
+          className='absolute top-4 right-4 z-50 bg-gray-100 dark:bg-gray-800 rounded-full p-2 shadow hover:bg-gray-200'
+          onClick={() => onModeChange?.(false)}
+          aria-label='Exit Full Screen'
+        >
+          ✕
+        </button>
+      )} */}
       {isLoading || isFetching ? (
         <div className='flex items-center justify-center h-full'>
           <div className='w-3/4 h-1/2 rounded-lg shimmer' />
@@ -223,9 +250,6 @@ const SalesBySalesPersonUnFilteredChart: React.FC<
                   drawTicks: false,
                   color: `hsl(${theme?.cssVars[mode === 'dark' ? 'dark' : 'light'].chartGird})`,
                 },
-                // ticks: {
-                //   color: `hsl(${theme?.cssVars[mode === 'dark' ? 'dark' : 'light'].chartLabel})`,
-                // },
 
                 ticks: {
                   callback: (value) =>

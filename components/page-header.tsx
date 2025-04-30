@@ -58,7 +58,7 @@ export default function PageHeader({
       <header className={cn('mb-6 @container xs:-mt-2 lg:mb-7', className)}>
         <div className='flex flex-col @lg:flex-row @lg:items-center @lg:justify-between'>
           <div>
-            <Label className='w-1/2 mb-2 text-[22px] lg:text-2xl 4xl:text-[26px]'>
+            <Label className='w-1/2 mb-2 text-[22px] lg:text-2xl 4xl:text-[26px] dark:text-slate-400 text-slate-600'>
               {title}
             </Label>
             {/* <Label className='mb-1 text-[22px] lg:text-2xl 4xl:text-[26px]'>

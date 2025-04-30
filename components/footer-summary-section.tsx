@@ -11,10 +11,9 @@ export function FooterSummarySection({
 }: FooterSummarySectionProps) {
   return (
     <div
-      className={`w-full border-t mt-4 pt-4 flex items-center bg-secondary text-primary dark:text-slate-500 px-4 py-3 rounded-md shadow-sm ${className}`}
+      className={`w-full border-t mt-4 pt-4 flex items-center bg-secondary text-primary dark:text-slate-400 px-4 py-3 rounded-md shadow-sm ${className}`}
     >
-      <div className='w-full flex justify-end'>
-        {' '}
+      <div className='w-full flex justify-end font-semibold text-md'>
         {/* Menambahkan div pembungkus untuk flex end */}
         {children}
       </div>

@@ -1,5 +1,5 @@
 'use client';
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import SalesBySalesPersonFilteredChart from './salesBySalesPersonFilteredChart';
 import SalesBySalesPersonUnFilteredChart from './salesBySalesPersonUnFilteredChart';
@@ -26,6 +26,8 @@ const SalesPersonPerformaOverview: React.FC<
       setSalesPersonName: state.setSalesPersonName,
     })
   );
+
+  const [isFullScreen, setIsFullScreen] = useState(false);
 
   const handleSalesPersonSelect = (selection: SalesPersonSelection | null) => {
     console.log('handleSalesPersonSelect in PerformaChart:', selection);
@@ -60,8 +62,8 @@ const SalesPersonPerformaOverview: React.FC<
         />
       ) : (
         <SalesBySalesPersonUnFilteredChart
-          isFullWidth={isFullWidth}
-          onModeChange={onModeChange}
+          isFullScreen={isFullScreen}
+          onModeChange={setIsFullScreen}
           onSalesPersonSelect={handleSalesPersonSelect}
         />
       )}

@@ -6,12 +6,13 @@ import { Button } from '@/components/ui/button';
 import { Filter } from 'lucide-react';
 import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
 import SalesInvoiceFilterSummary from '@/components/sales/salesInvoiceFilterSummary';
-import { Table } from '@tanstack/react-table';
-
 import SalesPersonPerformaOverview from '../salespersonperforma-chart/components/salesPersonPerformaOverview';
 import TopProductSoldBySalesPerson from '../salespersonperforma-chart/components/topProductSoldBySalesPerson';
 import SalesPersonInvoiceList from '../../../sales/salespersonInvoice/list/page';
-import { SalesPersonAnalyticsFilterSidebar } from '@/components/FilterSidebarButton/sales/SalesPersonAnalyticsFilterSidebar';
+import { SalesPersonInvoiceFilterSidebar } from '@/components/FilterSidebarButton/sales/salesPersonlnvoiceFilterSidebar';
+import Draggable from 'react-draggable';
+
+import { Table } from '@tanstack/react-table';
 
 interface SalesPersonSelection {
   salesPersonName: string;
@@ -33,6 +34,7 @@ const SalesPersonPerformaAnalytics = () => {
 
   const chartRef = useRef<HTMLDivElement>(null);
   const topProductRef = useRef<HTMLDivElement>(null);
+  const [buttonPosition, setButtonPosition] = useState({ x: 0, y: 0 });
 
   const validSalesPersonNames = Array.isArray(salesPersonName)
     ? salesPersonName.filter((name) => typeof name === 'string' && name.trim())
@@ -61,6 +63,18 @@ const SalesPersonPerformaAnalytics = () => {
     selectedMonth,
   ]);
 
+  useEffect(() => {
+    const saved = localStorage.getItem('filterButtonPosition');
+    if (saved) setButtonPosition(JSON.parse(saved));
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem(
+      'filterButtonPosition',
+      JSON.stringify(buttonPosition)
+    );
+  }, [buttonPosition]);
+
   const handleModeChange = (isFull: boolean) => {
     console.log('handleModeChange:', isFull);
     setFullChart(isFull ? 'period' : null);
@@ -80,23 +94,54 @@ const SalesPersonPerformaAnalytics = () => {
     }
   };
 
+  // Dummy table untuk sidebar (kosong, karena chart ga butuh)
+  const handleDrag = (e: any, data: { x: number; y: number }) => {
+    setButtonPosition({ x: data.x, y: data.y });
+  };
+
+  // Dummy table yang aman
+  const dummyTable = {
+    getState: () => ({
+      columnFilters: [],
+      sorting: [],
+      pagination: { pageIndex: 0, pageSize: 10 },
+      globalFilter: '',
+      rowSelection: {},
+    }),
+    getColumn: () => undefined,
+    getFilteredRowModel: () => ({ rows: [] }),
+  } as unknown as Table<any>;
+
   return (
     <div className='relative flex flex-col h-screen w-full p-4 gap-4'>
       {/* Floating Button */}
-      <Button
-        size='sm'
-        onClick={() => setIsSidebarOpen(true)}
-        className='fixed right-6 bottom-6 z-50 px-4 h-12 flex items-center gap-2 bg-white text-primary hover:bg-primary hover:text-white rounded-full shadow-lg hover:scale-105 transition-transform'
+      <Draggable
+        defaultPosition={{ x: 0, y: 0 }}
+        position={buttonPosition}
+        onDrag={handleDrag}
       >
-        <Filter className='w-4 h-4' />
-        Filter
-      </Button>
+        <div
+          className='fixed bottom-4 right-4 z-50'
+          style={{
+            transform: `translate(${buttonPosition.x}px, ${buttonPosition.y}px)`,
+          }}
+        >
+          <Button
+            size='sm'
+            onClick={() => setIsSidebarOpen(true)}
+            className='px-3 h-8 flex items-center gap-1 bg-primary text-white hover:bg-secondary-dark rounded-full hover:scale-105 transition-transform cursor-move shadow-md'
+          >
+            <Filter className='w-4 h-4' />
+            Filter
+          </Button>
+        </div>
+      </Draggable>
 
       {/* Sidebar as Sheet */}
       <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
-        <SheetContent className='pt-5 w-64'>
+        <SheetContent className='pt-5 w-80 sm:w-96'>
           <SheetTitle>Filter Data</SheetTitle>
-          <SalesPersonAnalyticsFilterSidebar />
+          <SalesPersonInvoiceFilterSidebar table={dummyTable} />
         </SheetContent>
       </Sheet>
 

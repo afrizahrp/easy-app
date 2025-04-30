@@ -5,7 +5,7 @@ import { FilterSummary } from '@/components/filterSummary';
 import { format } from 'date-fns';
 
 interface SalesInvoiceFilterSummaryProps {
-  className?: string; // Tambahkan prop className untuk fleksibilitas
+  className?: string;
 }
 
 export default function SalesInvoiceFilterSummary({
@@ -21,8 +21,6 @@ export default function SalesInvoiceFilterSummary({
     setPoType,
     setSalesPersonName,
   } = useSalesInvoiceHdFilterStore();
-
-  // State untuk mengontrol visibility salesDashboardPage (jika diperlukan)
 
   // Fungsi untuk clear filter
   const handleClear = (filterName: string) => {
@@ -47,53 +45,59 @@ export default function SalesInvoiceFilterSummary({
     }
   };
 
-  // Susun filter
+  // Susun filter, hanya tampilkan yang punya nilai (kecuali Periode)
   const filters = [
     {
       label: 'Invoice Period',
       value:
         startPeriod && endPeriod
           ? `${format(startPeriod, 'MMM yyyy')} - ${format(endPeriod, 'MMM yyyy')}`
-          : null,
+          : startPeriod
+            ? format(startPeriod, 'MMM yyyy')
+            : 'Jan 2025 - Apr 2025', // Default periode
       isClearable: false,
     },
-    {
-      label: 'Paid Status',
-      value: paidStatus,
-      isClearable: true,
-      onClear: () => handleClear('paidStatus'),
-    },
-    {
-      label: 'PO Type',
-      value: poType,
-      isClearable: true,
-      onClear: () => handleClear('poType'),
-    },
-    {
-      label: 'Sales Person',
-      value: salesPersonName,
-      isClearable: true,
-      onClear: () => handleClear('salesPersonName'),
-    },
-  ].filter(
-    (item) =>
-      item.value &&
-      (typeof item.value === 'string'
-        ? item.value.trim() !== ''
-        : Array.isArray(item.value)
-          ? item.value.length > 0
-          : true)
-  );
+    ...(salesPersonName.length > 0
+      ? [
+          {
+            label: 'Sales Person',
+            value: salesPersonName,
+            isClearable: true,
+            onClear: () => handleClear('salesPersonName'),
+          },
+        ]
+      : []),
+    ...(paidStatus.length > 0
+      ? [
+          {
+            label: 'Paid Status',
+            value: paidStatus,
+            isClearable: true,
+            onClear: () => handleClear('paidStatus'),
+          },
+        ]
+      : []),
+    ...(poType.length > 0
+      ? [
+          {
+            label: 'PO Type',
+            value: poType,
+            isClearable: true,
+            onClear: () => handleClear('poType'),
+          },
+        ]
+      : []),
+  ];
 
   return (
     <div
-      className={`w-full border-t mt-4 pt-4 flex items-center bg-secondary text-primary dark:text-white px-4 py-3 rounded-md shadow-sm ${className}`}
+      className={`w-full border-t mt-4 pt-4 flex items-center bg-secondary text-primary dark:text-slate-400 px-4 py-3 rounded-md shadow-sm ${className}`}
     >
-      <div className='w-full flex justify-end'>
+      <div className='w-full flex justify-center font-semibold text-md'>
         <FilterSummary
-          layout='grid'
+          layout='inline'
           filters={filters}
-          className='text-black text-lg'
+          className='text-black dark:text-slate-400 text-lg'
         />
       </div>
     </div>
