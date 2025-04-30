@@ -299,7 +299,7 @@ export const useCategoryFilterStore = create<CategoryFilterState>()(
       setCategoryType: (categoryType) => set({ categoryType }), // Tambahkan setter untuk categoryType
     }),
     {
-      name: 'category-filter-store', // Nama kunci di localStorage
+      name: 'category-store', // Nama kunci di localStorage
       storage: createJSONStorage(() => localStorage), // Gunakan localStorage
     }
   )
@@ -372,7 +372,7 @@ export const useMonthYearPeriodStore = create<MonthYearPeriodState>()(
         }),
     }),
     {
-      name: 'monthYearFilterStore',
+      name: 'month-year-period-store', // Nama kunci di localStorage
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
         startPeriod: toISOString(state.startPeriod),
@@ -409,7 +409,7 @@ export const useSalesInvoiceHdFilterStore = create<SalesInvoiceHdState>()(
       setSalesPersonName: (salesPersonName) => set({ salesPersonName }),
     }),
     {
-      name: 'salesInvoiceHdFilterStore', // Nama kunci di localStorage
+      name: 'invoice-header-filter-store', // Nama kunci di localStorage
       storage: createJSONStorage(() => localStorage), // Gunakan localStorage
       partialize: (state) => ({
         // Hanya simpan properti yang relevan

@@ -48,7 +48,7 @@ export function DataTableFacetedFilter<TData, TValue>({
           disabled={isLoading || disabled} // ✅ gabungkan dengan props.disabled
           variant='outline'
           size='sm'
-          className='h-10 border-dashed text-sm text-primary w-full'
+          className='h-10 text-sm bg-secondary text-slate w-full dark:text-slate-400 dark:bg-secondary'
         >
           {isLoading && <Loader2 className='mr-2 h-4 w-4 animate-spin' />}
           <FilterIcon className='mr-2 h-4 w-4 text-sm' />
@@ -56,7 +56,10 @@ export function DataTableFacetedFilter<TData, TValue>({
           {selectedValues.size > 0 && (
             <>
               <Separator orientation='vertical' className='mx-2 h-4' />
-              <Badge variant='outline' className='rounded-sm px-1 font-normal'>
+              <Badge
+                variant='outline'
+                className='rounded-sm px-1 font-normal text-slate dark:text-slate-400'
+              >
                 {selectedValues.size}
               </Badge>
             </>
@@ -107,20 +110,20 @@ export function DataTableFacetedFilter<TData, TValue>({
                       className={cn(
                         'mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary',
                         isSelected
-                          ? 'bg-primary text-primary-foreground'
+                          ? 'bg-primary text-slate-700 dark:text-slate-400'
                           : 'opacity-50'
                       )}
                     >
                       <CheckIcon
                         className={cn(
-                          'h-4 w-4 text-slate-400',
+                          'h-4 w-4 text-slate-400 bg-primary dark:bg-secondary ',
                           isSelected ? '' : 'invisible'
                         )}
                       />
                     </div>
                     <span>{option.label}</span>
                     {option.count !== undefined && (
-                      <span className='ml-auto text-xs'>
+                      <span className='ml-auto text-xs text-slate-700 dark:text-slate-400'>
                         {option.count.toLocaleString('id-ID')}{' '}
                       </span>
                     )}

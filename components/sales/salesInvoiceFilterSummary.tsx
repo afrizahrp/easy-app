@@ -97,7 +97,7 @@ export default function SalesInvoiceFilterSummary({
         <FilterSummary
           layout='inline'
           filters={filters}
-          className='text-black dark:text-slate-400 text-lg'
+          className='text-slate-700 dark:text-slate-400 text-lg'
         />
       </div>
     </div>

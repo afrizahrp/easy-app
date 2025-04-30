@@ -95,12 +95,12 @@ export function PeriodFilter({ onPeriodChange }: PeriodFilterProps) {
           dateFormat='MMM yyyy'
           placeholderText={format(endOfMonth(new Date()), 'MMM yyyy')}
           minDate={startPeriod ? startOfMonth(startPeriod) : undefined}
-          className='w-[120px] h-10 px-3 border rounded-md'
           shouldCloseOnSelect={false}
           showYearDropdown
           yearDropdownItemNumber={15}
           scrollableYearDropdown
           maxDate={endOfMonth(new Date())}
+          className='w-[120px] h-10 px-3 border rounded-md bg-white text-gray-900 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-600'
         />
       </div>
     </div>

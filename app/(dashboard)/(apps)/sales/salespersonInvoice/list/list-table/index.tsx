@@ -31,7 +31,7 @@ const columnLabels = {
 
 const searchOptionItem = {
   customerName: 'Customer',
-  po_id: 'Po No',
+  po_id: 'Po Id',
   invoice_id: 'Invoice No',
 };
 

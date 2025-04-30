@@ -27,7 +27,7 @@ export const columns: ColumnDef<SalesPersonInvoiceListColumns>[] = [
   {
     accessorKey: 'poType',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='PoType' />
+      <DataTableColumnHeader column={column} title='Po Type' />
     ),
     cell: ({ row }) => (
       <div className='flex space-x-1'>
@@ -65,7 +65,7 @@ export const columns: ColumnDef<SalesPersonInvoiceListColumns>[] = [
     cell: ({ row }) => (
       <Link
         href={`/sls/invoice-dt/${encodeURIComponent(row.getValue('invoice_id'))}`}
-        className='text-primary-600 dark:text-primary-400'
+        className='text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-300 font-semibold'
       >
         {row.getValue('invoice_id')}
       </Link>

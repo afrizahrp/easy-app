@@ -152,7 +152,7 @@ export function SalesPersonInvoiceFilterSidebar<TData>({
       )}
       <PeriodFilter />
 
-      <div className='w-full py-3'>
+      <div className='w-full py-3 dark:text-slate-400'>
         <DataTableFacetedFilter
           column={table?.getColumn('salesPersonName')}
           title='Sales Person'
@@ -192,33 +192,12 @@ export function SalesPersonInvoiceFilterSidebar<TData>({
           />
         )}
       </div>
-      {/* <div className='w-full py-3'>
-        {table?.getColumn('poType') && (
-          <DataTableFacetedFilter
-            column={table.getColumn('poType')}
-            title='PO Type'
-            options={poTypeOptionList}
-            isLoading={isPoTypeLoading}
-            disabled={salesPersonName.length > 1}
-            selectedValues={new Set(poType)}
-            onSelect={(value) => {
-              const updatedValues = new Set(poType);
-              value
-                ? updatedValues.has(value)
-                  ? updatedValues.delete(value)
-                  : updatedValues.add(value)
-                : updatedValues.clear();
-              setPoType(Array.from(updatedValues));
-            }}
-          />
-        )}
-      </div> */}
 
       {hasActiveFilters && (
         <Button
           variant='outline'
           onClick={handleReset}
-          className='h-10 px-2 w-full mb-5'
+          className='h-10 px-2 w-full mb-5 bg-secondary text-slate hover:bg-secondary-dark dark:bg-secondary dark:text-slate-400 dark:hover:bg-secondary dark:hover:text-slate-400'
         >
           <Cross2Icon className='ml-2 h-4 w-4' />
           Reset Filter

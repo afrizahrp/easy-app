@@ -50,7 +50,7 @@ export function FilterSidebar<TData>({
           <SheetFooter className='pb-12'>
             <SheetClose asChild>
               <Button
-                className='w-full'
+                className='w-full bg-primary text-primary-foreground hover:bg-primary-foreground hover:text-primary dark:bg-secondary dark:text-slate-400 dark:hover:bg-secondary dark:hover:text-slate-400'
                 type='button'
                 color='primary'
                 // variant='outline'
