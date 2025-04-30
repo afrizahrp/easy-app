@@ -1,12 +1,11 @@
 // analytics/sales/page.tsx
 'use client';
-import { useState } from 'react';
 import Link from 'next/link';
-import SalesPersonPerformaAnalytics from './SalesPersonPerformaAnalytics';
-import SalesInvoiceOverview from './salesinvoice-chart/components/salesInvoiceOverview';
 import AnalyticsNav from '@/components/AnalyticsNav';
+import SalesInvoiceAnalytics from './salesinvoice-chart/page';
+import SalesPersonPerformaAnalytics from './salespersonperforma-chart/page';
 
-export default function SalesPage() {
+export default function SalesAnalytics() {
   return (
     <div className='flex flex-col h-screen w-full p-4 gap-4'>
       <AnalyticsNav />
@@ -20,7 +19,7 @@ export default function SalesPage() {
         </div>
         <div className='bg-white p-4 rounded-lg shadow-sm'>
           <h2 className='text-lg font-semibold mb-2'>Sales Invoice Overview</h2>
-          <SalesInvoiceOverview isFullWidth={false} />
+          <SalesInvoiceAnalytics />
         </div>
       </div>
       <Link

@@ -5,14 +5,23 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export const isLocationMatch = (
-  targetLocation: any,
-  locationName: any
-): boolean => {
-  return (
-    locationName === targetLocation ||
-    locationName.startsWith(`${targetLocation}/`)
-  );
+// export const isLocationMatch = (
+//   targetLocation: any,
+//   locationName: any
+// ): boolean => {
+//   return (
+//     locationName === targetLocation ||
+//     locationName.startsWith(`${targetLocation}/`)
+//   );
+// };
+
+export const isLocationMatch = (href: string, locationName: string) => {
+  const normalizePath = (path: string) => path.replace(/\/$/, '');
+  return normalizePath(href) === normalizePath(locationName);
+};
+
+export const getDynamicPath = (pathname: string) => {
+  return pathname;
 };
 
 export const RGBToHex = (r: number, g: number, b: number): string => {
@@ -140,17 +149,17 @@ export function getWords(inputString: string): string {
 }
 
 // for path name
-export function getDynamicPath(pathname: any): any {
-  const prefixes = ['en', 'bn', 'ar'];
+// export function getDynamicPath(pathname: any): any {
+//   const prefixes = ['en', 'bn', 'ar'];
 
-  for (const prefix of prefixes) {
-    if (pathname.startsWith(`/${prefix}/`)) {
-      return `/${pathname.slice(prefix.length + 2)}`;
-    }
-  }
+//   for (const prefix of prefixes) {
+//     if (pathname.startsWith(`/${prefix}/`)) {
+//       return `/${pathname.slice(prefix.length + 2)}`;
+//     }
+//   }
 
-  return pathname;
-}
+//   return pathname;
+// }
 
 // translate
 

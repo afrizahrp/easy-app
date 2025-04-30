@@ -1,7 +1,7 @@
 // analytics/sales/salesinvoice-chart/page.tsx
 'use client';
 import { useState } from 'react';
-import AnalyticsNav from '@/components/analyticsNav';
+import AnalyticsNav from '@/components/AnalyticsNav';
 import SalesInvoiceOverview from '../salesinvoice-chart/components/salesInvoiceOverview';
 
 export default function SalesInvoiceAnalytics() {
