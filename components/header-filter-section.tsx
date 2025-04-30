@@ -1,3 +1,4 @@
+// components/HeaderFilterSection.tsx
 import { ReactNode } from 'react';
 
 interface HeaderFilterSectionProps {
@@ -11,7 +12,7 @@ export function HeaderFilterSection({
 }: HeaderFilterSectionProps) {
   return (
     <div
-      className={`w-full border-t mt-4 pt-4 flex items-center bg-slate-300 px-4 py-3 rounded-md shadow-sm ${className}`}
+      className={`w-full border-t mt-4 pt-4 flex items-center bg-white px-4 py-3 rounded-md shadow-sm ${className}`}
     >
       <div className='w-full flex justify-end'>{children}</div>
     </div>
