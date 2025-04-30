@@ -11,16 +11,21 @@ import {
   Legend,
   ScriptableContext,
 } from 'chart.js';
+import { hslToHex, hexToRGB } from '@/lib/utils';
+import { useThemeStore } from '@/store';
+import { useTheme } from 'next-themes';
+import { themes } from '@/config/thems';
 import gradientPlugin from 'chartjs-plugin-gradient';
 import { useToast } from '@/components/ui/use-toast';
 import useSalesByPeriodUnfiltered from '@/queryHooks/sls/analytics/useSalesPersonByPeriodUnFiltered';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
+// import ChartDataLabels from 'chartjs-plugin-datalabels';
+
 import {
   salesPersonColorMap,
   getFallbackColor,
 } from '@/utils/salesPersonColorMap';
 import { useSalesInvoiceHdFilterStore } from '@/store';
+import { months } from '@/utils/monthNameMap';
 
 ChartJS.register(
   CategoryScale,
@@ -30,6 +35,7 @@ ChartJS.register(
   Tooltip,
   Legend,
   gradientPlugin
+  // ChartDataLabels
 );
 
 interface SalesDataWithoutFilter {
@@ -56,6 +62,21 @@ interface SalesBySalesPersonUnFilteredProps {
 const SalesBySalesPersonUnFilteredChart: React.FC<
   SalesBySalesPersonUnFilteredProps
 > = ({ isFullWidth = true, onModeChange, onSalesPersonSelect }) => {
+  const { theme: config, setTheme: setConfig } = useThemeStore();
+  const { theme: mode } = useTheme();
+
+  const theme = themes.find((theme) => theme.name === config);
+
+  const hslPrimary = `hsla(${
+    theme?.cssVars[mode === 'dark' ? 'dark' : 'light'].primary
+  })`;
+  const hslSuccess = `hsla(${
+    theme?.cssVars[mode === 'dark' ? 'dark' : 'light'].success
+  })`;
+
+  const hexPrimary = hslToHex(hslPrimary);
+  const hexSuccess = hslToHex(hslSuccess);
+
   const { toast } = useToast();
   const { data, isLoading, isFetching, error } = useSalesByPeriodUnfiltered();
   const { salesPersonName, setSalesPersonName } = useSalesInvoiceHdFilterStore(
@@ -71,21 +92,6 @@ const SalesBySalesPersonUnFilteredChart: React.FC<
 
   const chartData = React.useMemo(() => {
     if (!data || !data.length) return null;
-
-    const months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
-    ];
 
     const allSalesPersons = Array.from(
       new Set(
@@ -132,6 +138,9 @@ const SalesBySalesPersonUnFilteredChart: React.FC<
         },
         borderColor: color.border,
         borderWidth: 1,
+        barThickness: 25,
+        borderRadius: 15,
+
         period: data && data.length > 0 ? data[0].period : undefined,
       };
     });
@@ -191,20 +200,9 @@ const SalesBySalesPersonUnFilteredChart: React.FC<
       }`}
     >
       <div className='flex items-center justify-between mb-2'>
-        <h2 className='text-md font-semibold'>
+        <h2 className='text-md text-muted-foreground font-semibold'>
           Top 5 Sales Performers (in Millions IDR)
         </h2>
-        {/* <div className='flex items-center space-x-2'>
-          <Label htmlFor='chart-mode-period'>
-            {isFullWidth ? 'Full Width' : 'Half Width'}
-          </Label>
-          <Switch
-            id='chart-mode-period'
-            checked={isFullWidth}
-            onCheckedChange={(checked) => onModeChange?.(checked)}
-            aria-label='Toggle full width chart'
-          />
-        </div> */}
       </div>
       {isLoading || isFetching ? (
         <div className='flex items-center justify-center h-full'>
@@ -221,26 +219,56 @@ const SalesBySalesPersonUnFilteredChart: React.FC<
             },
             scales: {
               y: {
-                beginAtZero: true,
-                max: maxValue * 1.1,
-                title: { display: true, text: 'Total Sales' },
+                grid: {
+                  drawTicks: false,
+                  color: `hsl(${theme?.cssVars[mode === 'dark' ? 'dark' : 'light'].chartGird})`,
+                },
+                // ticks: {
+                //   color: `hsl(${theme?.cssVars[mode === 'dark' ? 'dark' : 'light'].chartLabel})`,
+                // },
+
                 ticks: {
                   callback: (value) =>
                     `${(Number(value) / 1_000_000).toLocaleString('id-ID')}`,
                 },
               },
               x: {
-                title: { display: true, text: 'Month' },
-                grid: { display: false },
+                grid: {
+                  drawTicks: false,
+                  color: `hsl(${theme?.cssVars[mode === 'dark' ? 'dark' : 'light'].chartGird})`,
+                  display: false,
+                },
+                // @ts-expect-error: categoryPercentage is valid for category axis
+
+                categoryPercentage: 0.6, // default 0.8, makin kecil makin renggang
+
+                barPercentage: 0.7,
+
+                ticks: {
+                  color: `hsl(${theme?.cssVars[mode === 'dark' ? 'dark' : 'light'].chartLabel})`,
+                },
               },
             },
             plugins: {
-              legend: { position: 'top' },
+              legend: {
+                labels: {
+                  color: `hsl(${
+                    theme?.cssVars[mode === 'dark' ? 'dark' : 'light']
+                      .chartLabel
+                  })`,
+
+                  usePointStyle: true,
+                  pointStyle: 'circle',
+                },
+              },
+
               title: { display: false },
               tooltip: {
                 callbacks: {
                   label: (context) =>
-                    `${(context.raw as number).toLocaleString('id-ID')} IDR`,
+                    `${context.dataset.label}: ${(
+                      context.raw as number
+                    ).toLocaleString('id-ID')}`,
                 },
               },
             },

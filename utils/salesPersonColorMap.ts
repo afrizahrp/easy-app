@@ -12,12 +12,12 @@ export const salesPersonColorMap: Record<
   yoga: { from: '#e11d48', to: '#f472b6', border: '#e11d48' },
   sujud: { from: '#9333ea', to: '#c084fc', border: '#9333ea' },
   aji: { from: '#f59e0b', to: '#fcd34d', border: '#f59e0b' },
-  risa: { from: '#0ea5e9', to: '#7dd3fc', border: '#0ea5e9' },
+  // risa: { from: '#0ea5e9', to: '#7dd3fc', border: '#0ea5e9' },
   saefudin: { from: '#4b5563', to: '#9ca3af', border: '#4b5563' },
   'amir h.': { from: '#7c3aed', to: '#a78bfa', border: '#7c3aed' },
   indro: { from: '#dc2626', to: '#f87171', border: '#dc2626' },
   angga: { from: '#059669', to: '#34d399', border: '#059669' },
-  orit: { from: '#d97706', to: '#facc15', border: '#d97706' },
+  // orit: { from: '#d97706', to: '#facc15', border: '#d97706' },
   rikhi: { from: '#6d28d9', to: '#a855f7', border: '#6d28d9' },
   dani: { from: '#1d4ed8', to: '#60a5fa', border: '#1d4ed8' },
   handoyo: { from: '#be123c', to: '#fb7185', border: '#be123c' },
@@ -35,7 +35,12 @@ export const salesPersonColorMap: Record<
   arman: { from: '#9333ea', to: '#c084fc', border: '#9333ea' },
   'udin mio': { from: '#6b7280', to: '#9ca3af', border: '#6b7280' },
   bowo: { from: '#4ade80', to: '#34d399', border: '#4ade80' },
-  ariq: { from: '#6366f1', to: '#a5b4fc', border: '#6366f1' },
+  // ariq: { from: '#6366f1', to: '#a5b4fc', border: '#6366f1' },
+
+  orit: { from: '#fb923c', to: '#fde68a', border: '#fb923c' }, // orange-400 to amber-200
+  ariq: { from: '#a21caf', to: '#f472b6', border: '#a21caf' }, // violet-800 to pink-400
+  risa: { from: '#0ea5e9', to: '#7dd3fc', border: '#0ea5e9' }, // cyan-600 to cyan-300 (tetap biru muda)
+  // ...existing code...
 
   'direct/defvi': { from: '#d97706', to: '#facc15', border: '#d97706' },
   'dani pakai yg satunya': {

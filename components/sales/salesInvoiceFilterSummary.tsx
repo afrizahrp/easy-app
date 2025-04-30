@@ -1,6 +1,5 @@
 // components/Sls_InvoiceFilterSummary.tsx
 'use client';
-import { useState } from 'react';
 import { useMonthYearPeriodStore, useSalesInvoiceHdFilterStore } from '@/store';
 import { FilterSummary } from '@/components/filterSummary';
 import { format } from 'date-fns';
@@ -24,7 +23,6 @@ export default function SalesInvoiceFilterSummary({
   } = useSalesInvoiceHdFilterStore();
 
   // State untuk mengontrol visibility salesDashboardPage (jika diperlukan)
-  const [showSalesDashboard, setShowSalesDashboard] = useState(true);
 
   // Fungsi untuk clear filter
   const handleClear = (filterName: string) => {
@@ -89,7 +87,7 @@ export default function SalesInvoiceFilterSummary({
 
   return (
     <div
-      className={`w-full border-t mt-4 pt-4 flex items-center bg-[#7ed957] px-4 py-3 rounded-md shadow-sm ${className}`}
+      className={`w-full border-t mt-4 pt-4 flex items-center bg-secondary text-primary dark:text-white px-4 py-3 rounded-md shadow-sm ${className}`}
     >
       <div className='w-full flex justify-end'>
         <FilterSummary

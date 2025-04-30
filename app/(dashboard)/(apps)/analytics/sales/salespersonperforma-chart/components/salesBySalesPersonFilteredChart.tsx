@@ -12,6 +12,7 @@ import {
   ScriptableContext,
 } from 'chart.js';
 
+import { Search } from 'lucide-react';
 import gradientPlugin from 'chartjs-plugin-gradient';
 import { useToast } from '@/components/ui/use-toast';
 import useSalesByPeriodFiltered from '@/queryHooks/sls/analytics/useSalesPersonByPeriodFiltered';
@@ -166,46 +167,46 @@ const SalesBySalesPersonFilteredChart: React.FC<
       ref={containerRef}
       className={`bg-white p-4 rounded-lg shadow-sm h-96 w-full`}
     >
-      <div className='flex flex-col mb-2'>
-        <div className='flex items-center justify-between'>
-          <h2 className='text-md font-semibold'>
-            {validSalesPersonNames.length === 1
-              ? `Sales Performance by ${validSalesPersonNames[0]} (in Millions IDR)`
-              : validSalesPersonNames.length === 2
-                ? `Sales Performance by ${validSalesPersonNames.join(' and ')} (in Millions IDR)`
-                : validSalesPersonNames.length > 2
-                  ? `Sales Performance by ${validSalesPersonNames
-                      .slice(0, validSalesPersonNames.length - 1)
-                      .join(
-                        ', '
-                      )} and ${validSalesPersonNames[validSalesPersonNames.length - 1]} (in Millions IDR)`
-                  : 'Sales Performance (in Millions IDR)'}
-          </h2>
-
-          {/* Switch + Label + Back Button */}
-          <div className='flex flex-col items-end space-y-2'>
-            <div className='flex items-center space-x-2'>
-              <Label htmlFor='chart-mode-period'>
-                {isFullWidth ? 'Full Width' : 'Half Width'}
-              </Label>
-              <Switch
-                id='chart-mode-period'
-                checked={isFullWidth}
-                onCheckedChange={(checked) => onModeChange?.(checked)}
-                aria-label='Toggle full width chart'
-              />
-            </div>
-            <button
-              onClick={() => {
-                setSalesPersonName([]);
-                onSalesPersonSelect?.(null);
-                onModeChange?.(true);
-              }}
-              className='px-4 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 text-xs transition'
+      <div className='flex flex-row items-center justify-between mb-2'>
+        <h2 className='text-md font-semibold text-muted-foreground'>
+          {validSalesPersonNames.length === 1
+            ? `Sales Performance by ${validSalesPersonNames[0]} (in Millions IDR)`
+            : validSalesPersonNames.length === 2
+              ? `Sales Performance by ${validSalesPersonNames.join(' and ')} (in Millions IDR)`
+              : validSalesPersonNames.length > 2
+                ? `Sales Performance by ${validSalesPersonNames
+                    .slice(0, validSalesPersonNames.length - 1)
+                    .join(
+                      ', '
+                    )} and ${validSalesPersonNames[validSalesPersonNames.length - 1]} (in Millions IDR)`
+                : 'Sales Performance (in Millions IDR)'}
+        </h2>
+        {/* Switch + Label + Back Button */}
+        <div className='flex flex-col items-end space-y-2'>
+          <div className='flex items-center space-x-2'>
+            <Label
+              htmlFor='chart-mode-period'
+              className='text-xs text-muted-foreground'
             >
-              ← Back
-            </button>
+              {isFullWidth ? 'Full Width' : 'Half Width'}
+            </Label>
+            <Switch
+              id='chart-mode-period'
+              checked={isFullWidth}
+              onCheckedChange={(checked) => onModeChange?.(checked)}
+              aria-label='Toggle full width chart'
+            />
           </div>
+          <button
+            onClick={() => {
+              setSalesPersonName([]);
+              onSalesPersonSelect?.(null);
+              onModeChange?.(true);
+            }}
+            className='px-4 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 text-xs transition'
+          >
+            ← Back
+          </button>
         </div>
       </div>
 

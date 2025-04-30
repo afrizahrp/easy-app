@@ -14,6 +14,7 @@ import {
 import gradientPlugin from 'chartjs-plugin-gradient';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/components/ui/use-toast';
 import useTopProductsBySalesPerson from '@/queryHooks/sls/analytics/useTopProductBySalesPerson';
@@ -54,17 +55,7 @@ const TopProductSoldBySalesPerson: React.FC<
   const [chartMode, setChartMode] = useState<'qty' | 'total_amount'>('qty');
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Gunakan month langsung sebagai monthPeriod
-  const monthPeriod = month;
-  const yearPeriod = year;
-
-  console.log('TopProductSoldBySalesPerson props:', {
-    salesPersonName,
-    year,
-    month,
-    monthPeriod,
-  });
-
+  const [yearPeriod, monthPeriod] = [year, month];
   const {
     data: productData,
     isLoading,
@@ -84,7 +75,7 @@ const TopProductSoldBySalesPerson: React.FC<
         color: 'destructive',
       });
     }
-  }, [error, toast]);
+  }, [error?.message]);
 
   useEffect(() => {
     if (containerRef.current) {
@@ -193,6 +184,7 @@ const TopProductSoldBySalesPerson: React.FC<
         if (!isNaN(num)) {
           return num.toLocaleString('id-ID');
         }
+
         return value;
       },
     },
@@ -222,14 +214,17 @@ const TopProductSoldBySalesPerson: React.FC<
       className='bg-white p-4 rounded-lg shadow-md h-full w-full'
     >
       <div className='flex items-center justify-between mb-4'>
-        <h3 className='text-md font-semibold'>
-          Top 3 Products Sold by
-          <span className='block text-sm font-normal mt-1'>
-            {salesPersonName} in {month} {year}
+        <h3 className='text-sm text-muted-foreground'>
+          Top 3 Products Sold
+          <span className='block text-sm text-muted-foreground font-normal mt-1'>
+            by {salesPersonName} in {month} {year}
           </span>
         </h3>
-        <div className='flex items-center gap-2'>
-          <Label htmlFor='chart-mode-product'>
+        <div className='flex items-center gap-2 '>
+          <Label
+            htmlFor='chart-mode-product'
+            className='text-xs text-muted-foreground'
+          >
             {chartMode === 'qty' ? ' By Qty (in Unit)' : 'By Amount (in IDR)'}
           </Label>
           <Switch
@@ -241,14 +236,14 @@ const TopProductSoldBySalesPerson: React.FC<
             aria-label='Toggle chart mode'
           />
 
-          <button
+          {/* <button
             type='button'
             onClick={onClose}
             className='absolute top-4 right-4 p-1 rounded hover:bg-red-50'
             aria-label='Close'
           >
             <X className='w-5 h-5 text-red-500' />
-          </button>
+          </button> */}
         </div>
       </div>
 
@@ -267,8 +262,22 @@ const TopProductSoldBySalesPerson: React.FC<
           />
         </div>
       ) : (
-        <div className='flex items-center justify-center h-64 text-gray-400'>
-          <p>No data available</p>
+        <div className='flex flex-col items-center justify-center h-full text-gray-400'>
+          <svg
+            xmlns='http://www.w3.org/2000/svg'
+            className='w-24 h-24 mb-4 animate-bounce'
+            fill='none'
+            viewBox='0 0 24 24'
+            stroke='currentColor'
+            strokeWidth={1.5}
+          >
+            <path
+              strokeLinecap='round'
+              strokeLinejoin='round'
+              d='M3 3v18h18V3H3zm5 14h8m-8-4h8m-8-4h8'
+            />
+          </svg>
+          <p className='text-sm font-medium'>No data available</p>
         </div>
       )}
     </div>
