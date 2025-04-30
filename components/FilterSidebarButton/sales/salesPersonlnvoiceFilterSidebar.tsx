@@ -8,7 +8,6 @@ import 'react-datepicker/dist/react-datepicker.css';
 import { zonedTimeToUtc } from 'date-fns-tz';
 import useSalesInvoiceHdPaidStatusOptions from '@/queryHooks/sls/useSalesInvoiceHdPaidStatusOptions';
 import useSalesInvoiceHdSalesPersonOptions from '@/queryHooks/sls/useSalesInvoiceHdSalesPersonOptions';
-import useSalesInvoiceHdPoTypeOptions from '@/queryHooks/sls/useSalesInvoiceHdPoTypeOptions';
 import { PeriodFilter } from '@/components/period-filter';
 import { ResetSalesInvoiceFilterStore } from '@/utils/reset-filter-state/sls/resetSalesInvoiceFilterStore';
 import { Button } from '@/components/ui/button';
@@ -16,6 +15,12 @@ import { DataTableFacetedFilter } from '@/components/ui/data-table-faceted-filte
 import { useMonthYearPeriodStore, useSalesInvoiceHdFilterStore } from '@/store';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/components/ui/use-toast';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 interface SalesPersonInvoiceFilterSidebarProps<TData> {
   table?: Table<TData>;
@@ -73,9 +78,6 @@ export function SalesPersonInvoiceFilterSidebar<TData>({
       table
         .getColumn('salesPersonName')
         ?.setFilterValue(salesPersonName.length ? salesPersonName : undefined);
-      table
-        .getColumn('poType')
-        ?.setFilterValue(poType.length ? poType : undefined);
 
       let filterValue: { start: Date; end: Date } | undefined;
       if (normalizedStart && startPeriod) {
@@ -120,8 +122,6 @@ export function SalesPersonInvoiceFilterSidebar<TData>({
     useSalesInvoiceHdPaidStatusOptions();
   const { options: salesPersonOptionList, isLoading: isSalesPersonLoading } =
     useSalesInvoiceHdSalesPersonOptions();
-  const { options: poTypeOptionList, isLoading: isPoTypeLoading } =
-    useSalesInvoiceHdPoTypeOptions();
 
   const handleReset = () => {
     ResetSalesInvoiceFilterStore({
@@ -172,25 +172,38 @@ export function SalesPersonInvoiceFilterSidebar<TData>({
       </div>
 
       <div className='w-full py-3'>
-        {table?.getColumn('paidStatus') && (
-          <DataTableFacetedFilter
-            column={table.getColumn('paidStatus')}
-            title='Paid Status'
-            options={statusOptionList}
-            isLoading={isStatusLoading}
-            disabled={salesPersonName.length > 1}
-            selectedValues={new Set(paidStatus)}
-            onSelect={(value) => {
-              const updatedValues = new Set(paidStatus);
-              value
-                ? updatedValues.has(value)
-                  ? updatedValues.delete(value)
-                  : updatedValues.add(value)
-                : updatedValues.clear();
-              setPaidStatus(Array.from(updatedValues));
-            }}
-          />
-        )}
+        {/* {table?.getColumn('paidStatus') && ( */}
+
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className='flex items-center gap-2'>
+                <span>Paid Status</span>
+              </div>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Applies to invoice list only</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+        <DataTableFacetedFilter
+          column={table?.getColumn('paidStatus')}
+          title='Paid Status'
+          options={statusOptionList}
+          isLoading={isStatusLoading}
+          disabled={salesPersonName.length > 1}
+          selectedValues={new Set(paidStatus)}
+          onSelect={(value) => {
+            const updatedValues = new Set(paidStatus);
+            value
+              ? updatedValues.has(value)
+                ? updatedValues.delete(value)
+                : updatedValues.add(value)
+              : updatedValues.clear();
+            setPaidStatus(Array.from(updatedValues));
+          }}
+        />
+        {/* )} */}
       </div>
 
       {hasActiveFilters && (

@@ -1,6 +1,7 @@
 'use client';
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
+
 import { InvoiceListTable } from './list-table';
 import LayoutLoader from '@/components/layout-loader';
 import { routes } from '@/config/routes';
@@ -11,7 +12,7 @@ import { usePageStore } from '@/store';
 import { FooterSummarySection } from '@/components/footer-summary-section';
 import { FooterSummaryItem } from '@/components/footer-summary-item';
 
-const SalesPersonInvoiceList = () => {
+export default function SalesPersonInvoiceList() {
   const { currentPage, sorting, limit, setCurrentPage, setSorting, setLimit } =
     usePageStore();
   const sort = sorting?.[0];
@@ -89,6 +90,6 @@ const SalesPersonInvoiceList = () => {
       </Card> */}
     </>
   );
-};
+}
 
-export default SalesPersonInvoiceList;
+// export default SalesPersonInvoiceList;

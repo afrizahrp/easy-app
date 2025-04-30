@@ -31,6 +31,9 @@ const SalesPersonPerformaAnalytics = () => {
   const { salesPersonName } = useSalesInvoiceHdFilterStore((state) => ({
     salesPersonName: state.salesPersonName,
   }));
+  const { paidStatus } = useSalesInvoiceHdFilterStore((state) => ({
+    paidStatus: state.paidStatus,
+  }));
 
   const chartRef = useRef<HTMLDivElement>(null);
   const topProductRef = useRef<HTMLDivElement>(null);
