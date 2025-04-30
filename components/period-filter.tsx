@@ -1,16 +1,17 @@
-// components/PeriodFilter.tsx
 'use client';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { startOfMonth, endOfMonth, format } from 'date-fns';
 import { set as setDate } from 'date-fns';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { useMonthYearPeriodStore } from '@/store';
 import { useToast } from '@/components/ui/use-toast';
-// import { zonedTimeToUtc } from 'date-fns-tz';
 
 interface PeriodFilterProps {
-  onPeriodChange?: () => void; // Callback opsional saat periode berubah
+  onPeriodChange?: (period: {
+    startPeriod: Date | null;
+    endPeriod: Date | null;
+  }) => void;
 }
 
 export function PeriodFilter({ onPeriodChange }: PeriodFilterProps) {
@@ -18,8 +19,18 @@ export function PeriodFilter({ onPeriodChange }: PeriodFilterProps) {
     useMonthYearPeriodStore();
   const { toast } = useToast();
 
+  const prevPeriodRef = useRef({ startPeriod, endPeriod });
+
   useEffect(() => {
-    onPeriodChange?.();
+    const prev = prevPeriodRef.current;
+    if (startPeriod !== prev.startPeriod || endPeriod !== prev.endPeriod) {
+      console.log('PeriodFilter useEffect triggered with:', {
+        startPeriod,
+        endPeriod,
+      });
+      onPeriodChange?.({ startPeriod, endPeriod });
+      prevPeriodRef.current = { startPeriod, endPeriod };
+    }
   }, [startPeriod, endPeriod, onPeriodChange]);
 
   return (
@@ -29,6 +40,7 @@ export function PeriodFilter({ onPeriodChange }: PeriodFilterProps) {
         <DatePicker
           selected={startPeriod}
           onChange={(date) => {
+            console.log('Start Period changed to:', date);
             const newStart = date
               ? setDate(startOfMonth(date), {
                   hours: 0,
@@ -59,14 +71,15 @@ export function PeriodFilter({ onPeriodChange }: PeriodFilterProps) {
           showYearDropdown
           yearDropdownItemNumber={15}
           scrollableYearDropdown
-          maxDate={endOfMonth(new Date())} // <-- Batasi tahun maksimal
+          maxDate={endOfMonth(new Date())}
         />
       </div>
       <div className='min-w-[120px]'>
         <label className='text-sm font-medium mb-1 block'>End Period</label>
         <DatePicker
           selected={endPeriod}
-          onChange={(date) =>
+          onChange={(date) => {
+            console.log('End Period changed to:', date);
             setEndPeriod(
               date
                 ? setDate(endOfMonth(date), {
@@ -76,8 +89,8 @@ export function PeriodFilter({ onPeriodChange }: PeriodFilterProps) {
                     milliseconds: 999,
                   })
                 : null
-            )
-          }
+            );
+          }}
           showMonthYearPicker
           dateFormat='MMM yyyy'
           placeholderText={format(endOfMonth(new Date()), 'MMM yyyy')}
@@ -87,7 +100,7 @@ export function PeriodFilter({ onPeriodChange }: PeriodFilterProps) {
           showYearDropdown
           yearDropdownItemNumber={15}
           scrollableYearDropdown
-          maxDate={endOfMonth(new Date())} // <-- Batasi tahun maksimal
+          maxDate={endOfMonth(new Date())}
         />
       </div>
     </div>

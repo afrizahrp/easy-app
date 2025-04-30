@@ -78,12 +78,12 @@ const SalesPersonPerformaAnalytics = () => {
     <div className='flex flex-col h-screen w-full p-4 gap-4'>
       {/* Section: Header Summary & Filter */}
       <section className='rounded-lg bg-white shadow-sm border border-muted-200 p-4 flex flex-col gap-4'>
-        <SalesInvoiceFilterSummary />
         <HeaderPeriodFilterSection
           onPeriodChange={() => {
             // Optionally refetch data
           }}
         />
+        <SalesInvoiceFilterSummary />
       </section>
 
       {/* Section: Chart + Top Product */}
