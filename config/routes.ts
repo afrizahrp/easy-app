@@ -26,6 +26,7 @@ export const routes = {
   sales: {
     invoiceHd: '/sls/invoice-hd',
     invoiceList: '/sales/invoice/list',
+    salesPersonInvoiceList: '/sales/salespersoninvoice/list',
     invoiceDetails: (id: string) => `/sales/invoice/${id}`,
     invoiceEdit: (id: string) => `/sales/invoice/${id}/edit`,
     invoiceCreate: '/sales/invoice/create',

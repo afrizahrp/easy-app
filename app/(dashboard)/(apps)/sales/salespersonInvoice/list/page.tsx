@@ -57,7 +57,7 @@ const SalesPersonInvoiceList = () => {
       <PageHeader
         title='Sales Person Invoice List'
         breadcrumb={[
-          { name: 'Dashboard', href: routes.inventory.dashboard },
+          { name: 'Analytics', href: routes.inventory.dashboard },
           { name: 'List' },
         ]}
       />
