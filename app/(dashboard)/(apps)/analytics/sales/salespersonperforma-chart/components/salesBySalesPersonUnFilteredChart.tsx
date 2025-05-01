@@ -78,9 +78,9 @@ const SalesBySalesPersonUnFilteredChart: React.FC<
     })
   );
 
-  React.useEffect(() => {
-    console.log('Data dari SalesBySalesPersonUnFilteredChart:', data);
-  }, [data]);
+  // React.useEffect(() => {
+  //   console.log('Data dari SalesBySalesPersonUnFilteredChart:', data);
+  // }, [data]);
 
   const chartData = React.useMemo(() => {
     if (!data || !data.length) return null;
@@ -166,11 +166,11 @@ const SalesBySalesPersonUnFilteredChart: React.FC<
       const month = chartData?.labels[monthIndex] as string;
 
       if (salesPersonName) {
-        console.log('UnFilteredChart Clicked:', {
-          salesPersonName,
-          year,
-          month,
-        });
+        // console.log('UnFilteredChart Clicked:', {
+        //   salesPersonName,
+        //   year,
+        //   month,
+        // });
         setSalesPersonName([salesPersonName]);
         onSalesPersonSelect?.({ salesPersonName, year, month });
       }

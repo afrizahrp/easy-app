@@ -30,7 +30,7 @@ const SalesPersonPerformaOverview: React.FC<
   const [isFullScreen, setIsFullScreen] = useState(false);
 
   const handleSalesPersonSelect = (selection: SalesPersonSelection | null) => {
-    console.log('handleSalesPersonSelect in PerformaChart:', selection);
+    // console.log('handleSalesPersonSelect in PerformaChart:', selection);
     if (selection) {
       if (!salesPersonName.includes(selection.salesPersonName)) {
         setSalesPersonName([selection.salesPersonName]);

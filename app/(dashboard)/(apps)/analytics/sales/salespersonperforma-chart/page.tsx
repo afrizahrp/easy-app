@@ -1,3 +1,4 @@
+// app/analytics/sales/salespersonperforma-chart/page.tsx
 'use client';
 import { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
@@ -11,9 +12,8 @@ import TopProductSoldBySalesPerson from '../salespersonperforma-chart/components
 import SalesPersonInvoiceList from '../../../sales/salespersonInvoice/list/page';
 import { SalesPersonInvoiceFilterSidebar } from '@/components/FilterSidebarButton/sales/salesPersonlnvoiceFilterSidebar';
 import Draggable from 'react-draggable';
-
 import { Table } from '@tanstack/react-table';
-import PageHeaderWrapper from '@/components/page-header-wrapper';
+import { PageHeaderWrapper } from '@/components/page-header-wrapper';
 
 interface SalesPersonSelection {
   salesPersonName: string;
@@ -23,11 +23,12 @@ interface SalesPersonSelection {
 
 interface SalesPersonPerformaAnalyticsProps {
   showList?: boolean;
+  showHeader?: boolean; // Prop baru
 }
 
 const SalesPersonPerformaAnalytics: React.FC<
   SalesPersonPerformaAnalyticsProps
-> = ({ showList = true }) => {
+> = ({ showList = true, showHeader = true }) => {
   const [fullChart, setFullChart] = useState<'period' | null>('period');
   const [selectedSalesPerson, setSelectedSalesPerson] = useState<string | null>(
     null
@@ -101,12 +102,10 @@ const SalesPersonPerformaAnalytics: React.FC<
     }
   };
 
-  // Dummy table untuk sidebar (kosong, karena chart ga butuh)
   const handleDrag = (e: any, data: { x: number; y: number }) => {
     setButtonPosition({ x: data.x, y: data.y });
   };
 
-  // Dummy table yang aman
   const dummyTable = {
     getState: () => ({
       columnFilters: [],
@@ -118,12 +117,9 @@ const SalesPersonPerformaAnalytics: React.FC<
     getColumn: () => undefined,
     getFilteredRowModel: () => ({ rows: [] }),
     resetColumnFilters: () => {
-      // Kosong aja, karena ini dummy
       console.log('Reset column filters called on dummy table');
     },
-    setColumnFilters: () => {
-      // Kosong, buat jaga-jaga
-    },
+    setColumnFilters: () => {},
   } as unknown as Table<any>;
 
   return (
@@ -160,13 +156,14 @@ const SalesPersonPerformaAnalytics: React.FC<
       </Sheet>
 
       <PageHeaderWrapper
-        show={true}
-        title='Sales Person Performance'
+        show={showHeader} // Gunakan prop showHeader
+        title='Sales Person Performance Analytics'
+        hideBreadcrumb={false}
         breadcrumb={[
           { name: 'Analytics', href: '/analytics/sales' },
           {
-            name: 'Sales Person Performance Analytics',
-            href: '#',
+            name: 'Sales Person Performance',
+            href: '/analytics/sales/salespersonperforma-chart',
           },
         ]}
       />
@@ -246,7 +243,18 @@ const SalesPersonPerformaAnalytics: React.FC<
             transition={{ type: 'spring', stiffness: 250, damping: 25 }}
             className='w-full flex-1'
           >
-            <PageHeaderWrapper title='Invoice List' />
+            <PageHeaderWrapper
+              show={showHeader} // Gunakan prop showHeader
+              title='Sales Invoice List'
+              hideBreadcrumb={false}
+              breadcrumb={[
+                { name: 'Analytics', href: '/analytics/sales' },
+                {
+                  name: 'Sales Invoice List',
+                  href: '/sales/salespersonInvoice/list',
+                },
+              ]}
+            />
             <SalesPersonInvoiceList />
           </motion.div>
         )}

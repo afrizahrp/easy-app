@@ -1,8 +1,16 @@
-// analytics/sales/salesinvoice-chart/components/SalesByPoType.tsx
 'use client';
 import React from 'react';
-import { Pie } from 'react-chartjs-2';
-import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
+import { Line } from 'react-chartjs-2';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+} from 'chart.js';
 import { hslToHex } from '@/lib/utils';
 import { useThemeStore } from '@/store';
 import { useTheme } from 'next-themes';
@@ -12,8 +20,18 @@ import { useToast } from '@/components/ui/use-toast';
 import useSalesByPeriodAndPoType from '@/queryHooks/sls/dashboard/useSalesByPeriodAndPoType';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import { months } from '@/utils/monthNameMap';
 
-ChartJS.register(ArcElement, Tooltip, Legend, gradientPlugin);
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  gradientPlugin
+);
 
 interface SalesInvoiceByPoTypeChartProps {
   isFullWidth?: boolean;
@@ -31,37 +49,47 @@ const SalesInvoiceByPoTypeChart: React.FC<SalesInvoiceByPoTypeChartProps> = ({
     theme?.cssVars[mode === 'dark' ? 'dark' : 'light'].background
   })`;
   const hexBackground = hslToHex(hslBackground);
+
   const { toast } = useToast();
   const { data, isLoading, isFetching, error } = useSalesByPeriodAndPoType();
 
   const chartData = React.useMemo(() => {
-    if (!data || data.length === 0) return [];
+    if (!data || data.length === 0) return null;
 
-    return data.map((yearData) => {
-      const poTypes = Object.keys(yearData.poTypes);
-      const colors: Record<string, string> = {
-        eCatalog: 'rgba(75, 192, 192, 0.6)',
-        Regular: 'rgba(255, 99, 132, 0.6)',
-        Unknown: 'rgba(201, 203, 207, 0.6)',
-      };
-      return {
-        labels: poTypes,
-        datasets: [
-          {
-            label: `Sales ${yearData.period}`,
-            data: poTypes.map((poType) => yearData.poTypes[poType]),
-            backgroundColor: poTypes.map(
-              (poType) => colors[poType] || colors.Unknown
-            ),
-            borderColor: poTypes.map((poType) =>
-              (colors[poType] || colors.Unknown).replace('0.6', '1')
-            ),
-            borderWidth: 1,
-          },
-        ],
-      };
-    });
+    return {
+      labels: months,
+      datasets: data.map(
+        (poTypeData: {
+          poType: string;
+          period: string;
+          months: Record<string, number>;
+        }) => ({
+          label: poTypeData.poType,
+          // label: `${poTypeData.poType} (${poTypeData.period})`,
+
+          data: months.map((month) => poTypeData.months[month] || 0),
+          borderColor:
+            poTypeData.poType === 'eCatalog'
+              ? 'rgba(75, 192, 192, 1)'
+              : poTypeData.poType === 'Regular'
+                ? 'rgba(255, 99, 132, 1)'
+                : 'rgba(201, 203, 207, 1)',
+          backgroundColor:
+            poTypeData.poType === 'eCatalog'
+              ? 'rgba(75, 192, 192, 0.2)'
+              : poTypeData.poType === 'Regular'
+                ? 'rgba(255, 99, 132, 0.2)'
+                : 'rgba(201, 203, 207, 0.2)',
+          tension: 0.4, // Smooth curve
+        })
+      ),
+    };
   }, [data]);
+
+  const maxValue = React.useMemo(() => {
+    if (!chartData) return 0;
+    return Math.max(...chartData.datasets.flatMap((ds) => ds.data));
+  }, [chartData]);
 
   React.useEffect(() => {
     if (error) {
@@ -81,7 +109,7 @@ const SalesInvoiceByPoTypeChart: React.FC<SalesInvoiceByPoTypeChartProps> = ({
     >
       <div className='relative flex items-center justify-center mb-2'>
         <h2 className='text-md text-muted-foreground font-semibold mx-auto'>
-          Sales Invoice by PO Type (in Millions IDR)
+          Monthly Sales Invoice by PO Type (in Millions IDR)
         </h2>
         <div className='absolute right-0 top-0 flex items-center space-x-2'>
           <Label htmlFor='chart-mode-potype'>
@@ -100,46 +128,40 @@ const SalesInvoiceByPoTypeChart: React.FC<SalesInvoiceByPoTypeChartProps> = ({
         <div className='flex items-center justify-center h-full'>
           <div className='w-3/4 h-1/2 rounded-lg shimmer' />
         </div>
-      ) : chartData.length > 0 ? (
-        <div
-          className={`flex-1 mt-4 ${
-            chartData.length === 1
-              ? 'flex items-center justify-center'
-              : 'grid grid-cols-1 md:grid-cols-2 gap-4'
-          }`}
-        >
-          {chartData.map((chart, index) => (
-            <div
-              key={index}
-              className='flex flex-col items-center justify-center'
-            >
-              <h3 className='text-sm font-medium text-center mb-2'>
-                {chart.datasets[0].label}
-              </h3>
-              <div className='flex items-center justify-center w-full'>
-                <div
-                  className={`relative aspect-square ${isFullWidth ? 'w-80' : 'w-48'} flex items-center justify-center`}
-                >
-                  <Pie
-                    data={chart}
-                    options={{
-                      responsive: true,
-                      maintainAspectRatio: true,
-                      plugins: {
-                        legend: { position: 'top' },
-                        tooltip: {
-                          callbacks: {
-                            label: (context) =>
-                              ` ${(context.raw as number).toLocaleString('id-ID')}`,
-                          },
-                        },
-                      },
-                    }}
-                  />
-                </div>
-              </div>
-            </div>
-          ))}
+      ) : chartData ? (
+        <div className='flex-1 mt-4'>
+          <Line
+            data={chartData}
+            options={{
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: { position: 'top' },
+                tooltip: {
+                  callbacks: {
+                    label: (context) =>
+                      `${context.dataset.label}: ${(context.raw as number).toLocaleString('id-ID')} IDR`,
+                  },
+                },
+              },
+              scales: {
+                x: {
+                  title: { display: true, text: 'Months' },
+                },
+                y: {
+                  beginAtZero: true,
+                  min: maxValue < 1_000_000_000 ? 100_000_000 : undefined,
+
+                  ticks: {
+                    callback: (value) => {
+                      const val = Number(value) / 1000000;
+                      return `${val.toLocaleString('id-ID')}`;
+                    },
+                  },
+                },
+              },
+            }}
+          />
         </div>
       ) : (
         <div className='flex flex-col items-center justify-center h-full text-gray-400'>

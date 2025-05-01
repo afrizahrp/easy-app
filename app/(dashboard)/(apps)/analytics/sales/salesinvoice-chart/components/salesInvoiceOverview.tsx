@@ -2,18 +2,18 @@
 'use client';
 import { motion } from 'framer-motion';
 
-import { Button } from '@/components/ui/button';
-import { Filter } from 'lucide-react';
-import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
+// import { Button } from '@/components/ui/button';
+// import { Filter } from 'lucide-react';
+// import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
 
-import SalesInvoiceFilterSummary from '@/components/sales/salesInvoiceFilterSummary';
+// import SalesInvoiceFilterSummary from '@/components/sales/salesInvoiceFilterSummary';
 import SalesByPeriod from './salesInvoiceByPeriodChart';
 import SalesByPoType from './salesInvoiceByPoTypeChart';
 import SalesInvoiceHdList from '@/app/(dashboard)/(apps)/sales/invoice-hd/list/page';
-import Draggable from 'react-draggable';
+// import Draggable from 'react-draggable';
 
-import { Table } from '@tanstack/react-table';
-import PageHeaderWrapper from '@/components/page-header-wrapper';
+// import { Table } from '@tanstack/react-table';
+import { PageHeaderWrapper } from '@/components/page-header-wrapper';
 import { useEffect, useState } from 'react';
 import { GeneralInvoiceFilterSidebar } from '@/components/FilterSidebarButton/sales/generalnvoiceFilterSidebar';
 interface SalesInvoiceOverviewProps {
@@ -35,51 +35,39 @@ const SalesInvoiceOverview: React.FC<SalesInvoiceOverviewProps> = ({
     if (saved) setButtonPosition(JSON.parse(saved));
   }, []);
 
-  useEffect(() => {
-    localStorage.setItem(
-      'filterButtonPosition',
-      JSON.stringify(buttonPosition)
-    );
-  }, [buttonPosition]);
-  const handleDrag = (e: any, data: { x: number; y: number }) => {
-    setButtonPosition({ x: data.x, y: data.y });
-  };
+  // useEffect(() => {
+  //   localStorage.setItem(
+  //     'filterButtonPosition',
+  //     JSON.stringify(buttonPosition)
+  //   );
+  // }, [buttonPosition]);
+  // const handleDrag = (e: any, data: { x: number; y: number }) => {
+  //   setButtonPosition({ x: data.x, y: data.y });
+  // };
 
   // Dummy table yang aman
-  const dummyTable = {
-    getState: () => ({
-      columnFilters: [],
-      sorting: [],
-      pagination: { pageIndex: 0, pageSize: 10 },
-      globalFilter: '',
-      rowSelection: {},
-    }),
-    getColumn: () => undefined,
-    getFilteredRowModel: () => ({ rows: [] }),
-    resetColumnFilters: () => {
-      // Kosong aja, karena ini dummy
-      console.log('Reset column filters called on dummy table');
-    },
-    setColumnFilters: () => {
-      // Kosong, buat jaga-jaga
-    },
-  } as unknown as Table<any>;
+  // const dummyTable = {
+  //   getState: () => ({
+  //     columnFilters: [],
+  //     sorting: [],
+  //     pagination: { pageIndex: 0, pageSize: 10 },
+  //     globalFilter: '',
+  //     rowSelection: {},
+  //   }),
+  //   getColumn: () => undefined,
+  //   getFilteredRowModel: () => ({ rows: [] }),
+  //   resetColumnFilters: () => {
+  //     // Kosong aja, karena ini dummy
+  //     console.log('Reset column filters called on dummy table');
+  //   },
+  //   setColumnFilters: () => {
+  //     // Kosong, buat jaga-jaga
+  //   },
+  // } as unknown as Table<any>;
 
   return (
     <div className='relative flex flex-col h-screen w-full p-4 gap-4'>
-      <PageHeaderWrapper
-        show={true}
-        title='Sales Invoice'
-        breadcrumb={[
-          { name: 'Analytics', href: '/analytics/sales' },
-          {
-            name: 'Sales Invoice Analytics',
-            href: '/dashboard/apps/sales/invoice-hd',
-          },
-        ]}
-      />
-
-      <div className='flex-1 min-w-[200px]'>
+      {/* <div className='flex-1 min-w-[200px]'>
         <SalesInvoiceFilterSummary />
       </div>
 
@@ -106,13 +94,12 @@ const SalesInvoiceOverview: React.FC<SalesInvoiceOverviewProps> = ({
       </Draggable>
 
       {/* Sidebar as Sheet */}
-      <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
+      {/* <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
         <SheetContent className='pt-5 w-80 sm:w-96'>
           <SheetTitle>Filter Data</SheetTitle>
           <GeneralInvoiceFilterSidebar table={dummyTable} />
         </SheetContent>
-      </Sheet>
-
+      </Sheet> */}
       {/* Bagian Chart */}
       <div className='flex flex-col md:flex-row w-full gap-4'>
         {(fullChart === null || fullChart === 'period') && (

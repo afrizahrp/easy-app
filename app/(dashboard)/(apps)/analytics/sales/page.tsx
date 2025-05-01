@@ -1,20 +1,103 @@
-// analytics/sales/page.tsx
 'use client';
+import Link from 'next/link';
+import { ArrowRight, BarChart2, FileText } from 'lucide-react';
+import { motion } from 'framer-motion';
+import AnalyticsNav from '@/components/AnalyticsNav';
 import SalesInvoiceAnalytics from './salesinvoice-chart/page';
 import SalesPersonPerformaAnalytics from './salespersonperforma-chart/page';
-import PageHeaderWrapper from '@/components/page-header-wrapper';
+import { PageHeaderWrapper } from '@/components/page-header-wrapper';
+import { Button } from '@/components/ui/button';
 
-export default function SalesAnalytics() {
+export default function SalesPage() {
+  const cardVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
+  };
+
   return (
-    <div className='flex flex-col h-screen w-full p-2 gap-4'>
-      <div className='bg-white dark:bg-inherit p-4 rounded-lg shadow-sm'>
-        <PageHeaderWrapper show={false} />
-        <SalesPersonPerformaAnalytics showList={false} />
-
-        <div className='bg-white dark:bg-inherit p-2 rounded-lg shadow-sm'>
-          <PageHeaderWrapper show={false} />
-          <SalesInvoiceAnalytics />
-        </div>
+    <div className='flex flex-col min-h-screen w-full p-4 md:p-8 lg:p-10 gap-8 bg-gray-100 dark:bg-gray-900'>
+      {/* <AnalyticsNav /> */}
+      <div className='text-center md:text-left'>
+        <h1 className='text-4xl font-bold tracking-tight  text-slate-600 dark:text-slate-400'>
+          📊 Sales Analytics
+        </h1>
+        <p className='text-lg text-slate-600 dark:text-slate-400 mt-2'>
+          Explore sales performance and invoice summaries with interactive
+          insights.
+        </p>
+        {/* {console.log('SalesPage - Header rendered')} */}
+      </div>
+      <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+        <motion.div
+          className='bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-md border border-gray-200 dark:border-gray-700 transition-all hover:shadow-lg hover:-translate-y-1'
+          variants={cardVariants}
+          initial='hidden'
+          animate='visible'
+        >
+          <div className='flex items-center justify-between mb-4'>
+            <div className='flex items-center gap-3'>
+              <FileText className='w-6 h-6 text-blue-600 dark:text-blue-400' />
+              <h2 className='text-xl font-semibold text-gray-900 dark:text-white'>
+                Sales Invoice Overview
+              </h2>
+            </div>
+            <Button
+              asChild
+              variant='outline'
+              size='sm'
+              className='text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-gray-700'
+            >
+              <Link
+                href='/analytics/sales/salesinvoice-chart'
+                className='flex items-center gap-1'
+              >
+                View Details
+                <ArrowRight className='w-4 h-4' />
+              </Link>
+            </Button>
+          </div>
+          <PageHeaderWrapper
+            show={false}
+            title='Sales Invoice Overview'
+            hideBreadcrumb={true}
+          />
+          <SalesInvoiceAnalytics showList={false} showHeader={false} />
+        </motion.div>
+        <motion.div
+          className='bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-md border border-gray-200 dark:border-gray-700 transition-all hover:shadow-lg hover:-translate-y-1'
+          variants={cardVariants}
+          initial='hidden'
+          animate='visible'
+        >
+          <div className='flex items-center justify-between mb-4'>
+            <div className='flex items-center gap-3'>
+              <BarChart2 className='w-6 h-6 text-green-600 dark:text-green-400' />
+              <h2 className='text-xl font-semibold text-gray-900 dark:text-white'>
+                Salesperson Performance
+              </h2>
+            </div>
+            <Button
+              asChild
+              variant='outline'
+              size='sm'
+              className='text-green-600 hover:bg-green-50 dark:text-blue-400 dark:hover:bg-gray-700'
+            >
+              <Link
+                href='/analytics/sales/salespersonperforma-chart'
+                className='flex items-center gap-1'
+              >
+                View Details
+                <ArrowRight className='w-4 h-4' />
+              </Link>
+            </Button>
+          </div>
+          <PageHeaderWrapper
+            show={false}
+            title='Salesperson Performance'
+            hideBreadcrumb={true}
+          />
+          <SalesPersonPerformaAnalytics showList={false} showHeader={false} />
+        </motion.div>
       </div>
     </div>
   );

@@ -1,70 +1,39 @@
+// components/page-header.tsx
 'use client';
-import React, { Fragment } from 'react';
+import React from 'react';
 import { Label } from '@/components/ui/label';
 import cn from '@/utils/class-names';
-import { Slash } from 'lucide-react';
-
 import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbLink,
   BreadcrumbList,
-  BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
-
-export function BreadcrumbWithCustomSeparator() {
-  return (
-    <Breadcrumb>
-      <BreadcrumbList>
-        <BreadcrumbItem>
-          <BreadcrumbLink href='/'>Home</BreadcrumbLink>
-        </BreadcrumbItem>
-        <BreadcrumbSeparator>
-          <Slash />
-        </BreadcrumbSeparator>
-        <BreadcrumbItem>
-          <BreadcrumbLink href='/components'>Components</BreadcrumbLink>
-        </BreadcrumbItem>
-        <BreadcrumbSeparator>
-          <Slash />
-        </BreadcrumbSeparator>
-        <BreadcrumbItem>
-          <BreadcrumbPage>Breadcrumb</BreadcrumbPage>
-        </BreadcrumbItem>
-      </BreadcrumbList>
-    </Breadcrumb>
-  );
-}
-
 import { ChevronRight } from 'lucide-react';
 
 export type PageHeaderTypes = {
   title: string;
-  // description: string;
   breadcrumb: { name: string; href?: string }[];
   className?: string;
+  hideBreadcrumb?: boolean; // Prop baru
 };
 
 export default function PageHeader({
   title,
-  // description,
   breadcrumb,
   children,
   className,
+  hideBreadcrumb = false,
 }: React.PropsWithChildren<PageHeaderTypes>) {
   return (
-    <>
-      <header className={cn('mb-2 mt-0', className)}>
-        <div className='flex flex-col @lg:flex-row @lg:items-center @lg:justify-between'>
-          <div>
-            <Label className='w-1/2 mb-2 text-[18px] lg:text-2xl 4xl:text-[20px] dark:text-slate-400 text-slate-600'>
-              {title}
-            </Label>
-            {/* <Label className='mb-1 text-[22px] lg:text-2xl 4xl:text-[26px]'>
-              {description}
-            </Label> */}
-
+    <header className={cn('mb-2 mt-0', className)}>
+      <div className='flex flex-col @lg:flex-row @lg:items-center @lg:justify-between'>
+        <div>
+          <Label className='w-1/2 mb-2 text-sm lg:text-lg 4xl:text-base dark:text-slate-400 text-slate-600'>
+            {title}
+          </Label>
+          {!hideBreadcrumb && breadcrumb.length > 0 && (
             <Breadcrumb>
               <BreadcrumbList>
                 {breadcrumb.map((item, index) => (
@@ -83,10 +52,10 @@ export default function PageHeader({
                 ))}
               </BreadcrumbList>
             </Breadcrumb>
-          </div>
-          {children}
+          )}
         </div>
-      </header>
-    </>
+        {children}
+      </div>
+    </header>
   );
 }
