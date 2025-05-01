@@ -10,9 +10,11 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
+import { hslToHex } from '@/lib/utils';
+import { useThemeStore } from '@/store';
+import { useTheme } from 'next-themes';
+import { themes } from '@/config/thems';
 import gradientPlugin from 'chartjs-plugin-gradient';
-ChartJS.register(gradientPlugin);
-
 import { useToast } from '@/components/ui/use-toast';
 import useSalesPeriod from '@/queryHooks/sls/dashboard/useSalesPeriod';
 import { Switch } from '@/components/ui/switch'; // Impor Switch dari Shadcn UI
@@ -25,18 +27,26 @@ ChartJS.register(
   BarElement,
   Title,
   Tooltip,
-  Legend
+  Legend,
+  gradientPlugin
 );
 
-interface SalesByPeriodProps {
+interface SalesInvoiceByPeriodChartProps {
   isFullWidth?: boolean;
   onModeChange?: (isFullPage: boolean) => void;
 }
 
-const SalesByPeriod: React.FC<SalesByPeriodProps> = ({
+const SalesInvoiceByPeriodChart: React.FC<SalesInvoiceByPeriodChartProps> = ({
   isFullWidth,
   onModeChange,
 }) => {
+  const { theme: config, setTheme: setConfig } = useThemeStore();
+  const { theme: mode } = useTheme();
+  const theme = themes.find((theme) => theme.name === config);
+  const hslBackground = `hsla(${
+    theme?.cssVars[mode === 'dark' ? 'dark' : 'light'].background
+  })`;
+  const hexBackground = hslToHex(hslBackground);
   const { toast } = useToast();
   const { data, isLoading, isFetching, error } = useSalesPeriod();
 
@@ -81,6 +91,8 @@ const SalesByPeriod: React.FC<SalesByPeriodProps> = ({
       },
       borderColor: colorPalette[idx % colorPalette.length][0],
       borderWidth: 1,
+      barThickness: 25,
+      borderRadius: 15,
     }));
 
     return {
@@ -104,8 +116,6 @@ const SalesByPeriod: React.FC<SalesByPeriodProps> = ({
     }
   }, [error, toast]);
 
-  // console.log('chartData:', chartData);
-
   const isDataReady =
     !!chartData &&
     Array.isArray(chartData.labels) &&
@@ -116,20 +126,23 @@ const SalesByPeriod: React.FC<SalesByPeriodProps> = ({
     );
 
   return (
-    <div className='bg-white p-4 rounded-lg shadow-sm h-96 flex flex-col'>
-      <div className='flex items-center justify-between mb-2'>
-        <h2 className='text-md font-semibold'>
-          Sales by period (in Millions IDR)
+    <div
+      className='bg-white dark:bg-[#18181b] p-4 rounded-lg shadow-sm h-96 flex flex-col'
+      style={{ backgroundColor: hexBackground }}
+    >
+      <div className='relative flex items-center justify-center mb-2'>
+        <h2 className='text-md text-muted-foreground font-semibold mx-auto'>
+          Sales Invoice by Monthly Period (in Millions IDR)
         </h2>
-        <div className='flex items-center space-x-2'>
+        <div className='absolute right-0 top-0 flex items-center space-x-2'>
           <Label htmlFor='chart-mode-period'>
-            {/* {isFullWidth ? 'Full Width' : 'Half Width'} */}
             {isFullWidth ? 'Full Width' : ' Half Width'}
           </Label>
           <Switch
             id='chart-mode-period'
             checked={isFullWidth}
             onCheckedChange={(checked) => onModeChange?.(checked)}
+            aria-label='Toggle full width chart'
           />
         </div>
       </div>
@@ -154,7 +167,6 @@ const SalesByPeriod: React.FC<SalesByPeriodProps> = ({
                   beginAtZero: true,
                   min: maxValue < 1_000_000_000 ? 100_000_000 : undefined,
 
-                  title: { display: true, text: 'Total Sales' },
                   ticks: {
                     callback: (value: unknown) => {
                       const val = Number(value) / 1000000;
@@ -213,4 +225,4 @@ const SalesByPeriod: React.FC<SalesByPeriodProps> = ({
   );
 };
 
-export default SalesByPeriod;
+export default SalesInvoiceByPeriodChart;

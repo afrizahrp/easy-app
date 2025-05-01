@@ -1,10 +1,9 @@
 // analytics/sales/salesinvoice-chart/page.tsx
 'use client';
 import { useState } from 'react';
-import AnalyticsNav from '@/components/AnalyticsNav';
 import SalesInvoiceOverview from '../salesinvoice-chart/components/salesInvoiceOverview';
 
-export default function SalesInvoiceAnalytics() {
+const SalesInvoiceAnalytics = () => {
   const [fullChart, setFullChart] = useState<'period' | 'poType' | null>(null);
 
   const handleFilterChange = (filters: {
@@ -22,13 +21,14 @@ export default function SalesInvoiceAnalytics() {
   };
 
   return (
-    <div className='flex flex-col h-screen w-full p-4 gap-4'>
-      <AnalyticsNav />
-      <h1 className='text-2xl font-bold mb-4'>Sales Invoice Analytics</h1>
+    <div className='relative flex flex-col h-screen w-full p-4 gap-4'>
       <SalesInvoiceOverview
+        showList={true}
         fullChart={fullChart}
         onFilterChange={handleFilterChange}
       />
     </div>
   );
-}
+};
+
+export default SalesInvoiceAnalytics;

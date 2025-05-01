@@ -55,7 +55,7 @@ export default function PageHeader({
 }: React.PropsWithChildren<PageHeaderTypes>) {
   return (
     <>
-      <header className={cn('mb-6 @container xs:-mt-2 lg:mb-7', className)}>
+      <header className={cn('mb-2 mt-0', className)}>
         <div className='flex flex-col @lg:flex-row @lg:items-center @lg:justify-between'>
           <div>
             <Label className='w-1/2 mb-2 text-[18px] lg:text-2xl 4xl:text-[20px] dark:text-slate-400 text-slate-600'>

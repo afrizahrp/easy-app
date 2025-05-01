@@ -13,7 +13,6 @@ import { SalesPersonInvoiceFilterSidebar } from '@/components/FilterSidebarButto
 import Draggable from 'react-draggable';
 
 import { Table } from '@tanstack/react-table';
-import { Label } from '@/components/ui/label';
 import PageHeaderWrapper from '@/components/page-header-wrapper';
 
 interface SalesPersonSelection {
@@ -29,8 +28,6 @@ interface SalesPersonPerformaAnalyticsProps {
 const SalesPersonPerformaAnalytics: React.FC<
   SalesPersonPerformaAnalyticsProps
 > = ({ showList = true }) => {
-  // const [showInvoiceListSection, setShowInvoiceListSection] = useState(true);
-
   const [fullChart, setFullChart] = useState<'period' | null>('period');
   const [selectedSalesPerson, setSelectedSalesPerson] = useState<string | null>(
     null
@@ -164,7 +161,7 @@ const SalesPersonPerformaAnalytics: React.FC<
 
       <PageHeaderWrapper
         show={true}
-        title='Sales Person Performance Analytics'
+        title='Sales Person Performance'
         breadcrumb={[
           { name: 'Analytics', href: '/analytics/sales' },
           {
@@ -250,7 +247,6 @@ const SalesPersonPerformaAnalytics: React.FC<
             className='w-full flex-1'
           >
             <PageHeaderWrapper title='Invoice List' />
-
             <SalesPersonInvoiceList />
           </motion.div>
         )}

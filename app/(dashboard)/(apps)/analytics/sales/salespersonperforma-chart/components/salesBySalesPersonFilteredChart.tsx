@@ -88,8 +88,6 @@ const SalesBySalesPersonFilteredChart: React.FC<
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // console.log('Data dari SalesBySalesPersonFilteredChart:', data);
-    // console.log('isFullWidth in FilteredChart:', isFullWidth);
     if (containerRef.current) {
       console.log(
         'FilteredChart actual width:',

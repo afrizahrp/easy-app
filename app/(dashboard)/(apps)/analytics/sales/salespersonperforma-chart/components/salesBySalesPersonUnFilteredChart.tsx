@@ -139,12 +139,6 @@ const SalesBySalesPersonUnFilteredChart: React.FC<
     return { labels: months, datasets };
   }, [data]);
 
-  // const maxValue = React.useMemo(() => {
-  //   if (!chartData || !chartData.datasets.length) return 100_000_000;
-  //   const max = Math.max(...chartData.datasets.flatMap((ds) => ds.data), 0);
-  //   return max || 100_000_000;
-  // }, [chartData]);
-
   React.useEffect(() => {
     if (error) {
       toast({

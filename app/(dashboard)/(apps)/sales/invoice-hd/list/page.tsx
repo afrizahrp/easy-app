@@ -53,13 +53,13 @@ const SalesInvoiceHdPage = () => {
 
   return (
     <>
-      <PageHeader
+      {/* <PageHeader
         title='Invoice List'
         breadcrumb={[
           { name: 'Dashboard', href: routes.inventory.dashboard },
           { name: 'List' },
         ]}
-      />
+      /> */}
 
       <div>
         <Card className='mt-6'>
