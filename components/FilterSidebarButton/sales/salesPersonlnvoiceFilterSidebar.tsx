@@ -125,7 +125,7 @@ export function SalesPersonInvoiceFilterSidebar<TData>({
 
   const handleReset = () => {
     ResetSalesInvoiceFilterStore({
-      table,
+      table: table!,
       setPaidStatus,
       setSalesPersonName,
       setPoType,
@@ -145,7 +145,7 @@ export function SalesPersonInvoiceFilterSidebar<TData>({
         <Alert variant='destructiveDark' className='w-full'>
           <AlertCircle className='h-4 w-4' />
           <AlertDescription>
-            The Status filter is disabled when multiple Sales Persons are
+            The Paid Status filter is disabled when multiple Sales Persons are
             selected.
           </AlertDescription>
         </Alert>
@@ -170,15 +170,14 @@ export function SalesPersonInvoiceFilterSidebar<TData>({
           }}
         />
       </div>
-
       <div className='w-full py-3'>
-        {/* {table?.getColumn('paidStatus') && ( */}
-
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
               <div className='flex items-center gap-2'>
-                <span>Paid Status</span>
+                <AlertCircle className='w-4 h-4 text-yellow-500' />{' '}
+                {/* ikon exclamation */}
+                {/* <span>Paid Status</span> */}
               </div>
             </TooltipTrigger>
             <TooltipContent>
@@ -187,6 +186,10 @@ export function SalesPersonInvoiceFilterSidebar<TData>({
           </Tooltip>
         </TooltipProvider>
         <DataTableFacetedFilter
+          // <div className='w-full py-3'>
+
+          //   {table?.getColumn('paidStatus') && (
+
           column={table?.getColumn('paidStatus')}
           title='Paid Status'
           options={statusOptionList}
@@ -203,7 +206,7 @@ export function SalesPersonInvoiceFilterSidebar<TData>({
             setPaidStatus(Array.from(updatedValues));
           }}
         />
-        {/* )} */}
+        {/* )}  */}
       </div>
 
       {hasActiveFilters && (

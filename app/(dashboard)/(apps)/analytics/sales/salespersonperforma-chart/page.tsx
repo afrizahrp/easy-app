@@ -113,6 +113,13 @@ const SalesPersonPerformaAnalytics = () => {
     }),
     getColumn: () => undefined,
     getFilteredRowModel: () => ({ rows: [] }),
+    resetColumnFilters: () => {
+      // Kosong aja, karena ini dummy
+      console.log('Reset column filters called on dummy table');
+    },
+    setColumnFilters: () => {
+      // Kosong, buat jaga-jaga
+    },
   } as unknown as Table<any>;
 
   return (

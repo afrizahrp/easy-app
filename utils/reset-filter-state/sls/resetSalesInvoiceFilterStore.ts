@@ -9,7 +9,7 @@ type MonthYearPeriodState = ReturnType<typeof useMonthYearPeriodStore.getState>;
 type ToastFunction = ReturnType<typeof useToast>['toast'];
 
 interface ResetFilterParams {
-  table?: Table<any>;
+  table: Table<any>; // Table wajib, gak optional
   setPaidStatus: SalesInvoiceHdState['setPaidStatus'];
   setSalesPersonName: SalesInvoiceHdState['setSalesPersonName'];
   setPoType: SalesInvoiceHdState['setPoType'];
@@ -25,13 +25,21 @@ export const ResetSalesInvoiceFilterStore = ({
   resetPeriod,
   toast,
 }: ResetFilterParams) => {
-  table?.resetColumnFilters();
-  setPaidStatus([]);
-  setSalesPersonName([]);
-  setPoType([]);
-  resetPeriod();
-  toast({
-    description: 'All filters have been cleared.',
-    color: 'success',
-  });
+  try {
+    table.resetColumnFilters();
+    setPaidStatus([]);
+    setSalesPersonName([]);
+    setPoType([]);
+    resetPeriod();
+    toast({
+      description: 'All filters have been reset.',
+      color: 'success',
+    });
+  } catch (error) {
+    console.error('Filter reset failed:', error);
+    toast({
+      description: 'Filter reset failed, try Again.',
+      color: 'destructive',
+    });
+  }
 };

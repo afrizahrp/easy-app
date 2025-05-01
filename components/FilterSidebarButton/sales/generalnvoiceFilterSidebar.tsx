@@ -163,6 +163,10 @@ export function GeneralInvoiceFilterSidebar<TData>({
     });
   };
 
+  const hasActiveFilters =
+    (table?.getState?.().columnFilters?.length ?? 0) > 0 ||
+    salesPersonName.length > 0;
+
   return (
     <div className='flex items-center justify-end py-2'>
       <div className='flex flex-col items-center space-y-2 w-full'>
@@ -301,32 +305,11 @@ export function GeneralInvoiceFilterSidebar<TData>({
           )}
         </div>
 
-        {/* <div className='w-full py-3'>
-          {table.getColumn('salesPersonName') && (
-            <DataTableFacetedFilter
-              column={table.getColumn('salesPersonName')}
-              title='Sales Person'
-              options={salesPersonOptionList}
-              isLoading={isSalesPersonLoading}
-              selectedValues={new Set(salesPersonName)}
-              onSelect={(value) => {
-                const updatedValues = new Set(salesPersonName);
-                value
-                  ? updatedValues.has(value)
-                    ? updatedValues.delete(value)
-                    : updatedValues.add(value)
-                  : updatedValues.clear();
-                setSalesPersonName(Array.from(updatedValues));
-              }}
-            />
-          )}
-        </div> */}
-
-        {table.getState().columnFilters.length > 0 && (
+        {hasActiveFilters && (
           <Button
             variant='outline'
             onClick={handleReset}
-            className='h-10 px-2 lg:px-3 w-full mb-5'
+            className='h-10 px-2 w-full mb-5 bg-secondary text-slate hover:bg-secondary-dark dark:bg-secondary dark:text-slate-400 dark:hover:bg-secondary dark:hover:text-slate-400'
           >
             <Cross2Icon className='ml-2 h-4 w-4' />
             Reset Filter
