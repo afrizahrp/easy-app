@@ -13,6 +13,8 @@ import { SalesPersonInvoiceFilterSidebar } from '@/components/FilterSidebarButto
 import Draggable from 'react-draggable';
 
 import { Table } from '@tanstack/react-table';
+import { Label } from '@/components/ui/label';
+import PageHeaderWrapper from '@/components/page-header-wrapper';
 
 interface SalesPersonSelection {
   salesPersonName: string;
@@ -20,7 +22,15 @@ interface SalesPersonSelection {
   month?: string;
 }
 
-const SalesPersonPerformaAnalytics = () => {
+interface SalesPersonPerformaAnalyticsProps {
+  showList?: boolean;
+}
+
+const SalesPersonPerformaAnalytics: React.FC<
+  SalesPersonPerformaAnalyticsProps
+> = ({ showList = true }) => {
+  // const [showInvoiceListSection, setShowInvoiceListSection] = useState(true);
+
   const [fullChart, setFullChart] = useState<'period' | null>('period');
   const [selectedSalesPerson, setSelectedSalesPerson] = useState<string | null>(
     null
@@ -30,9 +40,6 @@ const SalesPersonPerformaAnalytics = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const { salesPersonName } = useSalesInvoiceHdFilterStore((state) => ({
     salesPersonName: state.salesPersonName,
-  }));
-  const { paidStatus } = useSalesInvoiceHdFilterStore((state) => ({
-    paidStatus: state.paidStatus,
   }));
 
   const chartRef = useRef<HTMLDivElement>(null);
@@ -155,6 +162,18 @@ const SalesPersonPerformaAnalytics = () => {
         </SheetContent>
       </Sheet>
 
+      <PageHeaderWrapper
+        show={true}
+        title='Sales Person Performance Analytics'
+        breadcrumb={[
+          { name: 'Analytics', href: '/analytics/sales' },
+          {
+            name: 'Sales Person Performance Analytics',
+            href: '#',
+          },
+        ]}
+      />
+
       {/* Main Content */}
       <div className='flex flex-col gap-4'>
         <div className='flex-1 min-w-[200px]'>
@@ -224,13 +243,17 @@ const SalesPersonPerformaAnalytics = () => {
             </motion.div>
           )}
         </div>
-        <motion.div
-          layout
-          transition={{ type: 'spring', stiffness: 250, damping: 25 }}
-          className='w-full flex-1'
-        >
-          <SalesPersonInvoiceList />
-        </motion.div>
+        {showList && (
+          <motion.div
+            layout
+            transition={{ type: 'spring', stiffness: 250, damping: 25 }}
+            className='w-full flex-1'
+          >
+            <PageHeaderWrapper title='Invoice List' />
+
+            <SalesPersonInvoiceList />
+          </motion.div>
+        )}
       </div>
     </div>
   );

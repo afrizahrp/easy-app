@@ -5,7 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { InvoiceListTable } from './list-table';
 import LayoutLoader from '@/components/layout-loader';
 import { routes } from '@/config/routes';
-import PageHeader from '@/components/page-header';
+import PageHeaderWrapper from '@/components/page-header-wrapper';
 import useSalesInvoiceHd from '@/queryHooks/sls/useSalesInvoiceHd';
 import { SalesPersonInvoiceListColumns } from './list-table/components/columns';
 import { usePageStore } from '@/store';
@@ -55,13 +55,14 @@ export default function SalesPersonInvoiceList() {
 
   return (
     <>
-      <PageHeader
-        title='Sales Person Invoice List'
+      {/* <PageHeaderWrapper
+        show={true}
+        title='Invoice List'
         breadcrumb={[
-          { name: 'Analytics', href: routes.inventory.dashboard },
+          { name: 'Sales Invoice', href: routes.inventory.dashboard },
           { name: 'List' },
         ]}
-      />
+      /> */}
 
       <div>
         <Card className='mt-6'>

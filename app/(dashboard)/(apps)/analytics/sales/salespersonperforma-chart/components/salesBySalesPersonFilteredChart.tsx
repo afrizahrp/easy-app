@@ -88,8 +88,8 @@ const SalesBySalesPersonFilteredChart: React.FC<
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    console.log('Data dari SalesBySalesPersonFilteredChart:', data);
-    console.log('isFullWidth in FilteredChart:', isFullWidth);
+    // console.log('Data dari SalesBySalesPersonFilteredChart:', data);
+    // console.log('isFullWidth in FilteredChart:', isFullWidth);
     if (containerRef.current) {
       console.log(
         'FilteredChart actual width:',
@@ -133,11 +133,11 @@ const SalesBySalesPersonFilteredChart: React.FC<
     return { labels: months, datasets };
   }, [data]);
 
-  const maxValue = React.useMemo(() => {
-    if (!chartData || !chartData.datasets.length) return 100_000_000;
-    const max = Math.max(...chartData.datasets.flatMap((ds) => ds.data), 0);
-    return max || 100_000_000;
-  }, [chartData]);
+  // const maxValue = React.useMemo(() => {
+  //   if (!chartData || !chartData.datasets.length) return 100_000_000;
+  //   const max = Math.max(...chartData.datasets.flatMap((ds) => ds.data), 0);
+  //   return max || 100_000_000;
+  // }, [chartData]);
 
   const handleChartClick = (event: any, elements: any[]) => {
     if (elements.length > 0) {
@@ -177,8 +177,8 @@ const SalesBySalesPersonFilteredChart: React.FC<
     <div
       ref={containerRef}
       className={` bg-white dark:bg-[#18181b] p-4 rounded-lg shadow-sm h-96 w-full`}
+      style={{ backgroundColor: hexBackground }}
     >
-      {/* style={{ backgroundColor: hexBackground }} */}
       <div className='flex flex-row items-center justify-between mb-2'>
         <h2 className='text-md font-semibold text-muted-foreground'>
           {validSalesPersonNames.length === 1

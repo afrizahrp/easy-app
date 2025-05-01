@@ -11,18 +11,17 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
+import { hslToHex } from '@/lib/utils';
+import { useThemeStore } from '@/store';
+import { useTheme } from 'next-themes';
+import { themes } from '@/config/thems';
 import gradientPlugin from 'chartjs-plugin-gradient';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/components/ui/use-toast';
 import useTopProductsBySalesPerson from '@/queryHooks/sls/analytics/useTopProductBySalesPerson';
 import { getGridConfig, getLabel } from '@/lib/appex-chart-options';
-import { useTheme } from 'next-themes';
-import { useThemeStore } from '@/store';
-import { themes } from '@/config/thems';
-import { X } from 'lucide-react';
 
 const Chart = dynamic(() => import('react-apexcharts'), { ssr: false });
 
@@ -51,7 +50,10 @@ const TopProductSoldBySalesPerson: React.FC<
   const { theme: config, isRtl } = useThemeStore();
   const { theme: mode } = useTheme();
   const theme = themes.find((t) => t.name === config);
-
+  const hslBackground = `hsla(${
+    theme?.cssVars[mode === 'dark' ? 'dark' : 'light'].background
+  })`;
+  const hexBackground = hslToHex(hslBackground);
   const [chartMode, setChartMode] = useState<'qty' | 'total_amount'>('qty');
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -121,6 +123,9 @@ const TopProductSoldBySalesPerson: React.FC<
             stops: [0, 100],
           },
         },
+        borderRadius: 15,
+        borderRadiusApplication: 'end', // opsional: 'end' untuk horizontal bar, 'all' untuk semua sudut
+        barGap: '20%', // <-- Tambahkan ini untuk memberi jarak antar bar
       },
     },
     dataLabels: {
@@ -211,7 +216,8 @@ const TopProductSoldBySalesPerson: React.FC<
   return (
     <div
       ref={containerRef}
-      className='bg-white p-4 rounded-lg shadow-md h-full w-full'
+      className={` bg-white dark:bg-[#18181b] p-4 rounded-lg shadow-sm h-96 w-full`}
+      style={{ backgroundColor: hexBackground }}
     >
       <div className='flex items-center justify-between mb-4'>
         <h3 className='text-sm text-muted-foreground'>
