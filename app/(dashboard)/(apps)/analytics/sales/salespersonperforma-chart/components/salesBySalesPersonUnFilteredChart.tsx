@@ -11,14 +11,13 @@ import {
   Legend,
   ScriptableContext,
 } from 'chart.js';
-import { hslToHex, hexToRGB } from '@/lib/utils';
+import { hslToHex } from '@/lib/utils';
 import { useThemeStore } from '@/store';
 import { useTheme } from 'next-themes';
 import { themes } from '@/config/thems';
 import gradientPlugin from 'chartjs-plugin-gradient';
 import { useToast } from '@/components/ui/use-toast';
 import useSalesByPeriodUnfiltered from '@/queryHooks/sls/analytics/useSalesPersonByPeriodUnFiltered';
-// import ChartDataLabels from 'chartjs-plugin-datalabels';
 
 import {
   salesPersonColorMap,
@@ -37,7 +36,6 @@ ChartJS.register(
   Tooltip,
   Legend,
   gradientPlugin
-  // ChartDataLabels
 );
 
 interface SalesDataWithoutFilter {
@@ -66,15 +64,11 @@ const SalesBySalesPersonUnFilteredChart: React.FC<
 > = ({ isFullScreen = false, onModeChange, onSalesPersonSelect }) => {
   const { theme: config, setTheme: setConfig } = useThemeStore();
   const { theme: mode } = useTheme();
-
   const theme = themes.find((theme) => theme.name === config);
-
   const hslBackground = `hsla(${
     theme?.cssVars[mode === 'dark' ? 'dark' : 'light'].background
   })`;
-
   const hexBackground = hslToHex(hslBackground);
-
   const { toast } = useToast();
   const { data, isLoading, isFetching, error } = useSalesByPeriodUnfiltered();
   const { salesPersonName, setSalesPersonName } = useSalesInvoiceHdFilterStore(
@@ -138,7 +132,6 @@ const SalesBySalesPersonUnFilteredChart: React.FC<
         borderWidth: 1,
         barThickness: 25,
         borderRadius: 15,
-
         period: data && data.length > 0 ? data[0].period : undefined,
       };
     });
@@ -186,7 +179,6 @@ const SalesBySalesPersonUnFilteredChart: React.FC<
         });
         setSalesPersonName([salesPersonName]);
         onSalesPersonSelect?.({ salesPersonName, year, month });
-        // Tidak memanggil onModeChange, biarkan full-width
       }
     }
   };
@@ -206,11 +198,11 @@ const SalesBySalesPersonUnFilteredChart: React.FC<
         left: isFullScreen ? 0 : undefined,
       }}
     >
-      <div className='flex items-center justify-between mb-2'>
-        <h2 className='text-md text-muted-foreground font-semibold justify-center items-center'>
+      <div className='relative flex items-center justify-center mb-2'>
+        <h2 className='text-md text-muted-foreground font-semibold mx-auto'>
           Top 5 Sales Performers (in Millions IDR)
         </h2>
-        <div className='flex items-center space-x-2'>
+        <div className='absolute right-0 top-0 flex items-center space-x-2'>
           <Label htmlFor='chart-mode-period'>
             {isFullScreen ? 'Full Page' : 'Full Width'}
           </Label>
@@ -222,15 +214,7 @@ const SalesBySalesPersonUnFilteredChart: React.FC<
           />
         </div>
       </div>
-      {/* {isFullScreen && (
-        <button
-          className='absolute top-4 right-4 z-50 bg-gray-100 dark:bg-gray-800 rounded-full p-2 shadow hover:bg-gray-200'
-          onClick={() => onModeChange?.(false)}
-          aria-label='Exit Full Screen'
-        >
-          ✕
-        </button>
-      )} */}
+
       {isLoading || isFetching ? (
         <div className='flex items-center justify-center h-full'>
           <div className='w-3/4 h-1/2 rounded-lg shimmer' />

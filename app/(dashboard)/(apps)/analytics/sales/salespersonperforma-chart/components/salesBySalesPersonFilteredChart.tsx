@@ -11,8 +11,10 @@ import {
   Legend,
   ScriptableContext,
 } from 'chart.js';
-
-import { Search } from 'lucide-react';
+import { hslToHex } from '@/lib/utils';
+import { useThemeStore } from '@/store';
+import { useTheme } from 'next-themes';
+import { themes } from '@/config/thems';
 import gradientPlugin from 'chartjs-plugin-gradient';
 import { useToast } from '@/components/ui/use-toast';
 import useSalesByPeriodFiltered from '@/queryHooks/sls/analytics/useSalesPersonByPeriodFiltered';
@@ -58,6 +60,13 @@ interface SalesBySalesPersonFilteredProps {
 const SalesBySalesPersonFilteredChart: React.FC<
   SalesBySalesPersonFilteredProps
 > = ({ isFullWidth = true, onModeChange, onSalesPersonSelect }) => {
+  const { theme: config, setTheme: setConfig } = useThemeStore();
+  const { theme: mode } = useTheme();
+  const theme = themes.find((theme) => theme.name === config);
+  const hslBackground = `hsla(${
+    theme?.cssVars[mode === 'dark' ? 'dark' : 'light'].background
+  })`;
+  const hexBackground = hslToHex(hslBackground);
   const { toast } = useToast();
   const { salesPersonName, setSalesPersonName } = useSalesInvoiceHdFilterStore(
     (state) => ({
@@ -115,6 +124,8 @@ const SalesBySalesPersonFilteredChart: React.FC<
         },
         borderColor: color.border,
         borderWidth: 1,
+        barThickness: 25,
+        borderRadius: 15,
         period: entry.period,
       };
     });
@@ -165,8 +176,9 @@ const SalesBySalesPersonFilteredChart: React.FC<
   return (
     <div
       ref={containerRef}
-      className={`bg-white p-4 rounded-lg shadow-sm h-96 w-full`}
+      className={` bg-white dark:bg-[#18181b] p-4 rounded-lg shadow-sm h-96 w-full`}
     >
+      {/* style={{ backgroundColor: hexBackground }} */}
       <div className='flex flex-row items-center justify-between mb-2'>
         <h2 className='text-md font-semibold text-muted-foreground'>
           {validSalesPersonNames.length === 1
@@ -228,22 +240,45 @@ const SalesBySalesPersonFilteredChart: React.FC<
                   },
                   scales: {
                     y: {
-                      beginAtZero: true,
-                      max: maxValue * 1.1,
-                      title: { display: true, text: 'Total Sales' },
+                      grid: {
+                        drawTicks: false,
+                        color: `hsl(${theme?.cssVars[mode === 'dark' ? 'dark' : 'light'].chartGird})`,
+                      },
+
                       ticks: {
                         callback: (value) =>
                           `${(Number(value) / 1_000_000).toLocaleString('id-ID')}`,
                       },
                     },
                     x: {
-                      title: { display: true, text: 'Month' },
-                      grid: { display: false },
+                      grid: {
+                        drawTicks: false,
+                        color: `hsl(${theme?.cssVars[mode === 'dark' ? 'dark' : 'light'].chartGird})`,
+                        display: false,
+                      },
+                      // @ts-expect-error: categoryPercentage is valid for category axis
+
+                      categoryPercentage: 0.6, // default 0.8, makin kecil makin renggang
+
+                      barPercentage: 0.7,
+
+                      ticks: {
+                        color: `hsl(${theme?.cssVars[mode === 'dark' ? 'dark' : 'light'].chartLabel})`,
+                      },
                     },
                   },
                   plugins: {
-                    legend: { position: 'top' },
-                    title: { display: false },
+                    legend: {
+                      labels: {
+                        color: `hsl(${
+                          theme?.cssVars[mode === 'dark' ? 'dark' : 'light']
+                            .chartLabel
+                        })`,
+
+                        usePointStyle: true,
+                        pointStyle: 'circle',
+                      },
+                    },
                     tooltip: {
                       callbacks: {
                         label: (context) =>
