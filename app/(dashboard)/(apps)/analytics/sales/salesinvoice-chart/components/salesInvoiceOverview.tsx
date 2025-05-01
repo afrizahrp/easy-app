@@ -10,15 +10,15 @@ import { GeneralInvoiceFilterSidebar } from '@/components/FilterSidebarButton/sa
 import { FloatingFilterButton } from '@/components/ui/floating-filter-button';
 
 interface SalesInvoiceOverviewProps {
-  showList?: boolean;
   showFloatingButton?: boolean;
+  showList?: boolean;
   fullChart?: 'period' | 'poType' | null;
   onFilterChange?: (filters: { period?: string; poType?: string }) => void;
 }
 
 const SalesInvoiceOverview: React.FC<SalesInvoiceOverviewProps> = ({
-  showList = true,
   showFloatingButton = true,
+  showList = true,
   fullChart = null,
   onFilterChange,
 }) => {
@@ -29,19 +29,21 @@ const SalesInvoiceOverview: React.FC<SalesInvoiceOverviewProps> = ({
     isFull ? 'w-full' : 'w-full md:w-1/2';
 
   return (
-    <div className='relative flex flex-col h-screen w-full p-2 gap-4'>
+    <div
+      className={`flex flex-col w-full p-2 gap-4 ${showList ? 'h-screen' : 'h-fit min-h-0'}`}
+    >
       {showFloatingButton && (
         <FloatingFilterButton
           onClick={() => setIsSidebarOpen(true)}
           showFloatingButton={true}
         />
       )}
-      {/* {isSidebarOpen && (
+      {isSidebarOpen && (
         <GeneralInvoiceFilterSidebar
           onClose={() => setIsSidebarOpen(false)}
-          onFilterChange={onFilterChange}
+          // onFilterChange={onFilterChange}
         />
-      )} */}
+      )}
 
       {showList ? (
         <div className={chartLayoutClass}>
@@ -54,6 +56,7 @@ const SalesInvoiceOverview: React.FC<SalesInvoiceOverviewProps> = ({
                 onModeChange={(isFull) =>
                   onFilterChange?.({ period: isFull ? 'full' : undefined })
                 }
+                height={400} // Tinggi untuk halaman utama
               />
             </div>
           )}
@@ -66,17 +69,20 @@ const SalesInvoiceOverview: React.FC<SalesInvoiceOverviewProps> = ({
                 onModeChange={(isFull) =>
                   onFilterChange?.({ poType: isFull ? 'full' : undefined })
                 }
+                height={400} // Tinggi untuk halaman utama
               />
             </div>
           )}
         </div>
       ) : (
-        <div className='w-full overflow-x-auto max-w-full'>
+        <div className='w-full overflow-x-auto max-w-full h-fit min-h-0'>
           <SalesByPeriod
             isFullWidth={false}
             onModeChange={(isFull) =>
               onFilterChange?.({ period: isFull ? 'full' : undefined })
             }
+            height={250} // Tinggi untuk SalesPage
+            isCompact={true} // Mode kompak untuk preview
           />
         </div>
       )}

@@ -16,9 +16,8 @@ export default function SalesPage() {
 
   return (
     <div className='flex flex-col w-full pt-2 pb-4 px-2 md:pt-4 md:pb-8 md:px-8 lg:pt-4 lg:pb-10 lg:px-10 gap-8 bg-gray-100 dark:bg-gray-900'>
-      {/* <AnalyticsNav /> */}
       <div className='text-center md:text-left'>
-        <h1 className='text-4xl font-bold tracking-tight text-slate-600 dark:text-slate-400'>
+        <h1 className='text-2xl font-bold tracking-tight text-slate-600 dark:text-slate-400'>
           📊 Sales Analytics
         </h1>
         <p className='text-lg text-slate-600 dark:text-slate-400 mt-2'>
@@ -28,12 +27,12 @@ export default function SalesPage() {
       </div>
       <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
         <motion.div
-          className='bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-md border border-gray-200 dark:border-gray-700 transition-all hover:shadow-lg hover:-translate-y-1'
+          className='bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-md border border-gray-200 dark:border-gray-700 transition-all hover:shadow-lg hover:-translate-y-1 flex flex-col min-h-0 h-fit'
           variants={cardVariants}
           initial='hidden'
           animate='visible'
         >
-          <div className='flex items-center justify-between mb-0'>
+          <div className='flex items-center justify-between mb-4'>
             <div className='flex items-center gap-3'>
               <FileText className='w-4 h-4 text-blue-600 dark:text-blue-400' />
               <h2 className='text-xl font-semibold text-gray-900 dark:text-white'>
@@ -58,18 +57,20 @@ export default function SalesPage() {
 
           <PageHeaderWrapper
             show={false}
-            title='Sales Invoice Overview'
+            title=' Sales Invoice Overview'
             hideBreadcrumb={true}
           />
-          <SalesInvoiceAnalytics showList={false} showHeader={false} />
+          <div className='flex-1 min-h-0 overflow-hidden'>
+            <SalesInvoiceAnalytics showList={false} showHeader={false} />
+          </div>
         </motion.div>
-        <motion.div
-          className='bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-md border border-gray-200 dark:border-gray-700 transition-all hover:shadow-lg hover:-translate-y-1'
+        {/* <motion.div
+          className='bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-md border border-gray-200 dark:border-gray-700 transition-all hover:shadow-lg hover:-translate-y-1 flex flex-col min-h-0 h-fit'
           variants={cardVariants}
           initial='hidden'
           animate='visible'
         >
-          <div className='flex items-center justify-between mb-0'>
+          <div className='flex items-center justify-between mb-4'>
             <div className='flex items-center gap-3'>
               <BarChart2 className='w-4 h-4 text-green-600 dark:text-green-400' />
               <h2 className='text-xl font-semibold text-gray-900 dark:text-white'>
@@ -80,7 +81,7 @@ export default function SalesPage() {
               asChild
               variant='outline'
               size='sm'
-              className='text-green-600 hover:bg-green-50 dark:text-blue-400 dark:hover:bg-gray-700'
+              className='text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-gray-700'
             >
               <Link
                 href='/analytics/sales/salespersonperforma-chart'
@@ -96,8 +97,10 @@ export default function SalesPage() {
             title='Salesperson Performance'
             hideBreadcrumb={true}
           />
-          <SalesPersonPerformaAnalytics showList={false} showHeader={false} />
-        </motion.div>
+          <div className='flex-1 min-h-0 overflow-hidden'>
+            <SalesPersonPerformaAnalytics showList={false} showHeader={false} />
+          </div>
+        </motion.div> */}
       </div>
     </div>
   );

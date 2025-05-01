@@ -17,8 +17,8 @@ import { themes } from '@/config/thems';
 import gradientPlugin from 'chartjs-plugin-gradient';
 import { useToast } from '@/components/ui/use-toast';
 import useSalesPeriod from '@/queryHooks/sls/dashboard/useSalesPeriod';
-import { Switch } from '@/components/ui/switch'; // Impor Switch dari Shadcn UI
-import { Label } from '@/components/ui/label'; // Impor Label untuk memberikan teks pada Switch
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 import { months } from '@/utils/monthNameMap';
 
 ChartJS.register(
@@ -32,11 +32,15 @@ ChartJS.register(
 );
 
 interface SalesInvoiceByPeriodChartProps {
+  height?: number;
+  isCompact?: boolean;
   isFullWidth?: boolean;
-  onModeChange?: (isFullPage: boolean) => void;
+  onModeChange?: (isFull: boolean) => void;
 }
 
 const SalesInvoiceByPeriodChart: React.FC<SalesInvoiceByPeriodChartProps> = ({
+  height = 400,
+  isCompact = false,
   isFullWidth,
   onModeChange,
 }) => {
@@ -101,7 +105,6 @@ const SalesInvoiceByPeriodChart: React.FC<SalesInvoiceByPeriodChartProps> = ({
     };
   }, [data]);
 
-  // Hitung nilai maksimum dari semua dataset
   const maxValue = React.useMemo(() => {
     if (!chartData) return 0;
     return Math.max(...chartData.datasets.flatMap((ds) => ds.data));
@@ -111,7 +114,7 @@ const SalesInvoiceByPeriodChart: React.FC<SalesInvoiceByPeriodChartProps> = ({
     if (error) {
       toast({
         description: 'Failed to load sales data. Please try again.',
-        color: 'destructive', // Ganti color ke variant
+        color: 'destructive',
       });
     }
   }, [error, toast]);
@@ -127,7 +130,7 @@ const SalesInvoiceByPeriodChart: React.FC<SalesInvoiceByPeriodChartProps> = ({
 
   return (
     <div
-      className='bg-white dark:bg-[#18181b] p-4 rounded-lg shadow-sm h-96 flex flex-col'
+      className='bg-white dark:bg-[#18181b] p-4 rounded-lg shadow-sm flex flex-col h-fit min-h-0'
       style={{ backgroundColor: hexBackground }}
     >
       <div className='relative flex items-center mb-2'>
@@ -136,7 +139,7 @@ const SalesInvoiceByPeriodChart: React.FC<SalesInvoiceByPeriodChartProps> = ({
         </h2>
         <div className='absolute right-0 top-0 flex items-center space-x-2'>
           <Label htmlFor='chart-mode-period'>
-            {isFullWidth ? 'Full Width' : ' Half Width'}
+            {isFullWidth ? 'Full Width' : 'Half Width'}
           </Label>
           <Switch
             id='chart-mode-period'
@@ -146,27 +149,29 @@ const SalesInvoiceByPeriodChart: React.FC<SalesInvoiceByPeriodChartProps> = ({
           />
         </div>
       </div>
-      <div className='flex-1 relative'>
+      <div className='flex-1 min-h-0'>
         {isLoading || isFetching ? (
           <div className='flex items-center justify-center h-full'>
             <div className='w-3/4 h-1/2 rounded-lg shimmer' />
           </div>
         ) : isDataReady ? (
           <Bar
+            width={isFullWidth ? 600 : 300}
+            height={isCompact ? 250 : height} // Kurangi tinggi di mode compact
             data={chartData}
             options={{
               responsive: true,
               maintainAspectRatio: false,
               layout: {
                 padding: {
-                  bottom: 20,
+                  bottom: isCompact ? 10 : 20, // Kurangi padding di mode compact
+                  top: isCompact ? 5 : 10,
                 },
               },
               scales: {
                 y: {
                   beginAtZero: true,
                   min: maxValue < 1_000_000_000 ? 100_000_000 : undefined,
-
                   ticks: {
                     callback: (value: unknown) => {
                       const val = Number(value) / 1000000;
@@ -181,14 +186,16 @@ const SalesInvoiceByPeriodChart: React.FC<SalesInvoiceByPeriodChartProps> = ({
                       return chartData.labels[index] ?? '';
                     },
                   },
-
                   grid: {
                     display: false,
                   },
                 },
               },
               plugins: {
-                legend: { position: 'top' },
+                legend: {
+                  display: !isCompact, // Sembunyikan legenda di mode compact
+                  position: 'top',
+                },
                 title: {
                   display: false,
                 },

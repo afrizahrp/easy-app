@@ -1,7 +1,6 @@
 'use client';
 import { useState } from 'react';
-import { motion } from 'framer-motion'; // Impor Framer Motion
-import { Button } from '@/components/ui/button';
+import { motion } from 'framer-motion';
 import { Table } from '@tanstack/react-table';
 import SalesInvoiceFilterSummary from '@/components/sales/salesInvoiceFilterSummary';
 import SalesInvoiceOverview from '../salesinvoice-chart/components/salesInvoiceOverview';
@@ -48,14 +47,17 @@ const SalesInvoiceAnalytics: React.FC<SalesInvoiceAnalyticsProps> = ({
     setColumnFilters: () => {},
   } as unknown as Table<any>;
 
-  // Definisikan varian animasi
   const containerVariants = {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
   };
 
   return (
-    <div className='relative flex flex-col h-screen w-full p-1 gap-4'>
+    <div
+      className={`relative flex flex-col w-full p-1 gap-4 ${
+        showList ? 'h-screen' : 'h-fit min-h-0'
+      }`}
+    >
       <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
         <SheetContent className='pt-5 w-60 sm:w-96'>
           <SheetTitle>Filter Data</SheetTitle>
@@ -63,7 +65,6 @@ const SalesInvoiceAnalytics: React.FC<SalesInvoiceAnalyticsProps> = ({
         </SheetContent>
       </Sheet>
 
-      {/* Animasi untuk PageHeaderWrapper */}
       {showHeader && (
         <motion.div
           variants={containerVariants}
@@ -86,25 +87,17 @@ const SalesInvoiceAnalytics: React.FC<SalesInvoiceAnalyticsProps> = ({
       )}
 
       <div className='flex flex-col gap-2'>
-        <div className='flex-1 min-w-[200px]'>
+        <div className='min-w-[200px]'>
           <SalesInvoiceFilterSummary />
         </div>
 
         <motion.div
-          className='flex-1 min-w-[200px]'
-          variants={containerVariants}
-          initial='hidden'
-          animate='visible'
-        ></motion.div>
-
-        {/* Animasi untuk SalesInvoiceOverview dengan layout */}
-        <motion.div
-          layout // Aktifkan animasi layout
-          transition={{ type: 'spring', stiffness: 300, damping: 30 }} // Transisi mulus
+          layout
+          transition={{ type: 'spring', stiffness: 300, damping: 30 }}
           className='w-full'
         >
           <SalesInvoiceOverview
-            showFloatingButton={true}
+            showFloatingButton={showList}
             showList={showList}
             fullChart={fullChart}
             onFilterChange={handleFilterChange}

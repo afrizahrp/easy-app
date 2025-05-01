@@ -34,11 +34,13 @@ ChartJS.register(
 );
 
 interface SalesInvoiceByPoTypeChartProps {
+  height?: number;
   isFullWidth?: boolean;
   onModeChange?: (isFull: boolean) => void;
 }
 
 const SalesInvoiceByPoTypeChart: React.FC<SalesInvoiceByPoTypeChartProps> = ({
+  height,
   isFullWidth,
   onModeChange,
 }) => {

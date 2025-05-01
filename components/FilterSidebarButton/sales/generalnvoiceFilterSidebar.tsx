@@ -23,10 +23,12 @@ import { ResetSalesInvoiceFilterStore } from '@/utils/reset-filter-state/sls/res
 
 interface GeneralInvoiceFilterSidebarProps<TData> {
   table?: Table<TData>;
+  onClose?: () => void;
 }
 
 export function GeneralInvoiceFilterSidebar<TData>({
   table,
+  onClose,
 }: GeneralInvoiceFilterSidebarProps<TData>) {
   const { startPeriod, setStartPeriod, endPeriod, setEndPeriod, reset } =
     useMonthYearPeriodStore();

@@ -1,4 +1,4 @@
-// components/Sls_InvoiceFilterSummary.tsx
+// components/sales/salesInvoiceFilterSummary.tsx
 'use client';
 import { useMonthYearPeriodStore, useSalesInvoiceHdFilterStore } from '@/store';
 import { FilterSummary } from '@/components/filterSummary';
@@ -22,7 +22,6 @@ export default function SalesInvoiceFilterSummary({
     setSalesPersonName,
   } = useSalesInvoiceHdFilterStore();
 
-  // Fungsi untuk clear filter
   const handleClear = (filterName: string) => {
     switch (filterName) {
       case 'startPeriod':
@@ -45,7 +44,6 @@ export default function SalesInvoiceFilterSummary({
     }
   };
 
-  // Susun filter, hanya tampilkan yang punya nilai (kecuali Periode)
   const filters = [
     {
       label: 'Invoice Period',
@@ -54,7 +52,7 @@ export default function SalesInvoiceFilterSummary({
           ? `${format(startPeriod, 'MMM yyyy')} - ${format(endPeriod, 'MMM yyyy')}`
           : startPeriod
             ? format(startPeriod, 'MMM yyyy')
-            : 'Jan 2025 - Apr 2025', // Default periode
+            : 'Jan 2025 - Apr 2025',
       isClearable: false,
     },
     ...(salesPersonName.length > 0
@@ -91,7 +89,7 @@ export default function SalesInvoiceFilterSummary({
 
   return (
     <div
-      className={`w-full border-t mt-4 pt-4 flex items-center bg-secondary text-primary dark:text-slate-400 px-4 py-3 rounded-md shadow-sm ${className}`}
+      className={`w-full flex items-center bg-secondary text-primary dark:text-slate-400 px-2 py-2 rounded-md shadow-sm ${className}`}
     >
       <div className='w-full flex justify-center font-semibold text-md'>
         <FilterSummary
