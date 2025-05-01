@@ -130,8 +130,8 @@ const SalesInvoiceByPeriodChart: React.FC<SalesInvoiceByPeriodChartProps> = ({
       className='bg-white dark:bg-[#18181b] p-4 rounded-lg shadow-sm h-96 flex flex-col'
       style={{ backgroundColor: hexBackground }}
     >
-      <div className='relative flex items-center justify-center mb-2'>
-        <h2 className='text-md text-muted-foreground font-semibold mx-auto'>
+      <div className='relative flex items-center mb-2'>
+        <h2 className='text-md text-muted-foreground font-semibold ml-2'>
           Sales Invoice by Monthly Period (in Millions IDR)
         </h2>
         <div className='absolute right-0 top-0 flex items-center space-x-2'>

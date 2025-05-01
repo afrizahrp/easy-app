@@ -192,8 +192,8 @@ const SalesBySalesPersonUnFilteredChart: React.FC<
         left: isFullScreen ? 0 : undefined,
       }}
     >
-      <div className='relative flex items-center justify-center mb-2'>
-        <h2 className='text-md text-muted-foreground font-semibold mx-auto'>
+      <div className='relative flex items-center mb-2'>
+        <h2 className='text-md text-muted-foreground font-semibold ml-2'>
           Top 5 Sales Performers (in Millions IDR)
         </h2>
         <div className='absolute right-0 top-0 flex items-center space-x-2'>

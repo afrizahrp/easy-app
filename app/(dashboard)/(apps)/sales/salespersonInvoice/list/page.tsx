@@ -5,7 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { InvoiceListTable } from './list-table';
 import LayoutLoader from '@/components/layout-loader';
 import { routes } from '@/config/routes';
-import PageHeaderWrapper from '@/components/page-header-wrapper';
+import { PageHeaderWrapper } from '@/components/page-header-wrapper';
 import useSalesInvoiceHd from '@/queryHooks/sls/useSalesInvoiceHd';
 import { SalesPersonInvoiceListColumns } from './list-table/components/columns';
 import { usePageStore } from '@/store';

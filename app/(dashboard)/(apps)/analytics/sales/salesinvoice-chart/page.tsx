@@ -1,6 +1,6 @@
-// app/analytics/sales/salesinvoice-chart/page.tsx
 'use client';
 import { useEffect, useState } from 'react';
+import { motion } from 'framer-motion'; // Impor Framer Motion
 import { Button } from '@/components/ui/button';
 import { Filter } from 'lucide-react';
 import { Table } from '@tanstack/react-table';
@@ -10,15 +10,16 @@ import { GeneralInvoiceFilterSidebar } from '@/components/FilterSidebarButton/sa
 import Draggable from 'react-draggable';
 import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
 import { PageHeaderWrapper } from '@/components/page-header-wrapper';
+import { FloatingFilterButton } from '@/components/ui/floating-filter-button';
 
 interface SalesInvoiceAnalyticsProps {
   showList?: boolean;
-  showHeader?: boolean; // Prop baru
+  showHeader?: boolean;
 }
 
 const SalesInvoiceAnalytics: React.FC<SalesInvoiceAnalyticsProps> = ({
   showList = true,
-  showHeader = true, // Default true
+  showHeader = true,
 }) => {
   const [buttonPosition, setButtonPosition] = useState({ x: 0, y: 0 });
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -62,29 +63,18 @@ const SalesInvoiceAnalytics: React.FC<SalesInvoiceAnalyticsProps> = ({
     setColumnFilters: () => {},
   } as unknown as Table<any>;
 
+  // Definisikan varian animasi
+  const containerVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
+  };
+
   return (
-    <div className='relative flex flex-col h-screen w-full p-4 gap-4'>
-      <Draggable
-        defaultPosition={{ x: 0, y: 0 }}
-        position={buttonPosition}
-        onDrag={handleDrag}
-      >
-        <div
-          className='fixed bottom-4 right-4 z-50'
-          style={{
-            transform: `translate(${buttonPosition.x}px, ${buttonPosition.y}px)`,
-          }}
-        >
-          <Button
-            size='sm'
-            onClick={() => setIsSidebarOpen(true)}
-            className='px-3 h-8 flex items-center gap-1 bg-primary text-white hover:bg-secondary-dark rounded-full hover:scale-105 transition-transform cursor-move shadow-md'
-          >
-            <Filter className='w-4 h-4' />
-            Filter
-          </Button>
-        </div>
-      </Draggable>
+    <div className='relative flex flex-col h-screen w-full p-1 gap-4'>
+      <FloatingFilterButton
+        onClick={() => setIsSidebarOpen(true)}
+        showFloatingButton={true}
+      />
 
       <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
         <SheetContent className='pt-5 w-80 sm:w-96'>
@@ -93,27 +83,55 @@ const SalesInvoiceAnalytics: React.FC<SalesInvoiceAnalyticsProps> = ({
         </SheetContent>
       </Sheet>
 
-      <PageHeaderWrapper
-        show={showHeader}
-        title='Sales Invoice Analytics'
-        hideBreadcrumb={false}
-        breadcrumb={[
-          { name: 'Analytics', href: '/analytics/sales' },
-          {
-            name: 'Sales Invoice Analytics',
-            href: '/analytics/sales/salesinvoice-chart',
-          },
-        ]}
-      />
-      <div className='flex-1 min-w-[200px]'>
-        <SalesInvoiceFilterSummary />
-      </div>
+      {/* Animasi untuk PageHeaderWrapper */}
+      {showHeader && (
+        <motion.div
+          variants={containerVariants}
+          initial='hidden'
+          animate='visible'
+        >
+          <PageHeaderWrapper
+            show={showHeader}
+            title='Sales Invoice Analytics'
+            hideBreadcrumb={false}
+            breadcrumb={[
+              { name: 'Analytics', href: '/analytics/sales' },
+              {
+                name: 'Sales Invoice Analytics',
+                href: '/analytics/sales/salesinvoice-chart',
+              },
+            ]}
+          />
+        </motion.div>
+      )}
 
-      <SalesInvoiceOverview
-        showList={showList}
-        fullChart={fullChart}
-        onFilterChange={handleFilterChange}
-      />
+      {/* Animasi untuk SalesInvoiceFilterSummary */}
+
+      <div className='flex flex-col gap-2'>
+        <div className='flex-1 min-w-[200px]'>
+          <SalesInvoiceFilterSummary />
+        </div>
+
+        <motion.div
+          className='flex-1 min-w-[200px]'
+          variants={containerVariants}
+          initial='hidden'
+          animate='visible'
+        ></motion.div>
+
+        {/* Animasi untuk SalesInvoiceOverview dengan layout */}
+        <motion.div
+          layout // Aktifkan animasi layout
+          transition={{ type: 'spring', stiffness: 300, damping: 30 }} // Transisi mulus
+          className='w-full'
+        >
+          <SalesInvoiceOverview
+            showList={showList}
+            fullChart={fullChart}
+            onFilterChange={handleFilterChange}
+          />
+        </motion.div>
+      </div>
     </div>
   );
 };

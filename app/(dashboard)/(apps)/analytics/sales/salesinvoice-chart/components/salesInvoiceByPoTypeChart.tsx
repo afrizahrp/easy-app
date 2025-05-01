@@ -53,6 +53,13 @@ const SalesInvoiceByPoTypeChart: React.FC<SalesInvoiceByPoTypeChartProps> = ({
   const { toast } = useToast();
   const { data, isLoading, isFetching, error } = useSalesByPeriodAndPoType();
 
+  function getRandomColor(alpha = 1) {
+    const r = Math.floor(Math.random() * 200) + 30;
+    const g = Math.floor(Math.random() * 200) + 30;
+    const b = Math.floor(Math.random() * 200) + 30;
+    return `rgba(${r},${g},${b},${alpha})`;
+  }
+
   const chartData = React.useMemo(() => {
     if (!data || data.length === 0) return null;
 
@@ -63,25 +70,19 @@ const SalesInvoiceByPoTypeChart: React.FC<SalesInvoiceByPoTypeChartProps> = ({
           poType: string;
           period: string;
           months: Record<string, number>;
-        }) => ({
-          label: poTypeData.poType,
-          // label: `${poTypeData.poType} (${poTypeData.period})`,
+        }) => {
+          const color = getRandomColor(1);
+          const bgColor = getRandomColor(0.2);
+          return {
+            // label: poTypeData.poType,
+            label: `${poTypeData.poType} (${poTypeData.period})`,
 
-          data: months.map((month) => poTypeData.months[month] || 0),
-          borderColor:
-            poTypeData.poType === 'eCatalog'
-              ? 'rgba(75, 192, 192, 1)'
-              : poTypeData.poType === 'Regular'
-                ? 'rgba(255, 99, 132, 1)'
-                : 'rgba(201, 203, 207, 1)',
-          backgroundColor:
-            poTypeData.poType === 'eCatalog'
-              ? 'rgba(75, 192, 192, 0.2)'
-              : poTypeData.poType === 'Regular'
-                ? 'rgba(255, 99, 132, 0.2)'
-                : 'rgba(201, 203, 207, 0.2)',
-          tension: 0.4, // Smooth curve
-        })
+            data: months.map((month) => poTypeData.months[month] || 0),
+            borderColor: color,
+            backgroundColor: bgColor,
+            tension: 0.4,
+          };
+        }
       ),
     };
   }, [data]);

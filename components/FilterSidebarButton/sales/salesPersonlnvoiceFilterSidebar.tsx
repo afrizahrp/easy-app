@@ -89,8 +89,8 @@ export function SalesPersonInvoiceFilterSidebar<TData>({
       table.getColumn('invoiceDate')?.setFilterValue(filterValue);
     }
 
-    const filteredRows = table ? table.getFilteredRowModel().rows : [];
-    console.log('Filtered rows count:', filteredRows.length);
+    // const filteredRows = table ? table.getFilteredRowModel().rows : [];
+    // console.log('Filtered rows count:', filteredRows.length);
   }, [
     startPeriod,
     endPeriod,

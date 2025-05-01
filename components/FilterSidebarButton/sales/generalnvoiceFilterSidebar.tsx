@@ -17,17 +17,18 @@ import { DataTableFacetedFilter } from '@/components/ui/data-table-faceted-filte
 import { useMonthYearPeriodStore, useSalesInvoiceHdFilterStore } from '@/store';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/components/ui/use-toast';
+import { ResetSalesInvoiceFilterStore } from '@/utils/reset-filter-state/sls/resetSalesInvoiceFilterStore';
 
 // import DatePicker from 'react-datepicker';
 
 interface GeneralInvoiceFilterSidebarProps<TData> {
-  table: Table<TData>;
+  table?: Table<TData>;
 }
 
 export function GeneralInvoiceFilterSidebar<TData>({
   table,
 }: GeneralInvoiceFilterSidebarProps<TData>) {
-  const { startPeriod, setStartPeriod, endPeriod, setEndPeriod } =
+  const { startPeriod, setStartPeriod, endPeriod, setEndPeriod, reset } =
     useMonthYearPeriodStore();
 
   const {
@@ -74,32 +75,32 @@ export function GeneralInvoiceFilterSidebar<TData>({
       });
     }
 
-    table
-      .getColumn('paidStatus')
-      ?.setFilterValue(paidStatus.length ? paidStatus : undefined);
-    table
-      .getColumn('salesPersonName')
-      ?.setFilterValue(salesPersonName.length ? salesPersonName : undefined);
-    table
-      .getColumn('poType')
-      ?.setFilterValue(poType.length ? poType : undefined);
+    if (table) {
+      table
+        .getColumn('paidStatus')
+        ?.setFilterValue(paidStatus.length ? paidStatus : undefined);
 
-    // Terapkan filter invoiceDate
-    let filterValue: { start: Date; end: Date } | undefined;
-    if (normalizedStart && startPeriod) {
-      filterValue = {
-        start: normalizedStart,
-        end: normalizedEnd ?? zonedTimeToUtc(endOfMonth(startPeriod), 'UTC'),
-      };
+      table
+        .getColumn('poType')
+        ?.setFilterValue(poType.length ? poType : undefined);
+
+      table
+        .getColumn('salesPersonName')
+        ?.setFilterValue(salesPersonName.length ? salesPersonName : undefined);
+
+      let filterValue: { start: Date; end: Date } | undefined;
+      if (normalizedStart && startPeriod) {
+        filterValue = {
+          start: normalizedStart,
+          end: normalizedEnd ?? zonedTimeToUtc(endOfMonth(startPeriod), 'UTC'),
+        };
+      }
+      table.getColumn('invoiceDate')?.setFilterValue(filterValue);
     }
 
-    console.log('Setting invoiceDate filter:', filterValue);
-
-    table.getColumn('invoiceDate')?.setFilterValue(filterValue);
-
     // Log data yang difilter
-    const filteredRows = table.getFilteredRowModel().rows;
-    console.log('Filtered rows count:', filteredRows.length);
+    // const filteredRows = table ? table.getFilteredRowModel().rows : [];
+    // console.log('Filtered rows count:', filteredRows.length);
   }, [
     startPeriod,
     endPeriod,
@@ -135,31 +136,13 @@ export function GeneralInvoiceFilterSidebar<TData>({
     useSalesInvoiceHdPoTypeOptions();
 
   const handleReset = () => {
-    // console.log('Resetting filters...');
-    table.resetColumnFilters();
-    setPaidStatus([]);
-    setSalesPersonName([]);
-    setPoType([]);
-    // Atur ulang ke nilai default
-    setStartPeriod(
-      setDate(startOfMonth(new Date(2025, 0, 1)), {
-        hours: 0,
-        minutes: 0,
-        seconds: 0,
-        milliseconds: 0,
-      })
-    );
-    setEndPeriod(
-      setDate(endOfMonth(new Date()), {
-        hours: 23,
-        minutes: 59,
-        seconds: 59,
-        milliseconds: 999,
-      })
-    );
-    toast({
-      description: 'All filters have been cleared.',
-      color: 'success',
+    ResetSalesInvoiceFilterStore({
+      table: table!,
+      setPaidStatus,
+      setSalesPersonName,
+      setPoType,
+      resetPeriod: reset,
+      toast,
     });
   };
 
@@ -284,7 +267,7 @@ export function GeneralInvoiceFilterSidebar<TData>({
         </div> */}
 
         <div className='w-full py-3'>
-          {table.getColumn('poType') && (
+          {table?.getColumn('poType') && (
             <DataTableFacetedFilter
               column={table.getColumn('poType')}
               title='PO Type'

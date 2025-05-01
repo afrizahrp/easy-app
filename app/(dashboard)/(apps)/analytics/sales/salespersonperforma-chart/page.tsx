@@ -123,7 +123,7 @@ const SalesPersonPerformaAnalytics: React.FC<
   } as unknown as Table<any>;
 
   return (
-    <div className='relative flex flex-col h-screen w-full p-4 gap-4'>
+    <div className='relative flex flex-col h-screen w-full p-1 gap-4'>
       {/* Floating Button */}
       <Draggable
         defaultPosition={{ x: 0, y: 0 }}
@@ -169,7 +169,7 @@ const SalesPersonPerformaAnalytics: React.FC<
       />
 
       {/* Main Content */}
-      <div className='flex flex-col gap-4'>
+      <div className='flex flex-col gap-2'>
         <div className='flex-1 min-w-[200px]'>
           <SalesInvoiceFilterSummary />
         </div>

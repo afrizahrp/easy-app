@@ -7,6 +7,7 @@ import SalesInvoiceAnalytics from './salesinvoice-chart/page';
 import SalesPersonPerformaAnalytics from './salespersonperforma-chart/page';
 import { PageHeaderWrapper } from '@/components/page-header-wrapper';
 import { Button } from '@/components/ui/button';
+import { FloatingFilterButton } from '@/components/ui/floating-filter-button';
 
 export default function SalesPage() {
   const cardVariants = {
@@ -15,28 +16,27 @@ export default function SalesPage() {
   };
 
   return (
-    <div className='flex flex-col min-h-screen w-full p-4 md:p-8 lg:p-10 gap-8 bg-gray-100 dark:bg-gray-900'>
+    <div className='flex flex-col w-full pt-2 pb-4 px-2 md:pt-4 md:pb-8 md:px-8 lg:pt-4 lg:pb-10 lg:px-10 gap-8 bg-gray-100 dark:bg-gray-900'>
       {/* <AnalyticsNav /> */}
       <div className='text-center md:text-left'>
-        <h1 className='text-4xl font-bold tracking-tight  text-slate-600 dark:text-slate-400'>
+        <h1 className='text-4xl font-bold tracking-tight text-slate-600 dark:text-slate-400'>
           📊 Sales Analytics
         </h1>
         <p className='text-lg text-slate-600 dark:text-slate-400 mt-2'>
           Explore sales performance and invoice summaries with interactive
           insights.
         </p>
-        {/* {console.log('SalesPage - Header rendered')} */}
       </div>
-      <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+      <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
         <motion.div
           className='bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-md border border-gray-200 dark:border-gray-700 transition-all hover:shadow-lg hover:-translate-y-1'
           variants={cardVariants}
           initial='hidden'
           animate='visible'
         >
-          <div className='flex items-center justify-between mb-4'>
+          <div className='flex items-center justify-between mb-0'>
             <div className='flex items-center gap-3'>
-              <FileText className='w-6 h-6 text-blue-600 dark:text-blue-400' />
+              <FileText className='w-4 h-4 text-blue-600 dark:text-blue-400' />
               <h2 className='text-xl font-semibold text-gray-900 dark:text-white'>
                 Sales Invoice Overview
               </h2>
@@ -56,6 +56,8 @@ export default function SalesPage() {
               </Link>
             </Button>
           </div>
+          <FloatingFilterButton onClick={() => {}} showFloatingButton={false} />
+
           <PageHeaderWrapper
             show={false}
             title='Sales Invoice Overview'
@@ -69,9 +71,9 @@ export default function SalesPage() {
           initial='hidden'
           animate='visible'
         >
-          <div className='flex items-center justify-between mb-4'>
+          <div className='flex items-center justify-between mb-0'>
             <div className='flex items-center gap-3'>
-              <BarChart2 className='w-6 h-6 text-green-600 dark:text-green-400' />
+              <BarChart2 className='w-4 h-4 text-green-600 dark:text-green-400' />
               <h2 className='text-xl font-semibold text-gray-900 dark:text-white'>
                 Salesperson Performance
               </h2>
