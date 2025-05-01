@@ -7,7 +7,6 @@ import SalesInvoiceAnalytics from './salesinvoice-chart/page';
 import SalesPersonPerformaAnalytics from './salespersonperforma-chart/page';
 import { PageHeaderWrapper } from '@/components/page-header-wrapper';
 import { Button } from '@/components/ui/button';
-import { FloatingFilterButton } from '@/components/ui/floating-filter-button';
 
 export default function SalesPage() {
   const cardVariants = {
@@ -56,7 +55,6 @@ export default function SalesPage() {
               </Link>
             </Button>
           </div>
-          <FloatingFilterButton onClick={() => {}} showFloatingButton={false} />
 
           <PageHeaderWrapper
             show={false}

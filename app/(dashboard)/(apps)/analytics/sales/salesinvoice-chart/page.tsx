@@ -1,16 +1,13 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { motion } from 'framer-motion'; // Impor Framer Motion
 import { Button } from '@/components/ui/button';
-import { Filter } from 'lucide-react';
 import { Table } from '@tanstack/react-table';
 import SalesInvoiceFilterSummary from '@/components/sales/salesInvoiceFilterSummary';
 import SalesInvoiceOverview from '../salesinvoice-chart/components/salesInvoiceOverview';
 import { GeneralInvoiceFilterSidebar } from '@/components/FilterSidebarButton/sales/generalnvoiceFilterSidebar';
-import Draggable from 'react-draggable';
 import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
 import { PageHeaderWrapper } from '@/components/page-header-wrapper';
-import { FloatingFilterButton } from '@/components/ui/floating-filter-button';
 
 interface SalesInvoiceAnalyticsProps {
   showList?: boolean;
@@ -21,7 +18,6 @@ const SalesInvoiceAnalytics: React.FC<SalesInvoiceAnalyticsProps> = ({
   showList = true,
   showHeader = true,
 }) => {
-  const [buttonPosition, setButtonPosition] = useState({ x: 0, y: 0 });
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [fullChart, setFullChart] = useState<'period' | 'poType' | null>(null);
 
@@ -36,17 +32,6 @@ const SalesInvoiceAnalytics: React.FC<SalesInvoiceAnalyticsProps> = ({
     } else {
       setFullChart(null);
     }
-  };
-
-  useEffect(() => {
-    localStorage.setItem(
-      'filterButtonPosition',
-      JSON.stringify(buttonPosition)
-    );
-  }, [buttonPosition]);
-
-  const handleDrag = (e: any, data: { x: number; y: number }) => {
-    setButtonPosition({ x: data.x, y: data.y });
   };
 
   const dummyTable = {
@@ -71,13 +56,8 @@ const SalesInvoiceAnalytics: React.FC<SalesInvoiceAnalyticsProps> = ({
 
   return (
     <div className='relative flex flex-col h-screen w-full p-1 gap-4'>
-      <FloatingFilterButton
-        onClick={() => setIsSidebarOpen(true)}
-        showFloatingButton={true}
-      />
-
       <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
-        <SheetContent className='pt-5 w-80 sm:w-96'>
+        <SheetContent className='pt-5 w-60 sm:w-96'>
           <SheetTitle>Filter Data</SheetTitle>
           <GeneralInvoiceFilterSidebar table={dummyTable} />
         </SheetContent>
@@ -105,8 +85,6 @@ const SalesInvoiceAnalytics: React.FC<SalesInvoiceAnalyticsProps> = ({
         </motion.div>
       )}
 
-      {/* Animasi untuk SalesInvoiceFilterSummary */}
-
       <div className='flex flex-col gap-2'>
         <div className='flex-1 min-w-[200px]'>
           <SalesInvoiceFilterSummary />
@@ -126,6 +104,7 @@ const SalesInvoiceAnalytics: React.FC<SalesInvoiceAnalyticsProps> = ({
           className='w-full'
         >
           <SalesInvoiceOverview
+            showFloatingButton={true}
             showList={showList}
             fullChart={fullChart}
             onFilterChange={handleFilterChange}

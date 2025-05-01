@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import SalesBySalesPersonFilteredChart from './salesBySalesPersonFilteredChart';
 import SalesBySalesPersonUnFilteredChart from './salesBySalesPersonUnFilteredChart';
 import { useSalesInvoiceHdFilterStore } from '@/store';
+import { FloatingFilterButton } from '@/components/ui/floating-filter-button';
 
 interface SalesPersonSelection {
   salesPersonName: string;
@@ -12,6 +13,8 @@ interface SalesPersonSelection {
 }
 
 interface SalesPersonPerformaOverviewProps {
+  showFloatingButton?: boolean;
+
   isFullWidth?: boolean;
   onModeChange?: (isFullPage: boolean) => void;
   onSalesPersonSelect?: (selection: SalesPersonSelection | null) => void;
@@ -19,14 +22,19 @@ interface SalesPersonPerformaOverviewProps {
 
 const SalesPersonPerformaOverview: React.FC<
   SalesPersonPerformaOverviewProps
-> = ({ isFullWidth = true, onModeChange, onSalesPersonSelect }) => {
+> = ({
+  showFloatingButton,
+  isFullWidth = true,
+  onModeChange,
+  onSalesPersonSelect,
+}) => {
   const { salesPersonName, setSalesPersonName } = useSalesInvoiceHdFilterStore(
     (state) => ({
       salesPersonName: state.salesPersonName,
       setSalesPersonName: state.setSalesPersonName,
     })
   );
-
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isFullScreen, setIsFullScreen] = useState(false);
 
   const handleSalesPersonSelect = (selection: SalesPersonSelection | null) => {
@@ -54,6 +62,12 @@ const SalesPersonPerformaOverview: React.FC<
       transition={{ type: 'spring', stiffness: 300, damping: 30 }}
       className='w-full'
     >
+      {showFloatingButton && (
+        <FloatingFilterButton
+          onClick={() => setIsSidebarOpen(true)}
+          showFloatingButton={true}
+        />
+      )}
       {validSalesPersonNames.length > 0 ? (
         <SalesBySalesPersonFilteredChart
           isFullWidth={isFullWidth}

@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
-import Draggable from 'react-draggable';
+import Draggable, { DraggableData, DraggableEvent } from 'react-draggable';
 import { Button } from '@/components/ui/button';
 import { Filter } from 'lucide-react';
+import { debounce } from 'lodash';
 
 type FloatingFilterButtonProps = {
   onClick: () => void;
   localStorageKey?: string;
-  showFloatingButton?: boolean; // opsional, default true
+  showFloatingButton?: boolean;
 };
 
 export const FloatingFilterButton = ({
@@ -24,15 +25,20 @@ export const FloatingFilterButton = ({
         setButtonPosition(parsed);
       } catch (error) {
         console.error('Failed to parse button position:', error);
+        setButtonPosition({ x: 0, y: 0 });
       }
     }
   }, [localStorageKey]);
 
   useEffect(() => {
-    localStorage.setItem(localStorageKey, JSON.stringify(buttonPosition));
+    const savePosition = debounce(() => {
+      localStorage.setItem(localStorageKey, JSON.stringify(buttonPosition));
+    }, 300);
+    savePosition();
+    return () => savePosition.cancel();
   }, [buttonPosition, localStorageKey]);
 
-  const handleDrag = (_e: any, data: { x: number; y: number }) => {
+  const handleDrag = (_e: DraggableEvent, data: DraggableData) => {
     setButtonPosition({ x: data.x, y: data.y });
   };
 
@@ -40,15 +46,11 @@ export const FloatingFilterButton = ({
 
   return (
     <Draggable position={buttonPosition} onDrag={handleDrag}>
-      <div
-        className='fixed bottom-4 right-4 z-50'
-        style={{
-          transform: `translate(${buttonPosition.x}px, ${buttonPosition.y}px)`,
-        }}
-      >
+      <div className='fixed bottom-4 right-4 z-50'>
         <Button
           size='sm'
           onClick={onClick}
+          aria-label='Open filter options'
           className='px-3 h-8 flex items-center gap-1 bg-primary text-white hover:bg-secondary-dark rounded-full hover:scale-105 transition-transform cursor-move shadow-md'
         >
           <Filter className='w-4 h-4' />

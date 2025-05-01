@@ -14,6 +14,7 @@ import { SalesPersonInvoiceFilterSidebar } from '@/components/FilterSidebarButto
 import Draggable from 'react-draggable';
 import { Table } from '@tanstack/react-table';
 import { PageHeaderWrapper } from '@/components/page-header-wrapper';
+import { FloatingFilterButton } from '@/components/ui/floating-filter-button';
 
 interface SalesPersonSelection {
   salesPersonName: string;
@@ -125,7 +126,7 @@ const SalesPersonPerformaAnalytics: React.FC<
   return (
     <div className='relative flex flex-col h-screen w-full p-1 gap-4'>
       {/* Floating Button */}
-      <Draggable
+      {/* <Draggable
         defaultPosition={{ x: 0, y: 0 }}
         position={buttonPosition}
         onDrag={handleDrag}
@@ -145,7 +146,7 @@ const SalesPersonPerformaAnalytics: React.FC<
             Filter
           </Button>
         </div>
-      </Draggable>
+      </Draggable> */}
 
       {/* Sidebar as Sheet */}
       <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
@@ -197,6 +198,7 @@ const SalesPersonPerformaAnalytics: React.FC<
             }}
           >
             <SalesPersonPerformaOverview
+              showFloatingButton={false}
               isFullWidth={fullChart === 'period'}
               onModeChange={handleModeChange}
               onSalesPersonSelect={handleSalesPersonSelect}

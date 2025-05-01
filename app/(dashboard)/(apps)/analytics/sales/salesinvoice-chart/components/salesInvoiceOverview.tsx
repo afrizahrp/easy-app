@@ -5,42 +5,45 @@ import SalesByPeriod from './salesInvoiceByPeriodChart';
 import SalesByPoType from './salesInvoiceByPoTypeChart';
 import SalesInvoiceHdList from '@/app/(dashboard)/(apps)/sales/invoice-hd/list/page';
 import { PageHeaderWrapper } from '@/components/page-header-wrapper';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { GeneralInvoiceFilterSidebar } from '@/components/FilterSidebarButton/sales/generalnvoiceFilterSidebar';
-import SalesInvoiceByPoTypeChart from './salesInvoiceByPoTypeChart';
-import SalesInvoiceByPeriodChart from './salesInvoiceByPeriodChart';
+import { FloatingFilterButton } from '@/components/ui/floating-filter-button';
 
 interface SalesInvoiceOverviewProps {
   showList?: boolean;
+  showFloatingButton?: boolean;
   fullChart?: 'period' | 'poType' | null;
   onFilterChange?: (filters: { period?: string; poType?: string }) => void;
 }
 
 const SalesInvoiceOverview: React.FC<SalesInvoiceOverviewProps> = ({
   showList = true,
+  showFloatingButton = true,
   fullChart = null,
   onFilterChange,
 }) => {
-  const [buttonPosition, setButtonPosition] = useState({ x: 0, y: 0 });
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  useEffect(() => {
-    const saved = localStorage.getItem('filterButtonPosition');
-    if (saved) setButtonPosition(JSON.parse(saved));
-  }, []);
-
-  // Tentukan tata letak untuk chart (hanya digunakan saat showList={true})
   const chartLayoutClass = 'flex flex-col md:flex-row w-full gap-4';
-
-  // Tentukan class lebar untuk chart (hanya digunakan saat showList={true})
   const chartWidthClass = (isFull: boolean) =>
     isFull ? 'w-full' : 'w-full md:w-1/2';
 
   return (
     <div className='relative flex flex-col h-screen w-full p-2 gap-4'>
-      {/* Bagian Chart */}
+      {showFloatingButton && (
+        <FloatingFilterButton
+          onClick={() => setIsSidebarOpen(true)}
+          showFloatingButton={true}
+        />
+      )}
+      {/* {isSidebarOpen && (
+        <GeneralInvoiceFilterSidebar
+          onClose={() => setIsSidebarOpen(false)}
+          onFilterChange={onFilterChange}
+        />
+      )} */}
+
       {showList ? (
-        // Di halaman utama (showList={true}), tampilkan kedua chart secara horizontal
         <div className={chartLayoutClass}>
           {(fullChart === null || fullChart === 'period') && (
             <div
@@ -54,12 +57,11 @@ const SalesInvoiceOverview: React.FC<SalesInvoiceOverviewProps> = ({
               />
             </div>
           )}
-
           {(fullChart === null || fullChart === 'poType') && (
             <div
               className={`${chartWidthClass(fullChart === 'poType')} overflow-x-auto max-w-full`}
             >
-              <SalesInvoiceByPoTypeChart
+              <SalesByPoType
                 isFullWidth={fullChart === 'poType'}
                 onModeChange={(isFull) =>
                   onFilterChange?.({ poType: isFull ? 'full' : undefined })
@@ -69,10 +71,9 @@ const SalesInvoiceOverview: React.FC<SalesInvoiceOverviewProps> = ({
           )}
         </div>
       ) : (
-        // Di SalesPage (showList={false}), hanya tampilkan SalesByPeriod
         <div className='w-full overflow-x-auto max-w-full'>
-          <SalesInvoiceByPeriodChart
-            isFullWidth={false} // Tidak perlu full width di SalesPage
+          <SalesByPeriod
+            isFullWidth={false}
             onModeChange={(isFull) =>
               onFilterChange?.({ period: isFull ? 'full' : undefined })
             }
@@ -80,7 +81,6 @@ const SalesInvoiceOverview: React.FC<SalesInvoiceOverviewProps> = ({
         </div>
       )}
 
-      {/* Bagian Table */}
       {showList && (
         <div className='w-full flex-1'>
           <PageHeaderWrapper title='Invoice List' />
