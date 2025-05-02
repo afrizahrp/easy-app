@@ -1,8 +1,7 @@
-// analytics/sales/salesinvoice-chart/components/SalesInvoiceOverview.tsx
 'use client';
 
-import SalesByPeriod from './salesInvoiceByPeriodChart';
-import SalesByPoType from './salesInvoiceByPoTypeChart';
+import SalesInvoiceByPeriodChart from './salesInvoiceByPeriodChart';
+import SalesInvoiceByPoTypeChart from './salesInvoiceByPoTypeChart';
 import SalesInvoiceHdList from '@/app/(dashboard)/(apps)/sales/invoice-hd/list/page';
 import { PageHeaderWrapper } from '@/components/page-header-wrapper';
 import { useState } from 'react';
@@ -24,7 +23,8 @@ const SalesInvoiceOverview: React.FC<SalesInvoiceOverviewProps> = ({
 }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  const chartLayoutClass = 'flex flex-col md:flex-row w-full gap-4';
+  const chartLayoutClass =
+    'flex flex-col md:flex-row w-full gap-4 items-stretch';
   const chartWidthClass = (isFull: boolean) =>
     isFull ? 'w-full' : 'w-full md:w-1/2';
 
@@ -51,12 +51,13 @@ const SalesInvoiceOverview: React.FC<SalesInvoiceOverviewProps> = ({
             <div
               className={`${chartWidthClass(fullChart === 'period')} overflow-x-auto max-w-full`}
             >
-              <SalesByPeriod
+              <SalesInvoiceByPeriodChart
                 isFullWidth={fullChart === 'period'}
                 onModeChange={(isFull) =>
                   onFilterChange?.({ period: isFull ? 'full' : undefined })
                 }
-                height={400} // Tinggi untuk halaman utama
+                height={400}
+                isCompact={false}
               />
             </div>
           )}
@@ -64,25 +65,26 @@ const SalesInvoiceOverview: React.FC<SalesInvoiceOverviewProps> = ({
             <div
               className={`${chartWidthClass(fullChart === 'poType')} overflow-x-auto max-w-full`}
             >
-              <SalesByPoType
+              <SalesInvoiceByPoTypeChart
                 isFullWidth={fullChart === 'poType'}
                 onModeChange={(isFull) =>
                   onFilterChange?.({ poType: isFull ? 'full' : undefined })
                 }
-                height={400} // Tinggi untuk halaman utama
+                height={400}
+                isCompact={false}
               />
             </div>
           )}
         </div>
       ) : (
         <div className='w-full overflow-x-auto max-w-full h-fit min-h-0'>
-          <SalesByPeriod
+          <SalesInvoiceByPeriodChart
             isFullWidth={false}
             onModeChange={(isFull) =>
               onFilterChange?.({ period: isFull ? 'full' : undefined })
             }
-            height={250} // Tinggi untuk SalesPage
-            isCompact={true} // Mode kompak untuk preview
+            height={250}
+            isCompact={true}
           />
         </div>
       )}

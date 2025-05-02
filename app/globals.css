@@ -662,4 +662,16 @@ html[dir='rtl'] .react-select .select__loading-indicator {
   animation: shimmer 2s infinite;
 }
 
+.chart-container {
+  height: 400px; /* Sesuaikan dengan height default */
+  display: flex;
+  flex-direction: column;
+}
+.chart-container.compact {
+  height: 250px; /* Sesuaikan dengan tinggi saat isCompact=true */
+}
+.chart-container.full {
+  height: 100%; /* Sesuaikan dengan tinggi penuh saat isFullWidth=true */
+}
+
 /*# sourceMappingURL=global.css.map */

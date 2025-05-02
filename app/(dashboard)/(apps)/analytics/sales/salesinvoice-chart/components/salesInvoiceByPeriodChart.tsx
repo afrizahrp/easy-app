@@ -130,14 +130,14 @@ const SalesInvoiceByPeriodChart: React.FC<SalesInvoiceByPeriodChartProps> = ({
 
   return (
     <div
-      className='bg-white dark:bg-[#18181b] p-4 rounded-lg shadow-sm flex flex-col h-fit min-h-0'
+      className={`chart-container ${isCompact ? 'compact' : ''} bg-white dark:bg-[#18181b] p-4 rounded-lg shadow-sm flex flex-col h-fit min-h-0`}
       style={{ backgroundColor: hexBackground }}
     >
       <div className='relative flex items-center mb-2'>
-        <h2 className='text-md text-muted-foreground font-semibold ml-2'>
+        <h2 className='text-sm text-muted-foreground font-semibold ml-2'>
           Sales Invoice by Monthly Period (in Millions IDR)
         </h2>
-        <div className='absolute right-0 top-0 flex items-center space-x-2'>
+        <div className='absolute right-0 top-0 flex items-center text-muted-foreground text-xs space-x-2'>
           <Label htmlFor='chart-mode-period'>
             {isFullWidth ? 'Full Width' : 'Half Width'}
           </Label>

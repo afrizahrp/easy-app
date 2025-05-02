@@ -35,12 +35,14 @@ ChartJS.register(
 
 interface SalesInvoiceByPoTypeChartProps {
   height?: number;
+  isCompact?: boolean;
   isFullWidth?: boolean;
   onModeChange?: (isFull: boolean) => void;
 }
 
 const SalesInvoiceByPoTypeChart: React.FC<SalesInvoiceByPoTypeChartProps> = ({
   height,
+  isCompact = false,
   isFullWidth,
   onModeChange,
 }) => {
@@ -55,12 +57,36 @@ const SalesInvoiceByPoTypeChart: React.FC<SalesInvoiceByPoTypeChartProps> = ({
   const { toast } = useToast();
   const { data, isLoading, isFetching, error } = useSalesByPeriodAndPoType();
 
-  function getRandomColor(alpha = 1) {
-    const r = Math.floor(Math.random() * 200) + 30;
-    const g = Math.floor(Math.random() * 200) + 30;
-    const b = Math.floor(Math.random() * 200) + 30;
-    return `rgba(${r},${g},${b},${alpha})`;
-  }
+  // Definisikan palet warna fixed berdasarkan poType dan period
+  const colorMap: Record<
+    string,
+    { borderColor: string; backgroundColor: string }
+  > = {
+    Regular_2023: {
+      borderColor: '#22C55E',
+      backgroundColor: 'rgba(34, 197, 94, 0.2)',
+    }, // Green
+    eCatalog_2023: {
+      borderColor: '#3B82F6',
+      backgroundColor: 'rgba(59, 130, 246, 0.2)',
+    }, // Blue
+    Regular_2024: {
+      borderColor: '#EF4444',
+      backgroundColor: 'rgba(239, 68, 68, 0.2)',
+    }, // Red
+    eCatalog_2024: {
+      borderColor: '#8B5CF6',
+      backgroundColor: 'rgba(139, 92, 246, 0.2)',
+    }, // Purple
+    Regular_2025: {
+      borderColor: '#EC4899',
+      backgroundColor: 'rgba(236, 72, 153, 0.2)',
+    }, // Pink
+    eCatalog_2025: {
+      borderColor: '#1E3A8A',
+      backgroundColor: 'rgba(30, 58, 138, 0.2)',
+    }, // Navy
+  };
 
   const chartData = React.useMemo(() => {
     if (!data || data.length === 0) return null;
@@ -73,15 +99,19 @@ const SalesInvoiceByPoTypeChart: React.FC<SalesInvoiceByPoTypeChartProps> = ({
           period: string;
           months: Record<string, number>;
         }) => {
-          const color = getRandomColor(1);
-          const bgColor = getRandomColor(0.2);
+          const colorKey = `${poTypeData.poType}_${poTypeData.period}`;
+          // Ambil warna dari colorMap, fallback ke warna default jika tidak ada
+          const { borderColor, backgroundColor } = colorMap[colorKey] || {
+            borderColor: '#6B7280', // Gray sebagai fallback
+            backgroundColor: 'rgba(107, 114, 128, 0.2)',
+          };
           return {
             // label: poTypeData.poType,
             label: `${poTypeData.poType} (${poTypeData.period})`,
 
             data: months.map((month) => poTypeData.months[month] || 0),
-            borderColor: color,
-            backgroundColor: bgColor,
+            borderColor,
+            backgroundColor,
             tension: 0.4,
           };
         }
@@ -107,14 +137,14 @@ const SalesInvoiceByPoTypeChart: React.FC<SalesInvoiceByPoTypeChartProps> = ({
 
   return (
     <div
-      className='bg-white dark:bg-[#18181b] p-4 rounded-lg shadow-sm h-96 flex flex-col'
+      className={`chart-container ${isCompact ? 'compact' : ''} bg-white dark:bg-[#18181b] p-4 rounded-lg shadow-sm flex flex-col h-fit min-h-0`}
       style={{ backgroundColor: hexBackground }}
     >
-      <div className='relative flex items-center justify-center mb-2'>
-        <h2 className='text-md text-muted-foreground font-semibold mx-auto'>
+      <div className='relative flex items-center mb-2'>
+        <h2 className='text-sm text-muted-foreground font-semibold ml-2'>
           Monthly Sales Invoice by PO Type (in Millions IDR)
         </h2>
-        <div className='absolute right-0 top-0 flex items-center space-x-2'>
+        <div className='absolute right-0 top-0 flex items-center text-muted-foreground text-xs space-x-2'>
           <Label htmlFor='chart-mode-potype'>
             {isFullWidth ? 'Full Width' : 'Half Width'}
           </Label>

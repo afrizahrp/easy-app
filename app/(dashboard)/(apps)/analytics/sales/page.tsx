@@ -64,7 +64,7 @@ export default function SalesPage() {
             <SalesInvoiceAnalytics showList={false} showHeader={false} />
           </div>
         </motion.div>
-        {/* <motion.div
+        <motion.div
           className='bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-md border border-gray-200 dark:border-gray-700 transition-all hover:shadow-lg hover:-translate-y-1 flex flex-col min-h-0 h-fit'
           variants={cardVariants}
           initial='hidden'
@@ -100,7 +100,7 @@ export default function SalesPage() {
           <div className='flex-1 min-h-0 overflow-hidden'>
             <SalesPersonPerformaAnalytics showList={false} showHeader={false} />
           </div>
-        </motion.div> */}
+        </motion.div>
       </div>
     </div>
   );
