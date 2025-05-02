@@ -9,6 +9,7 @@ interface SalesPersonSelection {
   salesPersonName: string;
   year?: string;
   month?: string;
+  color?: string;
 }
 
 interface SalesPersonPerformaOverviewProps {
@@ -34,7 +35,7 @@ const SalesPersonPerformaOverview: React.FC<
       setSalesPersonName: state.setSalesPersonName,
     })
   );
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  // const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isFullWidthState, setIsFullWidthState] = useState(false);
 
   const handleSalesPersonSelect = (selection: SalesPersonSelection | null) => {

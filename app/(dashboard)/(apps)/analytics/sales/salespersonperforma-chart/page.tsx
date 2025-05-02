@@ -15,6 +15,7 @@ interface SalesPersonSelection {
   salesPersonName: string;
   year?: string;
   month?: string;
+  color?: string;
 }
 
 interface SalesPersonPerformaAnalyticsProps {
@@ -31,6 +32,8 @@ const SalesPersonPerformaAnalytics: React.FC<
   );
   const [selectedYear, setSelectedYear] = useState<string | null>(null);
   const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
+  const [selectedColor, setSelecteColor] = useState<string | null>(null);
+
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const { salesPersonName } = useSalesInvoiceHdFilterStore((state) => ({
     salesPersonName: state.salesPersonName,
@@ -57,6 +60,7 @@ const SalesPersonPerformaAnalytics: React.FC<
       setSelectedSalesPerson(null);
       setSelectedYear(null);
       setSelectedMonth(null);
+      setSelecteColor(null);
       setFullChart('period');
     }
   }, [
@@ -64,6 +68,7 @@ const SalesPersonPerformaAnalytics: React.FC<
     selectedSalesPerson,
     selectedYear,
     selectedMonth,
+    selectedColor,
     fullChart,
   ]);
 
@@ -73,6 +78,7 @@ const SalesPersonPerformaAnalytics: React.FC<
       setSelectedSalesPerson(null);
       setSelectedYear(null);
       setSelectedMonth(null);
+      setSelecteColor(null);
     }
   };
 
@@ -81,11 +87,15 @@ const SalesPersonPerformaAnalytics: React.FC<
       setSelectedSalesPerson(selection.salesPersonName);
       setSelectedYear(selection.year || null);
       setSelectedMonth(selection.month || null);
+      setSelecteColor(selection.color || null);
+
       setFullChart(null);
     } else {
       setSelectedSalesPerson(null);
       setSelectedYear(null);
       setSelectedMonth(null);
+      setSelecteColor(null);
+
       setFullChart('period');
     }
   };
@@ -112,12 +122,12 @@ const SalesPersonPerformaAnalytics: React.FC<
         showList ? 'h-screen' : 'h-fit min-h-0'
       }`}
     >
-      <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
+      {/* <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
         <SheetContent className='pt-5 w-80 sm:w-96'>
           <SheetTitle>Filter Data</SheetTitle>
           <SalesPersonInvoiceFilterSidebar table={dummyTable} />
         </SheetContent>
-      </Sheet>
+      </Sheet> */}
       <PageHeaderWrapper
         show={showHeader}
         title='Sales Person Performance Analytics'

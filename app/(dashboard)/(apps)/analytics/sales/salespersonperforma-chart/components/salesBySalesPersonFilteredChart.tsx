@@ -27,6 +27,7 @@ import {
   getFallbackColor,
 } from '@/utils/salesPersonColorMap';
 import { months } from '@/utils/monthNameMap';
+import { getSalesPersonColor } from '@/utils/getSalesPersonColor';
 
 ChartJS.register(
   CategoryScale,
@@ -101,9 +102,9 @@ const SalesBySalesPersonFilteredChart: React.FC<
 
     const datasets = data.map((entry: SalesDataWithFilter) => {
       const monthsData = entry.months || {};
-      const color =
-        salesPersonColorMap[entry.salesPersonName.toLocaleUpperCase()] ||
-        getFallbackColor(entry.salesPersonName.toLocaleUpperCase());
+      // Gunakan warna dari onSalesPersonSelect jika tersedia, fallback ke salesPersonColorMap
+      const color = getSalesPersonColor(entry.salesPersonName);
+
       return {
         label: entry.salesPersonName,
         data: months.map((month) => monthsData[month] || 0),

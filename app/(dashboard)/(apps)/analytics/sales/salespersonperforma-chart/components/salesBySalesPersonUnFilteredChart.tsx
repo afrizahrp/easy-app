@@ -24,6 +24,7 @@ import {
 } from '@/utils/salesPersonColorMap';
 import { useSalesInvoiceHdFilterStore } from '@/store';
 import { months } from '@/utils/monthNameMap';
+import { getSalesPersonColor } from '@/utils/getSalesPersonColor';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 
@@ -50,6 +51,7 @@ interface SalesPersonSelection {
   salesPersonName: string;
   year?: string;
   month?: string;
+  color?: string;
 }
 
 interface SalesBySalesPersonUnFilteredProps {
@@ -100,8 +102,8 @@ const SalesBySalesPersonUnFilteredChart: React.FC<
 
     const datasets = allSalesPersons.map((salesPersonName) => {
       const color =
-        salesPersonColorMap[salesPersonName.toLocaleUpperCase()] ||
-        getFallbackColor(salesPersonName.toLocaleUpperCase());
+        salesPersonColorMap[salesPersonName.toLowerCase()] ||
+        getFallbackColor(salesPersonName);
 
       return {
         label: salesPersonName,
@@ -180,7 +182,9 @@ const SalesBySalesPersonUnFilteredChart: React.FC<
 
       if (salesPersonName) {
         setSalesPersonName([salesPersonName]);
-        onSalesPersonSelect?.({ salesPersonName, year, month });
+        const colorObj = getSalesPersonColor(salesPersonName);
+        const color = typeof colorObj === 'string' ? colorObj : colorObj?.to;
+        onSalesPersonSelect?.({ salesPersonName, year, month, color });
       }
     }
   };
