@@ -63,12 +63,12 @@ const SalesPersonPerformaOverview: React.FC<
     <div
       className={`flex flex-col w-full p-2 gap-4 ${showList ? 'h-fit' : 'h-fit min-h-0'}`}
     >
-      {showFloatingButton && (
+      {/* {showFloatingButton && (
         <FloatingFilterButton
           onClick={() => setIsSidebarOpen(true)}
           showFloatingButton={true}
         />
-      )}
+      )} */}
       <div className='w-full'>
         {validSalesPersonNames.length > 0 ? (
           <SalesBySalesPersonFilteredChart

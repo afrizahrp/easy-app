@@ -9,8 +9,6 @@ export const salesPersonColorMap: Record<
   medi: { from: '#10b981', to: '#6ee7b7', border: '#10b981' }, // Emerald
   yoga: { from: '#e11d48', to: '#f472b6', border: '#e11d48' }, // Rose
   sujud: { from: '#9333ea', to: '#c084fc', border: '#9333ea' }, // Purple
-  aji: { from: '#f59e0b', to: '#fcd34d', border: '#f59e0b' }, // Amber
-  saefudin: { from: '#4b5563', to: '#9ca3af', border: '#4b5563' }, // Gray
   'amir h.': { from: '#7c3aed', to: '#a78bfa', border: '#7c3aed' }, // Violet
   indro: { from: '#dc2626', to: '#f87171', border: '#dc2626' }, // Red
   angga: { from: '#059669', to: '#34d399', border: '#059669' }, // Green
@@ -50,6 +48,8 @@ export const salesPersonColorMap: Record<
 
   // NON BIS
   'aji nugraha': { from: '#f59e0b', to: '#fcd34d', border: '#f59e0b' }, // Amber
+  aji: { from: '#f59e0b', to: '#fcd34d', border: '#f59e0b' }, // Amber
+
   indah: { from: '#ec4899', to: '#f472b6', border: '#ec4899' }, // Pink
   jefri: { from: '#10b981', to: '#6ee7b7', border: '#10b981' }, // Emerald
   husni: { from: '#0ea5e9', to: '#7dd3fc', border: '#0ea5e9' }, // Cyan
@@ -64,6 +64,7 @@ export const salesPersonColorMap: Record<
   rhio: { from: '#c026d3', to: '#f0abfc', border: '#c026d3' }, // Fuchsia
   'setiadi elm': { from: '#4b5563', to: '#9ca3af', border: '#4b5563' }, // Gray
   'saefudin. bpk': { from: '#9ca3af', to: '#d1d5db', border: '#9ca3af' }, // Gray-400
+  saefudin: { from: '#9ca3af', to: '#d1d5db', border: '#9ca3af' }, // Gray
 };
 
 // Fallback untuk salesperson yang tidak ada di mapping
