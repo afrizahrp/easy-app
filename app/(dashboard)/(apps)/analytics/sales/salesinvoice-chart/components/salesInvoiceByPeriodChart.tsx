@@ -54,6 +54,8 @@ const SalesInvoiceByPeriodChart: React.FC<SalesInvoiceByPeriodChartProps> = ({
   const { toast } = useToast();
   const { data, isLoading, isFetching, error } = useSalesPeriod();
 
+  console.log('PeriodChart-isCompact', isCompact);
+
   const chartData = React.useMemo(() => {
     if (!data) return null;
 

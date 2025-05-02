@@ -20,12 +20,11 @@ interface SalesPersonSelection {
 interface SalesPersonPerformaAnalyticsProps {
   showList?: boolean;
   showHeader?: boolean;
-  isCompact?: boolean; // Prop baru untuk kontrol compact di salesPage
 }
 
 const SalesPersonPerformaAnalytics: React.FC<
   SalesPersonPerformaAnalyticsProps
-> = ({ showList = true, showHeader = true, isCompact = true }) => {
+> = ({ showList = true, showHeader = true }) => {
   const [fullChart, setFullChart] = useState<'period' | null>('period');
   const [selectedSalesPerson, setSelectedSalesPerson] = useState<string | null>(
     null
@@ -145,7 +144,6 @@ const SalesPersonPerformaAnalytics: React.FC<
               isFullWidth={fullChart === 'period'}
               onModeChange={handleModeChange}
               onSalesPersonSelect={handleSalesPersonSelect}
-              // initialCompact={isCompact} // Pakai prop isCompact
             />
           </motion.div>
           {selectedSalesPerson && selectedMonth && fullChart !== 'period' && (

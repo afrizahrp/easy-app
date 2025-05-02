@@ -20,7 +20,6 @@ interface SalesPersonPerformaOverviewProps {
   isFullWidth?: boolean;
   onModeChange?: (isFullPage: boolean) => void;
   onSalesPersonSelect?: (selection: SalesPersonSelection | null) => void;
-  initialCompact?: boolean;
 }
 
 const SalesPersonPerformaOverview: React.FC<
@@ -31,7 +30,6 @@ const SalesPersonPerformaOverview: React.FC<
   isFullWidth = true,
   onModeChange,
   onSalesPersonSelect,
-  initialCompact = true,
 }) => {
   const { salesPersonName, setSalesPersonName } = useSalesInvoiceHdFilterStore(
     (state) => ({
@@ -61,6 +59,11 @@ const SalesPersonPerformaOverview: React.FC<
       ? [salesPersonName]
       : [];
 
+  const chartLayoutClass =
+    'flex flex-col md:flex-row w-full gap-4 items-stretch';
+  const chartWidthClass = (isFull: boolean) =>
+    isFull ? 'w-full' : 'w-full md:w-1/2';
+
   return (
     <div
       className={`flex flex-col w-full p-2 gap-4 ${showList ? 'h-screen' : 'h-fit min-h-0'}`}
@@ -89,13 +92,15 @@ const SalesPersonPerformaOverview: React.FC<
             onSalesPersonSelect={handleSalesPersonSelect}
           />
         ) : (
-          <div className='w-full overflow-x-auto max-w-full h-fit min-h-0'>
+          <div
+            className={`${chartWidthClass(false)} overflow-x-auto max-w-full`}
+          >
             <SalesBySalesPersonUnFilteredChart
-              key='unfiltered'
+              // key='unfiltered'
               // isCompact={initialCompact && !isDetailedView} // Compact kecuali View Details
               isFullScreen={isFullScreen}
-              height={250}
-              isCompact={true}
+              height={400}
+              isCompact={false}
               onModeChange={setIsFullScreen}
               onSalesPersonSelect={handleSalesPersonSelect}
             />

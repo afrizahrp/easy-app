@@ -85,6 +85,8 @@ const SalesBySalesPersonUnFilteredChart: React.FC<
     })
   );
 
+  console.log('UnfilteredChart-isCompact', isCompact);
+
   const chartData = React.useMemo(() => {
     if (!data || !data.length) return null;
 
@@ -150,8 +152,7 @@ const SalesBySalesPersonUnFilteredChart: React.FC<
   React.useEffect(() => {
     if (error) {
       toast({
-        description:
-          error.message || 'Failed to load sales data. Please try again.',
+        description: 'Failed to load sales data. Please try again.',
         color: 'destructive',
       });
     }
@@ -162,16 +163,18 @@ const SalesBySalesPersonUnFilteredChart: React.FC<
     Array.isArray(chartData.labels) &&
     chartData.labels.length > 0 &&
     Array.isArray(chartData.datasets) &&
-    chartData.datasets.some((ds) => ds.data.some((value) => value > 0));
+    chartData.datasets.some(
+      (ds) => Array.isArray(ds.data) && ds.data.length > 0
+    );
 
-  React.useEffect(() => {
-    if (isDataReady) {
-      const container = document.querySelector('.chart-container');
-      const canvas = document.querySelector('.chartjs-container');
-      console.log('Container height:', container?.clientHeight);
-      console.log('Canvas height:', canvas?.clientHeight);
-    }
-  }, [isDataReady]);
+  // React.useEffect(() => {
+  //   if (isDataReady) {
+  //     const container = document.querySelector('.chart-container');
+  //     const canvas = document.querySelector('.chartjs-container');
+  //     console.log('Container height:', container?.clientHeight);
+  //     console.log('Canvas height:', canvas?.clientHeight);
+  //   }
+  // }, [isDataReady]);
 
   const handleChartClick = (event: any, elements: any[]) => {
     if (elements.length > 0) {
