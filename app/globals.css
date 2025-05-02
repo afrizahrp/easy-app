@@ -718,3 +718,7 @@ html[dir='rtl'] .react-select .select__loading-indicator {
   padding: 8px;
   border-radius: 4px;
 }
+
+.custom-drag {
+  cursor: url('/path/to/your/custom-cursor.png'), move;
+}
