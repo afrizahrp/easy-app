@@ -45,27 +45,6 @@ const SalesPersonPerformaAnalytics: React.FC<
       ? [salesPersonName]
       : [];
 
-  // useEffect(() => {
-  //   if (chartRef.current) {
-  //     console.log(
-  //       'Chart actual width:',
-  //       chartRef.current.getBoundingClientRect().width
-  //     );
-  //   }
-  //   if (topProductRef.current) {
-  //     console.log(
-  //       'TopProduct actual width:',
-  //       topProductRef.current.getBoundingClientRect().width
-  //     );
-  //   }
-  // }, [
-  //   fullChart,
-  //   validSalesPersonNames,
-  //   selectedSalesPerson,
-  //   selectedYear,
-  //   selectedMonth,
-  // ]);
-
   const handleModeChange = (isFull: boolean) => {
     setFullChart(isFull ? 'period' : null);
   };
@@ -127,53 +106,55 @@ const SalesPersonPerformaAnalytics: React.FC<
         <div className='min-w-[200px]'>
           <SalesInvoiceFilterSummary />
         </div>
-        {/* <div
-          className={`w-full gap-4 ${fullChart === 'period' ? '' : 'grid grid-cols-1 md:grid-cols-2'}`}
-        > */}
-        <motion.div
-          ref={chartRef}
-          layout
-          layoutId='chart'
-          transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-          // style={fullChart !== 'period' ? { flex: '1 1 50%' } : undefined}
-          className='w-full'
+        <div
+          className={`w-full gap-4 ${
+            fullChart === 'period'
+              ? 'flex flex-col'
+              : 'grid grid-cols-1 md:grid-cols-2'
+          }`}
         >
-          <SalesPersonPerformaOverview
-            showFloatingButton={true}
-            showList={showList}
-            isFullWidth={fullChart === 'period'}
-            onModeChange={handleModeChange}
-            onSalesPersonSelect={handleSalesPersonSelect}
-          />
-        </motion.div>
-        {selectedSalesPerson && selectedMonth && fullChart !== 'period' && (
           <motion.div
-            ref={topProductRef}
+            ref={chartRef}
             layout
-            layoutId='top-product'
+            layoutId='chart'
             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-            className='min-w-0 w-full flex-1'
-            style={{ flex: '1 1 50%' }}
-            initial={{ opacity: 0, x: 50 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 50 }}
+            className='w-full'
           >
-            <TopProductSoldBySalesPerson
-              salesPersonName={selectedSalesPerson}
-              year={selectedYear ?? undefined}
-              month={selectedMonth ?? undefined}
-              onClose={() => {
-                setSelectedSalesPerson(null);
-                setSelectedYear(null);
-                setSelectedMonth(null);
-                setFullChart('period');
-              }}
+            <SalesPersonPerformaOverview
+              showFloatingButton={true}
+              showList={showList}
+              isFullWidth={fullChart === 'period'}
+              onModeChange={handleModeChange}
+              onSalesPersonSelect={handleSalesPersonSelect}
             />
           </motion.div>
-        )}
+          {selectedSalesPerson && selectedMonth && fullChart !== 'period' && (
+            <motion.div
+              ref={topProductRef}
+              layout
+              layoutId='top-product'
+              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+              className='min-w-0 w-full'
+              initial={{ opacity: 0, x: 50 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 50 }}
+            >
+              <TopProductSoldBySalesPerson
+                salesPersonName={selectedSalesPerson}
+                year={selectedYear ?? undefined}
+                month={selectedMonth ?? undefined}
+                onClose={() => {
+                  setSelectedSalesPerson(null);
+                  setSelectedYear(null);
+                  setSelectedMonth(null);
+                  setFullChart('period');
+                }}
+              />
+            </motion.div>
+          )}
+        </div>
       </div>
     </div>
-    // </div>
   );
 };
 
