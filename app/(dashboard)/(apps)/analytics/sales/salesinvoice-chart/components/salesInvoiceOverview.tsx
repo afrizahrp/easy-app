@@ -32,19 +32,6 @@ const SalesInvoiceOverview: React.FC<SalesInvoiceOverviewProps> = ({
     <div
       className={`flex flex-col w-full p-2 gap-4 ${showList ? 'h-screen' : 'h-fit min-h-0'}`}
     >
-      {showFloatingButton && (
-        <FloatingFilterButton
-          onClick={() => setIsSidebarOpen(true)}
-          showFloatingButton={true}
-        />
-      )}
-      {isSidebarOpen && (
-        <GeneralInvoiceFilterSidebar
-          onClose={() => setIsSidebarOpen(false)}
-          // onFilterChange={onFilterChange}
-        />
-      )}
-
       {showList ? (
         <div className={chartLayoutClass}>
           {(fullChart === null || fullChart === 'period') && (
