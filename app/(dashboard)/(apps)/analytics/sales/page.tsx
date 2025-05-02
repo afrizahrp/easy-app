@@ -17,7 +17,10 @@ export default function SalesPage() {
   return (
     <div className='flex flex-col w-full pt-2 pb-4 px-2 md:pt-4 md:pb-8 md:px-8 lg:pt-4 lg:pb-10 lg:px-10 gap-8 bg-gray-100 dark:bg-gray-900'>
       <div className='text-center md:text-left'>
-        <h1 className='text-2xl font-bold tracking-tight text-slate-600 dark:text-slate-400'>
+        <h1
+          className='text-2xl font-bold tracking-tight
+         text-gray-900 dark:text-slate-100'
+        >
           📊 Sales Analytics
         </h1>
         <p className='text-lg text-slate-600 dark:text-slate-400 mt-2'>
@@ -35,7 +38,10 @@ export default function SalesPage() {
           <div className='flex items-center justify-between mb-4'>
             <div className='flex items-center gap-3'>
               <FileText className='w-4 h-4 text-blue-600 dark:text-blue-400' />
-              <h2 className='text-xl font-semibold text-gray-900 dark:text-white'>
+              <h2
+                className='text-xl font-semibold
+        text-slate-400 dark:text-slate-200'
+              >
                 Sales Invoice Overview
               </h2>
             </div>
@@ -73,7 +79,10 @@ export default function SalesPage() {
           <div className='flex items-center justify-between mb-4'>
             <div className='flex items-center gap-3'>
               <BarChart2 className='w-4 h-4 text-green-600 dark:text-green-400' />
-              <h2 className='text-xl font-semibold text-gray-900 dark:text-white'>
+              <h2
+                className='text-xl font-semibold 
+        text-slate-400 dark:text-slate-200'
+              >
                 Salesperson Performance
               </h2>
             </div>
