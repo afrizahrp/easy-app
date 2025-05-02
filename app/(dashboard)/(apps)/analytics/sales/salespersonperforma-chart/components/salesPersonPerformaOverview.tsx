@@ -92,15 +92,11 @@ const SalesPersonPerformaOverview: React.FC<
             onSalesPersonSelect={handleSalesPersonSelect}
           />
         ) : (
-          <div
-            className={`${chartWidthClass(false)} overflow-x-auto max-w-full`}
-          >
+          <div className='w-full overflow-x-auto max-w-full h-fit min-h-0'>
             <SalesBySalesPersonUnFilteredChart
-              // key='unfiltered'
-              // isCompact={initialCompact && !isDetailedView} // Compact kecuali View Details
               isFullScreen={isFullScreen}
-              height={400}
-              isCompact={false}
+              height={showList ? 400 : 250} // Sesuaikan tinggi berdasarkan showList
+              isCompact={!showList} // Compact saat showList = false
               onModeChange={setIsFullScreen}
               onSalesPersonSelect={handleSalesPersonSelect}
             />

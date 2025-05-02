@@ -17,8 +17,8 @@ const SalesInvoiceAnalytics: React.FC<SalesInvoiceAnalyticsProps> = ({
   showList = true,
   showHeader = true,
 }) => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [fullChart, setFullChart] = useState<'period' | 'poType' | null>(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const handleFilterChange = (filters: {
     period?: string;

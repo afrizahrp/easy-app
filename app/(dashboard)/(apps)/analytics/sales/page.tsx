@@ -8,7 +8,7 @@ import SalesPersonPerformaAnalytics from './salespersonperforma-chart/page';
 import { PageHeaderWrapper } from '@/components/page-header-wrapper';
 import { Button } from '@/components/ui/button';
 
-export default function SalesPage() {
+export default function SalesAnalyticsPage() {
   const cardVariants = {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },

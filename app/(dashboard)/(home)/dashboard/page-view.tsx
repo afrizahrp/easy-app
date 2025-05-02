@@ -13,6 +13,7 @@
 import React from 'react';
 // import { useSession } from 'next-auth/react';
 import { useSessionStore } from '@/store';
+import AnalyticPages from '../../(apps)/analytics/page';
 
 interface DashboardPageViewProps {
   trans: {
@@ -25,7 +26,11 @@ const DashboardPageView = () => {
   // console.log(session);
   const welcome = `Selamat datang ${user?.name}`;
 
-  return <div>{welcome}</div>;
+  return (
+    <div>
+      <AnalyticPages />
+    </div>
+  );
 };
 
 // <div className="space-y-6">
