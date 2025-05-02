@@ -10,6 +10,7 @@ import { SalesPersonInvoiceFilterSidebar } from '@/components/FilterSidebarButto
 import { PageHeaderWrapper } from '@/components/page-header-wrapper';
 import { Table } from '@tanstack/react-table';
 import SalesPersonInvoiceList from '../../../sales/salespersonInvoice/list/page';
+import { FloatingFilterButton } from '@/components/ui/floating-filter-button';
 
 interface SalesPersonSelection {
   salesPersonName: string;
@@ -122,12 +123,10 @@ const SalesPersonPerformaAnalytics: React.FC<
         showList ? 'h-screen' : 'h-fit min-h-0'
       }`}
     >
-      {/* <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
-        <SheetContent className='pt-5 w-80 sm:w-96'>
-          <SheetTitle>Filter Data</SheetTitle>
-          <SalesPersonInvoiceFilterSidebar table={dummyTable} />
-        </SheetContent>
-      </Sheet> */}
+      <FloatingFilterButton>
+        <SalesPersonInvoiceFilterSidebar table={dummyTable} />
+      </FloatingFilterButton>
+
       <PageHeaderWrapper
         show={showHeader}
         title='Sales Person Performance Analytics'

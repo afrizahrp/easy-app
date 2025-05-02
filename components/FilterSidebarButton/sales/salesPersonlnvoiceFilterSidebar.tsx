@@ -108,15 +108,15 @@ export function SalesPersonInvoiceFilterSidebar<TData>({
     }
   }, [salesPersonName, setPaidStatus]);
 
-  useEffect(() => {
-    if (salesPersonName.length > 1) {
-      setShowAlert(true);
-      const timer = setTimeout(() => setShowAlert(false), 5000);
-      return () => clearTimeout(timer);
-    } else {
-      setShowAlert(false);
-    }
-  }, [salesPersonName]);
+  // useEffect(() => {
+  //   if (salesPersonName.length > 1) {
+  //     setShowAlert(true);
+  //     const timer = setTimeout(() => setShowAlert(false), 5000);
+  //     return () => clearTimeout(timer);
+  //   } else {
+  //     setShowAlert(false);
+  //   }
+  // }, [salesPersonName]);
 
   const { options: statusOptionList, isLoading: isStatusLoading } =
     useSalesInvoiceHdPaidStatusOptions();
@@ -170,43 +170,27 @@ export function SalesPersonInvoiceFilterSidebar<TData>({
           }}
         />
       </div>
+
       <div className='w-full py-3'>
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <div className='flex items-center gap-2'>
-                <AlertCircle className='w-4 h-4 text-yellow-500' />{' '}
-                {/* ikon exclamation */}
-                {/* <span>Paid Status</span> */}
-              </div>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Applies to invoice list only</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-        <DataTableFacetedFilter
-          // <div className='w-full py-3'>
-
-          //   {table?.getColumn('paidStatus') && (
-
-          column={table?.getColumn('paidStatus')}
-          title='Paid Status'
-          options={statusOptionList}
-          isLoading={isStatusLoading}
-          disabled={salesPersonName.length > 1}
-          selectedValues={new Set(paidStatus)}
-          onSelect={(value) => {
-            const updatedValues = new Set(paidStatus);
-            value
-              ? updatedValues.has(value)
-                ? updatedValues.delete(value)
-                : updatedValues.add(value)
-              : updatedValues.clear();
-            setPaidStatus(Array.from(updatedValues));
-          }}
-        />
-        {/* )}  */}
+        {table?.getColumn('paidStatus') && (
+          <DataTableFacetedFilter
+            column={table.getColumn('paidStatus')}
+            title='Paid Status'
+            options={statusOptionList}
+            isLoading={isStatusLoading}
+            // disabled={salesPersonName.length > 1}
+            selectedValues={new Set(paidStatus)}
+            onSelect={(value: string) => {
+              const updatedValues = new Set(paidStatus);
+              value
+                ? updatedValues.has(value)
+                  ? updatedValues.delete(value)
+                  : updatedValues.add(value)
+                : updatedValues.clear();
+              setPaidStatus(Array.from(updatedValues));
+            }}
+          />
+        )}
       </div>
 
       {hasActiveFilters && (
