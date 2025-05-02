@@ -140,15 +140,19 @@ const SalesInvoiceByPeriodChart: React.FC<SalesInvoiceByPeriodChartProps> = ({
           Sales Invoice by Monthly Period (in Millions IDR)
         </h2>
         <div className='absolute right-0 top-0 flex items-center text-muted-foreground text-xs space-x-2'>
-          <Label htmlFor='chart-mode-period'>
-            {isFullWidth ? 'Full Width' : 'Half Width'}
-          </Label>
-          <Switch
-            id='chart-mode-period'
-            checked={isFullWidth}
-            onCheckedChange={(checked) => onModeChange?.(checked)}
-            aria-label='Toggle full width chart'
-          />
+          {!isCompact && ( // Hanya tampilkan switch jika isCompact = false
+            <div className='absolute right-0 top-0 flex items-center text-muted-foreground text-xs space-x-2'>
+              <Label htmlFor='chart-mode-period'>
+                {isFullWidth ? 'Full Width' : 'Half Width'}
+              </Label>
+              <Switch
+                id='chart-mode-period'
+                checked={isFullWidth}
+                onCheckedChange={(checked) => onModeChange?.(checked)}
+                aria-label='Toggle full width chart'
+              />
+            </div>
+          )}
         </div>
       </div>
       <div className='flex-1 min-h-0'>
@@ -159,7 +163,7 @@ const SalesInvoiceByPeriodChart: React.FC<SalesInvoiceByPeriodChartProps> = ({
         ) : isDataReady ? (
           <Bar
             width={isFullWidth ? 600 : 300}
-            height={isCompact ? 250 : height} // Kurangi tinggi di mode compact
+            height={isCompact ? 300 : height} // Kurangi tinggi di mode compact
             data={chartData}
             options={{
               responsive: true,

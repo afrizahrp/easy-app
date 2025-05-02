@@ -83,7 +83,7 @@ const SalesInvoiceOverview: React.FC<SalesInvoiceOverviewProps> = ({
             onModeChange={(isFull) =>
               onFilterChange?.({ period: isFull ? 'full' : undefined })
             }
-            height={250}
+            height={300}
             isCompact={true}
           />
         </div>

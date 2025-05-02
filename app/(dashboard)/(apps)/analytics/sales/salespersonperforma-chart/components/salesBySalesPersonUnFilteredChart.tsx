@@ -55,7 +55,7 @@ interface SalesPersonSelection {
 interface SalesBySalesPersonUnFilteredProps {
   height?: number;
   isCompact?: boolean;
-  isFullScreen?: boolean;
+  isFullWidth?: boolean;
   onModeChange?: (isFullPage: boolean) => void;
   onSalesPersonSelect?: (selection: SalesPersonSelection | null) => void;
 }
@@ -65,7 +65,7 @@ const SalesBySalesPersonUnFilteredChart: React.FC<
 > = ({
   height = 400,
   isCompact = false,
-  isFullScreen = false,
+  isFullWidth = true,
   onModeChange,
   onSalesPersonSelect,
 }) => {
@@ -85,7 +85,7 @@ const SalesBySalesPersonUnFilteredChart: React.FC<
     })
   );
 
-  console.log('UnfilteredChart-isCompact', isCompact);
+  // console.log('UnfilteredChart-isCompact', isCompact);
 
   const chartData = React.useMemo(() => {
     if (!data || !data.length) return null;
@@ -167,15 +167,6 @@ const SalesBySalesPersonUnFilteredChart: React.FC<
       (ds) => Array.isArray(ds.data) && ds.data.length > 0
     );
 
-  // React.useEffect(() => {
-  //   if (isDataReady) {
-  //     const container = document.querySelector('.chart-container');
-  //     const canvas = document.querySelector('.chartjs-container');
-  //     console.log('Container height:', container?.clientHeight);
-  //     console.log('Canvas height:', canvas?.clientHeight);
-  //   }
-  // }, [isDataReady]);
-
   const handleChartClick = (event: any, elements: any[]) => {
     if (elements.length > 0) {
       const element = elements[0];
@@ -199,19 +190,19 @@ const SalesBySalesPersonUnFilteredChart: React.FC<
     >
       <div className='relative flex items-center mb-2'>
         <h2 className='text-sm text-muted-foreground font-semibold ml-2'>
-          Top 5 Sales Performers (in Millions IDR)
+          Top 5 Sales Performers (Above 100 Million IDR)
         </h2>
-        <div className='absolute right-0 top-0 flex items-center space-x-2'>
+        {/* <div className='absolute right-0 top-0 flex items-center space-x-2'>
           <Label htmlFor='chart-mode-period'>
-            {isFullScreen ? 'Full Page' : 'Full Width'}
+            {isFullWidth ? 'Full Width' : 'Half Width'}
           </Label>
           <Switch
             id='chart-mode-period'
-            checked={isFullScreen}
+            checked={isFullWidth}
             onCheckedChange={(checked) => onModeChange?.(checked)}
-            aria-label='Toggle full screen chart'
+            aria-label='Toggle full width chart'
           />
-        </div>
+        </div> */}
       </div>
       <div className='flex-1 min-h-0'>
         {isLoading || isFetching ? (
@@ -220,8 +211,8 @@ const SalesBySalesPersonUnFilteredChart: React.FC<
           </div>
         ) : isDataReady ? (
           <Bar
-            width={isFullScreen ? 600 : 300}
-            height={isCompact ? 250 : height}
+            width={isFullWidth ? 600 : 300}
+            height={isCompact ? 300 : height}
             data={chartData}
             options={{
               responsive: true,

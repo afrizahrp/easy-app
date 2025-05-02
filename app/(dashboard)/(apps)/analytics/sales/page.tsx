@@ -7,12 +7,24 @@ import SalesInvoiceAnalytics from './salesinvoice-chart/page';
 import SalesPersonPerformaAnalytics from './salespersonperforma-chart/page';
 import { PageHeaderWrapper } from '@/components/page-header-wrapper';
 import { Button } from '@/components/ui/button';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 export default function SalesAnalyticsPage() {
   const cardVariants = {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
   };
+
+  const tooltipTextViewDetailsSalesInvoice =
+    'Explore sales invoices to spot trends and track performance.';
+
+  const tooltipTextViewDetailsSalesPersonPerforma =
+    'Click to view detailed performance of this salesperson, including their top 3 selling products.';
 
   return (
     <div className='flex flex-col w-full pt-2 pb-4 px-2 md:pt-4 md:pb-8 md:px-8 lg:pt-4 lg:pb-10 lg:px-10 gap-8 bg-gray-100 dark:bg-gray-900'>
@@ -45,20 +57,29 @@ export default function SalesAnalyticsPage() {
                 Sales Invoice Overview
               </h2>
             </div>
-            <Button
-              asChild
-              variant='outline'
-              size='sm'
-              className='text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-gray-700'
-            >
-              <Link
-                href='/analytics/sales/salesinvoice-chart'
-                className='flex items-center gap-1'
-              >
-                View Details
-                <ArrowRight className='w-4 h-4' />
-              </Link>
-            </Button>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    asChild
+                    variant='outline'
+                    size='sm'
+                    className='text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-gray-700'
+                  >
+                    <Link
+                      href='/analytics/sales/salesinvoice-chart'
+                      className='flex items-center gap-1'
+                    >
+                      View Details
+                      <ArrowRight className='w-4 h-4' />
+                    </Link>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent className='max-w-xs whitespace-normal text-sm'>
+                  <p>{tooltipTextViewDetailsSalesInvoice}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </div>
 
           <PageHeaderWrapper
@@ -86,20 +107,29 @@ export default function SalesAnalyticsPage() {
                 Salesperson Performance
               </h2>
             </div>
-            <Button
-              asChild
-              variant='outline'
-              size='sm'
-              className='text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-gray-700'
-            >
-              <Link
-                href='/analytics/sales/salespersonperforma-chart'
-                className='flex items-center gap-1'
-              >
-                View Details
-                <ArrowRight className='w-4 h-4' />
-              </Link>
-            </Button>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    asChild
+                    variant='outline'
+                    size='sm'
+                    className='text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-gray-700'
+                  >
+                    <Link
+                      href='/analytics/sales/salespersonperforma-chart'
+                      className='flex items-center gap-1'
+                    >
+                      View Details
+                      <ArrowRight className='w-4 h-4' />
+                    </Link>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent className='max-w-xs whitespace-normal text-sm'>
+                  <p>{tooltipTextViewDetailsSalesPersonPerforma}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </div>
           <PageHeaderWrapper
             show={false}

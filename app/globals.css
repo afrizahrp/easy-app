@@ -708,3 +708,13 @@ html[dir='rtl'] .react-select .select__loading-indicator {
   background-color: #1e293b; /* slate-800 */
   color: #f1f5f9; /* slate-100 */
 }
+
+.tooltip {
+  max-width: 200px; /* atur sesuai kebutuhan */
+  white-space: normal;
+  word-wrap: break-word;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 8px;
+  border-radius: 4px;
+}
