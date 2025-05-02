@@ -41,7 +41,7 @@ interface SalesInvoiceByPoTypeChartProps {
 }
 
 const SalesInvoiceByPoTypeChart: React.FC<SalesInvoiceByPoTypeChartProps> = ({
-  height,
+  height = 400,
   isCompact = false,
   isFullWidth,
   onModeChange,
@@ -99,16 +99,16 @@ const SalesInvoiceByPoTypeChart: React.FC<SalesInvoiceByPoTypeChartProps> = ({
           period: string;
           months: Record<string, number>;
         }) => {
+          // Buat kunci untuk colorMap berdasarkan poType dan period
           const colorKey = `${poTypeData.poType}_${poTypeData.period}`;
           // Ambil warna dari colorMap, fallback ke warna default jika tidak ada
           const { borderColor, backgroundColor } = colorMap[colorKey] || {
             borderColor: '#6B7280', // Gray sebagai fallback
             backgroundColor: 'rgba(107, 114, 128, 0.2)',
           };
-          return {
-            // label: poTypeData.poType,
-            label: `${poTypeData.poType} (${poTypeData.period})`,
 
+          return {
+            label: `${poTypeData.poType} (${poTypeData.period})`,
             data: months.map((month) => poTypeData.months[month] || 0),
             borderColor,
             backgroundColor,
@@ -137,10 +137,10 @@ const SalesInvoiceByPoTypeChart: React.FC<SalesInvoiceByPoTypeChartProps> = ({
 
   return (
     <div
-      className={`chart-container ${isCompact ? 'compact' : ''} bg-white dark:bg-[#18181b] p-4 rounded-lg shadow-sm flex flex-col h-fit min-h-0`}
+      className={`chart-container ${isCompact ? 'compact' : ''} bg-white dark:bg-[#18181b] p-2 rounded-lg shadow-sm flex flex-col`}
       style={{ backgroundColor: hexBackground }}
     >
-      <div className='relative flex items-center mb-2'>
+      <div className='relative flex items-center'>
         <h2 className='text-sm text-muted-foreground font-semibold ml-2'>
           Monthly Sales Invoice by PO Type (in Millions IDR)
         </h2>
@@ -162,14 +162,27 @@ const SalesInvoiceByPoTypeChart: React.FC<SalesInvoiceByPoTypeChartProps> = ({
           <div className='w-3/4 h-1/2 rounded-lg shimmer' />
         </div>
       ) : chartData ? (
-        <div className='flex-1 mt-4'>
+        <div className='flex-1 h-full w-full min-h-0'>
           <Line
             data={chartData}
+            width={isFullWidth ? 600 : 300}
+            height={isCompact ? 250 : height}
             options={{
               responsive: true,
               maintainAspectRatio: false,
               plugins: {
-                legend: { position: 'top' },
+                legend: {
+                  position: 'top',
+                  display: !isCompact,
+                  maxHeight: 60,
+                  labels: {
+                    boxWidth: 15,
+                    padding: 4,
+                    font: {
+                      size: 10,
+                    },
+                  },
+                },
                 tooltip: {
                   callbacks: {
                     label: (context) =>
@@ -179,18 +192,27 @@ const SalesInvoiceByPoTypeChart: React.FC<SalesInvoiceByPoTypeChartProps> = ({
               },
               scales: {
                 x: {
-                  title: { display: true, text: 'Months' },
+                  title: { display: false, text: 'Months' },
                 },
                 y: {
                   beginAtZero: true,
-                  min: maxValue < 1_000_000_000 ? 100_000_000 : undefined,
-
+                  min: maxValue < 1_000_000_000 ? 300_000_000 : undefined,
+                  max: maxValue * 1.1,
                   ticks: {
+                    stepSize:
+                      maxValue < 1_000_000_000 ? 300_000_000 : 1_000_000_000,
+                    maxTicksLimit: 5,
                     callback: (value) => {
                       const val = Number(value) / 1000000;
                       return `${val.toLocaleString('id-ID')}`;
                     },
                   },
+                },
+              },
+              layout: {
+                padding: {
+                  bottom: isCompact ? 2 : 5,
+                  top: isCompact ? 2 : 5,
                 },
               },
             }}
