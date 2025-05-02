@@ -131,12 +131,6 @@ const SalesBySalesPersonFilteredChart: React.FC<
     return { labels: months, datasets };
   }, [data]);
 
-  // const maxValue = React.useMemo(() => {
-  //   if (!chartData || !chartData.datasets.length) return 100_000_000;
-  //   const max = Math.max(...chartData.datasets.flatMap((ds) => ds.data), 0);
-  //   return max || 100_000_000;
-  // }, [chartData]);
-
   const handleChartClick = (event: any, elements: any[]) => {
     if (elements.length > 0) {
       const element = elements[0];
@@ -174,7 +168,7 @@ const SalesBySalesPersonFilteredChart: React.FC<
   return (
     <div
       ref={containerRef}
-      className={` bg-white dark:bg-[#18181b] p-4 rounded-lg shadow-sm h-96 w-full`}
+      className={`bg-white dark:bg-[#18181b] p-4 rounded-lg shadow-sm h-96 w-full`}
       style={{ backgroundColor: hexBackground }}
     >
       <div className='flex flex-row items-center justify-between mb-2'>
@@ -191,7 +185,6 @@ const SalesBySalesPersonFilteredChart: React.FC<
                     )} and ${validSalesPersonNames[validSalesPersonNames.length - 1]} (in Millions IDR)`
                 : 'Sales Performance (in Millions IDR)'}
         </h2>
-        {/* Switch + Label + Back Button */}
         <div className='flex flex-col items-end space-y-2'>
           <div className='flex items-center space-x-2'>
             <Label
@@ -211,7 +204,7 @@ const SalesBySalesPersonFilteredChart: React.FC<
             onClick={() => {
               setSalesPersonName([]);
               onSalesPersonSelect?.(null);
-              onModeChange?.(true);
+              onModeChange?.(true); // Pastikan full-width saat kembali
             }}
             className='px-4 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 text-xs transition'
           >
@@ -242,7 +235,6 @@ const SalesBySalesPersonFilteredChart: React.FC<
                         drawTicks: false,
                         color: `hsl(${theme?.cssVars[mode === 'dark' ? 'dark' : 'light'].chartGird})`,
                       },
-
                       ticks: {
                         callback: (value) =>
                           `${(Number(value) / 1_000_000).toLocaleString('id-ID')}`,
@@ -254,12 +246,6 @@ const SalesBySalesPersonFilteredChart: React.FC<
                         color: `hsl(${theme?.cssVars[mode === 'dark' ? 'dark' : 'light'].chartGird})`,
                         display: false,
                       },
-                      // @ts-expect-error: categoryPercentage is valid for category axis
-
-                      categoryPercentage: 0.6, // default 0.8, makin kecil makin renggang
-
-                      barPercentage: 0.7,
-
                       ticks: {
                         color: `hsl(${theme?.cssVars[mode === 'dark' ? 'dark' : 'light'].chartLabel})`,
                       },
@@ -272,7 +258,6 @@ const SalesBySalesPersonFilteredChart: React.FC<
                           theme?.cssVars[mode === 'dark' ? 'dark' : 'light']
                             .chartLabel
                         })`,
-
                         usePointStyle: true,
                         pointStyle: 'circle',
                       },
@@ -284,7 +269,6 @@ const SalesBySalesPersonFilteredChart: React.FC<
                       },
                     },
                   },
-
                   onClick: handleChartClick,
                 }}
               />

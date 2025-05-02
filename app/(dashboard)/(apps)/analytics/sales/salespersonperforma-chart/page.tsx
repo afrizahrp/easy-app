@@ -8,8 +8,8 @@ import SalesPersonPerformaOverview from '../salespersonperforma-chart/components
 import TopProductSoldBySalesPerson from '../salespersonperforma-chart/components/topProductSoldBySalesPerson';
 import { SalesPersonInvoiceFilterSidebar } from '@/components/FilterSidebarButton/sales/salesPersonlnvoiceFilterSidebar';
 import { PageHeaderWrapper } from '@/components/page-header-wrapper';
-import { FloatingFilterButton } from '@/components/ui/floating-filter-button';
 import { Table } from '@tanstack/react-table';
+import SalesPersonInvoiceList from '../../../sales/salespersonInvoice/list/page';
 
 interface SalesPersonSelection {
   salesPersonName: string;
@@ -45,8 +45,35 @@ const SalesPersonPerformaAnalytics: React.FC<
       ? [salesPersonName]
       : [];
 
+  // Reset state saat salesPersonName dihapus, dengan perbandingan state
+  useEffect(() => {
+    if (
+      validSalesPersonNames.length === 0 &&
+      (selectedSalesPerson !== null ||
+        selectedYear !== null ||
+        selectedMonth !== null ||
+        fullChart !== 'period')
+    ) {
+      setSelectedSalesPerson(null);
+      setSelectedYear(null);
+      setSelectedMonth(null);
+      setFullChart('period');
+    }
+  }, [
+    validSalesPersonNames,
+    selectedSalesPerson,
+    selectedYear,
+    selectedMonth,
+    fullChart,
+  ]);
+
   const handleModeChange = (isFull: boolean) => {
     setFullChart(isFull ? 'period' : null);
+    if (isFull) {
+      setSelectedSalesPerson(null);
+      setSelectedYear(null);
+      setSelectedMonth(null);
+    }
   };
 
   const handleSalesPersonSelect = (selection: SalesPersonSelection | null) => {
@@ -54,6 +81,7 @@ const SalesPersonPerformaAnalytics: React.FC<
       setSelectedSalesPerson(selection.salesPersonName);
       setSelectedYear(selection.year || null);
       setSelectedMonth(selection.month || null);
+      setFullChart(null);
     } else {
       setSelectedSalesPerson(null);
       setSelectedYear(null);
@@ -102,15 +130,15 @@ const SalesPersonPerformaAnalytics: React.FC<
           },
         ]}
       />
-      <div className='flex flex-col gap-2'>
+      <div className='flex flex-col gap-2 w-full'>
         <div className='min-w-[200px]'>
           <SalesInvoiceFilterSummary />
         </div>
         <div
           className={`w-full gap-4 ${
-            fullChart === 'period'
-              ? 'flex flex-col'
-              : 'grid grid-cols-1 md:grid-cols-2'
+            selectedSalesPerson && selectedMonth && fullChart !== 'period'
+              ? 'grid grid-cols-1 md:grid-cols-2'
+              : 'flex flex-col'
           }`}
         >
           <motion.div
@@ -153,6 +181,12 @@ const SalesPersonPerformaAnalytics: React.FC<
             </motion.div>
           )}
         </div>
+        {showList && (
+          <div className='w-full flex-1'>
+            <PageHeaderWrapper title='Invoice List' />
+            <SalesPersonInvoiceList />
+          </div>
+        )}
       </div>
     </div>
   );

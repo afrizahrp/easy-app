@@ -168,6 +168,8 @@ const SalesBySalesPersonUnFilteredChart: React.FC<
     );
 
   const handleChartClick = (event: any, elements: any[]) => {
+    if (isCompact) return; // <-- Tambahkan ini
+
     if (elements.length > 0) {
       const element = elements[0];
       const datasetIndex = element.datasetIndex;

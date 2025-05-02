@@ -1,7 +1,6 @@
 'use client';
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-
 import { InvoiceListTable } from './list-table';
 import LayoutLoader from '@/components/layout-loader';
 import { routes } from '@/config/routes';
@@ -57,14 +56,13 @@ export default function SalesPersonInvoiceList() {
     <>
       {/* <PageHeaderWrapper
         show={true}
-        title='Invoice List'
+        title='Sales Invoice List'
         breadcrumb={[
           { name: 'Sales Invoice', href: routes.inventory.dashboard },
           { name: 'List' },
         ]}
       /> */}
-
-      <div>
+      <div className='!w-full'>
         <Card className='mt-6'>
           <CardContent className='p-10'>
             <InvoiceListTable
@@ -81,16 +79,9 @@ export default function SalesPersonInvoiceList() {
           </CardContent>
         </Card>
       </div>
-
-      {/* <Card className='mt-4'>
-        <CardContent className='p-4'> */}
       <FooterSummarySection className='w-full flex justify-end'>
         <FooterSummaryItem label='Total Invoice' value={grandTotal_amount} />
       </FooterSummarySection>
-      {/* </CardContent>
-      </Card> */}
     </>
   );
 }
-
-// export default SalesPersonInvoiceList;

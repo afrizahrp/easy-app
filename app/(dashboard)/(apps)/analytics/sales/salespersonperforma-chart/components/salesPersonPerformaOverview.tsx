@@ -1,12 +1,9 @@
 'use client';
 import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
 import SalesBySalesPersonFilteredChart from './salesBySalesPersonFilteredChart';
 import SalesBySalesPersonUnFilteredChart from './salesBySalesPersonUnFilteredChart';
 import { useSalesInvoiceHdFilterStore } from '@/store';
 import { FloatingFilterButton } from '@/components/ui/floating-filter-button';
-import { PageHeaderWrapper } from '@/components/page-header-wrapper';
-import SalesPersonInvoiceList from '@/app/(dashboard)/(apps)/sales/salespersonInvoice/list/page';
 
 interface SalesPersonSelection {
   salesPersonName: string;
@@ -38,17 +35,20 @@ const SalesPersonPerformaOverview: React.FC<
     })
   );
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [isFullScreen, setIsFullScreen] = useState(false);
-  const [isDetailedView, setIsDetailedView] = useState(false); // State untuk View Details
+  const [isFullWidthState, setIsFullWidthState] = useState(false);
 
   const handleSalesPersonSelect = (selection: SalesPersonSelection | null) => {
     if (selection) {
+      // Hanya perbarui jika salesPersonName berbeda
       if (!salesPersonName.includes(selection.salesPersonName)) {
         setSalesPersonName([selection.salesPersonName]);
       }
       onSalesPersonSelect?.(selection);
     } else {
-      setSalesPersonName([]);
+      // Hanya reset jika salesPersonName tidak kosong
+      if (salesPersonName.length > 0) {
+        setSalesPersonName([]);
+      }
       onSalesPersonSelect?.(null);
     }
   };
@@ -59,31 +59,17 @@ const SalesPersonPerformaOverview: React.FC<
       ? [salesPersonName]
       : [];
 
-  const chartLayoutClass =
-    'flex flex-col md:flex-row w-full gap-4 items-stretch';
-  const chartWidthClass = (isFull: boolean) =>
-    isFull ? 'w-full' : 'w-full md:w-1/2';
-
   return (
     <div
-      className={`flex flex-col w-full p-2 gap-4 ${showList ? 'h-screen' : 'h-fit min-h-0'}`}
+      className={`flex flex-col w-full p-2 gap-4 ${showList ? 'h-fit' : 'h-fit min-h-0'}`}
     >
+      {showFloatingButton && (
+        <FloatingFilterButton
+          onClick={() => setIsSidebarOpen(true)}
+          showFloatingButton={true}
+        />
+      )}
       <div className='w-full'>
-        {showFloatingButton && (
-          <FloatingFilterButton
-            onClick={() => setIsSidebarOpen(true)}
-            showFloatingButton={true}
-          />
-        )}
-        {/* <div className='flex justify-between items-center mb-2'>
-          <Button
-            variant='outline'
-            size='sm'
-            onClick={() => setIsDetailedView(!isDetailedView)}
-          >
-            {isDetailedView ? 'Back to Compact' : 'View Details'}
-          </Button>
-        </div> */}
         {validSalesPersonNames.length > 0 ? (
           <SalesBySalesPersonFilteredChart
             key={`filtered-${validSalesPersonNames.join('-')}`}
@@ -95,17 +81,11 @@ const SalesPersonPerformaOverview: React.FC<
           <div className='w-full overflow-x-auto max-w-full h-fit min-h-0'>
             <SalesBySalesPersonUnFilteredChart
               isFullWidth={isFullWidth}
-              height={showList ? 400 : 300} // Sesuaikan tinggi berdasarkan showList
-              isCompact={!showList} // Compact saat showList = false
-              onModeChange={setIsFullScreen}
+              height={showList ? 400 : 300}
+              isCompact={!showList}
+              onModeChange={setIsFullWidthState}
               onSalesPersonSelect={handleSalesPersonSelect}
             />
-          </div>
-        )}
-        {showList && (
-          <div className='w-full flex-1'>
-            <PageHeaderWrapper title='Invoice List' />
-            <SalesPersonInvoiceList />
           </div>
         )}
       </div>
