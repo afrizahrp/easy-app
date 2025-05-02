@@ -229,6 +229,10 @@ const SalesBySalesPersonUnFilteredChart: React.FC<
                 y: {
                   beginAtZero: true,
                   min: maxValue < 1_000_000_000 ? 100_000_000 : undefined,
+                  grid: {
+                    drawTicks: false,
+                    color: `hsl(${theme?.cssVars[mode === 'dark' ? 'dark' : 'light'].chartGird})`,
+                  },
                   ticks: {
                     callback: (value: unknown) => {
                       const val = Number(value) / 1000000;
@@ -238,13 +242,15 @@ const SalesBySalesPersonUnFilteredChart: React.FC<
                 },
                 x: {
                   title: { display: false, text: 'Month' },
+                  grid: {
+                    drawTicks: false,
+                    color: `hsl(${theme?.cssVars[mode === 'dark' ? 'dark' : 'light'].chartGird})`,
+                    display: false,
+                  },
                   ticks: {
                     callback: (value, index, ticks) => {
                       return chartData.labels[index] ?? '';
                     },
-                  },
-                  grid: {
-                    display: false,
                   },
                 },
               },

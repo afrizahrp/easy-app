@@ -144,17 +144,19 @@ const SalesInvoiceByPoTypeChart: React.FC<SalesInvoiceByPoTypeChartProps> = ({
         <h2 className='text-sm text-muted-foreground font-semibold ml-2'>
           Monthly Sales Invoice by PO Type (in Millions IDR)
         </h2>
-        <div className='absolute right-0 top-0 flex items-center text-muted-foreground text-xs space-x-2'>
-          <Label htmlFor='chart-mode-potype'>
-            {isFullWidth ? 'Full Width' : 'Half Width'}
-          </Label>
-          <Switch
-            id='chart-mode-potype'
-            checked={isFullWidth}
-            onCheckedChange={(checked) => onModeChange?.(checked)}
-            aria-label='Toggle full width chart'
-          />
-        </div>
+        {!isCompact && ( // Hanya tampilkan switch jika isCompact = false
+          <div className='absolute right-0 top-0 flex items-center text-muted-foreground text-xs space-x-2'>
+            <Label htmlFor='chart-mode-potype'>
+              {isFullWidth ? 'Full Width' : 'Half Width'}
+            </Label>
+            <Switch
+              id='chart-mode-potype'
+              checked={isFullWidth}
+              onCheckedChange={(checked) => onModeChange?.(checked)}
+              aria-label='Toggle full width chart'
+            />
+          </div>
+        )}
       </div>
 
       {isLoading || isFetching ? (
@@ -193,19 +195,27 @@ const SalesInvoiceByPoTypeChart: React.FC<SalesInvoiceByPoTypeChartProps> = ({
               scales: {
                 x: {
                   title: { display: false, text: 'Months' },
+                  grid: {
+                    display: true, // pastikan gridline X tampil
+                    color: 'rgba(200,200,200,0.2)', // opsional: warna gridline
+                  },
                 },
                 y: {
                   beginAtZero: true,
-                  min: maxValue < 1_000_000_000 ? 300_000_000 : undefined,
-                  max: maxValue * 1.1,
+                  // min: maxValue < 1_000_000_000 ? 300_000_000 : undefined,
+                  // max: maxValue * 1.1,
                   ticks: {
-                    stepSize:
-                      maxValue < 1_000_000_000 ? 300_000_000 : 1_000_000_000,
+                    // stepSize:
+                    //   maxValue < 1_000_000_000 ? 300_000_000 : 1_000_000_000,
                     maxTicksLimit: 5,
                     callback: (value) => {
                       const val = Number(value) / 1000000;
                       return `${val.toLocaleString('id-ID')}`;
                     },
+                  },
+                  grid: {
+                    display: true, // pastikan gridline Y tampil
+                    color: 'rgba(200,200,200,0.2)', // opsional: warna gridline
                   },
                 },
               },

@@ -78,10 +78,19 @@ const SalesInvoiceOverview: React.FC<SalesInvoiceOverviewProps> = ({
         </div>
       ) : (
         <div className='w-full overflow-x-auto max-w-full h-fit min-h-0'>
-          <SalesInvoiceByPeriodChart
+          {/* <SalesInvoiceByPeriodChart
             isFullWidth={false}
             onModeChange={(isFull) =>
               onFilterChange?.({ period: isFull ? 'full' : undefined })
+            }
+            height={300}
+            isCompact={true}
+          /> */}
+
+          <SalesInvoiceByPoTypeChart
+            isFullWidth={fullChart === 'poType'}
+            onModeChange={(isFull) =>
+              onFilterChange?.({ poType: isFull ? 'full' : undefined })
             }
             height={300}
             isCompact={true}
