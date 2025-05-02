@@ -145,7 +145,7 @@ const SalesPersonPerformaAnalytics: React.FC<
               isFullWidth={fullChart === 'period'}
               onModeChange={handleModeChange}
               onSalesPersonSelect={handleSalesPersonSelect}
-              initialCompact={isCompact} // Pakai prop isCompact
+              // initialCompact={isCompact} // Pakai prop isCompact
             />
           </motion.div>
           {selectedSalesPerson && selectedMonth && fullChart !== 'period' && (

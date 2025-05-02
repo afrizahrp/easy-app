@@ -92,8 +92,10 @@ const SalesPersonPerformaOverview: React.FC<
           <div className='w-full overflow-x-auto max-w-full h-fit min-h-0'>
             <SalesBySalesPersonUnFilteredChart
               key='unfiltered'
-              isCompact={initialCompact && !isDetailedView} // Compact kecuali View Details
+              // isCompact={initialCompact && !isDetailedView} // Compact kecuali View Details
               isFullScreen={isFullScreen}
+              height={250}
+              isCompact={true}
               onModeChange={setIsFullScreen}
               onSalesPersonSelect={handleSalesPersonSelect}
             />
