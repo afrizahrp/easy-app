@@ -18,7 +18,6 @@ import { themes } from '@/config/thems';
 import gradientPlugin from 'chartjs-plugin-gradient';
 import { useToast } from '@/components/ui/use-toast';
 import useSalesByPeriodUnfiltered from '@/queryHooks/sls/analytics/useSalesPersonByPeriodUnFiltered';
-
 import {
   salesPersonColorMap,
   getFallbackColor,
@@ -54,6 +53,8 @@ interface SalesPersonSelection {
 }
 
 interface SalesBySalesPersonUnFilteredProps {
+  height?: number;
+  isCompact?: boolean;
   isFullScreen?: boolean;
   onModeChange?: (isFullPage: boolean) => void;
   onSalesPersonSelect?: (selection: SalesPersonSelection | null) => void;
@@ -61,7 +62,13 @@ interface SalesBySalesPersonUnFilteredProps {
 
 const SalesBySalesPersonUnFilteredChart: React.FC<
   SalesBySalesPersonUnFilteredProps
-> = ({ isFullScreen = false, onModeChange, onSalesPersonSelect }) => {
+> = ({
+  height = 400,
+  isCompact = false,
+  isFullScreen = false,
+  onModeChange,
+  onSalesPersonSelect,
+}) => {
   const { theme: config, setTheme: setConfig } = useThemeStore();
   const { theme: mode } = useTheme();
   const theme = themes.find((theme) => theme.name === config);
@@ -77,10 +84,6 @@ const SalesBySalesPersonUnFilteredChart: React.FC<
       setSalesPersonName: state.setSalesPersonName,
     })
   );
-
-  // React.useEffect(() => {
-  //   console.log('Data dari SalesBySalesPersonUnFilteredChart:', data);
-  // }, [data]);
 
   const chartData = React.useMemo(() => {
     if (!data || !data.length) return null;
@@ -139,6 +142,11 @@ const SalesBySalesPersonUnFilteredChart: React.FC<
     return { labels: months, datasets };
   }, [data]);
 
+  const maxValue = React.useMemo(() => {
+    if (!chartData) return 0;
+    return Math.max(...chartData.datasets.flatMap((ds) => ds.data));
+  }, [chartData]);
+
   React.useEffect(() => {
     if (error) {
       toast({
@@ -156,6 +164,15 @@ const SalesBySalesPersonUnFilteredChart: React.FC<
     Array.isArray(chartData.datasets) &&
     chartData.datasets.some((ds) => ds.data.some((value) => value > 0));
 
+  React.useEffect(() => {
+    if (isDataReady) {
+      const container = document.querySelector('.chart-container');
+      const canvas = document.querySelector('.chartjs-container');
+      console.log('Container height:', container?.clientHeight);
+      console.log('Canvas height:', canvas?.clientHeight);
+    }
+  }, [isDataReady]);
+
   const handleChartClick = (event: any, elements: any[]) => {
     if (elements.length > 0) {
       const element = elements[0];
@@ -166,11 +183,6 @@ const SalesBySalesPersonUnFilteredChart: React.FC<
       const month = chartData?.labels[monthIndex] as string;
 
       if (salesPersonName) {
-        // console.log('UnFilteredChart Clicked:', {
-        //   salesPersonName,
-        //   year,
-        //   month,
-        // });
         setSalesPersonName([salesPersonName]);
         onSalesPersonSelect?.({ salesPersonName, year, month });
       }
@@ -179,21 +191,11 @@ const SalesBySalesPersonUnFilteredChart: React.FC<
 
   return (
     <div
-      className={
-        isFullScreen
-          ? 'fixed inset-0 z-50 bg-white dark:bg-[#18181b] p-4 flex flex-col rounded-none shadow-lg'
-          : 'p-4 rounded-lg shadow-sm h-96 w-full'
-      }
-      style={{
-        backgroundColor: hexBackground,
-        height: isFullScreen ? '100vh' : undefined,
-        width: isFullScreen ? '100vw' : undefined,
-        top: isFullScreen ? 0 : undefined,
-        left: isFullScreen ? 0 : undefined,
-      }}
+      className={`chart-container ${isCompact ? 'compact' : ''} bg-white dark:bg-[#18181b] p-4 rounded-lg shadow-sm flex flex-col h-fit min-h-0`}
+      style={{ backgroundColor: hexBackground }}
     >
       <div className='relative flex items-center mb-2'>
-        <h2 className='text-md text-muted-foreground font-semibold ml-2'>
+        <h2 className='text-sm text-muted-foreground font-semibold ml-2'>
           Top 5 Sales Performers (in Millions IDR)
         </h2>
         <div className='absolute right-0 top-0 flex items-center space-x-2'>
@@ -208,94 +210,97 @@ const SalesBySalesPersonUnFilteredChart: React.FC<
           />
         </div>
       </div>
-
-      {isLoading || isFetching ? (
-        <div className='flex items-center justify-center h-full'>
-          <div className='w-3/4 h-1/2 rounded-lg shimmer' />
-        </div>
-      ) : isDataReady ? (
-        <Bar
-          data={chartData}
-          options={{
-            responsive: true,
-            maintainAspectRatio: false,
-            layout: {
-              padding: { bottom: 20 },
-            },
-            scales: {
-              y: {
-                grid: {
-                  drawTicks: false,
-                  color: `hsl(${theme?.cssVars[mode === 'dark' ? 'dark' : 'light'].chartGird})`,
-                },
-
-                ticks: {
-                  callback: (value) =>
-                    `${(Number(value) / 1_000_000).toLocaleString('id-ID')}`,
+      <div className='flex-1 min-h-0'>
+        {isLoading || isFetching ? (
+          <div className='flex items-center justify-center h-full'>
+            <div className='w-3/4 h-1/2 rounded-lg shimmer' />
+          </div>
+        ) : isDataReady ? (
+          <Bar
+            width={isFullScreen ? 600 : 300}
+            height={isCompact ? 250 : height}
+            data={chartData}
+            options={{
+              responsive: true,
+              maintainAspectRatio: false,
+              layout: {
+                padding: {
+                  bottom: isCompact ? 10 : 20,
+                  top: isCompact ? 5 : 10,
                 },
               },
-              x: {
-                grid: {
-                  drawTicks: false,
-                  color: `hsl(${theme?.cssVars[mode === 'dark' ? 'dark' : 'light'].chartGird})`,
-                  display: false,
+              scales: {
+                y: {
+                  beginAtZero: true,
+                  min: maxValue < 1_000_000_000 ? 100_000_000 : undefined,
+                  ticks: {
+                    callback: (value: unknown) => {
+                      const val = Number(value) / 1000000;
+                      return `${val.toLocaleString('id-ID')}`;
+                    },
+                  },
                 },
-                // @ts-expect-error: categoryPercentage is valid for category axis
-
-                categoryPercentage: 0.6, // default 0.8, makin kecil makin renggang
-
-                barPercentage: 0.7,
-
-                ticks: {
-                  color: `hsl(${theme?.cssVars[mode === 'dark' ? 'dark' : 'light'].chartLabel})`,
-                },
-              },
-            },
-            plugins: {
-              legend: {
-                labels: {
-                  color: `hsl(${
-                    theme?.cssVars[mode === 'dark' ? 'dark' : 'light']
-                      .chartLabel
-                  })`,
-
-                  usePointStyle: true,
-                  pointStyle: 'circle',
+                x: {
+                  title: { display: false, text: 'Month' },
+                  ticks: {
+                    callback: (value, index, ticks) => {
+                      return chartData.labels[index] ?? '';
+                    },
+                  },
+                  grid: {
+                    display: false,
+                  },
                 },
               },
-
-              title: { display: false },
-              tooltip: {
-                callbacks: {
-                  label: (context) =>
-                    `${context.dataset.label}: ${(
-                      context.raw as number
-                    ).toLocaleString('id-ID')}`,
+              plugins: {
+                legend: {
+                  display: !isCompact,
+                  position: 'top',
+                  labels: {
+                    color: `hsl(${
+                      theme?.cssVars[mode === 'dark' ? 'dark' : 'light']
+                        .chartLabel
+                    })`,
+                    boxWidth: 8,
+                    font: { size: 10 },
+                    usePointStyle: true,
+                    pointStyle: 'circle',
+                  },
+                  maxHeight: 60,
+                },
+                title: { display: false },
+                tooltip: {
+                  callbacks: {
+                    label: (context) =>
+                      `${context.dataset.label}: ${(
+                        context.raw as number
+                      ).toLocaleString('id-ID')}`,
+                  },
                 },
               },
-            },
-            onClick: handleChartClick,
-          }}
-        />
-      ) : (
-        <div className='flex flex-col items-center justify-center h-full text-gray-400'>
-          <svg
-            xmlns='http://www.w3.org/2000/svg'
-            className='w-24 h-24 mb-4 animate-bounce'
-            fill='none'
-            viewBox='0 0 24 24'
-            stroke='currentColor'
-            strokeWidth={1.5}
-          >
-            <path
-              strokeLinecap='round'
-              strokeLinejoin='round'
-              d='M3 3v18h18V3H3zm5 14h8m-8-4h8m-8-4h8'
-            />
-          </svg>
-          <p className='text-sm font-medium'>No data available</p>
-        </div>
-      )}
+              onClick: handleChartClick,
+            }}
+          />
+        ) : (
+          <div className='flex flex-col items-center justify-center h-full text-gray-400'>
+            <svg
+              xmlns='http://www.w3.org/2000/svg'
+              className='w-24 h-24 mb-4 animate-bounce'
+              fill='none'
+              viewBox='0 0 24 24'
+              stroke='currentColor'
+              strokeWidth={1.5}
+            >
+              <path
+                strokeLinecap='round'
+                strokeLinejoin='round'
+                d='M3 3v18h18V3H3zm5 14h8m-8-4h8m-8-4h8'
+              />
+            </svg>
+            <p className='text-sm font-medium'>No data available</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

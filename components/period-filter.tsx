@@ -71,7 +71,7 @@ export function PeriodFilter({ onPeriodChange }: PeriodFilterProps) {
           yearDropdownItemNumber={15}
           scrollableYearDropdown
           maxDate={endOfMonth(new Date())}
-          className='w-[120px] h-10 px-3 border rounded-md bg-white text-gray-900 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-600'
+          className='w-[120px] h-10 px-3 border rounded-md bg-white text-gray-900 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-600 custom-datepicker'
         />
       </div>
       <div className='min-w-[120px]'>
@@ -100,7 +100,7 @@ export function PeriodFilter({ onPeriodChange }: PeriodFilterProps) {
           yearDropdownItemNumber={15}
           scrollableYearDropdown
           maxDate={endOfMonth(new Date())}
-          className='w-[120px] h-10 px-3 border rounded-md bg-white text-gray-900 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-600'
+          className='w-[120px] h-10 px-3 border rounded-md bg-white text-gray-900 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-600 custom-datepicker'
         />
       </div>
     </div>
