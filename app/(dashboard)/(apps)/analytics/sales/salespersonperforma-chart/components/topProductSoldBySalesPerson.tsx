@@ -218,7 +218,7 @@ const TopProductSoldBySalesPerson: React.FC<
     >
       <div className='flex items-center justify-between mb-4'>
         <h3 className='text-sm text-muted-foreground'>
-          Top 3 Highest-Selling Products
+          Top Products (Max 3) Sold
           <span className='block text-sm text-muted-foreground font-normal mt-1'>
             by {salesPersonName} in {normalizedMonth || 'N/A'} {year || 'N/A'}
           </span>

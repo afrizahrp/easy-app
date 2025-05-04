@@ -95,14 +95,14 @@ const SalesBySalesPersonFilteredChart: React.FC<
 
   const containerRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    if (containerRef.current) {
-      console.log(
-        'FilteredChart actual width:',
-        containerRef.current.getBoundingClientRect().width
-      );
-    }
-  }, [data, isFullWidth]);
+  // useEffect(() => {
+  //   if (containerRef.current) {
+  //     console.log(
+  //       'FilteredChart actual width:',
+  //       containerRef.current.getBoundingClientRect().width
+  //     );
+  //   }
+  // }, [data, isFullWidth]);
 
   const chartData = React.useMemo(() => {
     if (!data || !data.length) return null;
@@ -170,7 +170,7 @@ const SalesBySalesPersonFilteredChart: React.FC<
         : undefined;
 
       if (salesPersonName && year && month) {
-        console.log('FilteredChart Clicked:', { salesPersonName, year, month });
+        // console.log('FilteredChart Clicked:', { salesPersonName, year, month });
         onSalesPersonSelect?.({ salesPersonName, year, month });
         onModeChange?.(false);
       }

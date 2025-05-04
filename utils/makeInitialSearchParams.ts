@@ -11,6 +11,6 @@ export const makeInitialSearchParams = (): Record<
       { searchBy: 'invoice_id', searchTerm: '' },
     ])
   ) as Record<SearchContext, { searchBy: string; searchTerm: string }>;
-  console.log('Initial Search Params:', initial);
+  // console.log('Initial Search Params:', initial);
   return initial;
 };

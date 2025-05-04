@@ -34,12 +34,24 @@ const useSalesByPeriodAndPoType = ({
   const module_id = 'SLS'; // Sesuaikan dengan SalesInvoiceList
   const subModule_id = 'sls';
 
-  const { salesInvoicePeriod } = useMonthYearPeriodStore();
+  const { salesInvoicePeriod, salesPersonInvoicePeriod } =
+    useMonthYearPeriodStore();
   const { salesInvoiceFilters } = useSalesInvoiceHdFilterStore();
 
   const { poType: storePoType } = salesInvoiceFilters;
 
-  const isValidRequest = Boolean(company_id && module_id && subModule_id);
+  // const isValidRequest = Boolean(company_id && module_id && subModule_id);
+
+  const period =
+    context === 'salesInvoice' ? salesInvoicePeriod : salesPersonInvoicePeriod;
+
+  const isValidRequest = Boolean(
+    company_id &&
+      module_id &&
+      subModule_id &&
+      period.startPeriod &&
+      period.endPeriod
+  );
 
   const validPoTypes =
     poTypes && Array.isArray(poTypes) && poTypes.length
@@ -60,8 +72,8 @@ const useSalesByPeriodAndPoType = ({
       company_id,
       module_id,
       subModule_id,
-      salesInvoicePeriod.startPeriod,
-      salesInvoicePeriod.endPeriod,
+      period.startPeriod,
+      period.endPeriod,
       validPoTypes,
     ],
     queryFn: async () => {
@@ -69,17 +81,11 @@ const useSalesByPeriodAndPoType = ({
 
       const params = new URLSearchParams();
 
-      if (salesInvoicePeriod.startPeriod) {
-        params.append(
-          'startPeriod',
-          format(salesInvoicePeriod.startPeriod, 'MMMyyyy')
-        );
+      if (period.startPeriod) {
+        params.append('startPeriod', format(period.startPeriod, 'MMMyyyy'));
       }
-      if (salesInvoicePeriod.endPeriod) {
-        params.append(
-          'endPeriod',
-          format(salesInvoicePeriod.endPeriod, 'MMMyyyy')
-        );
+      if (period.endPeriod) {
+        params.append('endPeriod', format(period.endPeriod, 'MMMyyyy'));
       }
 
       if (validPoTypes.length > 0) {

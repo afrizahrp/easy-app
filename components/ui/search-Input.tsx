@@ -26,13 +26,13 @@ export default function SearchInput({
   const [debouncedSearchTerm] = useDebounce(searchTerm, 500);
 
   useEffect(() => {
-    console.log(`SearchInput [${context}] debounced: ${debouncedSearchTerm}`);
+    // console.log(`SearchInput [${context}] debounced: ${debouncedSearchTerm}`);
     if (debouncedSearchTerm) {
       setSearchParam(context, 'searchTerm', debouncedSearchTerm);
-      console.log(`Set searchTerm for ${context}: ${debouncedSearchTerm}`);
+      // console.log(`Set searchTerm for ${context}: ${debouncedSearchTerm}`);
     } else {
       removeSearchParam(context, 'searchTerm');
-      console.log(`Removed searchTerm for ${context}`);
+      // console.log(`Removed searchTerm for ${context}`);
     }
     setCurrentPage(1);
   }, [

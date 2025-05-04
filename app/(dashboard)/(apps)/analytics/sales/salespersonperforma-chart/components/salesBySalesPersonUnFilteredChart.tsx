@@ -210,7 +210,6 @@ const SalesBySalesPersonUnFilteredChart: React.FC<
       };
     });
 
-    console.log('chartData.labels:', months);
     return { labels: months, datasets };
   }, [data, isFullScreen]);
 
@@ -267,20 +266,22 @@ const SalesBySalesPersonUnFilteredChart: React.FC<
     >
       <div className='relative flex items-center justify-between mb-2'>
         <h2 className='text-sm text-muted-foreground font-semibold ml-2'>
-          Sales Performers (Above 100 Million IDR)
+          Salespersons with Monthly Sales Above 300 Million IDR
         </h2>
-        <Button
-          variant='outline'
-          size='sm'
-          onClick={toggleFullScreen}
-          className='mr-2'
-        >
-          {isFullScreen ? (
-            <Minimize2 className='h-4 w-4' />
-          ) : (
-            <Maximize2 className='h-4 w-4' />
-          )}
-        </Button>
+        {!isCompact && (
+          <Button
+            variant='outline'
+            size='sm'
+            onClick={toggleFullScreen}
+            className='mr-2'
+          >
+            {isFullScreen ? (
+              <Minimize2 className='h-4 w-4' />
+            ) : (
+              <Maximize2 className='h-4 w-4' />
+            )}
+          </Button>
+        )}
       </div>
       <div className='flex-1 min-h-0'>
         {isLoading || isFetching ? (
@@ -364,11 +365,13 @@ const SalesBySalesPersonUnFilteredChart: React.FC<
               },
               datasets: {
                 bar: {
+                  barThickness: isFullScreen ? 30 : 20, // Lebar bar lebih besar di full-screen
                   categoryPercentage: 0.95, // Minimalkan gap antar bulan
                   barPercentage: 0.85, // Lebar bar dalam kategori
                 },
               },
-              onClick: handleChartClick,
+
+              onClick: !isCompact ? handleChartClick : undefined,
             }}
           />
         ) : (

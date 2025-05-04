@@ -13,6 +13,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { FloatingFilterButton } from '@/components/ui/floating-filter-button';
 
 export default function SalesAnalyticsPage() {
   const cardVariants = {

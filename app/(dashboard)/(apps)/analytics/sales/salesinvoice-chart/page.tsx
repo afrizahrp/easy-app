@@ -59,9 +59,9 @@ const SalesInvoiceAnalytics: React.FC<SalesInvoiceAnalyticsProps> = ({
         showList ? 'h-screen' : 'h-fit min-h-0'
       }`}
     >
-      {/* <FloatingFilterButton>
+      <FloatingFilterButton>
         <GeneralInvoiceFilterSidebar table={dummyTable} />
-      </FloatingFilterButton> */}
+      </FloatingFilterButton>
 
       {showHeader && (
         <motion.div
