@@ -84,25 +84,12 @@ const SalesBySalesPersonFilteredChart: React.FC<
       ? [salesPersonInvoiceFilters.salesPersonName]
       : [];
 
-  // const { data, isLoading, isFetching, error } = useSalesByPeriodFiltered({
-  //   salesPersonNames: validSalesPersonNames,
-  // });
-
   const { data, isLoading, isFetching, error } = useSalesByPeriodFiltered({
     context: 'salesPersonInvoice',
     salesPersonNames: validSalesPersonNames,
   });
 
   const containerRef = useRef<HTMLDivElement>(null);
-
-  // useEffect(() => {
-  //   if (containerRef.current) {
-  //     console.log(
-  //       'FilteredChart actual width:',
-  //       containerRef.current.getBoundingClientRect().width
-  //     );
-  //   }
-  // }, [data, isFullWidth]);
 
   const chartData = React.useMemo(() => {
     if (!data || !data.length) return null;
@@ -138,23 +125,6 @@ const SalesBySalesPersonFilteredChart: React.FC<
 
     return { labels: months, datasets };
   }, [data]);
-
-  // const handleChartClick = (event: any, elements: any[]) => {
-  //   if (elements.length > 0) {
-  //     const element = elements[0];
-  //     const datasetIndex = element.datasetIndex;
-  //     const monthIndex = element.index;
-  //     const salesPersonName = chartData?.datasets[datasetIndex]?.label;
-  //     const year = chartData?.datasets[datasetIndex]?.period;
-  //     const month = chartData?.labels[monthIndex] as string;
-
-  //     if (salesPersonName && year && month) {
-  //       console.log('FilteredChart Clicked:', { salesPersonName, year, month });
-  //       onSalesPersonSelect?.({ salesPersonName, year, month });
-  //       onModeChange?.(false); // Set ke half-width untuk TopProductSoldBySalesPerson
-  //     }
-  //   }
-  // };
 
   const handleChartClick = (event: any, elements: any[]) => {
     if (elements.length > 0) {
