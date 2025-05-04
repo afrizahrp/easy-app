@@ -1,6 +1,6 @@
 'use client';
-import { useState, useEffect } from 'react';
-import Draggable from 'react-draggable'; // Library untuk fitur draggable
+import { useState, useEffect, useRef } from 'react';
+import Draggable from 'react-draggable';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Filter } from 'lucide-react';
 import {
@@ -18,8 +18,8 @@ interface FloatingFilterButtonProps {
 export function FloatingFilterButton({ children }: FloatingFilterButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [position, setPosition] = useState({ x: 0, y: 0 });
+  const draggableRef = useRef<any>(null); // Ref untuk Draggable
 
-  // Simpan posisi tombol di localStorage agar tetap di tempat terakhir setelah refresh
   useEffect(() => {
     const savedPosition = localStorage.getItem('floatingFilterButtonPosition');
     if (savedPosition) {
@@ -39,11 +39,15 @@ export function FloatingFilterButton({ children }: FloatingFilterButtonProps) {
   return (
     <>
       <Draggable
+        nodeRef={draggableRef} // Gunakan nodeRef untuk menghindari findDOMNode
         defaultPosition={{ x: position.x, y: position.y }}
         onStop={handleDragStop}
-        bounds='parent' // Membatasi draggable area ke dalam parent container
+        bounds='parent'
       >
-        <div className='fixed bottom-6 right-6 z-50 cursor-move'>
+        <div
+          ref={draggableRef}
+          className='fixed bottom-6 right-6 z-50 cursor-move'
+        >
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -54,7 +58,6 @@ export function FloatingFilterButton({ children }: FloatingFilterButtonProps) {
                   transition={{ duration: 0.3, ease: 'easeOut' }}
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.95 }}
-                  aria-label='Floating filter button chart period'
                   onClick={() => setIsOpen(true)}
                 >
                   <motion.div
@@ -66,7 +69,7 @@ export function FloatingFilterButton({ children }: FloatingFilterButtonProps) {
                   <span>Filter Period</span>
                 </motion.div>
               </TooltipTrigger>
-              <TooltipContent>
+              <TooltipContent className='text-sm text-gray-700 dark:text-slate-100'>
                 <p>Adjust the period for all charts</p>
               </TooltipContent>
             </Tooltip>

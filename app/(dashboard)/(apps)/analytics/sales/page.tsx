@@ -108,7 +108,7 @@ export default function SalesAnalyticsPage() {
                     </Link>
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent className='max-w-xs whitespace-normal text-sm'>
+                <TooltipContent className='max-w-xs whitespace-normal text-sm  text-gray-700 dark:text-slate-100'>
                   <p>{tooltipTextViewDetailsSalesInvoice}</p>
                 </TooltipContent>
               </Tooltip>
@@ -163,7 +163,7 @@ export default function SalesAnalyticsPage() {
                     </Link>
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent className='max-w-xs whitespace-normal text-sm'>
+                <TooltipContent className='max-w-xs whitespace-normal text-sm text-gray-700 dark:text-slate-100'>
                   <p>{tooltipTextViewDetailsSalesPersonPerforma}</p>
                 </TooltipContent>
               </Tooltip>
