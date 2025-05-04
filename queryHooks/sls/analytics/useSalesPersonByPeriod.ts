@@ -8,7 +8,6 @@ import {
 import { format } from 'date-fns';
 import { AxiosError } from 'axios';
 
-// Tipe untuk respons
 interface SalesDataWithoutFilter {
   period: string;
   totalInvoice: number;
@@ -33,32 +32,34 @@ interface SalesPeriodResponse {
 }
 
 interface UseSalesPersonByPeriodProps {
+  context: 'salesInvoice' | 'salesPersonInvoice';
   salesPersonNames?: string[];
 }
 
 const useSalesPersonByPeriod = ({
+  context,
   salesPersonNames: propSalesPersonNames,
-}: UseSalesPersonByPeriodProps = {}) => {
+}: UseSalesPersonByPeriodProps) => {
   const user = useSessionStore((state) => state.user);
   const company_id = user?.company_id?.toUpperCase();
   const module_id = 'SLS';
   const subModule_id = 'sls';
 
-  const { startPeriod, endPeriod } = useMonthYearPeriodStore();
-  const { salesPersonName, paidStatus, poType } = useSalesInvoiceHdFilterStore(
-    (state) => ({
-      salesPersonName: state.salesPersonName,
-      poType: state.poType,
-      paidStatus: state.paidStatus,
-    })
-  );
+  const { salesInvoicePeriod, salesPersonInvoicePeriod } =
+    useMonthYearPeriodStore();
+  const { salesInvoiceFilters, salesPersonInvoiceFilters } =
+    useSalesInvoiceHdFilterStore();
 
-  const isValidRequest = Boolean(
-    company_id &&
-      module_id &&
-      startPeriod instanceof Date &&
-      endPeriod instanceof Date
-  );
+  const period =
+    context === 'salesInvoice' ? salesInvoicePeriod : salesPersonInvoicePeriod;
+  const filters =
+    context === 'salesInvoice'
+      ? salesInvoiceFilters
+      : salesPersonInvoiceFilters;
+
+  const { salesPersonName, paidStatus, poType } = filters;
+
+  const isValidRequest = Boolean(company_id && module_id && subModule_id);
 
   // Gunakan salesPersonName dari store jika propSalesPersonNames tidak diberikan
   const salesPersonNames = propSalesPersonNames ?? salesPersonName;
@@ -78,12 +79,15 @@ const useSalesPersonByPeriod = ({
   >({
     queryKey: [
       'salesPersonChart',
+      context,
       company_id,
       module_id,
       subModule_id,
-      startPeriod,
-      endPeriod,
+      period.startPeriod,
+      period.endPeriod,
       validSalesPersonNames,
+      paidStatus,
+      poType,
     ],
     queryFn: async () => {
       if (!isValidRequest) {
@@ -94,38 +98,54 @@ const useSalesPersonByPeriod = ({
 
       const params = new URLSearchParams();
 
-      // Tambahkan startPeriod dan endPeriod
-      if (startPeriod) {
-        params.append('startPeriod', format(startPeriod, 'MMMyyyy'));
+      // Tambahkan periode jika ada
+      if (period.startPeriod) {
+        params.append('startPeriod', format(period.startPeriod, 'MMMyyyy'));
       }
-      if (endPeriod) {
-        params.append('endPeriod', format(endPeriod, 'MMMyyyy'));
+      if (period.endPeriod) {
+        params.append('endPeriod', format(period.endPeriod, 'MMMyyyy'));
       }
 
-      let url = '';
-
+      // Tambahkan filter
       if (hasSalesPersonNames) {
-        // Tambahkan setiap salesPersonName sebagai parameter terpisah
         validSalesPersonNames.forEach((name) => {
-          params.append('salesPersonName', name); // Menghasilkan salesPersonName=HANDOYO&salesPersonName=ORIT
+          params.append('salesPersonName', name);
         });
-        url = `http://localhost:8000/BIS/SLS/sls/get-dashboard/getBySalesPersonByPeriod`;
-      } else {
-        url = `http://localhost:8000/BIS/SLS/sls/get-dashboard/getByTopNSalesPersonByPeriod`;
       }
 
-      // Bangun URL dengan query string
+      if (paidStatus?.length) {
+        paidStatus.forEach((status) => {
+          params.append('paidStatus', status);
+        });
+      }
+
+      if (poType?.length && context === 'salesInvoice') {
+        poType.forEach((type) => {
+          params.append('poType', type);
+        });
+      }
+
+      const endpoint = hasSalesPersonNames
+        ? 'getBySalesPersonByPeriod'
+        : 'getByTopNSalesPersonByPeriod';
+
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/${company_id}/${module_id}/${subModule_id}/get-dashboard/${endpoint}`;
+
       const finalUrl = `${url}${params.toString() ? `?${params.toString()}` : ''}`;
 
-      // Debugging: Log URL dan params
-      console.log('validSalesPersonNames:', validSalesPersonNames);
-      console.log('Query params:', params.toString());
-      console.log('finalUrl:', finalUrl);
+      console.log(
+        `[useSalesPersonByPeriod:${context}] validSalesPersonNames:`,
+        validSalesPersonNames
+      );
+      console.log(
+        `[useSalesPersonByPeriod:${context}] Query params:`,
+        params.toString()
+      );
+      console.log(`[useSalesPersonByPeriod:${context}] finalUrl:`, finalUrl);
 
       try {
-        // Kirim request tanpa params tambahan untuk menghindari paramsSerializer
         const response = await api.get<SalesPeriodResponse>(finalUrl, {
-          paramsSerializer: (params) => params.toString(), // Pastikan tidak ada modifikasi
+          paramsSerializer: (params) => params.toString(),
         });
         return response.data;
       } catch (err) {

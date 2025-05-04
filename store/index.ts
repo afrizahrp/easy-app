@@ -1,8 +1,10 @@
 import { create } from 'zustand';
 import { siteConfig } from '@/config/site';
-import { persist, createJSONStorage } from 'zustand/middleware';
+import { persist, PersistOptions, createJSONStorage } from 'zustand/middleware';
 import { SortingState } from '@tanstack/react-table';
-// import { startOfMonth, endOfMonth } from 'date-fns';
+
+import { SearchContext, SEARCH_CONTEXTS } from '@/constants/searchContexts';
+import { makeInitialSearchParams } from '@/utils/makeInitialSearchParams';
 import { startOfMonth, endOfMonth, set as setDate } from 'date-fns';
 
 interface ThemeStoreState {
@@ -209,79 +211,91 @@ export const useCompanyInfo = create<CompanyInfoStoreState>()(
   )
 );
 
+interface SearchParams {
+  searchBy?: string;
+  searchTerm?: string;
+}
+
 interface SearchParamsState {
-  searchParams: Record<string, string | string[]>;
-  setSearchBy: (by: string) => void;
-  setSearchParam: (key: string, value: string | string[]) => void;
-  removeSearchParam: (key: string) => void;
-  resetSearchParams: () => void;
+  searchParams: Record<SearchContext, SearchParams>;
+  setSearchParam: (
+    context: SearchContext,
+    key: keyof SearchParams,
+    value: string
+  ) => void;
+  removeSearchParam: (context: SearchContext, key: keyof SearchParams) => void;
+  resetSearchParams: (context: SearchContext) => void;
 }
 
 export const useSearchParamsStore = create<SearchParamsState>()(
   persist(
-    (set, get) => ({
-      // Inisialisasi dengan default searchBy
-      searchParams: {
-        searchBy: 'invoice_id', // Default untuk mencegah undefined
-      },
-
-      setSearchBy: (by) => {
-        if (!by) return; // Cegah set nilai kosong atau undefined
-        set((state) => ({
-          searchParams: { ...state.searchParams, searchBy: by },
-        }));
-      },
-
-      setSearchParam: (key, value) => {
-        // Hapus param jika value kosong
-        if (!value || (Array.isArray(value) && value.length === 0)) {
-          return get().removeSearchParam(key);
-        }
-        set((state) => ({
-          searchParams: { ...state.searchParams, [key]: value },
-        }));
-      },
-
-      removeSearchParam: (key) => {
+    (set) => ({
+      searchParams: makeInitialSearchParams(),
+      setSearchParam: (context, key, value) =>
         set((state) => {
-          const newParams = { ...state.searchParams };
-          delete newParams[key];
-          return { searchParams: newParams };
-        });
-      },
-
-      resetSearchParams: () => {
-        set({
-          searchParams: {
-            searchBy: 'invoice_id', // Reset ke default
-          },
-        });
-      },
+          if (!SEARCH_CONTEXTS.includes(context)) {
+            console.warn(`Invalid context: ${context}`);
+            return state;
+          }
+          const newState = {
+            searchParams: {
+              ...state.searchParams,
+              [context]: {
+                ...state.searchParams[context],
+                [key]: value,
+              },
+            },
+          };
+          console.log(`Setting ${context}.${key} to ${value}`, newState);
+          return newState;
+        }),
+      removeSearchParam: (context, key) =>
+        set((state) => {
+          if (!SEARCH_CONTEXTS.includes(context)) {
+            console.warn(`Invalid context: ${context}`);
+            return state;
+          }
+          const updated = { ...state.searchParams[context] };
+          delete updated[key];
+          console.log(`Removing ${context}.${key}`, updated);
+          return {
+            searchParams: {
+              ...state.searchParams,
+              [context]: updated,
+            },
+          };
+        }),
+      resetSearchParams: (context) =>
+        set((state) => {
+          if (!SEARCH_CONTEXTS.includes(context)) {
+            console.warn(`Invalid context: ${context}`);
+            return state;
+          }
+          console.log(`Resetting ${context} search params`);
+          return {
+            searchParams: {
+              ...state.searchParams,
+              [context]: { searchBy: 'invoice_id', searchTerm: '' },
+            },
+          };
+        }),
     }),
     {
       name: 'search-params-store',
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({ searchParams: state.searchParams }),
-      onRehydrateStorage: () => (state) => {
-        if (typeof window === 'undefined' || !state) return;
-
-        const params = new URLSearchParams(window.location.search);
-        const searchBy = params.get('searchBy');
-        const searchTerm = params.get('searchTerm');
-
-        const newParams = { ...state.searchParams };
-        if (searchBy) {
-          newParams.searchBy = searchBy;
-        }
-        if (searchTerm) {
-          newParams.searchTerm = searchTerm;
-        }
-
-        state.searchParams = newParams;
-      },
     }
   )
 );
+
+export const useSearchParams = (context: SearchContext) =>
+  useSearchParamsStore((state) => ({
+    searchBy: state.searchParams[context]?.searchBy || 'invoice_id',
+    searchTerm: state.searchParams[context]?.searchTerm || '',
+    setSearchParam: state.setSearchParam,
+    removeSearchParam: state.removeSearchParam,
+    resetSearchParams: state.resetSearchParams,
+  }));
 
 interface CategoryFilterState {
   status: string[]; // Array status
@@ -305,118 +319,188 @@ export const useCategoryFilterStore = create<CategoryFilterState>()(
   )
 );
 
-// Fungsi kustom setDate untuk mengatur waktu
-// const setDate = (
-//   date: Date,
-//   time: {
-//     hours: number;
-//     minutes: number;
-//     seconds: number;
-//     milliseconds: number;
-//   }
-// ): Date => {
-//   const newDate = new Date(date);
-//   newDate.setHours(time.hours, time.minutes, time.seconds, time.milliseconds);
-//   return newDate;
-// };
+interface PeriodState {
+  startPeriod: Date | null;
+  endPeriod: Date | null;
+}
+
+interface PersistedPeriodState {
+  startPeriod: string | null;
+  endPeriod: string | null;
+}
+
+interface PersistedMonthYearPeriodState {
+  salesInvoicePeriod: PersistedPeriodState;
+  salesPersonInvoicePeriod: PersistedPeriodState;
+}
 
 interface MonthYearPeriodState {
-  startPeriod: Date | null;
-  setStartPeriod: (date: Date | null) => void;
-  endPeriod: Date | null;
-  setEndPeriod: (date: Date | null) => void;
-  period: string;
-  setPeriod: (period: string) => void;
-  reset: () => void;
+  salesInvoicePeriod: PeriodState;
+  salesPersonInvoicePeriod: PeriodState;
+  setSalesInvoicePeriod: (period: Partial<PeriodState>) => void;
+  setSalesPersonInvoicePeriod: (period: Partial<PeriodState>) => void;
+  resetSalesInvoicePeriod: () => void;
+  resetSalesPersonInvoicePeriod: () => void;
 }
+
+type MonthYearPeriodStore = MonthYearPeriodState & {
+  $$storeMutators?: [['zustand/persist', PersistedMonthYearPeriodState]];
+};
 
 const currentYear = new Date().getFullYear();
 const toISOString = (date: Date | null) => (date ? date.toISOString() : null);
 const fromISOString = (dateString: string | null) =>
   dateString ? new Date(dateString) : null;
 
-export const useMonthYearPeriodStore = create<MonthYearPeriodState>()(
+const getDefaultPeriod = (): PeriodState => ({
+  startPeriod: setDate(startOfMonth(new Date(currentYear, 0, 1)), {
+    hours: 0,
+    minutes: 0,
+    seconds: 0,
+    milliseconds: 0,
+  }),
+  endPeriod: setDate(endOfMonth(new Date()), {
+    hours: 23,
+    minutes: 59,
+    seconds: 59,
+    milliseconds: 999,
+  }),
+});
+
+const persistOptions: PersistOptions<
+  MonthYearPeriodState,
+  PersistedMonthYearPeriodState
+> = {
+  name: 'monthYearFilterStore',
+  storage: createJSONStorage(() => localStorage),
+  partialize: (state: MonthYearPeriodState): PersistedMonthYearPeriodState => ({
+    salesInvoicePeriod: {
+      startPeriod: toISOString(state.salesInvoicePeriod.startPeriod),
+      endPeriod: toISOString(state.salesInvoicePeriod.endPeriod),
+    },
+    salesPersonInvoicePeriod: {
+      startPeriod: toISOString(state.salesPersonInvoicePeriod.startPeriod),
+      endPeriod: toISOString(state.salesPersonInvoicePeriod.endPeriod),
+    },
+  }),
+  onRehydrateStorage: () => (state) => {
+    if (state) {
+      // Konversi string ISO ke Date, fallback ke default jika tidak valid
+      state.salesInvoicePeriod.startPeriod =
+        fromISOString(
+          typeof state.salesInvoicePeriod.startPeriod === 'string'
+            ? state.salesInvoicePeriod.startPeriod
+            : null
+        ) || getDefaultPeriod().startPeriod;
+      state.salesInvoicePeriod.endPeriod =
+        fromISOString(
+          typeof state.salesInvoicePeriod.endPeriod === 'string'
+            ? state.salesInvoicePeriod.endPeriod
+            : null
+        ) || getDefaultPeriod().endPeriod;
+      state.salesPersonInvoicePeriod.startPeriod =
+        fromISOString(
+          typeof state.salesPersonInvoicePeriod.startPeriod === 'string'
+            ? state.salesPersonInvoicePeriod.startPeriod
+            : null
+        ) || getDefaultPeriod().startPeriod;
+      state.salesPersonInvoicePeriod.endPeriod =
+        fromISOString(
+          typeof state.salesPersonInvoicePeriod.endPeriod === 'string'
+            ? state.salesPersonInvoicePeriod.endPeriod
+            : null
+        ) || getDefaultPeriod().endPeriod;
+    }
+  },
+};
+
+export const useMonthYearPeriodStore = create<MonthYearPeriodStore>()(
   persist(
     (set) => ({
-      startPeriod: setDate(startOfMonth(new Date(currentYear, 0, 1)), {
-        hours: 0,
-        minutes: 0,
-        seconds: 0,
-        milliseconds: 0,
-      }),
-      setStartPeriod: (date) => set({ startPeriod: date }),
-      endPeriod: setDate(endOfMonth(new Date()), {
-        hours: 23,
-        minutes: 59,
-        seconds: 59,
-        milliseconds: 999,
-      }),
-      setEndPeriod: (date) => set({ endPeriod: date }),
-      period: '',
-      setPeriod: (period: string) => set({ period }),
-      reset: () =>
+      salesInvoicePeriod: getDefaultPeriod(),
+      salesPersonInvoicePeriod: getDefaultPeriod(),
+      setSalesInvoicePeriod: (period) =>
+        set((state) => ({
+          salesInvoicePeriod: { ...state.salesInvoicePeriod, ...period },
+        })),
+      setSalesPersonInvoicePeriod: (period) =>
+        set((state) => ({
+          salesPersonInvoicePeriod: {
+            ...state.salesPersonInvoicePeriod,
+            ...period,
+          },
+        })),
+      resetSalesInvoicePeriod: () =>
         set({
-          startPeriod: setDate(startOfMonth(new Date(currentYear, 0, 1)), {
-            hours: 0,
-            minutes: 0,
-            seconds: 0,
-            milliseconds: 0,
-          }),
-          endPeriod: setDate(endOfMonth(new Date()), {
-            hours: 23,
-            minutes: 59,
-            seconds: 59,
-            milliseconds: 999,
-          }),
-          period: '',
+          salesInvoicePeriod: getDefaultPeriod(),
+        }),
+      resetSalesPersonInvoicePeriod: () =>
+        set({
+          salesPersonInvoicePeriod: getDefaultPeriod(),
         }),
     }),
-    {
-      name: 'month-year-period-store', // Nama kunci di localStorage
-      storage: createJSONStorage(() => localStorage),
-      partialize: (state) => ({
-        startPeriod: toISOString(state.startPeriod),
-        endPeriod: toISOString(state.endPeriod),
-      }),
-      onRehydrateStorage: () => (state) => {
-        if (state) {
-          // state.startPeriod dan state.endPeriod adalah string | null dari localStorage
-          state.startPeriod = fromISOString(state.startPeriod as string | null);
-          state.endPeriod = fromISOString(state.endPeriod as string | null);
-        }
-      },
-    }
+    persistOptions
   )
 );
 
-interface SalesInvoiceHdState {
+interface FilterState {
   paidStatus: string[];
-  setPaidStatus: (status: string[]) => void;
   poType: string[];
-  setPoType: (poType: string[]) => void;
   salesPersonName: string[];
-  setSalesPersonName: (salesPersonName: string[]) => void;
 }
 
-export const useSalesInvoiceHdFilterStore = create<SalesInvoiceHdState>()(
+interface SalesInvoiceFilterState {
+  salesInvoiceFilters: FilterState;
+  salesPersonInvoiceFilters: FilterState;
+  setSalesInvoiceFilters: (filters: Partial<FilterState>) => void;
+  setSalesPersonInvoiceFilters: (filters: Partial<FilterState>) => void;
+  resetSalesInvoiceFilters: () => void;
+  resetSalesPersonInvoiceFilters: () => void;
+}
+export const useSalesInvoiceHdFilterStore = create<SalesInvoiceFilterState>()(
   persist(
     (set) => ({
-      paidStatus: [],
-      setPaidStatus: (status) => set({ paidStatus: status }),
-      poType: [],
-      setPoType: (poType) => set({ poType }),
-      salesPersonName: [],
-      setSalesPersonName: (salesPersonName) => set({ salesPersonName }),
+      salesInvoiceFilters: {
+        paidStatus: [],
+        poType: [],
+        salesPersonName: [],
+      },
+      salesPersonInvoiceFilters: {
+        paidStatus: [],
+        poType: [],
+        salesPersonName: [],
+      },
+      setSalesInvoiceFilters: (filters) =>
+        set((state) => ({
+          salesInvoiceFilters: { ...state.salesInvoiceFilters, ...filters },
+        })),
+      setSalesPersonInvoiceFilters: (filters) =>
+        set((state) => ({
+          salesPersonInvoiceFilters: {
+            ...state.salesPersonInvoiceFilters,
+            ...filters,
+          },
+        })),
+      resetSalesInvoiceFilters: () =>
+        set({
+          salesInvoiceFilters: {
+            paidStatus: [],
+            poType: [],
+            salesPersonName: [],
+          },
+        }),
+      resetSalesPersonInvoiceFilters: () =>
+        set({
+          salesPersonInvoiceFilters: {
+            paidStatus: [],
+            poType: [],
+            salesPersonName: [],
+          },
+        }),
     }),
     {
-      name: 'invoice-header-filter-store', // Nama kunci di localStorage
-      storage: createJSONStorage(() => localStorage), // Gunakan localStorage
-      partialize: (state) => ({
-        // Hanya simpan properti yang relevan
-        paidStatus: state.paidStatus,
-        poType: state.poType,
-        salesPersonName: state.salesPersonName,
-      }),
+      name: 'sales-invoice-filter',
+      storage: createJSONStorage(() => localStorage),
     }
   )
 );

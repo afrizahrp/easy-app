@@ -1,7 +1,7 @@
 import { api } from '@/config/axios.config';
 import { useQuery } from '@tanstack/react-query';
 import { useSessionStore, useMonthYearPeriodStore } from '@/store';
-import { format } from 'date-fns';
+import { format, isValid } from 'date-fns';
 import { AxiosError } from 'axios';
 
 interface SalesDataWithoutFilter {
@@ -20,19 +20,39 @@ interface SalesPeriodResponse {
   data: SalesDataWithoutFilter[];
 }
 
-const useSalesByPeriodUnfiltered = () => {
+interface UseSalesByPeriodUnfilteredProps {
+  context: 'salesPersonInvoice';
+}
+
+const useSalesByPeriodUnfiltered = ({
+  context,
+}: UseSalesByPeriodUnfilteredProps) => {
   const user = useSessionStore((state) => state.user);
   const company_id = user?.company_id?.toUpperCase();
-  const module_id = 'ANT';
+  const module_id = 'SLS';
   const subModule_id = 'sls';
 
-  const { startPeriod, endPeriod } = useMonthYearPeriodStore();
+  const { salesPersonInvoicePeriod } = useMonthYearPeriodStore();
 
-  const isValidRequest = Boolean(
-    company_id &&
-      module_id &&
-      startPeriod instanceof Date &&
-      endPeriod instanceof Date
+  const isValidRequest = Boolean(company_id && module_id && subModule_id);
+
+  // Validasi dan format periode
+  const getFormattedPeriod = (date: Date | null, defaultDate: Date): string => {
+    return date && isValid(date)
+      ? format(date, 'MMMyyyy')
+      : format(defaultDate, 'MMMyyyy');
+  };
+
+  const defaultStartPeriod = new Date(new Date().getFullYear(), 0, 1); // 1 Januari tahun berjalan
+  const defaultEndPeriod = new Date(); // Tanggal saat ini
+
+  const formattedStartPeriod = getFormattedPeriod(
+    salesPersonInvoicePeriod.startPeriod,
+    defaultStartPeriod
+  );
+  const formattedEndPeriod = getFormattedPeriod(
+    salesPersonInvoicePeriod.endPeriod,
+    defaultEndPeriod
   );
 
   const { data, isLoading, isFetching, error, ...rest } = useQuery<
@@ -41,31 +61,20 @@ const useSalesByPeriodUnfiltered = () => {
   >({
     queryKey: [
       'salesPersonChartUnfiltered',
+      context,
       company_id,
       module_id,
       subModule_id,
-      startPeriod,
-      endPeriod,
+      formattedStartPeriod,
+      formattedEndPeriod,
     ],
     queryFn: async () => {
-      if (!isValidRequest) {
-        throw new Error('Invalid request parameters');
-      }
-
       const params = new URLSearchParams();
-
-      if (startPeriod) {
-        params.append('startPeriod', format(startPeriod, 'MMMyyyy'));
-      }
-      if (endPeriod) {
-        params.append('endPeriod', format(endPeriod, 'MMMyyyy'));
-      }
+      params.append('startPeriod', formattedStartPeriod);
+      params.append('endPeriod', formattedEndPeriod);
 
       const url = `${process.env.NEXT_PUBLIC_API_URL}/${company_id}/${module_id}/${subModule_id}/get-analytics/getByTopNSalesPersonByPeriod`;
-      const finalUrl = `${url}${params.toString() ? `?${params.toString()}` : ''}`;
-
-      // console.log('Query params:', params.toString());
-      // console.log('finalUrl:', finalUrl);
+      const finalUrl = `${url}?${params.toString()}`;
 
       try {
         const response = await api.get<SalesPeriodResponse>(finalUrl);

@@ -59,16 +59,9 @@ const SalesInvoiceAnalytics: React.FC<SalesInvoiceAnalyticsProps> = ({
         showList ? 'h-screen' : 'h-fit min-h-0'
       }`}
     >
-      <FloatingFilterButton>
+      {/* <FloatingFilterButton>
         <GeneralInvoiceFilterSidebar table={dummyTable} />
-      </FloatingFilterButton>
-
-      {/* <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
-        <SheetContent className='pt-5 w-60 sm:w-96'>
-          <SheetTitle>Filter Data</SheetTitle>
-          <GeneralInvoiceFilterSidebar table={dummyTable} />
-        </SheetContent>
-      </Sheet> */}
+      </FloatingFilterButton> */}
 
       {showHeader && (
         <motion.div
@@ -93,7 +86,7 @@ const SalesInvoiceAnalytics: React.FC<SalesInvoiceAnalyticsProps> = ({
 
       <div className='flex flex-col gap-2'>
         <div className='min-w-[200px]'>
-          <SalesInvoiceFilterSummary />
+          <SalesInvoiceFilterSummary context='salesInvoice' />
         </div>
 
         <motion.div

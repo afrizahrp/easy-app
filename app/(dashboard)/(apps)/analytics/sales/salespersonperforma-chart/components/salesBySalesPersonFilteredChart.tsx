@@ -22,10 +22,6 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useSalesInvoiceHdFilterStore } from '@/store';
-import {
-  salesPersonColorMap,
-  getFallbackColor,
-} from '@/utils/salesPersonColorMap';
 import { months } from '@/utils/monthNameMap';
 import { getSalesPersonColor } from '@/utils/getSalesPersonColor';
 
@@ -69,20 +65,31 @@ const SalesBySalesPersonFilteredChart: React.FC<
   })`;
   const hexBackground = hslToHex(hslBackground);
   const { toast } = useToast();
-  const { salesPersonName, setSalesPersonName } = useSalesInvoiceHdFilterStore(
-    (state) => ({
-      salesPersonName: state.salesPersonName,
-      setSalesPersonName: state.setSalesPersonName,
-    })
-  );
 
-  const validSalesPersonNames = Array.isArray(salesPersonName)
-    ? salesPersonName.filter((name) => typeof name === 'string' && name.trim())
-    : salesPersonName && typeof salesPersonName === 'string' && salesPersonName
-      ? [salesPersonName]
+  const { salesPersonInvoiceFilters, setSalesPersonInvoiceFilters } =
+    useSalesInvoiceHdFilterStore((state) => ({
+      salesPersonInvoiceFilters: state.salesPersonInvoiceFilters,
+      setSalesPersonInvoiceFilters: state.setSalesPersonInvoiceFilters,
+    }));
+
+  const validSalesPersonNames = Array.isArray(
+    salesPersonInvoiceFilters.salesPersonName
+  )
+    ? salesPersonInvoiceFilters.salesPersonName.filter(
+        (name) => typeof name === 'string' && name.trim()
+      )
+    : salesPersonInvoiceFilters.salesPersonName &&
+        typeof salesPersonInvoiceFilters.salesPersonName === 'string' &&
+        salesPersonInvoiceFilters.salesPersonName
+      ? [salesPersonInvoiceFilters.salesPersonName]
       : [];
 
+  // const { data, isLoading, isFetching, error } = useSalesByPeriodFiltered({
+  //   salesPersonNames: validSalesPersonNames,
+  // });
+
   const { data, isLoading, isFetching, error } = useSalesByPeriodFiltered({
+    context: 'salesPersonInvoice',
     salesPersonNames: validSalesPersonNames,
   });
 
@@ -132,19 +139,40 @@ const SalesBySalesPersonFilteredChart: React.FC<
     return { labels: months, datasets };
   }, [data]);
 
+  // const handleChartClick = (event: any, elements: any[]) => {
+  //   if (elements.length > 0) {
+  //     const element = elements[0];
+  //     const datasetIndex = element.datasetIndex;
+  //     const monthIndex = element.index;
+  //     const salesPersonName = chartData?.datasets[datasetIndex]?.label;
+  //     const year = chartData?.datasets[datasetIndex]?.period;
+  //     const month = chartData?.labels[monthIndex] as string;
+
+  //     if (salesPersonName && year && month) {
+  //       console.log('FilteredChart Clicked:', { salesPersonName, year, month });
+  //       onSalesPersonSelect?.({ salesPersonName, year, month });
+  //       onModeChange?.(false); // Set ke half-width untuk TopProductSoldBySalesPerson
+  //     }
+  //   }
+  // };
+
   const handleChartClick = (event: any, elements: any[]) => {
     if (elements.length > 0) {
       const element = elements[0];
       const datasetIndex = element.datasetIndex;
       const monthIndex = element.index;
       const salesPersonName = chartData?.datasets[datasetIndex]?.label;
-      const year = chartData?.datasets[datasetIndex]?.period;
-      const month = chartData?.labels[monthIndex] as string;
+      const year =
+        chartData?.datasets[datasetIndex]?.period.match(/\d{4}/)?.[0] || '2025'; // Fallback ke tahun default
+      const rawMonth = chartData?.labels[monthIndex] as string;
+      const month = rawMonth
+        ? rawMonth.charAt(0).toUpperCase() + rawMonth.slice(1).toLowerCase()
+        : undefined;
 
       if (salesPersonName && year && month) {
         console.log('FilteredChart Clicked:', { salesPersonName, year, month });
         onSalesPersonSelect?.({ salesPersonName, year, month });
-        onModeChange?.(false); // Set ke half-width untuk TopProductSoldBySalesPerson
+        onModeChange?.(false);
       }
     }
   };
@@ -153,7 +181,8 @@ const SalesBySalesPersonFilteredChart: React.FC<
     if (error) {
       toast({
         description:
-          error.message || 'Failed to load sales data. Please try again.',
+          error.message ||
+          'Failed to load sales by salesperson data. Please try again.',
         color: 'destructive',
       });
     }
@@ -203,7 +232,9 @@ const SalesBySalesPersonFilteredChart: React.FC<
           </div>
           <button
             onClick={() => {
-              setSalesPersonName([]);
+              setSalesPersonInvoiceFilters({
+                salesPersonName: [],
+              });
               onSalesPersonSelect?.(null);
               onModeChange?.(true); // Pastikan full-width saat kembali
             }}

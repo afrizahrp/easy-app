@@ -8,30 +8,54 @@ import { useMonthYearPeriodStore } from '@/store';
 import { useToast } from '@/components/ui/use-toast';
 
 interface PeriodFilterProps {
+  context: 'salesInvoice' | 'salesPersonInvoice';
   onPeriodChange?: (period: {
     startPeriod: Date | null;
     endPeriod: Date | null;
   }) => void;
 }
 
-export function PeriodFilter({ onPeriodChange }: PeriodFilterProps) {
-  const { startPeriod, setStartPeriod, endPeriod, setEndPeriod } =
-    useMonthYearPeriodStore();
+export function PeriodFilter({ context, onPeriodChange }: PeriodFilterProps) {
+  const {
+    salesInvoicePeriod,
+    setSalesInvoicePeriod,
+    salesPersonInvoicePeriod,
+    setSalesPersonInvoicePeriod,
+  } = useMonthYearPeriodStore();
   const { toast } = useToast();
 
-  const prevPeriodRef = useRef({ startPeriod, endPeriod });
+  const period =
+    context === 'salesInvoice' ? salesInvoicePeriod : salesPersonInvoicePeriod;
+  const setPeriod =
+    context === 'salesInvoice'
+      ? setSalesInvoicePeriod
+      : setSalesPersonInvoicePeriod;
+
+  const prevPeriodRef = useRef({
+    startPeriod: period.startPeriod,
+    endPeriod: period.endPeriod,
+  });
 
   useEffect(() => {
     const prev = prevPeriodRef.current;
-    if (startPeriod !== prev.startPeriod || endPeriod !== prev.endPeriod) {
-      console.log('PeriodFilter useEffect triggered with:', {
-        startPeriod,
-        endPeriod,
+    if (
+      period.startPeriod !== prev.startPeriod ||
+      period.endPeriod !== prev.endPeriod
+    ) {
+      console.log(`[PeriodFilter:${context}] useEffect triggered with:`, {
+        startPeriod: period.startPeriod,
+        endPeriod: period.endPeriod,
       });
-      onPeriodChange?.({ startPeriod, endPeriod });
-      prevPeriodRef.current = { startPeriod, endPeriod };
+      onPeriodChange?.({
+        startPeriod: period.startPeriod,
+        endPeriod: period.endPeriod,
+      });
+      prevPeriodRef.current = {
+        startPeriod: period.startPeriod,
+        endPeriod: period.endPeriod,
+      };
     }
-  }, [startPeriod, endPeriod, onPeriodChange]);
+  }, [period.startPeriod, period.endPeriod, onPeriodChange, context]);
 
   return (
     <div className='w-full flex justify-center items-center'>
@@ -39,9 +63,9 @@ export function PeriodFilter({ onPeriodChange }: PeriodFilterProps) {
         <div className='min-w-[120px]'>
           <label className='text-sm font-medium mb-1 block'>Start Period</label>
           <DatePicker
-            selected={startPeriod}
+            selected={period.startPeriod}
             onChange={(date) => {
-              console.log('Start Period changed to:', date);
+              console.log(`[${context}] Start Period changed to:`, date);
               const newStart = date
                 ? setDate(startOfMonth(date), {
                     hours: 0,
@@ -50,13 +74,13 @@ export function PeriodFilter({ onPeriodChange }: PeriodFilterProps) {
                     milliseconds: 0,
                   })
                 : null;
-              setStartPeriod(newStart);
+              setPeriod({ startPeriod: newStart });
               if (
                 newStart &&
-                endPeriod &&
-                startOfMonth(endPeriod) < startOfMonth(newStart)
+                period.endPeriod &&
+                startOfMonth(period.endPeriod) < startOfMonth(newStart)
               ) {
-                setEndPeriod(null);
+                setPeriod({ endPeriod: null });
                 toast({
                   description:
                     'End Period was reset because it was earlier than the new Start Period.',
@@ -79,24 +103,26 @@ export function PeriodFilter({ onPeriodChange }: PeriodFilterProps) {
         <div className='min-w-[120px]'>
           <label className='text-sm font-medium mb-1 block'>End Period</label>
           <DatePicker
-            selected={endPeriod}
+            selected={period.endPeriod}
             onChange={(date) => {
-              console.log('End Period changed to:', date);
-              setEndPeriod(
-                date
+              console.log(`[${context}] End Period changed to:`, date);
+              setPeriod({
+                endPeriod: date
                   ? setDate(endOfMonth(date), {
                       hours: 23,
                       minutes: 59,
                       seconds: 59,
                       milliseconds: 999,
                     })
-                  : null
-              );
+                  : null,
+              });
             }}
             showMonthYearPicker
             dateFormat='MMM yyyy'
             placeholderText={format(endOfMonth(new Date()), 'MMM yyyy')}
-            minDate={startPeriod ? startOfMonth(startPeriod) : undefined}
+            minDate={
+              period.startPeriod ? startOfMonth(period.startPeriod) : undefined
+            }
             shouldCloseOnSelect={false}
             showYearDropdown
             yearDropdownItemNumber={15}

@@ -2,7 +2,6 @@ import { api } from '@/config/axios.config';
 import { useQuery } from '@tanstack/react-query';
 import {
   useSessionStore,
-  useModuleStore,
   useMonthYearPeriodStore,
   useSalesInvoiceHdFilterStore,
 } from '@/store';
@@ -18,18 +17,30 @@ interface SalesInvoiceHdSalesPersonResponse {
   data: SalesInvoiceHdSalesPerson[];
 }
 
-export const useSalesInvoiceHdSalesPerson = () => {
+interface UseSalesInvoiceHdSalesPersonParams {
+  context: 'salesInvoice' | 'salesPersonInvoice';
+}
+
+export const useSalesInvoiceHdSalesPerson = ({
+  context,
+}: UseSalesInvoiceHdSalesPersonParams) => {
   const user = useSessionStore((state) => state.user);
-  const company_id = user?.company_id.toLocaleUpperCase(); // Pastikan company_id dalam huruf besar
-  // const module_id = useModuleStore((state) => state.moduleId);
-  const module_id = 'SLS'; // Ganti dengan ID modul yang sesuai
+  const company_id = user?.company_id?.toUpperCase();
+  const module_id = 'SLS';
 
-  const { startPeriod, endPeriod } = useMonthYearPeriodStore();
+  const { salesInvoicePeriod, salesPersonInvoicePeriod } =
+    useMonthYearPeriodStore();
+  const { salesInvoiceFilters, salesPersonInvoiceFilters } =
+    useSalesInvoiceHdFilterStore();
 
-  const { paidStatus, poType } = useSalesInvoiceHdFilterStore((state) => ({
-    poType: state.poType,
-    paidStatus: state.paidStatus,
-  }));
+  const period =
+    context === 'salesInvoice' ? salesInvoicePeriod : salesPersonInvoicePeriod;
+  const filters =
+    context === 'salesInvoice'
+      ? salesInvoiceFilters
+      : salesPersonInvoiceFilters;
+
+  const { paidStatus, poType } = filters;
 
   const isEnabled = !!company_id && !!module_id;
 
@@ -37,30 +48,36 @@ export const useSalesInvoiceHdSalesPerson = () => {
     SalesInvoiceHdSalesPersonResponse,
     Error
   >({
-    queryKey: ['salesPersonName', company_id, module_id, status, poType], // Tambahkan status ke queryKey
+    queryKey: [
+      'salesPersonName',
+      context,
+      company_id,
+      module_id,
+      period.startPeriod,
+      period.endPeriod,
+      paidStatus,
+      poType,
+    ],
     queryFn: async () => {
-      // Bangun URL dengan parameter salesPersonName dan paidStatus
       const params = new URLSearchParams();
 
-      // Jika ada startPeriod, tambahkan ke query string dengan format yang sesuai
-      if (startPeriod) {
-        params.append('startPeriod', format(startPeriod, 'MMMyyyy')); // Konversi Date ke string dalam format MMMyyyy
+      if (period.startPeriod) {
+        params.append('startPeriod', format(period.startPeriod, 'MMMyyyy'));
       }
 
-      if (endPeriod) {
-        params.append('endPeriod', format(endPeriod, 'MMMyyyy')); // Konversi Date ke string dalam format MMMyyyy
+      if (period.endPeriod) {
+        params.append('endPeriod', format(period.endPeriod, 'MMMyyyy'));
       }
 
       if (poType?.length) {
         poType.forEach((name) => {
-          params.append('poType', name); // ⬅️ jadi salesPersonName=HANDOYO&salesPersonName=RISA
+          params.append('poType', name);
         });
       }
 
-      // Jika ada status, tambahkan ke query string
       if (paidStatus?.length) {
-        paidStatus.forEach((name: string) => {
-          params.append('paidStatus', name); // ⬅️ jadi salesPersonName=HANDOYO&salesPersonName=RISA
+        paidStatus.forEach((name) => {
+          params.append('paidStatus', name);
         });
       }
 
@@ -69,7 +86,6 @@ export const useSalesInvoiceHdSalesPerson = () => {
       }`;
 
       const response = await api.get<SalesInvoiceHdSalesPersonResponse>(url);
-
       return response.data;
     },
     enabled: isEnabled,
@@ -81,6 +97,7 @@ export const useSalesInvoiceHdSalesPerson = () => {
     data: data?.data,
     isLoading,
     error,
+    isFetching,
     ...rest,
   };
 };

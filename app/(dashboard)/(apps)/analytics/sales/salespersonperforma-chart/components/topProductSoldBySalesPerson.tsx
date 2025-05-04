@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import dynamic from 'next/dynamic';
 import {
   Chart as ChartJS,
@@ -39,13 +39,12 @@ interface TopProductSoldBySalesPersonProps {
   salesPersonName: string;
   year?: string;
   month?: string;
-  sortBy?: string;
   onClose: () => void;
 }
 
 const TopProductSoldBySalesPerson: React.FC<
   TopProductSoldBySalesPersonProps
-> = ({ salesPersonName, year, month, sortBy, onClose }) => {
+> = ({ salesPersonName, year, month, onClose }) => {
   const { toast } = useToast();
   const { theme: config, isRtl } = useThemeStore();
   const { theme: mode } = useTheme();
@@ -57,17 +56,22 @@ const TopProductSoldBySalesPerson: React.FC<
   const [chartMode, setChartMode] = useState<'qty' | 'total_amount'>('qty');
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const [yearPeriod, monthPeriod] = [year, month];
+  // Normalisasi month
+  const normalizedMonth = month
+    ? month.charAt(0).toUpperCase() + month.slice(1).toLowerCase()
+    : undefined;
+
   const {
     data: productData,
     isLoading,
     error,
   } = useTopProductsBySalesPerson({
+    context: 'salesPersonInvoice',
     salesPersonName,
-    yearPeriod,
-    monthPeriod,
+    year,
+    month: normalizedMonth,
     sortBy: chartMode,
-    enabled: !!salesPersonName && !!yearPeriod && !!monthPeriod,
+    enabled: !!salesPersonName && !!year && !!normalizedMonth,
   });
 
   useEffect(() => {
@@ -88,21 +92,26 @@ const TopProductSoldBySalesPerson: React.FC<
     }
   }, [productData]);
 
-  const labels = productData?.map((item) => item.productName) || [];
-  const series = [
-    {
-      data:
-        productData?.map((item) =>
-          chartMode === 'qty' ? item.qty : item.total_amount
-        ) || [],
-    },
-  ];
+  const labels = useMemo(
+    () => productData?.map((item) => item.productName) || [],
+    [productData]
+  );
+
+  const series = useMemo(
+    () => [
+      {
+        data:
+          productData?.map((item) =>
+            chartMode === 'qty' ? item.qty : item.total_amount
+          ) || [],
+      },
+    ],
+    [productData, chartMode]
+  );
 
   const options: any = {
     chart: {
-      toolbar: {
-        show: false,
-      },
+      toolbar: { show: false },
     },
     plotOptions: {
       bar: {
@@ -124,23 +133,19 @@ const TopProductSoldBySalesPerson: React.FC<
           },
         },
         borderRadius: 15,
-        borderRadiusApplication: 'end', // opsional: 'end' untuk horizontal bar, 'all' untuk semua sudut
-        barGap: '20%', // <-- Tambahkan ini untuk memberi jarak antar bar
+        borderRadiusApplication: 'end',
+        barGap: '20%',
       },
     },
     dataLabels: {
       enabled: true,
       textAnchor: 'start',
-      style: {
-        colors: ['#fff'],
-      },
+      style: { colors: ['#fff'] },
       formatter: function (val: number, opt: any) {
         return `${opt.w.globals.labels[opt.dataPointIndex]}: ${val.toLocaleString('id-ID')}`;
       },
       offsetX: 0,
-      dropShadow: {
-        enabled: true,
-      },
+      dropShadow: { enabled: true },
     },
     stroke: {
       show: false,
@@ -167,9 +172,7 @@ const TopProductSoldBySalesPerson: React.FC<
     ),
     yaxis: {
       show: false,
-      axisTicks: {
-        show: true,
-      },
+      axisTicks: { show: true },
       labels: {
         style: {
           colors: [
@@ -181,57 +184,51 @@ const TopProductSoldBySalesPerson: React.FC<
           ],
         },
       },
-      formatter: function (value: string | number) {
-        if (typeof value === 'number') {
-          return value.toLocaleString('id-ID');
-        }
-        const num = Number(value);
-        if (!isNaN(num)) {
-          return num.toLocaleString('id-ID');
-        }
-
-        return value;
-      },
     },
     xaxis: {
       categories: labels,
       labels: getLabel(
         `hsl(${theme?.cssVars[mode === 'dark' ? 'dark' : 'light'].chartLabel})`
       ),
-      formatter: function (value: string | number) {
-        if (chartMode === 'total_amount') {
-          const num = typeof value === 'number' ? value : Number(value);
-          if (!isNaN(num)) {
-            return num.toLocaleString('id-ID');
-          }
-        }
-        return value;
-      },
     },
   };
 
   const isDataReady =
     !!productData?.length && series[0].data.some((v) => v > 0);
 
+  // Validasi prop
+  if (!salesPersonName || !year || !normalizedMonth) {
+    console.warn('TopProductSoldBySalesPerson: Missing required props', {
+      salesPersonName,
+      year,
+      normalizedMonth,
+    });
+    return (
+      <div className='flex flex-col items-center justify-center h-64 text-red-500'>
+        <p>Error: Missing required props</p>
+      </div>
+    );
+  }
+
   return (
     <div
       ref={containerRef}
-      className={` bg-white dark:bg-[#18181b] p-4 rounded-lg shadow-sm h-96 w-full`}
+      className={`bg-white dark:bg-[#18181b] p-4 rounded-lg shadow-sm h-96 w-full`}
       style={{ backgroundColor: hexBackground }}
     >
       <div className='flex items-center justify-between mb-4'>
         <h3 className='text-sm text-muted-foreground'>
           Top 3 Highest-Selling Products
           <span className='block text-sm text-muted-foreground font-normal mt-1'>
-            by {salesPersonName} in {month} {year}
+            by {salesPersonName} in {normalizedMonth || 'N/A'} {year || 'N/A'}
           </span>
         </h3>
-        <div className='flex items-center gap-2 '>
+        <div className='flex items-center gap-2'>
           <Label
             htmlFor='chart-mode-product'
             className='text-xs text-muted-foreground'
           >
-            {chartMode === 'qty' ? ' By Qty (in Unit)' : 'By Amount (in IDR)'}
+            {chartMode === 'qty' ? 'By Qty (in Unit)' : 'By Amount (in IDR)'}
           </Label>
           <Switch
             id='chart-mode-product'
@@ -241,15 +238,6 @@ const TopProductSoldBySalesPerson: React.FC<
             }
             aria-label='Toggle chart mode'
           />
-
-          {/* <button
-            type='button'
-            onClick={onClose}
-            className='absolute top-4 right-4 p-1 rounded hover:bg-red-50'
-            aria-label='Close'
-          >
-            <X className='w-5 h-5 text-red-500' />
-          </button> */}
         </div>
       </div>
 

@@ -1,3 +1,4 @@
+// src/components/SearchInput.tsx
 import React, { useEffect, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { useSearchParamsStore, usePageStore } from '@/store';
@@ -8,34 +9,39 @@ interface SearchInputProps {
   className?: string;
   searchBy?: string;
   placeholder?: string;
+  context: 'salesInvoice' | 'salesPersonInvoice'; // Tambahkan konteks
 }
 
 export default function SearchInput({
   className,
-  searchBy,
   placeholder,
+  context,
 }: SearchInputProps) {
-  const { setSearchParam, removeSearchParam } = useSearchParamsStore();
+  const { searchParams, setSearchParam, removeSearchParam } =
+    useSearchParamsStore();
   const { setCurrentPage } = usePageStore();
-  const [searchTerm, setSearchTerm] = useState('');
+
+  const initialSearchTerm = searchParams?.[context]?.searchTerm || '';
+  const [searchTerm, setSearchTerm] = useState(initialSearchTerm);
   const [debouncedSearchTerm] = useDebounce(searchTerm, 500);
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
+    console.log(`SearchInput [${context}] debounced: ${debouncedSearchTerm}`);
     if (debouncedSearchTerm) {
-      params.set('page', '1');
-      setSearchParam('searchTerm', debouncedSearchTerm); // Ubah ke searchTerm
+      setSearchParam(context, 'searchTerm', debouncedSearchTerm);
+      console.log(`Set searchTerm for ${context}: ${debouncedSearchTerm}`);
     } else {
-      params.delete('searchTerm');
-      params.delete('page');
-      removeSearchParam('searchTerm');
+      removeSearchParam(context, 'searchTerm');
+      console.log(`Removed searchTerm for ${context}`);
     }
-    window.history.replaceState(null, '', `?${params.toString()}`);
-  }, [debouncedSearchTerm, setSearchParam, removeSearchParam]);
-
-  useEffect(() => {
     setCurrentPage(1);
-  }, [debouncedSearchTerm, setCurrentPage]);
+  }, [
+    debouncedSearchTerm,
+    context,
+    setSearchParam,
+    removeSearchParam,
+    setCurrentPage,
+  ]);
 
   return (
     <div className={`relative flex-grow min-w-0 ${className}`}>
@@ -44,7 +50,6 @@ export default function SearchInput({
         placeholder={placeholder}
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
-        // className='border rounded-md px-10 py-2 w-full sm:max-w-[300px] lg:max-w-[500px] sm:py-2 lg:py-3'
         className='pl-10 pr-10 py-2 w-full border rounded-md'
       />
       <Icon
@@ -57,7 +62,7 @@ export default function SearchInput({
           className='w-4 h-4 absolute top-1/2 right-3 -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer'
           onClick={() => {
             setSearchTerm('');
-            removeSearchParam('searchTerm');
+            removeSearchParam(context, 'searchTerm');
           }}
         />
       )}

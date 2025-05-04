@@ -2,8 +2,9 @@
 import { DataTable } from '@/components/ui/data-table';
 import { SalesPersonInvoiceListColumns, columns } from './components/columns';
 import { SortingState } from '@tanstack/react-table';
+import { SearchContext } from '@/constants/searchContexts';
 
-interface SalesInvoiceHdProps {
+interface SalesPersonInvoiceListTableProps {
   data: SalesPersonInvoiceListColumns[];
   currentPage: number;
   totalPages: number;
@@ -16,6 +17,7 @@ interface SalesInvoiceHdProps {
   setSorting: (
     sorting: SortingState | ((old: SortingState) => SortingState)
   ) => void;
+  context: SearchContext;
 }
 
 const columnLabels = {
@@ -35,7 +37,7 @@ const searchOptionItem = {
   invoice_id: 'Invoice No',
 };
 
-export const InvoiceListTable: React.FC<SalesInvoiceHdProps> = ({
+export const InvoiceListTable: React.FC<SalesPersonInvoiceListTableProps> = ({
   data,
   currentPage,
   totalPages,
@@ -65,6 +67,7 @@ export const InvoiceListTable: React.FC<SalesInvoiceHdProps> = ({
         setSorting={setSorting} // Pass setSorting
         columnLabels={columnLabels} // Pass columnLabels
         searchOptionItem={searchOptionItem} // Pass searchOptionItem
+        context='salesPersonInvoice' // Pass context
       />
     </div>
   );

@@ -1,5 +1,5 @@
 'use client';
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Bar } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -25,8 +25,8 @@ import {
 import { useSalesInvoiceHdFilterStore } from '@/store';
 import { months } from '@/utils/monthNameMap';
 import { getSalesPersonColor } from '@/utils/getSalesPersonColor';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
+import { Button } from '@/components/ui/button';
+import { Maximize2, Minimize2 } from 'lucide-react';
 
 ChartJS.register(
   CategoryScale,
@@ -79,15 +79,82 @@ const SalesBySalesPersonUnFilteredChart: React.FC<
   })`;
   const hexBackground = hslToHex(hslBackground);
   const { toast } = useToast();
-  const { data, isLoading, isFetching, error } = useSalesByPeriodUnfiltered();
-  const { salesPersonName, setSalesPersonName } = useSalesInvoiceHdFilterStore(
-    (state) => ({
-      salesPersonName: state.salesPersonName,
-      setSalesPersonName: state.setSalesPersonName,
-    })
-  );
+  const { data, isLoading, isFetching, error } = useSalesByPeriodUnfiltered({
+    context: 'salesPersonInvoice',
+  });
+  const { salesPersonInvoiceFilters, setSalesPersonInvoiceFilters } =
+    useSalesInvoiceHdFilterStore((state) => ({
+      salesPersonInvoiceFilters: state.salesPersonInvoiceFilters,
+      setSalesPersonInvoiceFilters: state.setSalesPersonInvoiceFilters,
+    }));
+  const [isFullScreen, setIsFullScreen] = useState(false);
+  const chartContainerRef = useRef<HTMLDivElement>(null);
 
-  // console.log('UnfilteredChart-isCompact', isCompact);
+  const toggleFullScreen = () => {
+    if (!chartContainerRef.current) return;
+
+    if (!isFullScreen) {
+      // Masuk full-screen
+      const requestFullscreen =
+        chartContainerRef.current.requestFullscreen ||
+        (chartContainerRef.current as any).webkitRequestFullscreen ||
+        (chartContainerRef.current as any).mozRequestFullScreen ||
+        (chartContainerRef.current as any).msRequestFullscreen;
+
+      if (requestFullscreen) {
+        requestFullscreen.call(chartContainerRef.current);
+      } else {
+        // Fallback: Gunakan CSS full-screen
+        setIsFullScreen(true);
+      }
+    } else {
+      // Keluar full-screen
+      if (document.fullscreenElement) {
+        const exitFullscreen =
+          document.exitFullscreen ||
+          (document as any).webkitExitFullscreen ||
+          (document as any).mozCancelFullScreen ||
+          (document as any).msExitFullscreen;
+
+        if (exitFullscreen) {
+          exitFullscreen.call(document);
+        }
+      } else {
+        // Fallback: Nonaktifkan CSS full-screen
+        setIsFullScreen(false);
+      }
+    }
+  };
+
+  // Sinkronkan state dengan Fullscreen API
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      const isNowFullScreen = !!document.fullscreenElement;
+      setIsFullScreen(isNowFullScreen);
+      onModeChange?.(isNowFullScreen);
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+    document.addEventListener('mozfullscreenchange', handleFullscreenChange);
+    document.addEventListener('MSFullscreenChange', handleFullscreenChange);
+
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      document.removeEventListener(
+        'webkitfullscreenchange',
+        handleFullscreenChange
+      );
+      document.removeEventListener(
+        'mozfullscreenchange',
+        handleFullscreenChange
+      );
+      document.removeEventListener(
+        'MSFullscreenChange',
+        handleFullscreenChange
+      );
+    };
+  }, [onModeChange]);
 
   const chartData = React.useMemo(() => {
     if (!data || !data.length) return null;
@@ -137,14 +204,15 @@ const SalesBySalesPersonUnFilteredChart: React.FC<
         },
         borderColor: color.border,
         borderWidth: 1,
-        barThickness: 25,
+        maxBarThickness: isFullScreen ? 30 : 20, // Bar lebih lebar di full-screen
         borderRadius: 15,
         period: data && data.length > 0 ? data[0].period : undefined,
       };
     });
 
+    console.log('chartData.labels:', months);
     return { labels: months, datasets };
-  }, [data]);
+  }, [data, isFullScreen]);
 
   const maxValue = React.useMemo(() => {
     if (!chartData) return 0;
@@ -170,45 +238,49 @@ const SalesBySalesPersonUnFilteredChart: React.FC<
     );
 
   const handleChartClick = (event: any, elements: any[]) => {
-    if (isCompact) return; // <-- Tambahkan ini
+    if (isCompact || elements.length === 0) return;
 
-    if (elements.length > 0) {
-      const element = elements[0];
-      const datasetIndex = element.datasetIndex;
-      const monthIndex = element.index;
-      const salesPersonName = chartData?.datasets[datasetIndex]?.label;
-      const year = chartData?.datasets[datasetIndex]?.period;
-      const month = chartData?.labels[monthIndex] as string;
+    const element = elements[0];
+    const datasetIndex = element.datasetIndex;
+    const monthIndex = element.index;
+    const salesPersonName = chartData?.datasets[datasetIndex]?.label;
+    const year = chartData?.datasets[datasetIndex]?.period;
+    const month = chartData?.labels[monthIndex] as string;
 
-      if (salesPersonName) {
-        setSalesPersonName([salesPersonName]);
-        const colorObj = getSalesPersonColor(salesPersonName);
-        const color = typeof colorObj === 'string' ? colorObj : colorObj?.to;
-        onSalesPersonSelect?.({ salesPersonName, year, month, color });
-      }
+    if (salesPersonName) {
+      setSalesPersonInvoiceFilters({ salesPersonName: [salesPersonName] });
+      const colorObj = getSalesPersonColor(salesPersonName);
+      const color = typeof colorObj === 'string' ? colorObj : colorObj?.to;
+      onSalesPersonSelect?.({ salesPersonName, year, month, color });
     }
   };
 
   return (
     <div
-      className={`chart-container ${isCompact ? 'compact' : ''} bg-white dark:bg-[#18181b] p-4 rounded-lg shadow-sm flex flex-col h-fit min-h-0`}
+      ref={chartContainerRef}
+      className={`chart-container ${isCompact ? 'compact' : ''} ${
+        isFullScreen && !document.fullscreenElement
+          ? 'fixed inset-0 z-50 bg-white dark:bg-[#18181b] p-4'
+          : 'relative'
+      } flex flex-col h-fit min-h-0`}
       style={{ backgroundColor: hexBackground }}
     >
-      <div className='relative flex items-center mb-2'>
+      <div className='relative flex items-center justify-between mb-2'>
         <h2 className='text-sm text-muted-foreground font-semibold ml-2'>
-          Top 5 Sales Performers (Above 100 Million IDR)
+          Sales Performers (Above 100 Million IDR)
         </h2>
-        {/* <div className='absolute right-0 top-0 flex items-center space-x-2'>
-          <Label htmlFor='chart-mode-period'>
-            {isFullWidth ? 'Full Width' : 'Half Width'}
-          </Label>
-          <Switch
-            id='chart-mode-period'
-            checked={isFullWidth}
-            onCheckedChange={(checked) => onModeChange?.(checked)}
-            aria-label='Toggle full width chart'
-          />
-        </div> */}
+        <Button
+          variant='outline'
+          size='sm'
+          onClick={toggleFullScreen}
+          className='mr-2'
+        >
+          {isFullScreen ? (
+            <Minimize2 className='h-4 w-4' />
+          ) : (
+            <Maximize2 className='h-4 w-4' />
+          )}
+        </Button>
       </div>
       <div className='flex-1 min-h-0'>
         {isLoading || isFetching ? (
@@ -217,16 +289,17 @@ const SalesBySalesPersonUnFilteredChart: React.FC<
           </div>
         ) : isDataReady ? (
           <Bar
-            width={isFullWidth ? 600 : 300}
-            height={isCompact ? 300 : height}
+            height={isFullScreen ? undefined : isCompact ? 300 : height}
             data={chartData}
             options={{
               responsive: true,
               maintainAspectRatio: false,
               layout: {
                 padding: {
-                  bottom: isCompact ? 10 : 20,
-                  top: isCompact ? 5 : 10,
+                  bottom: isFullScreen ? 10 : isCompact ? 5 : 10,
+                  top: isFullScreen ? 10 : isCompact ? 5 : 10,
+                  left: 0,
+                  right: 0,
                 },
               },
               scales: {
@@ -242,18 +315,26 @@ const SalesBySalesPersonUnFilteredChart: React.FC<
                       const val = Number(value) / 1000000;
                       return `${val.toLocaleString('id-ID')}`;
                     },
+                    font: {
+                      size: isFullScreen ? 14 : 12, // Font lebih besar di full-screen
+                    },
                   },
                 },
                 x: {
                   title: { display: false, text: 'Month' },
+                  // offset: 5, // Jarak kecil antar bulan
                   grid: {
                     drawTicks: false,
                     color: `hsl(${theme?.cssVars[mode === 'dark' ? 'dark' : 'light'].chartGird})`,
                     display: false,
                   },
                   ticks: {
+                    autoSkip: false,
                     callback: (value, index, ticks) => {
                       return chartData.labels[index] ?? '';
+                    },
+                    font: {
+                      size: isFullScreen ? 14 : 12, // Font lebih besar di full-screen
                     },
                   },
                 },
@@ -263,25 +344,28 @@ const SalesBySalesPersonUnFilteredChart: React.FC<
                   display: !isCompact,
                   position: 'top',
                   labels: {
-                    color: `hsl(${
-                      theme?.cssVars[mode === 'dark' ? 'dark' : 'light']
-                        .chartLabel
-                    })`,
+                    color: `hsl(${theme?.cssVars[mode === 'dark' ? 'dark' : 'light'].chartLabel})`,
                     boxWidth: 8,
-                    font: { size: 10 },
+                    font: { size: isFullScreen ? 12 : 10 },
                     usePointStyle: true,
                     pointStyle: 'circle',
                   },
-                  maxHeight: 60,
+                  maxHeight: isFullScreen ? 80 : 60,
                 },
                 title: { display: false },
                 tooltip: {
                   callbacks: {
                     label: (context) =>
-                      `${context.dataset.label}: ${(
-                        context.raw as number
-                      ).toLocaleString('id-ID')}`,
+                      `${context.dataset.label}: ${(context.raw as number).toLocaleString('id-ID')}`,
                   },
+                  titleFont: { size: isFullScreen ? 14 : 12 },
+                  bodyFont: { size: isFullScreen ? 12 : 10 },
+                },
+              },
+              datasets: {
+                bar: {
+                  categoryPercentage: 0.95, // Minimalkan gap antar bulan
+                  barPercentage: 0.85, // Lebar bar dalam kategori
                 },
               },
               onClick: handleChartClick,

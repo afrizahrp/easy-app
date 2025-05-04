@@ -2,7 +2,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useSalesInvoiceHdFilterStore } from '@/store';
-import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
 import SalesInvoiceFilterSummary from '@/components/sales/salesInvoiceFilterSummary';
 import SalesPersonPerformaOverview from '../salespersonperforma-chart/components/salesPersonPerformaOverview';
 import TopProductSoldBySalesPerson from '../salespersonperforma-chart/components/topProductSoldBySalesPerson';
@@ -33,21 +32,23 @@ const SalesPersonPerformaAnalytics: React.FC<
   );
   const [selectedYear, setSelectedYear] = useState<string | null>(null);
   const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
-  const [selectedColor, setSelecteColor] = useState<string | null>(null);
+  const [selectedColor, setSelectedColor] = useState<string | null>(null);
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const { salesPersonName } = useSalesInvoiceHdFilterStore((state) => ({
-    salesPersonName: state.salesPersonName,
-  }));
+  const { salesPersonInvoiceFilters, setSalesPersonInvoiceFilters } =
+    useSalesInvoiceHdFilterStore((state) => ({
+      salesPersonInvoiceFilters: state.salesPersonInvoiceFilters,
+      setSalesPersonInvoiceFilters: state.setSalesPersonInvoiceFilters,
+    }));
 
   const chartRef = useRef<HTMLDivElement>(null);
   const topProductRef = useRef<HTMLDivElement>(null);
 
-  const validSalesPersonNames = Array.isArray(salesPersonName)
-    ? salesPersonName.filter((name) => typeof name === 'string' && name.trim())
-    : salesPersonName && typeof salesPersonName === 'string' && salesPersonName
-      ? [salesPersonName]
-      : [];
+  const validSalesPersonNames = Array.isArray(
+    salesPersonInvoiceFilters.salesPersonName
+  )
+    ? salesPersonInvoiceFilters.salesPersonName
+    : [];
 
   // Reset state saat salesPersonName dihapus, dengan perbandingan state
   useEffect(() => {
@@ -61,7 +62,7 @@ const SalesPersonPerformaAnalytics: React.FC<
       setSelectedSalesPerson(null);
       setSelectedYear(null);
       setSelectedMonth(null);
-      setSelecteColor(null);
+      setSelectedColor(null);
       setFullChart('period');
     }
   }, [
@@ -79,7 +80,7 @@ const SalesPersonPerformaAnalytics: React.FC<
       setSelectedSalesPerson(null);
       setSelectedYear(null);
       setSelectedMonth(null);
-      setSelecteColor(null);
+      setSelectedColor(null);
     }
   };
 
@@ -88,14 +89,14 @@ const SalesPersonPerformaAnalytics: React.FC<
       setSelectedSalesPerson(selection.salesPersonName);
       setSelectedYear(selection.year || null);
       setSelectedMonth(selection.month || null);
-      setSelecteColor(selection.color || null);
+      setSelectedColor(selection.color || null);
 
       setFullChart(null);
     } else {
       setSelectedSalesPerson(null);
       setSelectedYear(null);
       setSelectedMonth(null);
-      setSelecteColor(null);
+      setSelectedColor(null);
 
       setFullChart('period');
     }
@@ -123,9 +124,9 @@ const SalesPersonPerformaAnalytics: React.FC<
         showList ? 'h-screen' : 'h-fit min-h-0'
       }`}
     >
-      <FloatingFilterButton>
+      {/* <FloatingFilterButton>
         <SalesPersonInvoiceFilterSidebar table={dummyTable} />
-      </FloatingFilterButton>
+      </FloatingFilterButton> */}
 
       <PageHeaderWrapper
         show={showHeader}
@@ -141,7 +142,7 @@ const SalesPersonPerformaAnalytics: React.FC<
       />
       <div className='flex flex-col gap-2 w-full'>
         <div className='min-w-[200px]'>
-          <SalesInvoiceFilterSummary />
+          <SalesInvoiceFilterSummary context='salesPersonInvoice' />
         </div>
         <div
           className={`w-full gap-4 ${

@@ -4,16 +4,15 @@ import { Cross2Icon } from '@radix-ui/react-icons';
 import { Table } from '@tanstack/react-table';
 import { AlertCircle } from 'lucide-react';
 import { startOfMonth, endOfMonth } from 'date-fns';
-import 'react-datepicker/dist/react-datepicker.css';
 import { zonedTimeToUtc } from 'date-fns-tz';
+
 import useSalesInvoiceHdPaidStatusOptions from '@/queryHooks/sls/useSalesInvoiceHdPaidStatusOptions';
 import useSalesInvoiceHdSalesPersonOptions from '@/queryHooks/sls/useSalesInvoiceHdSalesPersonOptions';
 import { PeriodFilter } from '@/components/period-filter';
-import { ResetSalesInvoiceFilterStore } from '@/utils/reset-filter-state/sls/resetSalesInvoiceFilterStore';
+import { useResetSalesInvoiceFilter } from '@/utils/reset-filter-state/sls/resetSalesInvoiceFilterStore';
 import { Button } from '@/components/ui/button';
 import { DataTableFacetedFilter } from '@/components/ui/data-table-faceted-filter';
 import { useMonthYearPeriodStore, useSalesInvoiceHdFilterStore } from '@/store';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/components/ui/use-toast';
 import {
   Tooltip,
@@ -21,48 +20,60 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-
 interface SalesPersonInvoiceFilterSidebarProps<TData> {
-  table?: Table<TData>;
+  table: Table<TData>;
 }
 
 export function SalesPersonInvoiceFilterSidebar<TData>({
   table,
 }: SalesPersonInvoiceFilterSidebarProps<TData>) {
-  const { startPeriod, setStartPeriod, endPeriod, setEndPeriod, reset } =
+  const { salesPersonInvoicePeriod, setSalesPersonInvoicePeriod } =
     useMonthYearPeriodStore();
-  const {
-    paidStatus,
-    setPaidStatus,
-    poType,
-    setPoType,
-    salesPersonName,
-    setSalesPersonName,
-  } = useSalesInvoiceHdFilterStore();
+  const { salesPersonInvoiceFilters, setSalesPersonInvoiceFilters } =
+    useSalesInvoiceHdFilterStore();
   const { toast } = useToast();
   const [showAlert, setShowAlert] = useState(false);
 
+  const { reset } = useResetSalesInvoiceFilter({
+    table,
+    context: 'salesPersonInvoice',
+  });
+
+  const { paidStatus, salesPersonName } = salesPersonInvoiceFilters;
+
   useEffect(() => {
-    const normalizedStart = startPeriod
-      ? zonedTimeToUtc(startOfMonth(startPeriod), 'UTC')
+    let isResetting = false;
+
+    const normalizedStart = salesPersonInvoicePeriod.startPeriod
+      ? zonedTimeToUtc(
+          startOfMonth(salesPersonInvoicePeriod.startPeriod),
+          'UTC'
+        )
       : null;
-    let normalizedEnd = endPeriod
-      ? zonedTimeToUtc(endOfMonth(endPeriod), 'UTC')
+    let normalizedEnd = salesPersonInvoicePeriod.endPeriod
+      ? zonedTimeToUtc(endOfMonth(salesPersonInvoicePeriod.endPeriod), 'UTC')
       : null;
 
-    if (normalizedStart && !normalizedEnd && startPeriod) {
-      normalizedEnd = zonedTimeToUtc(endOfMonth(startPeriod), 'UTC');
+    if (
+      normalizedStart &&
+      !normalizedEnd &&
+      salesPersonInvoicePeriod.startPeriod
+    ) {
+      normalizedEnd = zonedTimeToUtc(
+        endOfMonth(salesPersonInvoicePeriod.startPeriod),
+        'UTC'
+      );
     }
 
     if (normalizedStart && normalizedEnd && normalizedEnd < normalizedStart) {
       console.warn(
-        'Invalid date range: endPeriod is before startPeriod. Resetting endPeriod.',
+        '[SalesPersonInvoiceFilterSidebar] Invalid date range: endPeriod is before startPeriod. Resetting endPeriod.',
         {
           startPeriod: normalizedStart.toISOString(),
           endPeriod: normalizedEnd.toISOString(),
         }
       );
-      setEndPeriod(null);
+      setSalesPersonInvoicePeriod({ endPeriod: null });
       normalizedEnd = null;
       toast({
         description:
@@ -71,7 +82,7 @@ export function SalesPersonInvoiceFilterSidebar<TData>({
       });
     }
 
-    if (table) {
+    if (table && !isResetting) {
       table
         .getColumn('paidStatus')
         ?.setFilterValue(paidStatus.length ? paidStatus : undefined);
@@ -80,77 +91,125 @@ export function SalesPersonInvoiceFilterSidebar<TData>({
         ?.setFilterValue(salesPersonName.length ? salesPersonName : undefined);
 
       let filterValue: { start: Date; end: Date } | undefined;
-      if (normalizedStart && startPeriod) {
+      if (normalizedStart && salesPersonInvoicePeriod.startPeriod) {
         filterValue = {
           start: normalizedStart,
-          end: normalizedEnd ?? zonedTimeToUtc(endOfMonth(startPeriod), 'UTC'),
+          end:
+            normalizedEnd ??
+            zonedTimeToUtc(
+              endOfMonth(salesPersonInvoicePeriod.startPeriod),
+              'UTC'
+            ),
         };
       }
       table.getColumn('invoiceDate')?.setFilterValue(filterValue);
     }
 
-    // const filteredRows = table ? table.getFilteredRowModel().rows : [];
-    // console.log('Filtered rows count:', filteredRows.length);
+    return () => {
+      isResetting = true;
+    };
   }, [
-    startPeriod,
-    endPeriod,
+    salesPersonInvoicePeriod,
     paidStatus,
-    poType,
     salesPersonName,
     table,
-    setEndPeriod,
+    setSalesPersonInvoicePeriod,
     toast,
   ]);
 
   useEffect(() => {
     if (salesPersonName.length > 1) {
-      setPaidStatus([]);
+      setSalesPersonInvoiceFilters({ paidStatus: [] });
     }
-  }, [salesPersonName, setPaidStatus]);
+  }, [salesPersonName, setSalesPersonInvoiceFilters]);
 
-  // useEffect(() => {
-  //   if (salesPersonName.length > 1) {
-  //     setShowAlert(true);
-  //     const timer = setTimeout(() => setShowAlert(false), 5000);
-  //     return () => clearTimeout(timer);
-  //   } else {
-  //     setShowAlert(false);
-  //   }
-  // }, [salesPersonName]);
+  useEffect(() => {
+    if (salesPersonName.length > 1) {
+      setShowAlert(true);
+      const timer = setTimeout(() => setShowAlert(false), 5000);
+      return () => clearTimeout(timer);
+    } else {
+      setShowAlert(false);
+    }
+  }, [salesPersonName]);
 
-  const { options: statusOptionList, isLoading: isStatusLoading } =
-    useSalesInvoiceHdPaidStatusOptions();
-  const { options: salesPersonOptionList, isLoading: isSalesPersonLoading } =
-    useSalesInvoiceHdSalesPersonOptions();
+  useEffect(() => {
+    if (salesPersonName.length > 1) {
+      setShowAlert(true);
+      toast({
+        description:
+          'The Paid Status filter only works when one Sales Person is selected.',
+        color: 'destructive',
+      });
+      const timer = setTimeout(() => setShowAlert(false), 5000);
+      return () => clearTimeout(timer);
+    } else {
+      setShowAlert(false);
+    }
+  }, [salesPersonName, toast]);
+
+  const {
+    options: statusOptionList,
+    isLoading: isStatusLoading,
+    error: statusError,
+  } = useSalesInvoiceHdPaidStatusOptions({ context: 'salesPersonInvoice' });
+  const {
+    options: salesPersonOptionList,
+    isLoading: isSalesPersonLoading,
+    error: salesPersonError,
+  } = useSalesInvoiceHdSalesPersonOptions({ context: 'salesPersonInvoice' });
 
   const handleReset = () => {
-    ResetSalesInvoiceFilterStore({
-      table: table!,
-      setPaidStatus,
-      setSalesPersonName,
-      setPoType,
-      resetPeriod: reset,
-      toast,
-    });
+    try {
+      const result = reset();
+      toast({
+        description: result.message,
+        color: result.success ? 'default' : 'destructive',
+      });
+    } catch (error) {
+      toast({
+        description: `Reset failed: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+        color: 'destructive',
+      });
+    }
   };
 
-  // Cek apakah ada filter aktif dengan optional chaining
+  useEffect(() => {
+    if (salesPersonName.length > 1) {
+      setShowAlert(true);
+      toast({
+        description:
+          'The Paid Status filter only works when one Sales Person is selected.',
+      });
+      const timer = setTimeout(() => setShowAlert(false), 5000);
+      return () => clearTimeout(timer);
+    } else {
+      setShowAlert(false);
+    }
+  }, [salesPersonName, toast]);
+
+  useEffect(() => {
+    if (statusError || salesPersonError) {
+      toast({
+        description:
+          'Error loading filter options: ' +
+          (statusError?.message ||
+            salesPersonError?.message ||
+            'Unknown error'),
+      });
+    }
+  }, [statusError, salesPersonError, toast]);
+
   const hasActiveFilters =
     (table?.getState?.().columnFilters?.length ?? 0) > 0 ||
-    salesPersonName.length > 0;
+    salesPersonName.length > 0 ||
+    paidStatus.length > 0;
 
   return (
     <div className='flex flex-col space-y-4 w-full py-2'>
-      {showAlert && (
-        <Alert variant='destructiveDark' className='w-full'>
-          <AlertCircle className='h-4 w-4' />
-          <AlertDescription>
-            The Paid Status filter is disabled when multiple Sales Persons are
-            selected.
-          </AlertDescription>
-        </Alert>
-      )}
-      <PeriodFilter />
+      <PeriodFilter context='salesPersonInvoice' />
 
       <div className='w-full py-3 dark:text-slate-400'>
         <DataTableFacetedFilter
@@ -161,12 +220,16 @@ export function SalesPersonInvoiceFilterSidebar<TData>({
           selectedValues={new Set(salesPersonName)}
           onSelect={(value) => {
             const updatedValues = new Set(salesPersonName);
-            value
-              ? updatedValues.has(value)
+            if (value) {
+              updatedValues.has(value)
                 ? updatedValues.delete(value)
-                : updatedValues.add(value)
-              : updatedValues.clear();
-            setSalesPersonName(Array.from(updatedValues));
+                : updatedValues.add(value);
+            } else {
+              updatedValues.clear();
+            }
+            setSalesPersonInvoiceFilters({
+              salesPersonName: Array.from(updatedValues),
+            });
           }}
         />
       </div>
@@ -178,17 +241,22 @@ export function SalesPersonInvoiceFilterSidebar<TData>({
             title='Paid Status'
             options={statusOptionList}
             isLoading={isStatusLoading}
-            // disabled={salesPersonName.length > 1}
+            disabled={salesPersonName.length > 1}
             selectedValues={new Set(paidStatus)}
-            onSelect={(value: string) => {
+            onSelect={(value) => {
               const updatedValues = new Set(paidStatus);
-              value
-                ? updatedValues.has(value)
+              if (value) {
+                updatedValues.has(value)
                   ? updatedValues.delete(value)
-                  : updatedValues.add(value)
-                : updatedValues.clear();
-              setPaidStatus(Array.from(updatedValues));
+                  : updatedValues.add(value);
+              } else {
+                updatedValues.clear();
+              }
+              setSalesPersonInvoiceFilters({
+                paidStatus: Array.from(updatedValues),
+              });
             }}
+            aria-label='paidStatus sales person invoice filter'
           />
         )}
       </div>

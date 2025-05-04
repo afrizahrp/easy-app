@@ -1,5 +1,3 @@
-// DataTableToolbar.tsx
-
 import { Table } from '@tanstack/react-table';
 import { Button } from '@/components/ui/button';
 import { Filter, Plus } from 'lucide-react';
@@ -8,6 +6,7 @@ import { DataTableViewOptions } from '@/components/ui/data-table-view-options';
 import SearchInput from '@/components/ui/search-Input';
 import FilterSidebar from './filter-sidebar';
 import { SearchOption } from './search-Option';
+import { SearchContext } from '@/constants/searchContexts';
 import { useSearchParamsStore } from '@/store';
 
 interface DataTableToolbarProps<TData> {
@@ -23,6 +22,7 @@ interface DataTableToolbarProps<TData> {
   open: boolean;
   handleSheetOpen: () => void;
   pageName?: string;
+  context: SearchContext; // Tambahkan prop context
 }
 
 function toSearchOptionArray(options: Record<string, string>) {
@@ -40,9 +40,12 @@ export function DataTableToolbar<TData>({
   pageName,
   columnLabels,
   searchOptionItem,
+  context, // Tambahkan context ke destructure
 }: DataTableToolbarProps<TData>) {
-  const { searchParams, setSearchBy } = useSearchParamsStore();
-  const searchBy = (searchParams.searchBy as string) || 'id';
+  // Ambil state dan fungsi untuk mengupdate searchParams dari store
+  const { searchParams, setSearchParam } = useSearchParamsStore();
+
+  const currentSearchBy = searchParams?.[context]?.searchBy || 'invoice_id'; // Gunakan context secara dinamis
 
   const searchOptions = toSearchOptionArray(searchOptionItem);
 
@@ -59,10 +62,9 @@ export function DataTableToolbar<TData>({
       {/* Search Option Selector */}
       <div className='flex items-center space-x-2'>
         <SearchOption
-          value={searchBy}
-          onChange={setSearchBy}
           options={searchOptions}
           placeholder='Search by'
+          context={context}
         />
       </div>
 
@@ -71,7 +73,8 @@ export function DataTableToolbar<TData>({
         <SearchInput
           className='w-full'
           placeholder={placeholder}
-          searchBy={searchBy}
+          searchBy={currentSearchBy}
+          context={context}
         />
       </div>
 

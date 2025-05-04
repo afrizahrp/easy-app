@@ -14,16 +14,27 @@ interface SalesPeriodResponse {
   }[];
 }
 
-const useSalesByPeriod = () => {
+interface UseSalesByPeriodParams {
+  context: 'salesInvoice' | 'salesPersonInvoice';
+}
+
+const useSalesByPeriod = ({ context }: UseSalesByPeriodParams) => {
   const user = useSessionStore((state) => state.user);
   const company_id = user?.company_id?.toUpperCase();
   const module_id = 'dsb';
   const subModule_id = 'sls';
 
-  const { startPeriod, endPeriod } = useMonthYearPeriodStore();
+  const { salesInvoicePeriod, salesPersonInvoicePeriod } =
+    useMonthYearPeriodStore();
+  const period =
+    context === 'salesInvoice' ? salesInvoicePeriod : salesPersonInvoicePeriod;
 
   const isValidRequest = Boolean(
-    company_id && module_id && startPeriod && endPeriod
+    company_id &&
+      module_id &&
+      subModule_id &&
+      period.startPeriod &&
+      period.endPeriod
   );
 
   const { data, isLoading, isFetching, error, ...rest } = useQuery<
@@ -32,23 +43,22 @@ const useSalesByPeriod = () => {
   >({
     queryKey: [
       'salesPeriodComparison',
+      context,
       company_id,
       module_id,
       subModule_id,
-      startPeriod,
-      endPeriod,
+      period.startPeriod,
+      period.endPeriod,
     ],
     queryFn: async () => {
       const url = `${process.env.NEXT_PUBLIC_API_URL}/${company_id}/${module_id}/${subModule_id}/get-dashboard/getByPeriod`;
 
       const response = await api.get<SalesPeriodResponse>(url, {
         params: {
-          startPeriod: format(startPeriod!, 'MMMyyyy'),
-          endPeriod: format(endPeriod!, 'MMMyyyy'),
+          startPeriod: format(period.startPeriod!, 'MMMyyyy'),
+          endPeriod: format(period.endPeriod!, 'MMMyyyy'),
         },
       });
-
-      // console.log('response data', response.data);
 
       return response.data;
     },

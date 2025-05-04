@@ -3,13 +3,18 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { InvoiceListTable } from './list-table';
 import LayoutLoader from '@/components/layout-loader';
-import { routes } from '@/config/routes';
-import PageHeader from '@/components/page-header';
 import useSalesInvoiceHd from '@/queryHooks/sls/useSalesInvoiceHd';
 import { SalesInvoiceHdColumns } from './list-table/components/columns';
-import { usePageStore } from '@/store';
+import {
+  usePageStore,
+  useMonthYearPeriodStore,
+  useSalesInvoiceHdFilterStore,
+} from '@/store';
 import { FooterSummarySection } from '@/components/footer-summary-section';
 import { FooterSummaryItem } from '@/components/footer-summary-item';
+
+import { routes } from '@/config/routes';
+import PageHeader from '@/components/page-header';
 
 const SalesInvoiceHdPage = () => {
   const { currentPage, sorting, limit, setCurrentPage, setSorting, setLimit } =
@@ -18,12 +23,19 @@ const SalesInvoiceHdPage = () => {
   const orderBy = sort?.id ?? 'invoiceDate';
   const orderDir = sort?.desc ? 'desc' : 'asc';
 
+  const { salesInvoiceFilters } = useSalesInvoiceHdFilterStore();
+  const { salesInvoicePeriod } = useMonthYearPeriodStore();
+
   const { data, total, grandTotal_amount, isFetching, error } =
     useSalesInvoiceHd({
       page: currentPage,
       limit,
       orderBy,
       orderDir,
+      filters: salesInvoiceFilters,
+      startPeriod: salesInvoicePeriod.startPeriod,
+      endPeriod: salesInvoicePeriod.endPeriod,
+      context: 'salesInvoice',
     });
 
   if (isFetching && !data) {

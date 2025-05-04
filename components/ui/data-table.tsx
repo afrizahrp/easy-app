@@ -26,6 +26,7 @@ import {
 
 import { DataTablePagination } from '@/components/ui/data-table-pagination';
 import { DataTableToolbar } from '@/components/ui/data-table-toolbar';
+import { SearchContext } from '@/constants/searchContexts';
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -47,6 +48,7 @@ interface DataTableProps<TData, TValue> {
   ) => void;
   columnLabels?: Record<string, string>;
   searchOptionItem: Record<string, string>;
+  context: SearchContext; // Tambahkan prop context
 }
 
 export function DataTable<TData, TValue>({
@@ -66,6 +68,7 @@ export function DataTable<TData, TValue>({
   setSorting, // Gunakan dari props
   columnLabels,
   searchOptionItem,
+  context,
 }: DataTableProps<TData, TValue>) {
   const [rowSelection, setRowSelection] = React.useState({});
   const [columnVisibility, setColumnVisibility] =
@@ -123,6 +126,7 @@ export function DataTable<TData, TValue>({
           pageName={pageName}
           columnLabels={columnLabels} // Pass columnLabels ke DataTableToolbar
           searchOptionItem={searchOptionItem} // Pass searchOptionItem ke DataTableToolbar
+          context={context} // Pass context ke DataTableToolbar
         />
 
         <div className='rounded-md border'>

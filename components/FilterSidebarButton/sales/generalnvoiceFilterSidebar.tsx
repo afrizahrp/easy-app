@@ -4,71 +4,66 @@ import { Cross2Icon } from '@radix-ui/react-icons';
 import { Table } from '@tanstack/react-table';
 import { AlertCircle } from 'lucide-react';
 import { startOfMonth, endOfMonth } from 'date-fns';
-import { set as setDate } from 'date-fns';
-import 'react-datepicker/dist/react-datepicker.css';
 import { zonedTimeToUtc } from 'date-fns-tz';
 
-import useSalesInvoiceHdPaidStatusOptions from '@/queryHooks/sls/useSalesInvoiceHdPaidStatusOptions';
 import useSalesInvoiceHdSalesPersonOptions from '@/queryHooks/sls/useSalesInvoiceHdSalesPersonOptions';
+
 import useSalesInvoiceHdPoTypeOptions from '@/queryHooks/sls/useSalesInvoiceHdPoTypeOptions';
 import { PeriodFilter } from '@/components/period-filter';
+import { useResetSalesInvoiceFilter } from '@/utils/reset-filter-state/sls/resetSalesInvoiceFilterStore';
 import { Button } from '@/components/ui/button';
 import { DataTableFacetedFilter } from '@/components/ui/data-table-faceted-filter';
 import { useMonthYearPeriodStore, useSalesInvoiceHdFilterStore } from '@/store';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/components/ui/use-toast';
-import { ResetSalesInvoiceFilterStore } from '@/utils/reset-filter-state/sls/resetSalesInvoiceFilterStore';
-
-// import DatePicker from 'react-datepicker';
 
 interface GeneralInvoiceFilterSidebarProps<TData> {
-  table?: Table<TData>;
-  onClose?: () => void;
+  table: Table<TData>;
 }
 
 export function GeneralInvoiceFilterSidebar<TData>({
   table,
-  onClose,
 }: GeneralInvoiceFilterSidebarProps<TData>) {
-  const { startPeriod, setStartPeriod, endPeriod, setEndPeriod, reset } =
+  const { salesInvoicePeriod, setSalesInvoicePeriod } =
     useMonthYearPeriodStore();
-
-  const {
-    paidStatus,
-    setPaidStatus,
-    poType,
-    setPoType,
-    salesPersonName,
-    setSalesPersonName,
-  } = useSalesInvoiceHdFilterStore();
-
+  const { salesInvoiceFilters, setSalesInvoiceFilters } =
+    useSalesInvoiceHdFilterStore();
   const { toast } = useToast();
   const [showAlert, setShowAlert] = useState(false);
 
+  const { reset } = useResetSalesInvoiceFilter({
+    table,
+    context: 'salesInvoice',
+  });
+
+  const { paidStatus, salesPersonName, poType } = salesInvoiceFilters;
+
   useEffect(() => {
-    // Normalisasi ke UTC
-    const normalizedStart = startPeriod
-      ? zonedTimeToUtc(startOfMonth(startPeriod), 'UTC')
+    let isResetting = false;
+
+    const normalizedStart = salesInvoicePeriod.startPeriod
+      ? zonedTimeToUtc(startOfMonth(salesInvoicePeriod.startPeriod), 'UTC')
       : null;
-    let normalizedEnd = endPeriod
-      ? zonedTimeToUtc(endOfMonth(endPeriod), 'UTC')
+    let normalizedEnd = salesInvoicePeriod.endPeriod
+      ? zonedTimeToUtc(endOfMonth(salesInvoicePeriod.endPeriod), 'UTC')
       : null;
 
-    // Jika endPeriod tidak ada, gunakan akhir bulan dari startPeriod
-    if (normalizedStart && !normalizedEnd && startPeriod) {
-      normalizedEnd = zonedTimeToUtc(endOfMonth(startPeriod), 'UTC');
+    if (normalizedStart && !normalizedEnd && salesInvoicePeriod.startPeriod) {
+      normalizedEnd = zonedTimeToUtc(
+        endOfMonth(salesInvoicePeriod.startPeriod),
+        'UTC'
+      );
     }
 
-    // Validasi: Jika endPeriod lebih awal dari startPeriod, atur ulang endPeriod
     if (normalizedStart && normalizedEnd && normalizedEnd < normalizedStart) {
       console.warn(
-        'Invalid date range: endPeriod is before startPeriod. Resetting endPeriod.',
+        '[GeneralInvoiceFilterSidebar] Invalid date range: endPeriod is before startPeriod. Resetting endPeriod.',
         {
           startPeriod: normalizedStart.toISOString(),
           endPeriod: normalizedEnd.toISOString(),
         }
       );
-      setEndPeriod(null);
+      setSalesInvoicePeriod({ endPeriod: null });
       normalizedEnd = null;
       toast({
         description:
@@ -77,153 +72,150 @@ export function GeneralInvoiceFilterSidebar<TData>({
       });
     }
 
-    if (table) {
+    if (table && !isResetting) {
       table
         .getColumn('paidStatus')
         ?.setFilterValue(paidStatus.length ? paidStatus : undefined);
-
+      table
+        .getColumn('salesPersonName')
+        ?.setFilterValue(salesPersonName.length ? salesPersonName : undefined);
       table
         .getColumn('poType')
         ?.setFilterValue(poType.length ? poType : undefined);
 
-      table
-        .getColumn('salesPersonName')
-        ?.setFilterValue(salesPersonName.length ? salesPersonName : undefined);
-
       let filterValue: { start: Date; end: Date } | undefined;
-      if (normalizedStart && startPeriod) {
+      if (normalizedStart && salesInvoicePeriod.startPeriod) {
         filterValue = {
           start: normalizedStart,
-          end: normalizedEnd ?? zonedTimeToUtc(endOfMonth(startPeriod), 'UTC'),
+          end:
+            normalizedEnd ??
+            zonedTimeToUtc(endOfMonth(salesInvoicePeriod.startPeriod), 'UTC'),
         };
       }
       table.getColumn('invoiceDate')?.setFilterValue(filterValue);
     }
 
-    // Log data yang difilter
-    // const filteredRows = table ? table.getFilteredRowModel().rows : [];
-    // console.log('Filtered rows count:', filteredRows.length);
+    return () => {
+      isResetting = true;
+    };
   }, [
-    startPeriod,
-    endPeriod,
+    salesInvoicePeriod,
     paidStatus,
-    poType,
     salesPersonName,
+    poType,
     table,
-    setEndPeriod,
+    setSalesInvoicePeriod,
     toast,
   ]);
 
   useEffect(() => {
     if (salesPersonName.length > 1) {
-      setPaidStatus([]);
-    }
-  }, [salesPersonName, setPaidStatus]);
-
-  useEffect(() => {
-    if (salesPersonName.length > 1) {
+      setSalesInvoiceFilters({ paidStatus: [] });
       setShowAlert(true);
       const timer = setTimeout(() => setShowAlert(false), 5000);
       return () => clearTimeout(timer);
     } else {
       setShowAlert(false);
     }
-  }, [salesPersonName]);
+  }, [salesPersonName, setSalesInvoiceFilters]);
 
-  const { options: statusOptionList, isLoading: isStatusLoading } =
-    useSalesInvoiceHdPaidStatusOptions();
-  const { options: salesPersonOptionList, isLoading: isSalesPersonLoading } =
-    useSalesInvoiceHdSalesPersonOptions();
-  const { options: poTypeOptionList, isLoading: isPoTypeLoading } =
-    useSalesInvoiceHdPoTypeOptions();
+  const {
+    options: salesPersonOptionList,
+    isLoading: isSalesPersonLoading,
+    error: salesPersonError,
+  } = useSalesInvoiceHdSalesPersonOptions({ context: 'salesInvoice' });
+
+  const {
+    options: poTypeOptionList,
+    isLoading: isPoTypeLoading,
+    error: poTypeError,
+  } = useSalesInvoiceHdPoTypeOptions({ context: 'salesInvoice' });
 
   const handleReset = () => {
-    ResetSalesInvoiceFilterStore({
-      table: table!,
-      setPaidStatus,
-      setSalesPersonName,
-      setPoType,
-      resetPeriod: reset,
-      toast,
-    });
+    try {
+      console.log('[GeneralInvoiceFilterSidebar] Initiating reset');
+      const result = reset();
+      toast({
+        description: result.message,
+        color: result.success ? 'default' : 'destructive',
+      });
+      console.log('[GeneralInvoiceFilterSidebar] Reset result:', result);
+    } catch (error) {
+      console.error('[GeneralInvoiceFilterSidebar] Reset error:', error);
+      toast({
+        description: `Reset failed: ${error instanceof Error ? error.message : String(error)}`,
+        color: 'destructive',
+      });
+    }
   };
 
   const hasActiveFilters =
     (table?.getState?.().columnFilters?.length ?? 0) > 0 ||
-    salesPersonName.length > 0;
+    salesPersonName.length > 0 ||
+    // paidStatus.length > 0 ||
+    poType.length > 0;
 
   return (
-    <div className='flex items-center justify-end py-2'>
-      <div className='flex flex-col items-center space-y-2 w-full'>
-        {showAlert && (
-          <Alert variant='destructiveDark' className='w-full'>
-            <AlertCircle className='h-4 w-4' />
-            <AlertDescription>
-              The Status filter is disabled when multiple Sales Persons are
-              selected.
-            </AlertDescription>
-          </Alert>
-        )}
+    <div className='flex flex-col space-y-4 w-full py-2'>
+      <PeriodFilter context='salesInvoice' />
 
-        <div className='flex flex-col items-center space-y-2 w-full'>
-          <PeriodFilter />
-        </div>
+      <div className='w-full py-3 dark:text-slate-400'>
+        <DataTableFacetedFilter
+          column={table?.getColumn('salesPersonName')}
+          title='Sales Person'
+          options={salesPersonOptionList}
+          isLoading={isSalesPersonLoading}
+          selectedValues={new Set(salesPersonName)}
+          onSelect={(value) => {
+            const updatedValues = new Set(salesPersonName);
+            if (value) {
+              updatedValues.has(value)
+                ? updatedValues.delete(value)
+                : updatedValues.add(value);
+            } else {
+              updatedValues.clear();
+            }
+            setSalesInvoiceFilters({
+              salesPersonName: Array.from(updatedValues),
+            });
+          }}
+        />
+      </div>
 
-        {/* <div className='w-full py-3'>
-          {table.getColumn('paidStatus') && (
-            <DataTableFacetedFilter
-              column={table.getColumn('paidStatus')}
-              title='Status'
-              options={statusOptionList}
-              isLoading={isStatusLoading}
-              disabled={salesPersonName.length > 1}
-              selectedValues={new Set(paidStatus)}
-              onSelect={(value) => {
-                const updatedValues = new Set(paidStatus);
-                value
-                  ? updatedValues.has(value)
-                    ? updatedValues.delete(value)
-                    : updatedValues.add(value)
-                  : updatedValues.clear();
-                setPaidStatus(Array.from(updatedValues));
-              }}
-            />
-          )}
-        </div> */}
-
-        <div className='w-full py-3'>
-          {table?.getColumn('poType') && (
-            <DataTableFacetedFilter
-              column={table.getColumn('poType')}
-              title='PO Type'
-              options={poTypeOptionList}
-              isLoading={isPoTypeLoading}
-              disabled={salesPersonName.length > 1}
-              selectedValues={new Set(poType)}
-              onSelect={(value) => {
-                const updatedValues = new Set(poType);
-                value
-                  ? updatedValues.has(value)
-                    ? updatedValues.delete(value)
-                    : updatedValues.add(value)
-                  : updatedValues.clear();
-                setPoType(Array.from(updatedValues));
-              }}
-            />
-          )}
-        </div>
-
-        {hasActiveFilters && (
-          <Button
-            variant='outline'
-            onClick={handleReset}
-            className='h-10 px-2 w-full mb-5 bg-secondary text-slate hover:bg-secondary-dark dark:bg-secondary dark:text-slate-400 dark:hover:bg-secondary dark:hover:text-slate-400'
-          >
-            <Cross2Icon className='ml-2 h-4 w-4' />
-            Reset Filter
-          </Button>
+      <div className='w-full py-3'>
+        {table.getColumn('poType') && (
+          <DataTableFacetedFilter
+            column={table.getColumn('poType')}
+            title='PO Type'
+            options={poTypeOptionList}
+            isLoading={isPoTypeLoading}
+            disabled={salesPersonName.length > 1}
+            selectedValues={new Set(poType)}
+            onSelect={(value) => {
+              const updatedValues = new Set(poType);
+              value
+                ? updatedValues.has(value)
+                  ? updatedValues.delete(value)
+                  : updatedValues.add(value)
+                : updatedValues.clear();
+              setSalesInvoiceFilters({
+                poType: Array.from(updatedValues),
+              });
+            }}
+          />
         )}
       </div>
+
+      {hasActiveFilters && (
+        <Button
+          variant='outline'
+          onClick={handleReset}
+          className='h-10 px-2 w-full mb-5 bg-secondary text-slate hover:bg-secondary-dark dark:bg-secondary dark:text-slate-400 dark:hover:bg-secondary dark:hover:text-slate-400'
+        >
+          <Cross2Icon className='ml-2 h-4 w-4' />
+          Reset Filter
+        </Button>
+      )}
     </div>
   );
 }

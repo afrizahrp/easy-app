@@ -1,4 +1,5 @@
 import useSalesInvoiceHdPaidStatus from '@/queryHooks/sls/useSalesInvoiceHdPaidStatus';
+import { AxiosError } from 'axios';
 
 interface OptionType {
   value: string;
@@ -6,15 +7,27 @@ interface OptionType {
   count: number;
 }
 
-export default function useSalesInvoiceHdStatusOptions() {
-  const { data: statusData, isLoading } = useSalesInvoiceHdPaidStatus();
+interface UseSalesInvoiceHdStatusOptionsProps {
+  context: 'salesInvoice' | 'salesPersonInvoice';
+}
+
+export default function useSalesInvoiceHdStatusOptions({
+  context,
+}: UseSalesInvoiceHdStatusOptionsProps) {
+  const {
+    data: statusData,
+    isLoading,
+    error,
+  } = useSalesInvoiceHdPaidStatus({ context });
 
   const options =
     statusData?.map((status) => ({
-      value: status.name, // Sesuaikan dengan format API
-      label: status.name, // Tambahkan count dengan pemisah ribuan di label
-      count: Number(status.count), // Pastikan count tetap number
+      value: status.name,
+      label: `${status.name} (${status.count.toLocaleString()})`,
+      count: isNaN(Number(status.count)) ? 0 : Number(status.count), // Validasi count
     })) || [];
 
-  return { options, isLoading };
+  console.log(`[useSalesInvoiceHdStatusOptions:${context}] Error:`, error);
+
+  return { options, isLoading, error };
 }

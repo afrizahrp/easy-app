@@ -1,13 +1,19 @@
 import useSalesInvoiceHdPoType from '@/queryHooks/sls/useSalesInvoiceHdPoType';
 
-interface OptionType {
-  value: string;
-  label: string;
-  count: number;
+interface UseSalesInvoiceHdPoTypeProps {
+  context: 'salesInvoice' | 'salesPersonInvoice';
 }
 
-export default function useSalesInvoiceHdPoTypeOptions() {
-  const { data: poTypeData, isLoading } = useSalesInvoiceHdPoType();
+export default function useSalesInvoiceHdPoTypeOptions({
+  context,
+}: UseSalesInvoiceHdPoTypeProps) {
+  const {
+    data: poTypeData,
+    isLoading,
+    error,
+  } = context === 'salesInvoice'
+    ? useSalesInvoiceHdPoType({ context })
+    : { data: [], isLoading: false };
 
   const options =
     poTypeData?.map((poTypeList) => ({
@@ -16,5 +22,5 @@ export default function useSalesInvoiceHdPoTypeOptions() {
       count: Number(poTypeList.count), // Pastikan count tetap number
     })) || [];
 
-  return { options, isLoading };
+  return { options, isLoading, error };
 }

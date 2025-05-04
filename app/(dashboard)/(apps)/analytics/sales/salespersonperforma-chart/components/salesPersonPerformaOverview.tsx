@@ -3,7 +3,6 @@ import React, { useState } from 'react';
 import SalesBySalesPersonFilteredChart from './salesBySalesPersonFilteredChart';
 import SalesBySalesPersonUnFilteredChart from './salesBySalesPersonUnFilteredChart';
 import { useSalesInvoiceHdFilterStore } from '@/store';
-import { FloatingFilterButton } from '@/components/ui/floating-filter-button';
 
 interface SalesPersonSelection {
   salesPersonName: string;
@@ -29,47 +28,59 @@ const SalesPersonPerformaOverview: React.FC<
   onModeChange,
   onSalesPersonSelect,
 }) => {
-  const { salesPersonName, setSalesPersonName } = useSalesInvoiceHdFilterStore(
-    (state) => ({
-      salesPersonName: state.salesPersonName,
-      setSalesPersonName: state.setSalesPersonName,
-    })
-  );
+  const { salesPersonInvoiceFilters, setSalesPersonInvoiceFilters } =
+    useSalesInvoiceHdFilterStore((state) => ({
+      salesPersonInvoiceFilters: state.salesPersonInvoiceFilters,
+      setSalesPersonInvoiceFilters: state.setSalesPersonInvoiceFilters,
+    }));
+
+  const salesPersonName = salesPersonInvoiceFilters.salesPersonName;
+
+  const validSalesPersonNames = Array.isArray(
+    salesPersonInvoiceFilters.salesPersonName
+  )
+    ? salesPersonInvoiceFilters.salesPersonName.filter(
+        (name) => typeof name === 'string' && name.trim()
+      )
+    : salesPersonInvoiceFilters.salesPersonName &&
+        typeof salesPersonInvoiceFilters.salesPersonName === 'string' &&
+        salesPersonInvoiceFilters.salesPersonName
+      ? [salesPersonInvoiceFilters.salesPersonName]
+      : [];
+
   // const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isFullWidthState, setIsFullWidthState] = useState(false);
 
   const handleSalesPersonSelect = (selection: SalesPersonSelection | null) => {
     if (selection) {
-      // Hanya perbarui jika salesPersonName berbeda
       if (!salesPersonName.includes(selection.salesPersonName)) {
-        setSalesPersonName([selection.salesPersonName]);
+        setSalesPersonInvoiceFilters({
+          ...salesPersonInvoiceFilters,
+          salesPersonName: [selection.salesPersonName],
+        });
       }
       onSalesPersonSelect?.(selection);
     } else {
-      // Hanya reset jika salesPersonName tidak kosong
       if (salesPersonName.length > 0) {
-        setSalesPersonName([]);
+        setSalesPersonInvoiceFilters({
+          ...salesPersonInvoiceFilters,
+          salesPersonName: [],
+        });
       }
       onSalesPersonSelect?.(null);
     }
   };
 
-  const validSalesPersonNames = Array.isArray(salesPersonName)
-    ? salesPersonName.filter((name) => typeof name === 'string' && name.trim())
-    : salesPersonName && typeof salesPersonName === 'string' && salesPersonName
-      ? [salesPersonName]
-      : [];
+  // const validSalesPersonNames = Array.isArray(salesPersonName)
+  //   ? salesPersonName.filter((name) => typeof name === 'string' && name.trim())
+  //   : salesPersonName && typeof salesPersonName === 'string' && salesPersonName
+  //     ? [salesPersonName]
+  //     : [];
 
   return (
     <div
       className={`flex flex-col w-full p-2 gap-4 ${showList ? 'h-fit' : 'h-fit min-h-0'}`}
     >
-      {/* {showFloatingButton && (
-        <FloatingFilterButton
-          onClick={() => setIsSidebarOpen(true)}
-          showFloatingButton={true}
-        />
-      )} */}
       <div className='w-full'>
         {validSalesPersonNames.length > 0 ? (
           <SalesBySalesPersonFilteredChart

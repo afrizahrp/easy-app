@@ -2,7 +2,6 @@ import { api } from '@/config/axios.config';
 import { useQuery } from '@tanstack/react-query';
 import {
   useSessionStore,
-  useModuleStore,
   useMonthYearPeriodStore,
   useSalesInvoiceHdFilterStore,
 } from '@/store';
@@ -11,29 +10,30 @@ import { format } from 'date-fns';
 interface SalesInvoiceHdPOType {
   id: string;
   name: string;
-  count: number; // ✅ Ubah ke number agar mudah diproses
+  count: number;
 }
 
 interface SalesInvoiceHdPoTypeResponse {
   data: SalesInvoiceHdPOType[];
 }
 
-export const useSalesInvoiceHdPoType = () => {
+interface UseSalesInvoiceHdPoTypeParams {
+  context: 'salesInvoice';
+}
+
+export const useSalesInvoiceHdPoType = ({
+  context,
+}: UseSalesInvoiceHdPoTypeParams) => {
   const user = useSessionStore((state) => state.user);
-  const company_id = user?.company_id.toLocaleUpperCase(); // Pastikan company_id dalam huruf besar
-  // const module_id = useModuleStore((state) => state.moduleId);
+  const company_id = user?.company_id?.toUpperCase();
   const module_id = 'SLS';
 
-  const { startPeriod, endPeriod } = useMonthYearPeriodStore();
+  const { salesInvoicePeriod } = useMonthYearPeriodStore();
+  const { salesInvoiceFilters } = useSalesInvoiceHdFilterStore();
 
-  const { salesPersonName, paidStatus } = useSalesInvoiceHdFilterStore(
-    (state) => ({
-      salesPersonName: state.salesPersonName,
-      paidStatus: state.paidStatus,
-    })
-  );
+  const { salesPersonName, paidStatus } = salesInvoiceFilters;
 
-  const isEnabled = !!company_id && !!module_id && salesPersonName.length <= 1; // ✅ Update isEnabled logic
+  const isEnabled = !!company_id && !!module_id && salesPersonName.length <= 1;
 
   const { data, isLoading, error, isFetching, ...rest } = useQuery<
     SalesInvoiceHdPoTypeResponse,
@@ -41,48 +41,53 @@ export const useSalesInvoiceHdPoType = () => {
   >({
     queryKey: [
       'SalesInvoiceHdPoType',
+      context,
       company_id,
       module_id,
-      startPeriod,
-      endPeriod,
+      salesInvoicePeriod.startPeriod,
+      salesInvoicePeriod.endPeriod,
       paidStatus,
       salesPersonName,
     ],
     queryFn: async () => {
       const params = new URLSearchParams();
 
-      // Hanya jika ada salesPersonName, tambahkan ke query string
       if (salesPersonName?.length) {
         salesPersonName.forEach((name) => {
-          params.append('salesPersonName', name); // ⬅️ jadi salesPersonName=HANDOYO&salesPersonName=RISA
+          params.append('salesPersonName', name);
         });
       }
 
       if (paidStatus?.length) {
-        paidStatus.forEach((name: string) => {
-          params.append('paidStatus', name); // ⬅️ jadi salesPersonName=HANDOYO&salesPersonName=RISA
+        paidStatus.forEach((name) => {
+          params.append('paidStatus', name);
         });
       }
 
-      // if (status?.length) {
-      //   params.append('paidStatus', status.join(','));
-      // }
-
-      // Jika ada startPeriod, tambahkan ke query string dengan format yang sesuai
-      if (startPeriod) {
-        params.append('startPeriod', format(startPeriod, 'MMMyyyy')); // Konversi Date ke string dalam format MMMyyyy
+      if (salesInvoicePeriod.startPeriod) {
+        params.append(
+          'startPeriod',
+          format(salesInvoicePeriod.startPeriod, 'MMMyyyy')
+        );
       }
 
-      if (endPeriod) {
-        params.append('endPeriod', format(endPeriod, 'MMMyyyy')); // Konversi Date ke string dalam format MMMyyyy
+      if (salesInvoicePeriod.endPeriod) {
+        params.append(
+          'endPeriod',
+          format(salesInvoicePeriod.endPeriod, 'MMMyyyy')
+        );
       }
 
-      // ✅ Seragam dengan `useinvoiceType`, gunakan query string
       const url = `${process.env.NEXT_PUBLIC_API_URL}/${company_id}/${module_id}/get-invoiceHd/getPoType${
         params.toString() ? `?${params.toString()}` : ''
       }`;
 
       const response = await api.get<SalesInvoiceHdPoTypeResponse>(url);
+
+      console.log(
+        `[useSalesInvoiceHdPoType:${context}] URL: ${url}, Response: ${JSON.stringify(response.data)}`
+      );
+
       return response.data;
     },
     enabled: isEnabled,
@@ -94,6 +99,7 @@ export const useSalesInvoiceHdPoType = () => {
     data: data?.data,
     isLoading,
     error,
+    isFetching,
     ...rest,
   };
 };

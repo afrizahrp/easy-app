@@ -1,4 +1,3 @@
-// components/sales/salesInvoiceFilterSummary.tsx
 'use client';
 import { useMonthYearPeriodStore, useSalesInvoiceHdFilterStore } from '@/store';
 import { FilterSummary } from '@/components/filterSummary';
@@ -6,54 +5,81 @@ import { format } from 'date-fns';
 
 interface SalesInvoiceFilterSummaryProps {
   className?: string;
+  context: 'salesInvoice' | 'salesPersonInvoice';
 }
 
 export default function SalesInvoiceFilterSummary({
   className = '',
+  context,
 }: SalesInvoiceFilterSummaryProps) {
-  const { startPeriod, endPeriod, setStartPeriod, setEndPeriod } =
-    useMonthYearPeriodStore();
   const {
-    paidStatus,
-    poType,
-    salesPersonName,
-    setPaidStatus,
-    setPoType,
-    setSalesPersonName,
+    salesInvoicePeriod,
+    setSalesInvoicePeriod,
+    salesPersonInvoicePeriod,
+    setSalesPersonInvoicePeriod,
+  } = useMonthYearPeriodStore();
+  const {
+    salesInvoiceFilters,
+    setSalesInvoiceFilters,
+    salesPersonInvoiceFilters,
+    setSalesPersonInvoiceFilters,
   } = useSalesInvoiceHdFilterStore();
+
+  const period =
+    context === 'salesInvoice' ? salesInvoicePeriod : salesPersonInvoicePeriod;
+  const setPeriod =
+    context === 'salesInvoice'
+      ? setSalesInvoicePeriod
+      : setSalesPersonInvoicePeriod;
+  const filters =
+    context === 'salesInvoice'
+      ? salesInvoiceFilters
+      : salesPersonInvoiceFilters;
+  const setFilters =
+    context === 'salesInvoice'
+      ? setSalesInvoiceFilters
+      : setSalesPersonInvoiceFilters;
+
+  const { paidStatus, poType, salesPersonName } = filters;
 
   const handleClear = (filterName: string) => {
     switch (filterName) {
       case 'startPeriod':
-        setStartPeriod(null);
+        setPeriod({ startPeriod: null });
         break;
       case 'endPeriod':
-        setEndPeriod(null);
+        setPeriod({ endPeriod: null });
         break;
       case 'paidStatus':
-        setPaidStatus([]);
+        setFilters({ paidStatus: [] });
         break;
       case 'poType':
-        setPoType([]);
+        setFilters({ poType: [] });
         break;
       case 'salesPersonName':
-        setSalesPersonName([]);
+        setFilters({ salesPersonName: [] });
         break;
       default:
         break;
     }
   };
 
-  const filters = [
+  const defaultPeriod =
+    context === 'salesInvoice' ? 'Jan 2024 - Dec 2024' : 'Jan 2025 - May 2025';
+
+  const filtersList = [
     {
       label: 'Invoice Period',
       value:
-        startPeriod && endPeriod
-          ? `${format(startPeriod, 'MMM yyyy')} - ${format(endPeriod, 'MMM yyyy')}`
-          : startPeriod
-            ? format(startPeriod, 'MMM yyyy')
-            : 'Jan 2025 - Apr 2025',
+        period.startPeriod && period.endPeriod
+          ? `${format(period.startPeriod, 'MMM yyyy')} - ${format(period.endPeriod, 'MMM yyyy')}`
+          : period.startPeriod
+            ? format(period.startPeriod, 'MMM yyyy')
+            : defaultPeriod,
       isClearable: false,
+      onClear: () => {
+        setPeriod({ startPeriod: null, endPeriod: null });
+      },
     },
     ...(salesPersonName.length > 0
       ? [
@@ -75,7 +101,7 @@ export default function SalesInvoiceFilterSummary({
           },
         ]
       : []),
-    ...(poType.length > 0
+    ...(context === 'salesInvoice' && poType.length > 0
       ? [
           {
             label: 'PO Type',
@@ -94,7 +120,7 @@ export default function SalesInvoiceFilterSummary({
       <div className='w-full flex justify-center font-semibold text-md'>
         <FilterSummary
           layout='inline'
-          filters={filters}
+          filters={filtersList}
           className='text-slate-700 dark:text-slate-400 text-lg'
         />
       </div>

@@ -12,7 +12,7 @@ interface SalesDataWithFilter {
   period: string;
   totalInvoice: number;
   salesPersonName: string;
-  months: { [month: string]: number }; // Sesuai dengan response backend
+  months: { [month: string]: number };
 }
 
 interface SalesPeriodResponse {
@@ -23,30 +23,28 @@ interface SalesPeriodResponse {
 }
 
 interface UseSalesByPeriodFilteredProps {
+  context: 'salesPersonInvoice';
   salesPersonNames: string[];
 }
 
 const useSalesByPeriodFiltered = ({
+  context,
   salesPersonNames,
 }: UseSalesByPeriodFilteredProps) => {
   const user = useSessionStore((state) => state.user);
   const company_id = user?.company_id?.toUpperCase();
-  const module_id = 'ANT';
+  const module_id = 'SLS';
   const subModule_id = 'sls';
 
-  const { startPeriod, endPeriod } = useMonthYearPeriodStore();
-  const { salesPersonName: storeSalesPersonName } =
-    useSalesInvoiceHdFilterStore((state) => ({
-      salesPersonName: state.salesPersonName,
-      poType: state.poType,
-      paidStatus: state.paidStatus,
-    }));
+  const { salesPersonInvoicePeriod } = useMonthYearPeriodStore();
+  const { salesPersonInvoiceFilters } = useSalesInvoiceHdFilterStore();
+
+  const { salesPersonName: storeSalesPersonName } = salesPersonInvoiceFilters;
 
   const isValidRequest = Boolean(
     company_id &&
       module_id &&
-      startPeriod instanceof Date &&
-      endPeriod instanceof Date &&
+      subModule_id &&
       salesPersonNames &&
       salesPersonNames.length > 0
   );
@@ -65,11 +63,12 @@ const useSalesByPeriodFiltered = ({
   >({
     queryKey: [
       'salesPersonChartFiltered',
+      context,
       company_id,
       module_id,
       subModule_id,
-      startPeriod,
-      endPeriod,
+      salesPersonInvoicePeriod.startPeriod,
+      salesPersonInvoicePeriod.endPeriod,
       validSalesPersonNames,
     ],
     queryFn: async () => {
@@ -81,11 +80,17 @@ const useSalesByPeriodFiltered = ({
 
       const params = new URLSearchParams();
 
-      if (startPeriod) {
-        params.append('startPeriod', format(startPeriod, 'MMMyyyy'));
+      if (salesPersonInvoicePeriod.startPeriod) {
+        params.append(
+          'startPeriod',
+          format(salesPersonInvoicePeriod.startPeriod, 'MMMyyyy')
+        );
       }
-      if (endPeriod) {
-        params.append('endPeriod', format(endPeriod, 'MMMyyyy'));
+      if (salesPersonInvoicePeriod.endPeriod) {
+        params.append(
+          'endPeriod',
+          format(salesPersonInvoicePeriod.endPeriod, 'MMMyyyy')
+        );
       }
 
       validSalesPersonNames.forEach((name) => {
@@ -95,10 +100,10 @@ const useSalesByPeriodFiltered = ({
       const url = `${process.env.NEXT_PUBLIC_API_URL}/${company_id}/${module_id}/${subModule_id}/get-analytics/getBySalesPersonByPeriod`;
       const finalUrl = `${url}${params.toString() ? `?${params.toString()}` : ''}`;
 
+      console.log(`[useSalesByPeriodFiltered:${context}] finalUrl:`, finalUrl);
+
       try {
-        const response = await api.get<SalesPeriodResponse>(finalUrl, {
-          paramsSerializer: (params) => params.toString(),
-        });
+        const response = await api.get<SalesPeriodResponse>(finalUrl);
         return response.data;
       } catch (err) {
         const axiosError = err as AxiosError<{ message?: string }>;

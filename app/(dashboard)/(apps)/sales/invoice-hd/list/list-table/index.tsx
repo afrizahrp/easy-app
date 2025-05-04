@@ -64,6 +64,7 @@ export const InvoiceListTable: React.FC<SalesInvoiceHdProps> = ({
         setSorting={setSorting} // Pass setSorting
         columnLabels={columnLabels} // Pass columnLabels
         searchOptionItem={searchOptionItem} // Pass searchOptionItem
+        context='salesInvoice' // Pass context
       />
     </div>
   );

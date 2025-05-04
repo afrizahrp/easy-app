@@ -55,7 +55,9 @@ const SalesInvoiceByPoTypeChart: React.FC<SalesInvoiceByPoTypeChartProps> = ({
   const hexBackground = hslToHex(hslBackground);
 
   const { toast } = useToast();
-  const { data, isLoading, isFetching, error } = useSalesByPeriodAndPoType();
+  const { data, isLoading, isFetching, error } = useSalesByPeriodAndPoType({
+    context: 'salesInvoice',
+  });
 
   // Definisikan palet warna fixed berdasarkan poType dan period
   const colorMap: Record<

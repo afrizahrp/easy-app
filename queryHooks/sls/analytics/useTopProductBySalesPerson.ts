@@ -1,6 +1,11 @@
 import { api } from '@/config/axios.config';
 import { useQuery } from '@tanstack/react-query';
-import { useSessionStore, useSalesInvoiceHdFilterStore } from '@/store';
+import {
+  useSessionStore,
+  useSalesInvoiceHdFilterStore,
+  useMonthYearPeriodStore,
+} from '@/store';
+import { format } from 'date-fns';
 import { AxiosError } from 'axios';
 
 interface ProductSoldItem {
@@ -18,43 +23,66 @@ interface ProductSoldCountResponse {
 }
 
 interface UseTopProductsBySalesPersonProps {
+  context: 'salesPersonInvoice';
   salesPersonName?: string;
-  yearPeriod?: string;
-  monthPeriod?: string;
+  year?: string;
+  month?: string;
   sortBy?: string;
   enabled?: boolean;
 }
 
 const useTopProductsBySalesPerson = ({
+  context,
   salesPersonName: propSalesPersonName,
-  yearPeriod,
-  monthPeriod,
+  year,
+  month,
   sortBy,
   enabled = true,
 }: UseTopProductsBySalesPersonProps) => {
   const user = useSessionStore((state) => state.user);
   const company_id = user?.company_id?.toUpperCase();
-  const module_id = 'ANT';
+  const module_id = 'SLS';
   const subModule_id = 'sls';
 
-  const { salesPersonName: storeSalesPersonName } =
-    useSalesInvoiceHdFilterStore((state) => ({
-      salesPersonName: state.salesPersonName,
-    }));
+  const { salesPersonInvoicePeriod } = useMonthYearPeriodStore();
+  const { salesPersonInvoiceFilters } = useSalesInvoiceHdFilterStore();
+
+  const { salesPersonName: storeSalesPersonName } = salesPersonInvoiceFilters;
 
   const finalSalesPersonName =
     propSalesPersonName?.trim() ||
     (storeSalesPersonName.length > 0 ? storeSalesPersonName[0]?.trim() : '');
 
-  const finalYearPeriod = yearPeriod?.trim() || null;
-  const finalMonthPeriod = monthPeriod?.trim() || null;
+  // Prioritaskan prop year dan month, fallback ke salesPersonInvoicePeriod
+  const yearPeriod =
+    year ||
+    (salesPersonInvoicePeriod.startPeriod
+      ? format(salesPersonInvoicePeriod.startPeriod, 'yyyy')
+      : new Date().getFullYear().toString());
+  const monthPeriod =
+    month ||
+    (salesPersonInvoicePeriod.startPeriod
+      ? format(salesPersonInvoicePeriod.startPeriod, 'MMM')
+      : format(new Date(), 'MMM'));
+
+  // Debugging: Log nilai prop dan periode
+  console.log(`[useTopProductsBySalesPerson:${context}] Input props:`, {
+    propSalesPersonName,
+    year,
+    month,
+    sortBy,
+    yearPeriod,
+    monthPeriod,
+    finalSalesPersonName,
+  });
 
   const isValidRequest = Boolean(
     company_id &&
       module_id &&
       subModule_id &&
       finalSalesPersonName &&
-      (finalYearPeriod?.trim() || finalMonthPeriod?.trim())
+      yearPeriod &&
+      monthPeriod
   );
 
   const { data, isLoading, isFetching, error, ...rest } = useQuery<
@@ -63,15 +91,15 @@ const useTopProductsBySalesPerson = ({
   >({
     queryKey: [
       'topProductsBySalesPerson',
-      company_id,
-      module_id,
-      subModule_id,
-      finalSalesPersonName,
-      finalYearPeriod,
-      finalMonthPeriod,
-      sortBy,
+      context,
+      company_id || 'unknown',
+      module_id || 'unknown',
+      subModule_id || 'unknown',
+      finalSalesPersonName || 'unknown',
+      yearPeriod,
+      monthPeriod,
+      sortBy || 'qty',
     ],
-
     queryFn: async () => {
       if (!isValidRequest) {
         throw new Error(
@@ -81,22 +109,19 @@ const useTopProductsBySalesPerson = ({
 
       const params = new URLSearchParams();
       params.append('salesPersonName', finalSalesPersonName);
-
-      if (yearPeriod) {
-        params.append('yearPeriod', yearPeriod);
-      }
-
-      if (monthPeriod) {
-        params.append('monthPeriod', monthPeriod);
-      }
-
+      params.append('yearPeriod', yearPeriod);
+      params.append('monthPeriod', monthPeriod);
       if (sortBy) {
         params.append('sortBy', sortBy);
       }
-      const url = `${process.env.NEXT_PUBLIC_API_URL}/${company_id}/${module_id}/${subModule_id}/get-analytics/getProductSoldCountBySalesPerson`; // Perbarui URL sesuai backend
-      const finalUrl = `${url}?${params.toString()}`; // Gabungkan URL dan query params
 
-      console.log('FinalUrl:', finalUrl); // Debugging log
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/${company_id}/${module_id}/${subModule_id}/get-analytics/getProductSoldCountBySalesPerson`;
+      const finalUrl = `${url}?${params.toString()}`;
+
+      console.log(
+        `[useTopProductsBySalesPerson:${context}] finalUrl:`,
+        finalUrl
+      );
 
       try {
         const response = await api.get<ProductSoldCountResponse>(finalUrl);
@@ -112,11 +137,11 @@ const useTopProductsBySalesPerson = ({
     enabled: isValidRequest && enabled,
     staleTime: 60 * 1000,
     retry: (failureCount, err) => {
-      if (err instanceof AxiosError) {
-        const status = err.response?.status;
-        if (status === 400 || status === 404) {
-          return false;
-        }
+      if (
+        err instanceof AxiosError &&
+        (err.response?.status === 400 || err.response?.status === 404)
+      ) {
+        return false;
       }
       return failureCount < 2;
     },

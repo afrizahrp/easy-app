@@ -3,17 +3,26 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { InvoiceListTable } from './list-table';
 import LayoutLoader from '@/components/layout-loader';
-import { routes } from '@/config/routes';
-import { PageHeaderWrapper } from '@/components/page-header-wrapper';
 import useSalesInvoiceHd from '@/queryHooks/sls/useSalesInvoiceHd';
 import { SalesPersonInvoiceListColumns } from './list-table/components/columns';
-import { usePageStore } from '@/store';
+import {
+  usePageStore,
+  useMonthYearPeriodStore,
+  useSalesInvoiceHdFilterStore,
+} from '@/store';
 import { FooterSummarySection } from '@/components/footer-summary-section';
 import { FooterSummaryItem } from '@/components/footer-summary-item';
+import { useToast } from '@/components/ui/use-toast';
 
 export default function SalesPersonInvoiceList() {
   const { currentPage, sorting, limit, setCurrentPage, setSorting, setLimit } =
     usePageStore();
+
+  const { salesPersonInvoiceFilters, resetSalesPersonInvoiceFilters } =
+    useSalesInvoiceHdFilterStore();
+  const { salesPersonInvoicePeriod } = useMonthYearPeriodStore();
+  const { toast } = useToast();
+
   const sort = sorting?.[0];
   const orderBy = sort?.id ?? 'invoiceDate';
   const orderDir = sort?.desc ? 'desc' : 'asc';
@@ -24,6 +33,10 @@ export default function SalesPersonInvoiceList() {
       limit,
       orderBy,
       orderDir,
+      filters: salesPersonInvoiceFilters,
+      startPeriod: salesPersonInvoicePeriod.startPeriod,
+      endPeriod: salesPersonInvoicePeriod.endPeriod,
+      context: 'salesPersonInvoice',
     });
 
   if (isFetching && !data) {
@@ -35,7 +48,7 @@ export default function SalesPersonInvoiceList() {
   }
 
   if (error) {
-    return <div>Error fetching invoiceHd: {error.message}</div>;
+    return <div>Error fetching salesperson invoice list: {error.message}</div>;
   }
 
   const formattedInvoiceHd: SalesPersonInvoiceListColumns[] =
@@ -54,14 +67,6 @@ export default function SalesPersonInvoiceList() {
 
   return (
     <>
-      {/* <PageHeaderWrapper
-        show={true}
-        title='Sales Invoice List'
-        breadcrumb={[
-          { name: 'Sales Invoice', href: routes.inventory.dashboard },
-          { name: 'List' },
-        ]}
-      /> */}
       <div className='!w-full'>
         <Card className='mt-6'>
           <CardContent className='p-10'>
@@ -75,6 +80,7 @@ export default function SalesPersonInvoiceList() {
               setLimit={setLimit}
               sorting={sorting}
               setSorting={setSorting}
+              context='salesPersonInvoice'
             />
           </CardContent>
         </Card>

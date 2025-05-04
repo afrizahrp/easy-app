@@ -52,9 +52,9 @@ const SalesInvoiceByPeriodChart: React.FC<SalesInvoiceByPeriodChartProps> = ({
   })`;
   const hexBackground = hslToHex(hslBackground);
   const { toast } = useToast();
-  const { data, isLoading, isFetching, error } = useSalesPeriod();
-
-  console.log('PeriodChart-isCompact', isCompact);
+  const { data, isLoading, isFetching, error } = useSalesPeriod({
+    context: 'salesInvoice',
+  });
 
   const chartData = React.useMemo(() => {
     if (!data) return null;

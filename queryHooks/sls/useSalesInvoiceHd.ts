@@ -1,15 +1,15 @@
+// src/hooks/useSalesInvoiceHd.ts
 import { api } from '@/config/axios.config';
 import { useQuery } from '@tanstack/react-query';
 import {
   useSessionStore,
-  useModuleStore,
-  useSearchParamsStore,
   useMonthYearPeriodStore,
   useSalesInvoiceHdFilterStore,
+  useSearchParamsStore, // Tambahkan kembali
 } from '@/store';
-
 import { SalesInvoiceHd } from '@/types';
 import { format } from 'date-fns';
+import { SEARCH_CONTEXTS } from '@/constants/searchContexts';
 
 interface SalesInvoiceHdResponse {
   data: SalesInvoiceHd[];
@@ -17,32 +17,59 @@ interface SalesInvoiceHdResponse {
   grandTotal_amount?: number;
 }
 
+interface Filters {
+  paidStatus?: string[];
+  poType?: string[];
+  salesPersonName?: string[];
+}
+
 interface UseSalesInvoiceHdParams {
   page: number;
   limit: number;
-  searchBy?: string;
-  searchTerm?: string;
   orderBy?: string;
   orderDir?: 'asc' | 'desc';
+  filters?: Filters;
+  startPeriod?: Date | null;
+  endPeriod?: Date | null;
+  context: 'salesInvoice' | 'salesPersonInvoice';
 }
-
 const useSalesInvoiceHd = ({
   page,
   limit,
-  searchBy,
-  searchTerm,
   orderBy,
   orderDir,
+  filters = {},
+  startPeriod = null,
+  endPeriod = null,
+  context,
 }: UseSalesInvoiceHdParams) => {
-  const user = useSessionStore((state) => state.user);
-  const company_id = user?.company_id.toLocaleUpperCase();
-  // const module_id = useModuleStore((state) => state.moduleId);
-  const module_id = 'SLS';
-  const searchParams = useSearchParamsStore((state) => state.searchParams);
+  if (!SEARCH_CONTEXTS.includes(context)) {
+    console.error(`Invalid context in useSalesInvoiceHd: ${context}`);
+    throw new Error(`Invalid search context: ${context}`);
+  }
 
-  const { startPeriod, endPeriod } = useMonthYearPeriodStore();
-  const { paidStatus, poType, salesPersonName } =
+  const user = useSessionStore((state) => state.user);
+  const company_id = user?.company_id?.toUpperCase();
+  const module_id = 'SLS';
+
+  const { salesInvoicePeriod, salesPersonInvoicePeriod } =
+    useMonthYearPeriodStore();
+  const { salesInvoiceFilters, salesPersonInvoiceFilters } =
     useSalesInvoiceHdFilterStore();
+
+  const { searchParams } = useSearchParamsStore();
+  const contextSearchParams = searchParams[context] ?? {
+    searchBy: 'invoice_id',
+    searchTerm: '',
+  };
+  const { searchBy, searchTerm } = contextSearchParams;
+
+  const period =
+    context === 'salesInvoice' ? salesInvoicePeriod : salesPersonInvoicePeriod;
+  const storeFilters =
+    context === 'salesInvoice'
+      ? salesInvoiceFilters
+      : salesPersonInvoiceFilters;
 
   const isValidRequest = Boolean(company_id && module_id);
 
@@ -72,26 +99,39 @@ const useSalesInvoiceHd = ({
 
     if (extra.endPeriod) {
       result.endPeriod = format(extra.endPeriod, 'MMMyyyy');
+    } else if (extra.startPeriod) {
+      result.endPeriod = format(extra.startPeriod, 'MMMyyyy');
     }
 
     if (extra.paidStatus?.length) {
-      result.paidStatus = extra.paidStatus; //.join(',');
+      result.paidStatus = extra.paidStatus;
     }
 
     if (extra.salesPersonName?.length) {
-      result.salesPersonName = extra.salesPersonName; //.join(',');
+      result.salesPersonName = extra.salesPersonName;
     }
 
     if (extra.poType?.length) {
-      result.poType = extra.poType; //.join(',');
+      result.poType = extra.poType;
     }
 
-    if (extra.searchBy && extra.searchTerm) {
+    if (extra.searchTerm && extra.searchBy) {
       result.searchBy = extra.searchBy;
       result.searchTerm = extra.searchTerm;
+    } else if (extra.searchTerm || extra.searchBy) {
+      console.warn('Incomplete search params:', {
+        searchBy: extra.searchBy,
+        searchTerm: extra.searchTerm,
+      });
     }
 
     return result;
+  };
+
+  const mergedFilters: Filters = {
+    paidStatus: filters.paidStatus ?? storeFilters.paidStatus,
+    poType: filters.poType ?? storeFilters.poType,
+    salesPersonName: filters.salesPersonName ?? storeFilters.salesPersonName,
   };
 
   const { data, isLoading, error, isFetching, ...rest } = useQuery<
@@ -104,16 +144,13 @@ const useSalesInvoiceHd = ({
       module_id,
       page,
       limit,
-      JSON.stringify(searchParams),
-      startPeriod,
-      endPeriod,
-      paidStatus,
-      poType,
-      salesPersonName,
       searchBy,
       searchTerm,
       orderBy,
       orderDir,
+      mergedFilters,
+      startPeriod || period.startPeriod,
+      endPeriod || period.endPeriod,
     ],
     queryFn: async () => {
       if (!isValidRequest) {
@@ -121,13 +158,13 @@ const useSalesInvoiceHd = ({
       }
 
       const filteredParams = buildFilteredParams(
-        { page, limit, orderBy, orderDir, ...searchParams },
+        { page, limit, orderBy, orderDir },
         {
-          paidStatus,
-          salesPersonName,
-          poType,
-          startPeriod,
-          endPeriod,
+          paidStatus: mergedFilters.paidStatus,
+          salesPersonName: mergedFilters.salesPersonName,
+          poType: mergedFilters.poType,
+          startPeriod: startPeriod || period.startPeriod,
+          endPeriod: endPeriod || period.endPeriod,
           searchBy,
           searchTerm,
         }
@@ -138,7 +175,7 @@ const useSalesInvoiceHd = ({
       const response = await api.get<SalesInvoiceHdResponse>(url, {
         params: filteredParams,
         paramsSerializer: (params) => {
-          return new URLSearchParams(
+          const queryString = new URLSearchParams(
             Object.entries(params).flatMap(([key, value]) => {
               if (Array.isArray(value)) {
                 return value.map((v) => [key, v]);
@@ -146,18 +183,13 @@ const useSalesInvoiceHd = ({
               return [[key, value]];
             })
           ).toString();
+          return queryString;
         },
       });
 
-      // console.log('response data', response.data);
-
-      // const response = await api.get<SalesInvoiceHdResponse>(url, {
-      //   params: filteredParams,
-      // });
-
       return response.data;
     },
-    enabled: isValidRequest,
+    enabled: isValidRequest && page >= 1 && limit > 0,
     staleTime: 60 * 1000,
     retry: 3,
     placeholderData: (previousData) => previousData,

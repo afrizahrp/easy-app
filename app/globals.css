@@ -722,3 +722,14 @@ html[dir='rtl'] .react-select .select__loading-indicator {
 .custom-drag {
   cursor: url('/path/to/your/custom-cursor.png'), move;
 }
+.chart-container.fullscreen {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+}
+
+.chart-container:not(.fullscreen) {
+  position: relative;
+}
