@@ -51,7 +51,7 @@ const useSalesByPeriod = ({ context }: UseSalesByPeriodParams) => {
       period.endPeriod,
     ],
     queryFn: async () => {
-      const url = `${process.env.NEXT_PUBLIC_API_URL}/${company_id}/${module_id}/${subModule_id}/get-dashboard/getByPeriod`;
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/${company_id}/${module_id}/${subModule_id}/get-analytics/getByPeriod`;
 
       const response = await api.get<SalesPeriodResponse>(url, {
         params: {

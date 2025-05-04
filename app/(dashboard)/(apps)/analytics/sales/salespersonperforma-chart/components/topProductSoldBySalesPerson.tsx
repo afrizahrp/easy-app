@@ -20,7 +20,7 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/components/ui/use-toast';
-import useTopProductsBySalesPerson from '@/queryHooks/sls/analytics/useTopProductBySalesPerson';
+import useTopProductsBySalesPerson from '@/queryHooks/analytics/sales/useTopProductBySalesPerson';
 import { getGridConfig, getLabel } from '@/lib/appex-chart-options';
 
 const Chart = dynamic(() => import('react-apexcharts'), { ssr: false });

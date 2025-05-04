@@ -16,7 +16,7 @@ import { useTheme } from 'next-themes';
 import { themes } from '@/config/thems';
 import gradientPlugin from 'chartjs-plugin-gradient';
 import { useToast } from '@/components/ui/use-toast';
-import useSalesPeriod from '@/queryHooks/sls/dashboard/useSalesPeriod';
+import useSalesPeriod from '@/queryHooks/analytics/sales/useSalesPeriod';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { months } from '@/utils/monthNameMap';
@@ -178,6 +178,11 @@ const SalesInvoiceByPeriodChart: React.FC<SalesInvoiceByPeriodChartProps> = ({
                 y: {
                   beginAtZero: true,
                   min: maxValue < 1_000_000_000 ? 100_000_000 : undefined,
+                  grid: {
+                    drawTicks: false,
+                    color: `hsl(${theme?.cssVars[mode === 'dark' ? 'dark' : 'light'].chartGird})`,
+                  },
+
                   ticks: {
                     callback: (value: unknown) => {
                       const val = Number(value) / 1000000;
@@ -193,6 +198,8 @@ const SalesInvoiceByPeriodChart: React.FC<SalesInvoiceByPeriodChartProps> = ({
                     },
                   },
                   grid: {
+                    drawTicks: false,
+                    color: `hsl(${theme?.cssVars[mode === 'dark' ? 'dark' : 'light'].chartGird})`,
                     display: false,
                   },
                 },

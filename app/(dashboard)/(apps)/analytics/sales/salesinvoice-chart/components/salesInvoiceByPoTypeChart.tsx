@@ -17,7 +17,7 @@ import { useTheme } from 'next-themes';
 import { themes } from '@/config/thems';
 import gradientPlugin from 'chartjs-plugin-gradient';
 import { useToast } from '@/components/ui/use-toast';
-import useSalesByPeriodAndPoType from '@/queryHooks/sls/dashboard/useSalesByPeriodAndPoType';
+import useSalesByPeriodAndPoType from '@/queryHooks/analytics/sales/useSalesByPeriodAndPoType';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { months } from '@/utils/monthNameMap';

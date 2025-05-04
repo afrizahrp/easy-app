@@ -17,7 +17,7 @@ import { useTheme } from 'next-themes';
 import { themes } from '@/config/thems';
 import gradientPlugin from 'chartjs-plugin-gradient';
 import { useToast } from '@/components/ui/use-toast';
-import useSalesByPeriodUnfiltered from '@/queryHooks/sls/analytics/useSalesPersonByPeriodUnFiltered';
+import useSalesByPeriodUnfiltered from '@/queryHooks/analytics/sales/useSalesPersonByPeriodUnFiltered';
 import {
   salesPersonColorMap,
   getFallbackColor,

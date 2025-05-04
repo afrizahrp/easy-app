@@ -129,7 +129,7 @@ const useSalesPersonByPeriod = ({
         ? 'getBySalesPersonByPeriod'
         : 'getByTopNSalesPersonByPeriod';
 
-      const url = `${process.env.NEXT_PUBLIC_API_URL}/${company_id}/${module_id}/${subModule_id}/get-dashboard/${endpoint}`;
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/${company_id}/${module_id}/${subModule_id}/get-analytics/${endpoint}`;
 
       const finalUrl = `${url}${params.toString() ? `?${params.toString()}` : ''}`;
 

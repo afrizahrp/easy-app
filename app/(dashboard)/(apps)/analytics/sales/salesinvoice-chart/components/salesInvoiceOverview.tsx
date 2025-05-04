@@ -2,7 +2,7 @@
 
 import SalesInvoiceByPeriodChart from './salesInvoiceByPeriodChart';
 import SalesInvoiceByPoTypeChart from './salesInvoiceByPoTypeChart';
-import SalesInvoiceHdList from '@/app/(dashboard)/(apps)/sales/invoice-hd/list/page';
+import SalesInvoiceHdList from '@/app/(dashboard)/(apps)/sales/salesInvoiceHd/list/page';
 import { PageHeaderWrapper } from '@/components/page-header-wrapper';
 import { useState } from 'react';
 
