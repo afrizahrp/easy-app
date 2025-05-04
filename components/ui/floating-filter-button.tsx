@@ -1,108 +1,108 @@
-import { useEffect, useRef, useState } from 'react';
-import Draggable from 'react-draggable';
-import { Button } from '@/components/ui/button';
+'use client';
+import { useState, useEffect } from 'react';
+import Draggable from 'react-draggable'; // Library untuk fitur draggable
+import { motion, AnimatePresence } from 'framer-motion';
 import { Filter } from 'lucide-react';
-import { debounce } from 'lodash';
-import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
+import { Button } from '@/components/ui/button';
 
-type FloatingFilterButtonProps = {
-  localStorageKey?: string;
-  showFloatingButton?: boolean;
-  children?: React.ReactNode;
-  sheetTitle?: string;
-};
+interface FloatingFilterButtonProps {
+  children: React.ReactNode;
+}
 
-export const FloatingFilterButton = ({
-  localStorageKey = 'filterButtonPosition',
-  showFloatingButton = true,
-  children,
-  sheetTitle = 'Filter Data',
-}: FloatingFilterButtonProps) => {
-  const [buttonPosition, setButtonPosition] = useState({ x: 0, y: 0 });
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [isDraggable, setIsDraggable] = useState(false);
+export function FloatingFilterButton({ children }: FloatingFilterButtonProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
 
-  const pressTimerRef = useRef<NodeJS.Timeout | null>(null);
-
-  // Load posisi dari localStorage
+  // Simpan posisi tombol di localStorage agar tetap di tempat terakhir setelah refresh
   useEffect(() => {
-    const stored = localStorage.getItem(localStorageKey);
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored);
-        setButtonPosition(parsed);
-      } catch (error) {
-        console.error('Failed to parse button position:', error);
-      }
+    const savedPosition = localStorage.getItem('floatingFilterButtonPosition');
+    if (savedPosition) {
+      setPosition(JSON.parse(savedPosition));
     }
-  }, [localStorageKey]);
+  }, []);
 
-  // Save posisi
-  useEffect(() => {
-    const savePosition = debounce(() => {
-      localStorage.setItem(localStorageKey, JSON.stringify(buttonPosition));
-    }, 300);
-    savePosition();
-    return () => savePosition.cancel();
-  }, [buttonPosition, localStorageKey]);
-
-  const handleDrag = (_e: any, data: any) => {
-    setButtonPosition({ x: data.x, y: data.y });
+  const handleDragStop = (e: any, data: any) => {
+    const newPosition = { x: data.x, y: data.y };
+    setPosition(newPosition);
+    localStorage.setItem(
+      'floatingFilterButtonPosition',
+      JSON.stringify(newPosition)
+    );
   };
-
-  // Long press logic
-  const handleMouseDown = () => {
-    pressTimerRef.current = setTimeout(() => {
-      setIsDraggable(true);
-    }, 400); // 400ms untuk long press
-  };
-
-  const handleMouseUp = () => {
-    if (pressTimerRef.current) clearTimeout(pressTimerRef.current);
-    if (!isDraggable) {
-      setIsSidebarOpen(true); // hanya buka sheet kalau bukan mode drag
-    }
-    setTimeout(() => setIsDraggable(false), 100); // reset
-  };
-
-  if (!showFloatingButton) return null;
 
   return (
     <>
       <Draggable
-        position={buttonPosition}
-        onDrag={handleDrag}
-        disabled={!isDraggable}
+        defaultPosition={{ x: position.x, y: position.y }}
+        onStop={handleDragStop}
+        bounds='parent' // Membatasi draggable area ke dalam parent container
       >
-        <div className='fixed bottom-4 right-4 z-50'>
-          <div
-            onMouseDown={handleMouseDown}
-            onMouseUp={handleMouseUp}
-            onTouchStart={handleMouseDown}
-            onTouchEnd={handleMouseUp}
-            className={
-              isDraggable
-                ? 'cursor-grab active:cursor-grabbing'
-                : 'cursor-pointer'
-            }
-          >
-            <Button
-              size='sm'
-              aria-label='Open filter options'
-              className='px-3 h-8 flex items-center gap-1 bg-primary text-white hover:bg-secondary-dark rounded-full hover:scale-105 transition-transform shadow-md'
-            >
-              <Filter className='w-4 h-4' /> Filter Data
-            </Button>
-          </div>
+        <div className='fixed bottom-6 right-6 z-50 cursor-move'>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <motion.div
+                  className='flex items-center gap-2 px-4 py-2 rounded-full shadow-lg bg-gradient-to-r from-blue-500 to-indigo-600 text-white hover:from-blue-600 hover:to-indigo-700 transition-all'
+                  initial={{ scale: 0.8, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ duration: 0.3, ease: 'easeOut' }}
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.95 }}
+                  aria-label='Floating filter button chart period'
+                  onClick={() => setIsOpen(true)}
+                >
+                  <motion.div
+                    animate={{ rotate: [0, 10, -10, 0] }}
+                    transition={{ repeat: Infinity, duration: 2 }}
+                  >
+                    <Filter className='w-5 h-5' />
+                  </motion.div>
+                  <span>Filter Period</span>
+                </motion.div>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Adjust the period for all charts</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
       </Draggable>
 
-      <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
-        <SheetContent className='pt-5 w-80 sm:w-96'>
-          <SheetTitle>{sheetTitle}</SheetTitle>
-          {children}
-        </SheetContent>
-      </Sheet>
+      <AnimatePresence>
+        {isOpen && (
+          <>
+            <motion.div
+              className='fixed inset-0 bg-black/50 z-40'
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsOpen(false)}
+            />
+            <motion.div
+              className='fixed bottom-20 right-6 bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg z-50'
+              initial={{ y: 100, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: 100, opacity: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              {children}
+              <Button
+                variant='outline'
+                className='mt-4 w-full'
+                onClick={() => setIsOpen(false)}
+              >
+                Close
+              </Button>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </>
   );
-};
+}

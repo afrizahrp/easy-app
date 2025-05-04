@@ -5,36 +5,70 @@ import { set as setDate } from 'date-fns';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { useMonthYearPeriodStore } from '@/store';
+import { SearchContext } from '@/constants/searchContexts'; // Impor SearchContext
 import { useToast } from '@/components/ui/use-toast';
 
 interface PeriodFilterProps {
-  context: 'salesInvoice' | 'salesPersonInvoice';
-  onPeriodChange?: (period: {
-    startPeriod: Date | null;
-    endPeriod: Date | null;
-  }) => void;
+  context: SearchContext;
+  onChange?: (
+    period: Partial<{ startPeriod: Date | null; endPeriod: Date | null }>
+  ) => void;
+  value?: { startPeriod: Date | null; endPeriod: Date | null };
 }
 
-export function PeriodFilter({ context, onPeriodChange }: PeriodFilterProps) {
+export function PeriodFilter({ context, onChange, value }: PeriodFilterProps) {
   const {
     salesInvoicePeriod,
     setSalesInvoicePeriod,
     salesPersonInvoicePeriod,
     setSalesPersonInvoicePeriod,
+    purchasingPeriod,
+    setPurchasingPeriod,
+    inventoryPeriod,
+    setInventoryPeriod,
   } = useMonthYearPeriodStore();
   const { toast } = useToast();
 
+  // Gunakan value dari prop jika ada, jika tidak ambil dari store
   const period =
-    context === 'salesInvoice' ? salesInvoicePeriod : salesPersonInvoicePeriod;
-  const setPeriod =
-    context === 'salesInvoice'
-      ? setSalesInvoicePeriod
-      : setSalesPersonInvoicePeriod;
+    value ||
+    (context === 'salesInvoice'
+      ? salesInvoicePeriod
+      : context === 'salesPersonInvoice'
+        ? salesPersonInvoicePeriod
+        : context === 'purchasing'
+          ? purchasingPeriod
+          : inventoryPeriod);
 
   const prevPeriodRef = useRef({
     startPeriod: period.startPeriod,
     endPeriod: period.endPeriod,
   });
+
+  // Default setter berdasarkan context jika tidak ada onChange
+  const setPeriodDefault = (
+    newPeriod: Partial<{ startPeriod: Date | null; endPeriod: Date | null }>
+  ) => {
+    switch (context) {
+      case 'salesInvoice':
+        setSalesInvoicePeriod(newPeriod);
+        break;
+      case 'salesPersonInvoice':
+        setSalesPersonInvoicePeriod(newPeriod);
+        break;
+      // case 'purchasing':
+      //   setPurchasingPeriod(newPeriod);
+      //   break;
+      // case 'inventory':
+      //   setInventoryPeriod(newPeriod);
+      //   break;
+      default:
+        console.warn(`Unknown context: ${context}`);
+    }
+  };
+
+  // Handler untuk mengatur periode
+  const setPeriod = onChange || setPeriodDefault;
 
   useEffect(() => {
     const prev = prevPeriodRef.current;
@@ -46,16 +80,18 @@ export function PeriodFilter({ context, onPeriodChange }: PeriodFilterProps) {
         startPeriod: period.startPeriod,
         endPeriod: period.endPeriod,
       });
-      onPeriodChange?.({
-        startPeriod: period.startPeriod,
-        endPeriod: period.endPeriod,
-      });
+      if (onChange) {
+        onChange({
+          startPeriod: period.startPeriod,
+          endPeriod: period.endPeriod,
+        });
+      }
       prevPeriodRef.current = {
         startPeriod: period.startPeriod,
         endPeriod: period.endPeriod,
       };
     }
-  }, [period.startPeriod, period.endPeriod, onPeriodChange, context]);
+  }, [period.startPeriod, period.endPeriod, onChange, context]);
 
   return (
     <div className='w-full flex justify-center items-center'>

@@ -332,15 +332,23 @@ interface PersistedPeriodState {
 interface PersistedMonthYearPeriodState {
   salesInvoicePeriod: PersistedPeriodState;
   salesPersonInvoicePeriod: PersistedPeriodState;
+  purchasingPeriod: PersistedPeriodState;
+  inventoryPeriod: PersistedPeriodState;
 }
 
 interface MonthYearPeriodState {
   salesInvoicePeriod: PeriodState;
   salesPersonInvoicePeriod: PeriodState;
+  purchasingPeriod: PeriodState;
+  inventoryPeriod: PeriodState;
   setSalesInvoicePeriod: (period: Partial<PeriodState>) => void;
   setSalesPersonInvoicePeriod: (period: Partial<PeriodState>) => void;
+  setPurchasingPeriod: (period: Partial<PeriodState>) => void;
+  setInventoryPeriod: (period: Partial<PeriodState>) => void;
   resetSalesInvoicePeriod: () => void;
   resetSalesPersonInvoicePeriod: () => void;
+  resetPurchasingPeriod: () => void;
+  resetInventoryPeriod: () => void;
 }
 
 type MonthYearPeriodStore = MonthYearPeriodState & {
@@ -382,6 +390,14 @@ const persistOptions: PersistOptions<
       startPeriod: toISOString(state.salesPersonInvoicePeriod.startPeriod),
       endPeriod: toISOString(state.salesPersonInvoicePeriod.endPeriod),
     },
+    purchasingPeriod: {
+      startPeriod: toISOString(state.purchasingPeriod.startPeriod),
+      endPeriod: toISOString(state.purchasingPeriod.endPeriod),
+    },
+    inventoryPeriod: {
+      startPeriod: toISOString(state.inventoryPeriod.startPeriod),
+      endPeriod: toISOString(state.inventoryPeriod.endPeriod),
+    },
   }),
   onRehydrateStorage: () => (state) => {
     if (state) {
@@ -410,6 +426,30 @@ const persistOptions: PersistOptions<
             ? state.salesPersonInvoicePeriod.endPeriod
             : null
         ) || getDefaultPeriod().endPeriod;
+      state.purchasingPeriod.startPeriod =
+        fromISOString(
+          typeof state.purchasingPeriod.startPeriod === 'string'
+            ? state.purchasingPeriod.startPeriod
+            : null
+        ) || getDefaultPeriod().startPeriod;
+      state.purchasingPeriod.endPeriod =
+        fromISOString(
+          typeof state.purchasingPeriod.endPeriod === 'string'
+            ? state.purchasingPeriod.endPeriod
+            : null
+        ) || getDefaultPeriod().endPeriod;
+      state.inventoryPeriod.startPeriod =
+        fromISOString(
+          typeof state.inventoryPeriod.startPeriod === 'string'
+            ? state.inventoryPeriod.startPeriod
+            : null
+        ) || getDefaultPeriod().startPeriod;
+      state.inventoryPeriod.endPeriod =
+        fromISOString(
+          typeof state.inventoryPeriod.endPeriod === 'string'
+            ? state.inventoryPeriod.endPeriod
+            : null
+        ) || getDefaultPeriod().endPeriod;
     }
   },
 };
@@ -419,6 +459,8 @@ export const useMonthYearPeriodStore = create<MonthYearPeriodStore>()(
     (set) => ({
       salesInvoicePeriod: getDefaultPeriod(),
       salesPersonInvoicePeriod: getDefaultPeriod(),
+      purchasingPeriod: getDefaultPeriod(),
+      inventoryPeriod: getDefaultPeriod(),
       setSalesInvoicePeriod: (period) =>
         set((state) => ({
           salesInvoicePeriod: { ...state.salesInvoicePeriod, ...period },
@@ -430,6 +472,14 @@ export const useMonthYearPeriodStore = create<MonthYearPeriodStore>()(
             ...period,
           },
         })),
+      setPurchasingPeriod: (period) =>
+        set((state) => ({
+          purchasingPeriod: { ...state.purchasingPeriod, ...period },
+        })),
+      setInventoryPeriod: (period) =>
+        set((state) => ({
+          inventoryPeriod: { ...state.inventoryPeriod, ...period },
+        })),
       resetSalesInvoicePeriod: () =>
         set({
           salesInvoicePeriod: getDefaultPeriod(),
@@ -437,6 +487,14 @@ export const useMonthYearPeriodStore = create<MonthYearPeriodStore>()(
       resetSalesPersonInvoicePeriod: () =>
         set({
           salesPersonInvoicePeriod: getDefaultPeriod(),
+        }),
+      resetPurchasingPeriod: () =>
+        set({
+          purchasingPeriod: getDefaultPeriod(),
+        }),
+      resetInventoryPeriod: () =>
+        set({
+          inventoryPeriod: getDefaultPeriod(),
         }),
     }),
     persistOptions

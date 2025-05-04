@@ -6,8 +6,8 @@ import SalesInvoiceFilterSummary from '@/components/sales/salesInvoiceFilterSumm
 import SalesInvoiceOverview from '../salesinvoice-chart/components/salesInvoiceOverview';
 import { GeneralInvoiceFilterSidebar } from '@/components/FilterSidebarButton/sales/generalnvoiceFilterSidebar';
 import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
-import { FloatingFilterButton } from '@/components/ui/floating-filter-button';
 import { PageHeaderWrapper } from '@/components/page-header-wrapper';
+import { ChartPeriodFilterSidebar } from '@/components/FilterSidebarButton/chartPeriodFilterSidebar';
 
 interface SalesInvoiceAnalyticsProps {
   showList?: boolean;
@@ -59,10 +59,6 @@ const SalesInvoiceAnalytics: React.FC<SalesInvoiceAnalyticsProps> = ({
         showList ? 'h-screen' : 'h-fit min-h-0'
       }`}
     >
-      <FloatingFilterButton>
-        <GeneralInvoiceFilterSidebar table={dummyTable} />
-      </FloatingFilterButton>
-
       {showHeader && (
         <motion.div
           variants={containerVariants}

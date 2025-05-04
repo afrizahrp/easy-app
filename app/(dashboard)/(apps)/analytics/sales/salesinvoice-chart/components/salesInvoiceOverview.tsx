@@ -32,20 +32,6 @@ const SalesInvoiceOverview: React.FC<SalesInvoiceOverviewProps> = ({
     >
       {showList ? (
         <div className={chartLayoutClass}>
-          {(fullChart === null || fullChart === 'period') && (
-            <div
-              className={`${chartWidthClass(fullChart === 'period')} overflow-x-auto max-w-full`}
-            >
-              <SalesInvoiceByPeriodChart
-                isFullWidth={fullChart === 'period'}
-                onModeChange={(isFull) =>
-                  onFilterChange?.({ period: isFull ? 'full' : undefined })
-                }
-                height={400}
-                isCompact={false}
-              />
-            </div>
-          )}
           {(fullChart === null || fullChart === 'poType') && (
             <div
               className={`${chartWidthClass(fullChart === 'poType')} overflow-x-auto max-w-full`}
@@ -54,6 +40,20 @@ const SalesInvoiceOverview: React.FC<SalesInvoiceOverviewProps> = ({
                 isFullWidth={fullChart === 'poType'}
                 onModeChange={(isFull) =>
                   onFilterChange?.({ poType: isFull ? 'full' : undefined })
+                }
+                height={400}
+                isCompact={false}
+              />
+            </div>
+          )}
+          {(fullChart === null || fullChart === 'period') && (
+            <div
+              className={`${chartWidthClass(fullChart === 'period')} overflow-x-auto max-w-full`}
+            >
+              <SalesInvoiceByPeriodChart
+                isFullWidth={fullChart === 'period'}
+                onModeChange={(isFull) =>
+                  onFilterChange?.({ period: isFull ? 'full' : undefined })
                 }
                 height={400}
                 isCompact={false}
