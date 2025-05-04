@@ -1,15 +1,13 @@
 'use client';
 import { useState, useRef, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useSalesInvoiceHdFilterStore } from '@/store';
 import SalesInvoiceFilterSummary from '@/components/sales/salesInvoiceFilterSummary';
 import SalesPersonPerformaOverview from '../salespersonperforma-chart/components/salesPersonPerformaOverview';
 import TopProductSoldBySalesPerson from '../salespersonperforma-chart/components/topProductSoldBySalesPerson';
-import { SalesPersonInvoiceFilterSidebar } from '@/components/FilterSidebarButton/sales/salesPersonlnvoiceFilterSidebar';
 import { PageHeaderWrapper } from '@/components/page-header-wrapper';
 import { Table } from '@tanstack/react-table';
 import SalesPersonInvoiceList from '../../../sales/salespersonInvoice/list/page';
-import { FloatingFilterButton } from '@/components/ui/floating-filter-button';
 
 interface SalesPersonSelection {
   salesPersonName: string;
@@ -124,10 +122,6 @@ const SalesPersonPerformaAnalytics: React.FC<
         showList ? 'h-screen' : 'h-fit min-h-0'
       }`}
     >
-      {/* <FloatingFilterButton>
-        <SalesPersonInvoiceFilterSidebar table={dummyTable} />
-      </FloatingFilterButton> */}
-
       <PageHeaderWrapper
         show={showHeader}
         title='Sales Person Performance Analytics'
@@ -152,11 +146,14 @@ const SalesPersonPerformaAnalytics: React.FC<
           }`}
         >
           <motion.div
+            key={fullChart}
             ref={chartRef}
             layout
             layoutId='chart'
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-            className='w-full'
+            className='w-full rounded-lg'
           >
             <SalesPersonPerformaOverview
               showFloatingButton={true}

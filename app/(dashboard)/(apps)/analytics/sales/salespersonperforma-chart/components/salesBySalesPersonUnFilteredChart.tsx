@@ -259,8 +259,8 @@ const SalesBySalesPersonUnFilteredChart: React.FC<
       ref={chartContainerRef}
       className={`chart-container ${isCompact ? 'compact' : ''} ${
         isFullScreen && !document.fullscreenElement
-          ? 'fixed inset-0 z-50 bg-white dark:bg-[#18181b] p-4'
-          : 'relative'
+          ? 'fixed inset-0 z-50 bg-white dark:bg-[#18181b] p-4 rounded-lg shadow-md'
+          : 'relative rounded-lg shadow-md'
       } flex flex-col h-fit min-h-0`}
       style={{ backgroundColor: hexBackground }}
     >

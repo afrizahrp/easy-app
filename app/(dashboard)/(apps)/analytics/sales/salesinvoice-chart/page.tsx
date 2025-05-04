@@ -61,6 +61,7 @@ const SalesInvoiceAnalytics: React.FC<SalesInvoiceAnalyticsProps> = ({
     >
       {showHeader && (
         <motion.div
+          key={showHeader ? 'header' : 'no-header'}
           variants={containerVariants}
           initial='hidden'
           animate='visible'
@@ -87,6 +88,8 @@ const SalesInvoiceAnalytics: React.FC<SalesInvoiceAnalyticsProps> = ({
 
         <motion.div
           layout
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
           transition={{ type: 'spring', stiffness: 300, damping: 30 }}
           className='w-full'
         >
