@@ -1,10 +1,10 @@
 'use client';
-
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion'; // Impor Framer Motion
 import SalesInvoiceByPeriodChart from './salesInvoiceByPeriodChart';
 import SalesInvoiceByPoTypeChart from './salesInvoiceByPoTypeChart';
 import SalesInvoiceHdList from '@/app/(dashboard)/(apps)/sales/salesInvoiceHd/list/page';
 import { PageHeaderWrapper } from '@/components/page-header-wrapper';
-import { useState } from 'react';
 
 interface SalesInvoiceOverviewProps {
   showFloatingButton?: boolean;
@@ -19,12 +19,22 @@ const SalesInvoiceOverview: React.FC<SalesInvoiceOverviewProps> = ({
   fullChart = null,
   onFilterChange,
 }) => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
   const chartLayoutClass =
-    'flex flex-col md:flex-row w-full gap-4 items-stretch';
-  const chartWidthClass = (isFull: boolean) =>
-    isFull ? 'w-full' : 'w-full md:w-1/2';
+    'flex flex-col md:flex-row w-full gap-4 items-stretch min-w-0';
+
+  const handlePeriodModeChange = (isFull: boolean) => {
+    onFilterChange?.({
+      period: isFull ? 'full' : undefined,
+      poType: undefined,
+    });
+  };
+
+  const handlePoTypeModeChange = (isFull: boolean) => {
+    onFilterChange?.({
+      poType: isFull ? 'full' : undefined,
+      period: undefined,
+    });
+  };
 
   return (
     <div
@@ -32,52 +42,51 @@ const SalesInvoiceOverview: React.FC<SalesInvoiceOverviewProps> = ({
     >
       {showList ? (
         <div className={chartLayoutClass}>
-          {(fullChart === null || fullChart === 'poType') && (
-            <div
-              className={`${chartWidthClass(fullChart === 'poType')} overflow-x-auto max-w-full`}
-            >
-              <SalesInvoiceByPoTypeChart
-                isFullWidth={fullChart === 'poType'}
-                onModeChange={(isFull) =>
-                  onFilterChange?.({ poType: isFull ? 'full' : undefined })
-                }
-                height={400}
-                isCompact={false}
-              />
-            </div>
-          )}
-          {(fullChart === null || fullChart === 'period') && (
-            <div
-              className={`${chartWidthClass(fullChart === 'period')} overflow-x-auto max-w-full`}
-            >
-              <SalesInvoiceByPeriodChart
-                isFullWidth={fullChart === 'period'}
-                onModeChange={(isFull) =>
-                  onFilterChange?.({ period: isFull ? 'full' : undefined })
-                }
-                height={400}
-                isCompact={false}
-              />
-            </div>
-          )}
+          <AnimatePresence>
+            {(fullChart === null || fullChart === 'poType') && (
+              <motion.div
+                key='poTypeChart'
+                className={`flex-none ${fullChart === 'poType' ? 'w-full' : 'w-full md:w-1/2'} overflow-x-auto max-w-full`}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.3, ease: 'easeInOut' }}
+              >
+                <SalesInvoiceByPoTypeChart
+                  isFullWidth={fullChart === 'poType'}
+                  onModeChange={handlePoTypeModeChange}
+                  height={400}
+                  isCompact={false}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
+          <AnimatePresence>
+            {(fullChart === null || fullChart === 'period') && (
+              <motion.div
+                key='periodChart'
+                className={`flex-none ${fullChart === 'period' ? 'w-full' : 'w-full md:w-1/2'} overflow-x-auto max-w-full`}
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 20 }}
+                transition={{ duration: 0.3, ease: 'easeInOut' }}
+              >
+                <SalesInvoiceByPeriodChart
+                  isFullWidth={fullChart === 'period'}
+                  onModeChange={handlePeriodModeChange}
+                  height={400}
+                  isCompact={false}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       ) : (
         <div className='w-full overflow-x-auto max-w-full h-fit min-h-0'>
-          {/* <SalesInvoiceByPeriodChart
-            isFullWidth={false}
-            onModeChange={(isFull) =>
-              onFilterChange?.({ period: isFull ? 'full' : undefined })
-            }
-            height={300}
-            isCompact={true}
-          /> */}
-
           <SalesInvoiceByPoTypeChart
             isFullWidth={fullChart === 'poType'}
-            onModeChange={(isFull) =>
-              onFilterChange?.({ poType: isFull ? 'full' : undefined })
-            }
-            height={300}
+            onModeChange={handlePoTypeModeChange}
+            height={250}
             isCompact={true}
           />
         </div>

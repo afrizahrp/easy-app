@@ -116,16 +116,19 @@ const SalesPersonPerformaAnalytics: React.FC<
     setColumnFilters: () => {},
   } as unknown as Table<any>;
 
+  console.log(selectedSalesPerson, selectedYear, selectedMonth);
+
   return (
     <div
       className={`relative flex flex-col w-full p-1 gap-4 ${
         showList ? 'h-screen' : 'h-fit min-h-0'
       }`}
     >
+      {}
       <PageHeaderWrapper
         show={showHeader}
         title='Sales Person Performance Analytics'
-        hideBreadcrumb={false}
+        hideBreadcrumb={selectedSalesPerson !== null}
         breadcrumb={[
           { name: 'Analytics', href: '/analytics/sales' },
           {

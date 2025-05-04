@@ -213,10 +213,10 @@ const TopProductSoldBySalesPerson: React.FC<
   return (
     <div
       ref={containerRef}
-      className={`bg-white dark:bg-[#18181b] p-4 rounded-lg shadow-sm h-96 w-full`}
+      className={`bg-white dark:bg-[#18181b] p-4 rounded-lg shadow-sm h-96 w-full mt-2`}
       style={{ backgroundColor: hexBackground }}
     >
-      <div className='flex items-center justify-between mb-4'>
+      <div className='flex items-center justify-between mb-2'>
         <h3 className='text-sm text-muted-foreground'>
           Top Products (Max 3) Sold
           <span className='block text-sm text-muted-foreground font-normal mt-1'>

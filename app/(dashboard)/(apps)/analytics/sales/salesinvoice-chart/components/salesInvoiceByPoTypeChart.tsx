@@ -11,6 +11,7 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
+import { motion } from 'framer-motion';
 import { hslToHex } from '@/lib/utils';
 import { useThemeStore } from '@/store';
 import { useTheme } from 'next-themes';
@@ -43,23 +44,21 @@ interface SalesInvoiceByPoTypeChartProps {
 const SalesInvoiceByPoTypeChart: React.FC<SalesInvoiceByPoTypeChartProps> = ({
   height = 400,
   isCompact = false,
-  isFullWidth,
+  isFullWidth = false,
   onModeChange,
 }) => {
-  const { theme: config, setTheme: setConfig } = useThemeStore();
+  const { theme: config } = useThemeStore();
   const { theme: mode } = useTheme();
   const theme = themes.find((theme) => theme.name === config);
   const hslBackground = `hsla(${
     theme?.cssVars[mode === 'dark' ? 'dark' : 'light'].background
   })`;
   const hexBackground = hslToHex(hslBackground);
-
   const { toast } = useToast();
   const { data, isLoading, isFetching, error } = useSalesByPeriodAndPoType({
     context: 'salesInvoice',
   });
 
-  // Definisikan palet warna fixed berdasarkan poType dan period
   const colorMap: Record<
     string,
     { borderColor: string; backgroundColor: string }
@@ -67,27 +66,27 @@ const SalesInvoiceByPoTypeChart: React.FC<SalesInvoiceByPoTypeChartProps> = ({
     Regular_2023: {
       borderColor: '#22C55E',
       backgroundColor: 'rgba(34, 197, 94, 0.2)',
-    }, // Green
+    },
     eCatalog_2023: {
       borderColor: '#3B82F6',
       backgroundColor: 'rgba(59, 130, 246, 0.2)',
-    }, // Blue
+    },
     Regular_2024: {
       borderColor: '#EF4444',
       backgroundColor: 'rgba(239, 68, 68, 0.2)',
-    }, // Red
+    },
     eCatalog_2024: {
       borderColor: '#8B5CF6',
       backgroundColor: 'rgba(139, 92, 246, 0.2)',
-    }, // Purple
+    },
     Regular_2025: {
       borderColor: '#EC4899',
       backgroundColor: 'rgba(236, 72, 153, 0.2)',
-    }, // Pink
+    },
     eCatalog_2025: {
       borderColor: '#1E3A8A',
       backgroundColor: 'rgba(30, 58, 138, 0.2)',
-    }, // Navy
+    },
   };
 
   const chartData = React.useMemo(() => {
@@ -101,11 +100,9 @@ const SalesInvoiceByPoTypeChart: React.FC<SalesInvoiceByPoTypeChartProps> = ({
           period: string;
           months: Record<string, number>;
         }) => {
-          // Buat kunci untuk colorMap berdasarkan poType dan period
           const colorKey = `${poTypeData.poType}_${poTypeData.period}`;
-          // Ambil warna dari colorMap, fallback ke warna default jika tidak ada
           const { borderColor, backgroundColor } = colorMap[colorKey] || {
-            borderColor: '#6B7280', // Gray sebagai fallback
+            borderColor: '#6B7280',
             backgroundColor: 'rgba(107, 114, 128, 0.2)',
           };
 
@@ -138,15 +135,24 @@ const SalesInvoiceByPoTypeChart: React.FC<SalesInvoiceByPoTypeChartProps> = ({
   }, [error, toast]);
 
   return (
-    <div
-      className={`chart-container ${isCompact ? 'compact' : ''} bg-white dark:bg-[#18181b] p-2 rounded-lg shadow-sm flex flex-col`}
+    <motion.div
+      className={`chart-container ${isCompact ? 'compact' : ''} bg-white dark:bg-[#18181b] p-2 rounded-lg shadow-sm flex flex-col w-full min-h-[250px]`} // Lebar dikontrol oleh parent
       style={{ backgroundColor: hexBackground }}
+      animate={{
+        opacity: isFullWidth ? 1 : 0.95,
+        scale: isFullWidth ? 1 : 0.98,
+      }}
+      initial={{
+        opacity: isFullWidth ? 1 : 0.95,
+        scale: isFullWidth ? 1 : 0.98,
+      }}
+      transition={{ duration: 0.3, ease: 'easeInOut' }}
     >
       <div className='relative flex items-center'>
         <h2 className='text-sm text-muted-foreground font-semibold ml-2'>
           Monthly Sales Invoice by PO Type (in Millions IDR)
         </h2>
-        {!isCompact && ( // Hanya tampilkan switch jika isCompact = false
+        {!isCompact && (
           <div className='absolute right-0 top-0 flex items-center text-muted-foreground text-xs space-x-2'>
             <Label htmlFor='chart-mode-potype'>
               {isFullWidth ? 'Full Width' : 'Half Width'}
@@ -160,17 +166,16 @@ const SalesInvoiceByPoTypeChart: React.FC<SalesInvoiceByPoTypeChartProps> = ({
           </div>
         )}
       </div>
-
-      {isLoading || isFetching ? (
-        <div className='flex items-center justify-center h-full'>
-          <div className='w-3/4 h-1/2 rounded-lg shimmer' />
-        </div>
-      ) : chartData ? (
-        <div className='flex-1 h-full w-full min-h-0'>
+      <div className='flex-1 h-full w-full min-h-0'>
+        {isLoading || isFetching ? (
+          <div className='flex items-center justify-center h-full'>
+            <div className='w-3/4 h-1/2 rounded-lg shimmer' />
+          </div>
+        ) : chartData ? (
           <Line
-            data={chartData}
-            width={isFullWidth ? 600 : 300}
+            key={isFullWidth ? 'full' : 'half'}
             height={isCompact ? 250 : height}
+            data={chartData}
             options={{
               responsive: true,
               maintainAspectRatio: false,
@@ -198,17 +203,13 @@ const SalesInvoiceByPoTypeChart: React.FC<SalesInvoiceByPoTypeChartProps> = ({
                 x: {
                   title: { display: false, text: 'Months' },
                   grid: {
-                    display: true, // pastikan gridline X tampil
-                    color: 'rgba(200,200,200,0.2)', // opsional: warna gridline
+                    display: true,
+                    color: 'rgba(200,200,200,0.2)',
                   },
                 },
                 y: {
                   beginAtZero: true,
-                  // min: maxValue < 1_000_000_000 ? 300_000_000 : undefined,
-                  // max: maxValue * 1.1,
                   ticks: {
-                    // stepSize:
-                    //   maxValue < 1_000_000_000 ? 300_000_000 : 1_000_000_000,
                     maxTicksLimit: 5,
                     callback: (value) => {
                       const val = Number(value) / 1000000;
@@ -216,8 +217,8 @@ const SalesInvoiceByPoTypeChart: React.FC<SalesInvoiceByPoTypeChartProps> = ({
                     },
                   },
                   grid: {
-                    display: true, // pastikan gridline Y tampil
-                    color: 'rgba(200,200,200,0.2)', // opsional: warna gridline
+                    display: true,
+                    color: 'rgba(200,200,200,0.2)',
                   },
                 },
               },
@@ -229,27 +230,27 @@ const SalesInvoiceByPoTypeChart: React.FC<SalesInvoiceByPoTypeChartProps> = ({
               },
             }}
           />
-        </div>
-      ) : (
-        <div className='flex flex-col items-center justify-center h-full text-gray-400'>
-          <svg
-            xmlns='http://www.w3.org/2000/svg'
-            className='w-24 h-24 mb-4 animate-bounce'
-            fill='none'
-            viewBox='0 0 24 24'
-            stroke='currentColor'
-            strokeWidth={1.5}
-          >
-            <path
-              strokeLinecap='round'
-              strokeLinejoin='round'
-              d='M3 3v18h18V3H3zm5 14h8m-8-4h8m-8-4h8'
-            />
-          </svg>
-          <p className='text-sm font-medium'>No data available</p>
-        </div>
-      )}
-    </div>
+        ) : (
+          <div className='flex flex-col items-center justify-center h-full text-gray-400'>
+            <svg
+              xmlns='http://www.w3.org/2000/svg'
+              className='w-24 h-24 mb-4 animate-bounce'
+              fill='none'
+              viewBox='0 0 24 24'
+              stroke='currentColor'
+              strokeWidth={1.5}
+            >
+              <path
+                strokeLinecap='round'
+                strokeLinejoin='round'
+                d='M3 3v18h18V3H3zm5 14h8m-8-4h8m-8-4h8'
+              />
+            </svg>
+            <p className='text-sm font-medium'>No data available</p>
+          </div>
+        )}
+      </div>
+    </motion.div>
   );
 };
 

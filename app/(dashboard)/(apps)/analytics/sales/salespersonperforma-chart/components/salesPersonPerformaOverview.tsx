@@ -48,7 +48,6 @@ const SalesPersonPerformaOverview: React.FC<
       ? [salesPersonInvoiceFilters.salesPersonName]
       : [];
 
-  // const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isFullWidthState, setIsFullWidthState] = useState(false);
 
   const handleSalesPersonSelect = (selection: SalesPersonSelection | null) => {
@@ -70,12 +69,6 @@ const SalesPersonPerformaOverview: React.FC<
       onSalesPersonSelect?.(null);
     }
   };
-
-  // const validSalesPersonNames = Array.isArray(salesPersonName)
-  //   ? salesPersonName.filter((name) => typeof name === 'string' && name.trim())
-  //   : salesPersonName && typeof salesPersonName === 'string' && salesPersonName
-  //     ? [salesPersonName]
-  //     : [];
 
   return (
     <div

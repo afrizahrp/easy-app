@@ -10,6 +10,7 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
+import { motion } from 'framer-motion';
 import { hslToHex } from '@/lib/utils';
 import { useThemeStore } from '@/store';
 import { useTheme } from 'next-themes';
@@ -41,10 +42,10 @@ interface SalesInvoiceByPeriodChartProps {
 const SalesInvoiceByPeriodChart: React.FC<SalesInvoiceByPeriodChartProps> = ({
   height = 400,
   isCompact = false,
-  isFullWidth,
+  isFullWidth = false,
   onModeChange,
 }) => {
-  const { theme: config, setTheme: setConfig } = useThemeStore();
+  const { theme: config } = useThemeStore();
   const { theme: mode } = useTheme();
   const theme = themes.find((theme) => theme.name === config);
   const hslBackground = `hsla(${
@@ -131,46 +132,53 @@ const SalesInvoiceByPeriodChart: React.FC<SalesInvoiceByPeriodChartProps> = ({
     );
 
   return (
-    <div
-      className={`chart-container ${isCompact ? 'compact' : ''} bg-white dark:bg-[#18181b] p-4 rounded-lg shadow-sm flex flex-col h-fit min-h-0`}
+    <motion.div
+      className={`chart-container ${isCompact ? 'compact' : ''} bg-white dark:bg-[#18181b] p-4 rounded-lg shadow-sm flex flex-col h-fit min-h-[250px] w-full`} // Lebar dikontrol oleh parent
       style={{ backgroundColor: hexBackground }}
+      animate={{
+        opacity: isFullWidth ? 1 : 0.95,
+        scale: isFullWidth ? 1 : 0.98,
+      }}
+      initial={{
+        opacity: isFullWidth ? 1 : 0.95,
+        scale: isFullWidth ? 1 : 0.98,
+      }}
+      transition={{ duration: 0.3, ease: 'easeInOut' }}
     >
       <div className='relative flex items-center mb-2'>
         <h2 className='text-sm text-muted-foreground font-semibold ml-2'>
           Sales Invoice by Monthly Period (in Millions IDR)
         </h2>
-        <div className='absolute right-0 top-0 flex items-center text-muted-foreground text-xs space-x-2'>
-          {!isCompact && ( // Hanya tampilkan switch jika isCompact = false
-            <div className='absolute right-0 top-0 flex items-center text-muted-foreground text-xs space-x-2'>
-              <Label htmlFor='chart-mode-period'>
-                {isFullWidth ? 'Full Width' : 'Half Width'}
-              </Label>
-              <Switch
-                id='chart-mode-period'
-                checked={isFullWidth}
-                onCheckedChange={(checked) => onModeChange?.(checked)}
-                aria-label='Toggle full width chart'
-              />
-            </div>
-          )}
-        </div>
+        {!isCompact && (
+          <div className='absolute right-0 top-0 flex items-center text-muted-foreground text-xs space-x-2'>
+            <Label htmlFor='chart-mode-period'>
+              {isFullWidth ? 'Full Width' : 'Half Width'}
+            </Label>
+            <Switch
+              id='chart-mode-period'
+              checked={isFullWidth}
+              onCheckedChange={(checked) => onModeChange?.(checked)}
+              aria-label='Toggle full width chart'
+            />
+          </div>
+        )}
       </div>
-      <div className='flex-1 min-h-0'>
+      <div className='flex-1 min-h-0 w-full'>
         {isLoading || isFetching ? (
           <div className='flex items-center justify-center h-full'>
             <div className='w-3/4 h-1/2 rounded-lg shimmer' />
           </div>
         ) : isDataReady ? (
           <Bar
-            width={isFullWidth ? 600 : 300}
-            height={isCompact ? 300 : height} // Kurangi tinggi di mode compact
+            key={isFullWidth ? 'full' : 'half'}
+            height={isCompact ? 250 : height}
             data={chartData}
             options={{
               responsive: true,
               maintainAspectRatio: false,
               layout: {
                 padding: {
-                  bottom: isCompact ? 10 : 20, // Kurangi padding di mode compact
+                  bottom: isCompact ? 10 : 20,
                   top: isCompact ? 5 : 10,
                 },
               },
@@ -182,7 +190,6 @@ const SalesInvoiceByPeriodChart: React.FC<SalesInvoiceByPeriodChartProps> = ({
                     drawTicks: false,
                     color: `hsl(${theme?.cssVars[mode === 'dark' ? 'dark' : 'light'].chartGird})`,
                   },
-
                   ticks: {
                     callback: (value: unknown) => {
                       const val = Number(value) / 1000000;
@@ -193,9 +200,7 @@ const SalesInvoiceByPeriodChart: React.FC<SalesInvoiceByPeriodChartProps> = ({
                 x: {
                   title: { display: false, text: 'Month' },
                   ticks: {
-                    callback: (value, index, ticks) => {
-                      return chartData.labels[index] ?? '';
-                    },
+                    callback: (value, index) => chartData.labels[index] ?? '',
                   },
                   grid: {
                     drawTicks: false,
@@ -206,7 +211,7 @@ const SalesInvoiceByPeriodChart: React.FC<SalesInvoiceByPeriodChartProps> = ({
               },
               plugins: {
                 legend: {
-                  display: !isCompact, // Sembunyikan legenda di mode compact
+                  display: !isCompact,
                   position: 'top',
                 },
                 title: {
@@ -241,7 +246,7 @@ const SalesInvoiceByPeriodChart: React.FC<SalesInvoiceByPeriodChartProps> = ({
           </div>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 };
 
