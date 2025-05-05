@@ -17,6 +17,7 @@ export type PageHeaderTypes = {
   breadcrumb: { name: string; href?: string }[];
   className?: string;
   hideBreadcrumb?: boolean; // Prop baru
+  disabled?: boolean;
 };
 
 export default function PageHeader({
@@ -25,6 +26,7 @@ export default function PageHeader({
   children,
   className,
   hideBreadcrumb = false,
+  disabled = true,
 }: React.PropsWithChildren<PageHeaderTypes>) {
   return (
     <header className={cn('mb-2 mt-0', className)}>

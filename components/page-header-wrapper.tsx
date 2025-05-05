@@ -7,6 +7,7 @@ interface PageHeaderWrapperProps {
   title?: string;
   breadcrumb?: { name: string; href?: string }[];
   hideBreadcrumb?: boolean;
+  disabled?: boolean;
 }
 
 export const PageHeaderWrapper: React.FC<PageHeaderWrapperProps> = ({
@@ -14,6 +15,7 @@ export const PageHeaderWrapper: React.FC<PageHeaderWrapperProps> = ({
   title,
   breadcrumb = [],
   hideBreadcrumb = false,
+  disabled = true,
 }) => {
   if (!show) return null;
   return (

@@ -109,6 +109,29 @@ export const hexToRGB = (hex: string, alpha?: number): string => {
   }
 };
 
+export function lightenColor(hex: string, amount: number): string {
+  let color = hex.replace('#', '');
+  if (color.length === 3) {
+    color = color
+      .split('')
+      .map((c) => c + c)
+      .join('');
+  }
+  const r = Math.min(
+    255,
+    Math.floor(parseInt(color.slice(0, 2), 16) * (1 + amount))
+  );
+  const g = Math.min(
+    255,
+    Math.floor(parseInt(color.slice(2, 4), 16) * (1 + amount))
+  );
+  const b = Math.min(
+    255,
+    Math.floor(parseInt(color.slice(4, 6), 16) * (1 + amount))
+  );
+  return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
+}
+
 export const formatTime = (time: number | Date | string): string => {
   if (!time) return '';
 

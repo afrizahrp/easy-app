@@ -186,7 +186,7 @@ const SalesBySalesPersonFilteredChart: React.FC<
                 : 'Sales Performance (in Millions IDR)'}
         </h2>
         <div className='flex flex-col items-end space-y-2'>
-          <div className='flex items-center space-x-2'>
+          {/* <div className='flex items-center space-x-2'>
             <Label
               htmlFor='chart-mode-period'
               className='text-xs text-muted-foreground'
@@ -199,7 +199,7 @@ const SalesBySalesPersonFilteredChart: React.FC<
               onCheckedChange={(checked) => onModeChange?.(checked)}
               aria-label='Toggle full width chart'
             />
-          </div>
+          </div> */}
           <button
             onClick={() => {
               setSalesPersonInvoiceFilters({
