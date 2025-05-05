@@ -20,15 +20,15 @@ interface SalesByPoTypeResponse {
   }[];
 }
 
-interface UseSalesByPeriodAndPoTypeProps {
+interface UseYearlySalesInvoiceByPoTypeProps {
   context: 'salesInvoice';
   poTypes?: string[];
 }
 
-const useSalesByPeriodAndPoType = ({
+const useYearlySalesInvoiceByPoType = ({
   context,
   poTypes,
-}: UseSalesByPeriodAndPoTypeProps) => {
+}: UseYearlySalesInvoiceByPoTypeProps) => {
   const user = useSessionStore((state) => state.user);
   const company_id = user?.company_id?.toUpperCase();
   const module_id = 'SLS'; // Sesuaikan dengan SalesInvoiceList
@@ -77,7 +77,7 @@ const useSalesByPeriodAndPoType = ({
       validPoTypes,
     ],
     queryFn: async () => {
-      const url = `${process.env.NEXT_PUBLIC_API_URL}/${company_id}/${module_id}/${subModule_id}/get-analytics/getSalesByPoTypeByPeriod`;
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/${company_id}/${module_id}/${subModule_id}/get-analytics/getYearlySalesInvoiceByPoType`;
 
       const params = new URLSearchParams();
 
@@ -123,4 +123,4 @@ const useSalesByPeriodAndPoType = ({
   };
 };
 
-export default useSalesByPeriodAndPoType;
+export default useYearlySalesInvoiceByPoType;

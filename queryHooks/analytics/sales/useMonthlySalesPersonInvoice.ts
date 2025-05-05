@@ -20,13 +20,13 @@ interface SalesPeriodResponse {
   data: SalesDataWithoutFilter[];
 }
 
-interface UseSalesByPeriodUnfilteredProps {
+interface UseMonthlySalesPersonInvoiceProps {
   context: 'salesPersonInvoice';
 }
 
-const useSalesByPeriodUnfiltered = ({
+const useMonthlySalesPersonInvoice = ({
   context,
-}: UseSalesByPeriodUnfilteredProps) => {
+}: UseMonthlySalesPersonInvoiceProps) => {
   const user = useSessionStore((state) => state.user);
   const company_id = user?.company_id?.toUpperCase();
   const module_id = 'SLS';
@@ -73,7 +73,7 @@ const useSalesByPeriodUnfiltered = ({
       params.append('startPeriod', formattedStartPeriod);
       params.append('endPeriod', formattedEndPeriod);
 
-      const url = `${process.env.NEXT_PUBLIC_API_URL}/${company_id}/${module_id}/${subModule_id}/get-analytics/getByTopNSalesPersonByPeriod`;
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/${company_id}/${module_id}/${subModule_id}/get-analytics/getMonthlySalespersonInvoice`;
       const finalUrl = `${url}?${params.toString()}`;
 
       try {
@@ -105,4 +105,4 @@ const useSalesByPeriodUnfiltered = ({
   };
 };
 
-export default useSalesByPeriodUnfiltered;
+export default useMonthlySalesPersonInvoice;

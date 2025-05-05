@@ -22,7 +22,7 @@ interface ProductSoldCountResponse {
   data: ProductSoldItem[];
 }
 
-interface UseTopProductsBySalesPersonProps {
+interface UseProductSoldFromSelectedSalesPersonProps {
   context: 'salesPersonInvoice';
   salesPersonName?: string;
   year?: string;
@@ -31,14 +31,14 @@ interface UseTopProductsBySalesPersonProps {
   enabled?: boolean;
 }
 
-const useTopProductsBySalesPerson = ({
+const useProductSoldFromSelectedSalesPerson = ({
   context,
   salesPersonName: propSalesPersonName,
   year,
   month,
   sortBy,
   enabled = true,
-}: UseTopProductsBySalesPersonProps) => {
+}: UseProductSoldFromSelectedSalesPersonProps) => {
   const user = useSessionStore((state) => state.user);
   const company_id = user?.company_id?.toUpperCase();
   const module_id = 'SLS';
@@ -66,15 +66,18 @@ const useTopProductsBySalesPerson = ({
       : format(new Date(), 'MMM'));
 
   // Debugging: Log nilai prop dan periode
-  console.log(`[useTopProductsBySalesPerson:${context}] Input props:`, {
-    propSalesPersonName,
-    year,
-    month,
-    sortBy,
-    yearPeriod,
-    monthPeriod,
-    finalSalesPersonName,
-  });
+  console.log(
+    `[useProductSoldFromSelectedSalesPerson:${context}] Input props:`,
+    {
+      propSalesPersonName,
+      year,
+      month,
+      sortBy,
+      yearPeriod,
+      monthPeriod,
+      finalSalesPersonName,
+    }
+  );
 
   const isValidRequest = Boolean(
     company_id &&
@@ -90,7 +93,7 @@ const useTopProductsBySalesPerson = ({
     AxiosError<{ message?: string }>
   >({
     queryKey: [
-      'topProductsBySalesPerson',
+      'productSoldFromSelectedSalesPerson',
       context,
       company_id || 'unknown',
       module_id || 'unknown',
@@ -115,11 +118,11 @@ const useTopProductsBySalesPerson = ({
         params.append('sortBy', sortBy);
       }
 
-      const url = `${process.env.NEXT_PUBLIC_API_URL}/${company_id}/${module_id}/${subModule_id}/get-analytics/getProductSoldCountBySalesPerson`;
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/${company_id}/${module_id}/${subModule_id}/get-analytics/getProductSoldFromSelectedSalesPerson`;
       const finalUrl = `${url}?${params.toString()}`;
 
       console.log(
-        `[useTopProductsBySalesPerson:${context}] finalUrl:`,
+        `[useProductSoldFromSelectedSalesPerson:${context}] finalUrl:`,
         finalUrl
       );
 
@@ -156,4 +159,4 @@ const useTopProductsBySalesPerson = ({
   };
 };
 
-export default useTopProductsBySalesPerson;
+export default useProductSoldFromSelectedSalesPerson;

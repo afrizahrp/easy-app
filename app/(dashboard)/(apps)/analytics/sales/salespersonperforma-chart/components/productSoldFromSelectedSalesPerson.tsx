@@ -20,7 +20,7 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/components/ui/use-toast';
-import useTopProductsBySalesPerson from '@/queryHooks/analytics/sales/useTopProductBySalesPerson';
+import useProductSoldFromSelectedSalesPerson from '@/queryHooks/analytics/sales/useProductSoldFromSelectedSalesPerson';
 import { getGridConfig, getLabel } from '@/lib/appex-chart-options';
 
 const Chart = dynamic(() => import('react-apexcharts'), { ssr: false });
@@ -35,15 +35,15 @@ ChartJS.register(
   gradientPlugin
 );
 
-interface TopProductSoldBySalesPersonProps {
+interface ProductSoldFromSelectedSalesPersonProps {
   salesPersonName: string;
   year?: string;
   month?: string;
   onClose: () => void;
 }
 
-const TopProductSoldBySalesPerson: React.FC<
-  TopProductSoldBySalesPersonProps
+const ProductSoldFromSelectedSalesPerson: React.FC<
+  ProductSoldFromSelectedSalesPersonProps
 > = ({ salesPersonName, year, month, onClose }) => {
   const { toast } = useToast();
   const { theme: config, isRtl } = useThemeStore();
@@ -65,7 +65,7 @@ const TopProductSoldBySalesPerson: React.FC<
     data: productData,
     isLoading,
     error,
-  } = useTopProductsBySalesPerson({
+  } = useProductSoldFromSelectedSalesPerson({
     context: 'salesPersonInvoice',
     salesPersonName,
     year,
@@ -198,7 +198,7 @@ const TopProductSoldBySalesPerson: React.FC<
 
   // Validasi prop
   if (!salesPersonName || !year || !normalizedMonth) {
-    console.warn('TopProductSoldBySalesPerson: Missing required props', {
+    console.warn('ProductSoldFromSelectedSalesPerson: Missing required props', {
       salesPersonName,
       year,
       normalizedMonth,
@@ -278,4 +278,4 @@ const TopProductSoldBySalesPerson: React.FC<
   );
 };
 
-export default TopProductSoldBySalesPerson;
+export default ProductSoldFromSelectedSalesPerson;

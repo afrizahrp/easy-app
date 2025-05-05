@@ -14,11 +14,11 @@ interface SalesPeriodResponse {
   }[];
 }
 
-interface UseSalesByPeriodParams {
+interface UseMonthlySalesInvoiceParams {
   context: 'salesInvoice' | 'salesPersonInvoice';
 }
 
-const useSalesByPeriod = ({ context }: UseSalesByPeriodParams) => {
+const useMonthlySalesInvoice = ({ context }: UseMonthlySalesInvoiceParams) => {
   const user = useSessionStore((state) => state.user);
   const company_id = user?.company_id?.toUpperCase();
   const module_id = 'dsb';
@@ -51,7 +51,7 @@ const useSalesByPeriod = ({ context }: UseSalesByPeriodParams) => {
       period.endPeriod,
     ],
     queryFn: async () => {
-      const url = `${process.env.NEXT_PUBLIC_API_URL}/${company_id}/${module_id}/${subModule_id}/get-analytics/getByPeriod`;
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/${company_id}/${module_id}/${subModule_id}/get-analytics/getMonthlySalesInvoice`;
 
       const response = await api.get<SalesPeriodResponse>(url, {
         params: {
@@ -76,4 +76,4 @@ const useSalesByPeriod = ({ context }: UseSalesByPeriodParams) => {
   };
 };
 
-export default useSalesByPeriod;
+export default useMonthlySalesInvoice;

@@ -17,7 +17,7 @@ import { useTheme } from 'next-themes';
 import { themes } from '@/config/thems';
 import gradientPlugin from 'chartjs-plugin-gradient';
 import { useToast } from '@/components/ui/use-toast';
-import useSalesByPeriodFiltered from '@/queryHooks/analytics/sales/useSalesPersonByPeriodFiltered';
+import useSelectedSalesPersonInvoice from '@/queryHooks/analytics/sales/useSelectedSalesPersonInvoice';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -48,14 +48,14 @@ interface SalesPersonSelection {
   month?: string;
 }
 
-interface SalesBySalesPersonFilteredProps {
+interface SelectedSalesPersonInvoiceProps {
   isFullWidth?: boolean;
   onModeChange?: (isFullPage: boolean) => void;
   onSalesPersonSelect?: (selection: SalesPersonSelection | null) => void;
 }
 
-const SalesBySalesPersonFilteredChart: React.FC<
-  SalesBySalesPersonFilteredProps
+const SelectedSalesPersonInvoiceChart: React.FC<
+  SelectedSalesPersonInvoiceProps
 > = ({ isFullWidth = true, onModeChange, onSalesPersonSelect }) => {
   const { theme: config, setTheme: setConfig } = useThemeStore();
   const { theme: mode } = useTheme();
@@ -84,7 +84,7 @@ const SalesBySalesPersonFilteredChart: React.FC<
       ? [salesPersonInvoiceFilters.salesPersonName]
       : [];
 
-  const { data, isLoading, isFetching, error } = useSalesByPeriodFiltered({
+  const { data, isLoading, isFetching, error } = useSelectedSalesPersonInvoice({
     context: 'salesPersonInvoice',
     salesPersonNames: validSalesPersonNames,
   });
@@ -300,4 +300,4 @@ const SalesBySalesPersonFilteredChart: React.FC<
   );
 };
 
-export default SalesBySalesPersonFilteredChart;
+export default SelectedSalesPersonInvoiceChart;

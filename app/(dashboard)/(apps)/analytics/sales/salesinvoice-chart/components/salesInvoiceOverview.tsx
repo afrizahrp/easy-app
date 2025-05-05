@@ -1,8 +1,8 @@
 'use client';
-import React, { useState } from 'react';
+import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion'; // Impor Framer Motion
-import SalesInvoiceByPeriodChart from './salesInvoiceByPeriodChart';
-import SalesInvoiceByPoTypeChart from './salesInvoiceByPoTypeChart';
+import MonthlySalesInvoiceChart from './monthlySalesInvoiceChart';
+// import YearlySalesInvoiceByPoTypeChart from './yearlySalesInvoiceByPoTypeChart';
 import SalesInvoiceHdList from '@/app/(dashboard)/(apps)/sales/salesInvoiceHd/list/page';
 import { PageHeaderWrapper } from '@/components/page-header-wrapper';
 
@@ -52,12 +52,13 @@ const SalesInvoiceOverview: React.FC<SalesInvoiceOverviewProps> = ({
                 exit={{ opacity: 0, x: -20 }}
                 transition={{ duration: 0.3, ease: 'easeInOut' }}
               >
-                <SalesInvoiceByPoTypeChart
+                Still in development
+                {/* <YearlySalesInvoiceByPoTypeChart
                   isFullWidth={fullChart === 'poType'}
                   onModeChange={handlePoTypeModeChange}
                   height={400}
                   isCompact={false}
-                />
+                /> */}
               </motion.div>
             )}
           </AnimatePresence>
@@ -71,7 +72,7 @@ const SalesInvoiceOverview: React.FC<SalesInvoiceOverviewProps> = ({
                 exit={{ opacity: 0, x: 20 }}
                 transition={{ duration: 0.3, ease: 'easeInOut' }}
               >
-                <SalesInvoiceByPeriodChart
+                <MonthlySalesInvoiceChart
                   isFullWidth={fullChart === 'period'}
                   onModeChange={handlePeriodModeChange}
                   height={400}
@@ -83,12 +84,13 @@ const SalesInvoiceOverview: React.FC<SalesInvoiceOverviewProps> = ({
         </div>
       ) : (
         <div className='w-full overflow-x-auto max-w-full h-fit min-h-0'>
-          <SalesInvoiceByPoTypeChart
+          {/* <YearlySalesInvoiceByPoTypeChart
             isFullWidth={fullChart === 'poType'}
             onModeChange={handlePoTypeModeChange}
             height={250}
             isCompact={true}
-          />
+          /> */}
+          still in development
         </div>
       )}
 

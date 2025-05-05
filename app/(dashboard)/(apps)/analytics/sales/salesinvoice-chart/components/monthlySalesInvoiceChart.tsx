@@ -1,12 +1,11 @@
 'use client';
 import React from 'react';
-import { Line } from 'react-chartjs-2';
+import { Bar } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
   CategoryScale,
   LinearScale,
-  PointElement,
-  LineElement,
+  BarElement,
   Title,
   Tooltip,
   Legend,
@@ -18,30 +17,29 @@ import { useTheme } from 'next-themes';
 import { themes } from '@/config/thems';
 import gradientPlugin from 'chartjs-plugin-gradient';
 import { useToast } from '@/components/ui/use-toast';
-import useSalesByPeriodAndPoType from '@/queryHooks/analytics/sales/useSalesByPeriodAndPoType';
-import { Label } from '@/components/ui/label';
+import useMonthlySalesInvoice from '@/queryHooks/analytics/sales/useMonthlySalesInvoice';
 import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 import { months } from '@/utils/monthNameMap';
 
 ChartJS.register(
   CategoryScale,
   LinearScale,
-  PointElement,
-  LineElement,
+  BarElement,
   Title,
   Tooltip,
   Legend,
   gradientPlugin
 );
 
-interface SalesInvoiceByPoTypeChartProps {
+interface MonthlySalesInvoiceChartProps {
   height?: number;
   isCompact?: boolean;
   isFullWidth?: boolean;
   onModeChange?: (isFull: boolean) => void;
 }
 
-const SalesInvoiceByPoTypeChart: React.FC<SalesInvoiceByPoTypeChartProps> = ({
+const MonthlySalesInvoiceChart: React.FC<MonthlySalesInvoiceChartProps> = ({
   height = 400,
   isCompact = false,
   isFullWidth = false,
@@ -55,66 +53,58 @@ const SalesInvoiceByPoTypeChart: React.FC<SalesInvoiceByPoTypeChartProps> = ({
   })`;
   const hexBackground = hslToHex(hslBackground);
   const { toast } = useToast();
-  const { data, isLoading, isFetching, error } = useSalesByPeriodAndPoType({
+  const { data, isLoading, isFetching, error } = useMonthlySalesInvoice({
     context: 'salesInvoice',
   });
 
-  const colorMap: Record<
-    string,
-    { borderColor: string; backgroundColor: string }
-  > = {
-    Regular_2023: {
-      borderColor: '#22C55E',
-      backgroundColor: 'rgba(34, 197, 94, 0.2)',
-    },
-    eCatalog_2023: {
-      borderColor: '#3B82F6',
-      backgroundColor: 'rgba(59, 130, 246, 0.2)',
-    },
-    Regular_2024: {
-      borderColor: '#EF4444',
-      backgroundColor: 'rgba(239, 68, 68, 0.2)',
-    },
-    eCatalog_2024: {
-      borderColor: '#8B5CF6',
-      backgroundColor: 'rgba(139, 92, 246, 0.2)',
-    },
-    Regular_2025: {
-      borderColor: '#EC4899',
-      backgroundColor: 'rgba(236, 72, 153, 0.2)',
-    },
-    eCatalog_2025: {
-      borderColor: '#1E3A8A',
-      backgroundColor: 'rgba(30, 58, 138, 0.2)',
-    },
-  };
-
   const chartData = React.useMemo(() => {
-    if (!data || data.length === 0) return null;
+    if (!data) return null;
+
+    const allYears = data.map((d) => d.period);
+
+    const colorPalette = [
+      ['#1e3a8a', '#3b82f6'], // Navy → Blue
+      ['#10b981', '#6ee7b7'], // Green → Light Green
+      ['#e11d48', '#f472b6'], // Red → Pink
+      ['#9333ea', '#c084fc'], // Purple
+      ['#f59e0b', '#fcd34d'], // Amber
+      ['#0ea5e9', '#7dd3fc'], // Sky
+    ];
+
+    const datasets = allYears.map((year, idx) => ({
+      label: `Sales ${year}`,
+      data: months.map((month) => {
+        const yearData = data.find((d) => d.period === year);
+        return yearData?.months[month] || 0;
+      }),
+      backgroundColor: (ctx: import('chart.js').ScriptableContext<'bar'>) => {
+        const chart = ctx.chart;
+        const { ctx: canvasCtx, chartArea } = chart;
+
+        const [from, to] = colorPalette[idx % colorPalette.length];
+
+        if (!chartArea) return to;
+
+        const gradient = canvasCtx.createLinearGradient(
+          0,
+          chartArea.bottom,
+          0,
+          chartArea.top
+        );
+        gradient.addColorStop(0, from);
+        gradient.addColorStop(1, to);
+
+        return gradient;
+      },
+      borderColor: colorPalette[idx % colorPalette.length][0],
+      borderWidth: 1,
+      barThickness: 25,
+      borderRadius: 15,
+    }));
 
     return {
       labels: months,
-      datasets: data.map(
-        (poTypeData: {
-          poType: string;
-          period: string;
-          months: Record<string, number>;
-        }) => {
-          const colorKey = `${poTypeData.poType}_${poTypeData.period}`;
-          const { borderColor, backgroundColor } = colorMap[colorKey] || {
-            borderColor: '#6B7280',
-            backgroundColor: 'rgba(107, 114, 128, 0.2)',
-          };
-
-          return {
-            label: `${poTypeData.poType} (${poTypeData.period})`,
-            data: months.map((month) => poTypeData.months[month] || 0),
-            borderColor,
-            backgroundColor,
-            tension: 0.4,
-          };
-        }
-      ),
+      datasets,
     };
   }, [data]);
 
@@ -126,17 +116,24 @@ const SalesInvoiceByPoTypeChart: React.FC<SalesInvoiceByPoTypeChartProps> = ({
   React.useEffect(() => {
     if (error) {
       toast({
-        description:
-          error.message ||
-          'Failed to load sales by PO type data. Please try again.',
+        description: 'Failed to load sales data. Please try again.',
         color: 'destructive',
       });
     }
   }, [error, toast]);
 
+  const isDataReady =
+    !!chartData &&
+    Array.isArray(chartData.labels) &&
+    chartData.labels.length > 0 &&
+    Array.isArray(chartData.datasets) &&
+    chartData.datasets.some(
+      (ds) => Array.isArray(ds.data) && ds.data.length > 0
+    );
+
   return (
     <motion.div
-      className={`chart-container ${isCompact ? 'compact' : ''} bg-white dark:bg-[#18181b] p-2 rounded-lg shadow-sm flex flex-col w-full min-h-[250px]`} // Lebar dikontrol oleh parent
+      className={`chart-container ${isCompact ? 'compact' : ''} bg-white dark:bg-[#18181b] p-4 rounded-lg shadow-sm flex flex-col h-fit min-h-[250px] w-full`} // Lebar dikontrol oleh parent
       style={{ backgroundColor: hexBackground }}
       animate={{
         opacity: isFullWidth ? 1 : 0.95,
@@ -148,17 +145,17 @@ const SalesInvoiceByPoTypeChart: React.FC<SalesInvoiceByPoTypeChartProps> = ({
       }}
       transition={{ duration: 0.3, ease: 'easeInOut' }}
     >
-      <div className='relative flex items-center'>
+      <div className='relative flex items-center mb-2'>
         <h2 className='text-sm text-muted-foreground font-semibold ml-2'>
-          Monthly Sales Invoice by PO Type (in Millions IDR)
+          Sales Invoice by Monthly Period (in Millions IDR)
         </h2>
         {!isCompact && (
           <div className='absolute right-0 top-0 flex items-center text-muted-foreground text-xs space-x-2'>
-            <Label htmlFor='chart-mode-potype'>
+            <Label htmlFor='chart-mode-period'>
               {isFullWidth ? 'Full Width' : 'Half Width'}
             </Label>
             <Switch
-              id='chart-mode-potype'
+              id='chart-mode-period'
               checked={isFullWidth}
               onCheckedChange={(checked) => onModeChange?.(checked)}
               aria-label='Toggle full width chart'
@@ -166,66 +163,65 @@ const SalesInvoiceByPoTypeChart: React.FC<SalesInvoiceByPoTypeChartProps> = ({
           </div>
         )}
       </div>
-      <div className='flex-1 h-full w-full min-h-0'>
+      <div className='flex-1 min-h-0 w-full'>
         {isLoading || isFetching ? (
           <div className='flex items-center justify-center h-full'>
             <div className='w-3/4 h-1/2 rounded-lg shimmer' />
           </div>
-        ) : chartData ? (
-          <Line
+        ) : isDataReady ? (
+          <Bar
             key={isFullWidth ? 'full' : 'half'}
             height={isCompact ? 250 : height}
             data={chartData}
             options={{
               responsive: true,
               maintainAspectRatio: false,
-              plugins: {
-                legend: {
-                  position: 'top',
-                  display: !isCompact,
-                  maxHeight: 60,
-                  labels: {
-                    boxWidth: 15,
-                    padding: 4,
-                    font: {
-                      size: 10,
-                    },
-                  },
-                },
-                tooltip: {
-                  callbacks: {
-                    label: (context) =>
-                      `${context.dataset.label}: ${(context.raw as number).toLocaleString('id-ID')} IDR`,
-                  },
+              layout: {
+                padding: {
+                  bottom: isCompact ? 10 : 20,
+                  top: isCompact ? 5 : 10,
                 },
               },
               scales: {
-                x: {
-                  title: { display: false, text: 'Months' },
-                  grid: {
-                    display: true,
-                    color: 'rgba(200,200,200,0.2)',
-                  },
-                },
                 y: {
                   beginAtZero: true,
+                  min: maxValue < 1_000_000_000 ? 100_000_000 : undefined,
+                  grid: {
+                    drawTicks: false,
+                    color: `hsl(${theme?.cssVars[mode === 'dark' ? 'dark' : 'light'].chartGird})`,
+                  },
                   ticks: {
-                    maxTicksLimit: 5,
-                    callback: (value) => {
+                    callback: (value: unknown) => {
                       const val = Number(value) / 1000000;
                       return `${val.toLocaleString('id-ID')}`;
                     },
                   },
+                },
+                x: {
+                  title: { display: false, text: 'Month' },
+                  ticks: {
+                    callback: (value, index) => chartData.labels[index] ?? '',
+                  },
                   grid: {
-                    display: true,
-                    color: 'rgba(200,200,200,0.2)',
+                    drawTicks: false,
+                    color: `hsl(${theme?.cssVars[mode === 'dark' ? 'dark' : 'light'].chartGird})`,
+                    display: false,
                   },
                 },
               },
-              layout: {
-                padding: {
-                  bottom: isCompact ? 2 : 5,
-                  top: isCompact ? 2 : 5,
+              plugins: {
+                legend: {
+                  display: !isCompact,
+                  position: 'top',
+                },
+                title: {
+                  display: false,
+                },
+                tooltip: {
+                  callbacks: {
+                    label: (context) =>
+                      ` ${(context.raw as number).toLocaleString('id-ID')}`,
+                  },
                 },
               },
             }}
@@ -254,4 +250,4 @@ const SalesInvoiceByPoTypeChart: React.FC<SalesInvoiceByPoTypeChartProps> = ({
   );
 };
 
-export default SalesInvoiceByPoTypeChart;
+export default MonthlySalesInvoiceChart;

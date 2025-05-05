@@ -1,10 +1,10 @@
 'use client';
 import { useState, useRef, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { useSalesInvoiceHdFilterStore } from '@/store';
 import SalesInvoiceFilterSummary from '@/components/sales/salesInvoiceFilterSummary';
 import SalesPersonPerformaOverview from '../salespersonperforma-chart/components/salesPersonPerformaOverview';
-import TopProductSoldBySalesPerson from '../salespersonperforma-chart/components/topProductSoldBySalesPerson';
+import ProductSoldFromSelectedSalesPerson from './components/productSoldFromSelectedSalesPerson';
 import { PageHeaderWrapper } from '@/components/page-header-wrapper';
 import { Table } from '@tanstack/react-table';
 import SalesPersonInvoiceList from '../../../sales/salespersonInvoice/list/page';
@@ -178,7 +178,7 @@ const SalesPersonPerformaAnalytics: React.FC<
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: 50 }}
             >
-              <TopProductSoldBySalesPerson
+              <ProductSoldFromSelectedSalesPerson
                 salesPersonName={selectedSalesPerson}
                 year={selectedYear ?? undefined}
                 month={selectedMonth ?? undefined}

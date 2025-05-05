@@ -17,7 +17,7 @@ import { useTheme } from 'next-themes';
 import { themes } from '@/config/thems';
 import gradientPlugin from 'chartjs-plugin-gradient';
 import { useToast } from '@/components/ui/use-toast';
-import useSalesByPeriodUnfiltered from '@/queryHooks/analytics/sales/useSalesPersonByPeriodUnFiltered';
+import useMonthlySalesPersonInvoice from '@/queryHooks/analytics/sales/useMonthlySalesPersonInvoice';
 import {
   salesPersonColorMap,
   getFallbackColor,
@@ -54,7 +54,7 @@ interface SalesPersonSelection {
   color?: string;
 }
 
-interface SalesBySalesPersonUnFilteredProps {
+interface MonthlySalesPersonInvoiceProps {
   height?: number;
   isCompact?: boolean;
   isFullWidth?: boolean;
@@ -62,8 +62,8 @@ interface SalesBySalesPersonUnFilteredProps {
   onSalesPersonSelect?: (selection: SalesPersonSelection | null) => void;
 }
 
-const SalesBySalesPersonUnFilteredChart: React.FC<
-  SalesBySalesPersonUnFilteredProps
+const MonthlySalesPersonInvoiceChart: React.FC<
+  MonthlySalesPersonInvoiceProps
 > = ({
   height = 400,
   isCompact = false,
@@ -79,7 +79,7 @@ const SalesBySalesPersonUnFilteredChart: React.FC<
   })`;
   const hexBackground = hslToHex(hslBackground);
   const { toast } = useToast();
-  const { data, isLoading, isFetching, error } = useSalesByPeriodUnfiltered({
+  const { data, isLoading, isFetching, error } = useMonthlySalesPersonInvoice({
     context: 'salesPersonInvoice',
   });
   const { salesPersonInvoiceFilters, setSalesPersonInvoiceFilters } =
@@ -398,4 +398,4 @@ const SalesBySalesPersonUnFilteredChart: React.FC<
   );
 };
 
-export default SalesBySalesPersonUnFilteredChart;
+export default MonthlySalesPersonInvoiceChart;

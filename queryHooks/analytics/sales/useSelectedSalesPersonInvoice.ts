@@ -22,15 +22,15 @@ interface SalesPeriodResponse {
   data: SalesDataWithFilter[];
 }
 
-interface UseSalesByPeriodFilteredProps {
+interface UseSelectedSalesPersonInvoiceProps {
   context: 'salesPersonInvoice';
   salesPersonNames: string[];
 }
 
-const useSalesByPeriodFiltered = ({
+const useSelectedSalesPersonInvoice = ({
   context,
   salesPersonNames,
-}: UseSalesByPeriodFilteredProps) => {
+}: UseSelectedSalesPersonInvoiceProps) => {
   const user = useSessionStore((state) => state.user);
   const company_id = user?.company_id?.toUpperCase();
   const module_id = 'SLS';
@@ -97,10 +97,13 @@ const useSalesByPeriodFiltered = ({
         params.append('salesPersonName', name);
       });
 
-      const url = `${process.env.NEXT_PUBLIC_API_URL}/${company_id}/${module_id}/${subModule_id}/get-analytics/getBySalesPersonByPeriod`;
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/${company_id}/${module_id}/${subModule_id}/get-analytics/getSelectedSalesPersonInvoice`;
       const finalUrl = `${url}${params.toString() ? `?${params.toString()}` : ''}`;
 
-      console.log(`[useSalesByPeriodFiltered:${context}] finalUrl:`, finalUrl);
+      console.log(
+        `[useSelectedSalesPersonInvoice:${context}] finalUrl:`,
+        finalUrl
+      );
 
       try {
         const response = await api.get<SalesPeriodResponse>(finalUrl);
@@ -131,4 +134,4 @@ const useSalesByPeriodFiltered = ({
   };
 };
 
-export default useSalesByPeriodFiltered;
+export default useSelectedSalesPersonInvoice;
