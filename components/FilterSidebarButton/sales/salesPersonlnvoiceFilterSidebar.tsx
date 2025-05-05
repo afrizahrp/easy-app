@@ -6,8 +6,8 @@ import { AlertCircle } from 'lucide-react';
 import { startOfMonth, endOfMonth } from 'date-fns';
 import { zonedTimeToUtc } from 'date-fns-tz';
 
-import useSalesInvoiceHdPaidStatusOptions from '@/queryHooks/sls/useSalesInvoiceHdPaidStatusOptions';
-import useSalesInvoiceHdSalesPersonOptions from '@/queryHooks/sls/useSalesInvoiceHdSalesPersonOptions';
+import useSalesInvoiceHdPaidStatusOptions from '@/queryHooks/sales/useSalesInvoiceHdPaidStatusOptions';
+import useSalesInvoiceHdSalesPersonOptions from '@/queryHooks/sales/useSalesInvoiceHdSalesPersonOptions';
 import { PeriodFilter } from '@/components/period-filter';
 import { useResetSalesInvoiceFilter } from '@/utils/reset-filter-state/sls/resetSalesInvoiceFilterStore';
 import { Button } from '@/components/ui/button';

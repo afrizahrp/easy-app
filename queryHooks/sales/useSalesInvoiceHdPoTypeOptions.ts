@@ -1,4 +1,4 @@
-import useSalesInvoiceHdPoType from '@/queryHooks/sls/useSalesInvoiceHdPoType';
+import useSalesInvoiceHdPoType from '@/queryHooks/sales/useSalesInvoiceHdPoType';
 
 interface UseSalesInvoiceHdPoTypeProps {
   context: 'salesInvoice' | 'salesPersonInvoice';

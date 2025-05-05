@@ -3,7 +3,7 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { InvoiceListTable } from './list-table';
 import LayoutLoader from '@/components/layout-loader';
-import useSalesInvoiceHd from '@/queryHooks/sls/useSalesInvoiceHd';
+import useSalesInvoiceHd from '@/queryHooks/sales/useSalesInvoiceHd';
 import { SalesInvoiceHdColumns } from './list-table/components/columns';
 import {
   usePageStore,

@@ -1,4 +1,4 @@
-import useSalesInvoiceHdSalesPerson from '@/queryHooks/sls/useSalesInvoiceHdSalesPerson';
+import useSalesInvoiceHdSalesPerson from '@/queryHooks/sales/useSalesInvoiceHdSalesPerson';
 
 interface useSalesInvoiceHdSalesPersonPropOptions {
   context: 'salesInvoice' | 'salesPersonInvoice';

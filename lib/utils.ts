@@ -109,6 +109,11 @@ export const hexToRGB = (hex: string, alpha?: number): string => {
   }
 };
 
+export const getDefaultYears = (): string[] => {
+  const currentYear = new Date().getFullYear();
+  return [`${currentYear - 1}`, `${currentYear}`];
+};
+
 export function lightenColor(hex: string, amount: number): string {
   let color = hex.replace('#', '');
   if (color.length === 3) {

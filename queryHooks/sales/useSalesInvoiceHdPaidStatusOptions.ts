@@ -1,4 +1,4 @@
-import useSalesInvoiceHdPaidStatus from '@/queryHooks/sls/useSalesInvoiceHdPaidStatus';
+import useSalesInvoiceHdPaidStatus from '@/queryHooks/sales/useSalesInvoiceHdPaidStatus';
 import { AxiosError } from 'axios';
 
 interface OptionType {

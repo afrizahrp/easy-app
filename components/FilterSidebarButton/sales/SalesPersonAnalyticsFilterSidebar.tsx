@@ -2,7 +2,7 @@
 import { PeriodFilter } from '@/components/period-filter';
 import { useSalesInvoiceHdFilterStore } from '@/store';
 import { DataTableFacetedFilter } from '@/components/ui/data-table-faceted-filter';
-import useSalesInvoiceHdSalesPersonOptions from '@/queryHooks/sls/useSalesInvoiceHdSalesPersonOptions';
+import useSalesInvoiceHdSalesPersonOptions from '@/queryHooks/sales/useSalesInvoiceHdSalesPersonOptions';
 import { Button } from '@/components/ui/button';
 import { Cross2Icon } from '@radix-ui/react-icons';
 
