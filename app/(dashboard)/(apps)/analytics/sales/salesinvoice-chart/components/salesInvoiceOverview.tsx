@@ -1,10 +1,14 @@
 'use client';
 import React from 'react';
+import { Table } from '@tanstack/react-table';
+
 import { motion, AnimatePresence } from 'framer-motion'; // Impor Framer Motion
 import MonthlySalesInvoiceChart from './monthlySalesInvoiceChart';
-// import YearlySalesInvoiceByPoTypeChart from './yearlySalesInvoiceByPoTypeChart';
+import MonthlySalesInvoiceByPoTypeChart from './monthlySalesInvoiceByPoTypeChart';
 import SalesInvoiceHdList from '@/app/(dashboard)/(apps)/sales/salesInvoiceHd/list/page';
 import { PageHeaderWrapper } from '@/components/page-header-wrapper';
+import { FloatingFilterButton } from '@/components/ui/floating-filter-button';
+import { SalesInvoiceFilterSidebar } from '@/components/FilterSidebarButton/sales/saleslnvoiceFilterSidebar';
 
 interface SalesInvoiceOverviewProps {
   showFloatingButton?: boolean;
@@ -36,10 +40,38 @@ const SalesInvoiceOverview: React.FC<SalesInvoiceOverviewProps> = ({
     });
   };
 
+  const dummyTable = {
+    getState: () => ({
+      columnFilters: [],
+      sorting: [],
+      pagination: { pageIndex: 0, pageSize: 10 },
+      globalFilter: '',
+      rowSelection: {},
+    }),
+    getColumn: () => undefined,
+    getFilteredRowModel: () => ({ rows: [] }),
+    resetColumnFilters: () => {},
+    setColumnFilters: () => {},
+  } as unknown as Table<any>;
+
   return (
     <div
       className={`flex flex-col w-full p-2 gap-4 ${showList ? 'h-screen' : 'h-fit min-h-0'}`}
     >
+      {showFloatingButton && (
+        <div className='flex-none w-full md:w-1/2'>
+          <FloatingFilterButton
+            title='Filter Sales Invoice'
+            description='Filter sales invoices by date and type.'
+          >
+            <SalesInvoiceFilterSidebar
+              table={dummyTable}
+              context='salesInvoice'
+            />
+          </FloatingFilterButton>
+        </div>
+      )}
+
       {showList ? (
         <div className={chartLayoutClass}>
           <AnimatePresence>
@@ -52,13 +84,12 @@ const SalesInvoiceOverview: React.FC<SalesInvoiceOverviewProps> = ({
                 exit={{ opacity: 0, x: -20 }}
                 transition={{ duration: 0.3, ease: 'easeInOut' }}
               >
-                Still in development
-                {/* <YearlySalesInvoiceByPoTypeChart
+                <MonthlySalesInvoiceByPoTypeChart
                   isFullWidth={fullChart === 'poType'}
                   onModeChange={handlePoTypeModeChange}
                   height={400}
                   isCompact={false}
-                /> */}
+                />
               </motion.div>
             )}
           </AnimatePresence>
@@ -84,20 +115,19 @@ const SalesInvoiceOverview: React.FC<SalesInvoiceOverviewProps> = ({
         </div>
       ) : (
         <div className='w-full overflow-x-auto max-w-full h-fit min-h-0'>
-          {/* <YearlySalesInvoiceByPoTypeChart
+          <MonthlySalesInvoiceByPoTypeChart
             isFullWidth={fullChart === 'poType'}
             onModeChange={handlePoTypeModeChange}
             height={250}
             isCompact={true}
-          /> */}
-          still in development
+          />
         </div>
       )}
 
       {showList && (
         <div className='w-full flex-1'>
           <PageHeaderWrapper title='Invoice List' />
-          <SalesInvoiceHdList />
+          <SalesInvoiceHdList showFilterButton={false} />
         </div>
       )}
     </div>

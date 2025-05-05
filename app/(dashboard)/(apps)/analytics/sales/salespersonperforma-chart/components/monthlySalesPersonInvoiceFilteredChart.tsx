@@ -17,7 +17,7 @@ import { useTheme } from 'next-themes';
 import { themes } from '@/config/thems';
 import gradientPlugin from 'chartjs-plugin-gradient';
 import { useToast } from '@/components/ui/use-toast';
-import useSelectedSalesPersonInvoice from '@/queryHooks/analytics/sales/useSelectedSalesPersonInvoice';
+import useMonthlySalesPersonInvoiceFiltered from '@/queryHooks/analytics/sales/useMonthlySalesPersonInvoiceFiltered';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -48,14 +48,14 @@ interface SalesPersonSelection {
   month?: string;
 }
 
-interface SelectedSalesPersonInvoiceProps {
+interface MonthlySalesPersonInvoiceChartProps {
   isFullWidth?: boolean;
   onModeChange?: (isFullPage: boolean) => void;
   onSalesPersonSelect?: (selection: SalesPersonSelection | null) => void;
 }
 
-const SelectedSalesPersonInvoiceChart: React.FC<
-  SelectedSalesPersonInvoiceProps
+const MonthlySalesPersonInvoiceChartChart: React.FC<
+  MonthlySalesPersonInvoiceChartProps
 > = ({ isFullWidth = true, onModeChange, onSalesPersonSelect }) => {
   const { theme: config, setTheme: setConfig } = useThemeStore();
   const { theme: mode } = useTheme();
@@ -84,10 +84,11 @@ const SelectedSalesPersonInvoiceChart: React.FC<
       ? [salesPersonInvoiceFilters.salesPersonName]
       : [];
 
-  const { data, isLoading, isFetching, error } = useSelectedSalesPersonInvoice({
-    context: 'salesPersonInvoice',
-    salesPersonNames: validSalesPersonNames,
-  });
+  const { data, isLoading, isFetching, error } =
+    useMonthlySalesPersonInvoiceFiltered({
+      context: 'salesPersonInvoice',
+      salesPersonNames: validSalesPersonNames,
+    });
 
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -300,4 +301,4 @@ const SelectedSalesPersonInvoiceChart: React.FC<
   );
 };
 
-export default SelectedSalesPersonInvoiceChart;
+export default MonthlySalesPersonInvoiceChartChart;

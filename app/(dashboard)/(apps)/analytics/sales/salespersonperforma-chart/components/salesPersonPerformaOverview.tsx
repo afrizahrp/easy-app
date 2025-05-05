@@ -1,8 +1,8 @@
 'use client';
 import React, { useState } from 'react';
-import MonthlySalesPersonInvoiceChart from './monthlySalesPersonInvoiceChart';
-import SelectedSalesPersonInvoice from './selectedSalesPersonInvoice';
 import { useSalesInvoiceHdFilterStore } from '@/store';
+import MonthlySalesPersonInvoiceChart from './monthlySalesPersonInvoiceChart';
+import MonthlySalesPersonInvoiceChartChart from './monthlySalesPersonInvoiceFilteredChart';
 
 interface SalesPersonSelection {
   salesPersonName: string;
@@ -76,7 +76,7 @@ const SalesPersonPerformaOverview: React.FC<
     >
       <div className='w-full'>
         {validSalesPersonNames.length > 0 ? (
-          <SelectedSalesPersonInvoice
+          <MonthlySalesPersonInvoiceChartChart
             key={`filtered-${validSalesPersonNames.join('-')}`}
             isFullWidth={isFullWidth}
             onModeChange={onModeChange}

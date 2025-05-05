@@ -78,7 +78,7 @@ export function SalesPersonInvoiceFilterSidebar<TData>({
       toast({
         description:
           'End Period cannot be earlier than Start Period. End Period has been reset.',
-        color: 'destructive',
+        variant: 'destructive',
       });
     }
 
@@ -139,7 +139,7 @@ export function SalesPersonInvoiceFilterSidebar<TData>({
       toast({
         description:
           'The Paid Status filter only works when one Sales Person is selected.',
-        color: 'destructive',
+        variant: 'destructive',
       });
       const timer = setTimeout(() => setShowAlert(false), 5000);
       return () => clearTimeout(timer);
@@ -164,14 +164,14 @@ export function SalesPersonInvoiceFilterSidebar<TData>({
       const result = reset();
       toast({
         description: result.message,
-        color: result.success ? 'default' : 'destructive',
+        variant: result.success ? 'default' : 'destructive',
       });
     } catch (error) {
       toast({
         description: `Reset failed: ${
           error instanceof Error ? error.message : String(error)
         }`,
-        color: 'destructive',
+        variant: 'destructive',
       });
     }
   };

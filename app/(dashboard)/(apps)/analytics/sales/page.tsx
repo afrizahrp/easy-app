@@ -179,8 +179,11 @@ export default function SalesAnalyticsPage() {
           </div>
         </motion.div>
 
-        <FloatingFilterButton>
-          <ChartPeriodFilterSidebar />
+        <FloatingFilterButton
+          title='Filter Period'
+          description='Select the period for the chart'
+        >
+          <ChartPeriodFilterSidebar filterContext='salesInvoice' />
         </FloatingFilterButton>
       </div>
     </div>

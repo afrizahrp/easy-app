@@ -23,6 +23,7 @@ interface DataTableToolbarProps<TData> {
   handleSheetOpen: () => void;
   pageName?: string;
   context: SearchContext; // Tambahkan prop context
+  showFilterButton: boolean; // Tambahkan prop showFilterButton
 }
 
 function toSearchOptionArray(options: Record<string, string>) {
@@ -40,24 +41,28 @@ export function DataTableToolbar<TData>({
   pageName,
   columnLabels,
   searchOptionItem,
-  context, // Tambahkan context ke destructure
+  context,
+  showFilterButton,
 }: DataTableToolbarProps<TData>) {
-  // Ambil state dan fungsi untuk mengupdate searchParams dari store
   const { searchParams, setSearchParam } = useSearchParamsStore();
 
   const currentSearchBy = searchParams?.[context]?.searchBy || 'invoice_id'; // Gunakan context secara dinamis
 
   const searchOptions = toSearchOptionArray(searchOptionItem);
-
+  console.log('showFilterButton', showFilterButton);
   return (
     <div className='flex flex-wrap items-center gap-2 sm:gap-4 w-full'>
       {/* Sidebar Filter */}
-      <FilterSidebar
-        table={table}
-        open={open}
-        onClose={handleSheetOpen}
-        pageName={pageName}
-      />
+      {showFilterButton && (
+        <FilterSidebar
+          table={table}
+          open={open}
+          onClose={handleSheetOpen}
+          pageName={pageName}
+        />
+      )}
+
+      {/* Filter Button */}
 
       {/* Search Option Selector */}
       <div className='flex items-center space-x-2'>
@@ -80,14 +85,18 @@ export function DataTableToolbar<TData>({
 
       {/* Actions: Filter, View Options, Add */}
       <div className='flex flex-wrap items-center gap-2 ml-auto w-full sm:w-auto'>
-        <Button
-          size='sm'
-          onClick={onFilterClick}
-          className='px-3 h-8 flex items-center gap-1'
-        >
-          <Filter className='w-4 h-4' />
-          <span className='hidden sm:inline'>Filter data</span>
-        </Button>
+        {showFilterButton && (
+          <Button
+            size='sm'
+            onClick={onFilterClick}
+            className='px-3 h-8 flex items-center gap-1'
+          >
+            <Filter className='w-4 h-4' />
+            <span className='hidden sm:inline'>Filter data</span>
+          </Button>
+        )}
+
+        {/* View Options */}
 
         <DataTableViewOptions table={table} columnLabels={columnLabels} />
 

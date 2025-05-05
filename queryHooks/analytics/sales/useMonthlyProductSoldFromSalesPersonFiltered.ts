@@ -22,7 +22,7 @@ interface ProductSoldCountResponse {
   data: ProductSoldItem[];
 }
 
-interface UseProductSoldFromSelectedSalesPersonProps {
+interface UseMonthlyProductSoldFromSalesPersonFilteredProps {
   context: 'salesPersonInvoice';
   salesPersonName?: string;
   year?: string;
@@ -31,14 +31,14 @@ interface UseProductSoldFromSelectedSalesPersonProps {
   enabled?: boolean;
 }
 
-const useProductSoldFromSelectedSalesPerson = ({
+const useMonthlyProductSoldFromSalesPersonFiltered = ({
   context,
   salesPersonName: propSalesPersonName,
   year,
   month,
   sortBy,
   enabled = true,
-}: UseProductSoldFromSelectedSalesPersonProps) => {
+}: UseMonthlyProductSoldFromSalesPersonFilteredProps) => {
   const user = useSessionStore((state) => state.user);
   const company_id = user?.company_id?.toUpperCase();
   const module_id = 'SLS';
@@ -67,7 +67,7 @@ const useProductSoldFromSelectedSalesPerson = ({
 
   // Debugging: Log nilai prop dan periode
   console.log(
-    `[useProductSoldFromSelectedSalesPerson:${context}] Input props:`,
+    `[useMonthlyProductSoldFromSalesPersonFiltered:${context}] Input props:`,
     {
       propSalesPersonName,
       year,
@@ -93,7 +93,7 @@ const useProductSoldFromSelectedSalesPerson = ({
     AxiosError<{ message?: string }>
   >({
     queryKey: [
-      'productSoldFromSelectedSalesPerson',
+      'MonthlyProductSoldFromSalesPersonFiltered',
       context,
       company_id || 'unknown',
       module_id || 'unknown',
@@ -118,11 +118,11 @@ const useProductSoldFromSelectedSalesPerson = ({
         params.append('sortBy', sortBy);
       }
 
-      const url = `${process.env.NEXT_PUBLIC_API_URL}/${company_id}/${module_id}/${subModule_id}/get-analytics/getProductSoldFromSelectedSalesPerson`;
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/${company_id}/${module_id}/${subModule_id}/get-analytics/getMonthlyProductSoldFromSalesPersonFiltered`;
       const finalUrl = `${url}?${params.toString()}`;
 
       console.log(
-        `[useProductSoldFromSelectedSalesPerson:${context}] finalUrl:`,
+        `[useMonthlyProductSoldFromSalesPersonFiltered:${context}] finalUrl:`,
         finalUrl
       );
 
@@ -159,4 +159,4 @@ const useProductSoldFromSelectedSalesPerson = ({
   };
 };
 
-export default useProductSoldFromSelectedSalesPerson;
+export default useMonthlyProductSoldFromSalesPersonFiltered;

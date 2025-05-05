@@ -22,15 +22,15 @@ interface SalesPeriodResponse {
   data: SalesDataWithFilter[];
 }
 
-interface UseSelectedSalesPersonInvoiceProps {
+interface UseMonthlySalesPersonInvoiceFilteredProps {
   context: 'salesPersonInvoice';
   salesPersonNames: string[];
 }
 
-const useSelectedSalesPersonInvoice = ({
+const useMonthlySalesPersonInvoiceFiltered = ({
   context,
   salesPersonNames,
-}: UseSelectedSalesPersonInvoiceProps) => {
+}: UseMonthlySalesPersonInvoiceFilteredProps) => {
   const user = useSessionStore((state) => state.user);
   const company_id = user?.company_id?.toUpperCase();
   const module_id = 'SLS';
@@ -97,11 +97,11 @@ const useSelectedSalesPersonInvoice = ({
         params.append('salesPersonName', name);
       });
 
-      const url = `${process.env.NEXT_PUBLIC_API_URL}/${company_id}/${module_id}/${subModule_id}/get-analytics/getSelectedSalesPersonInvoice`;
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/${company_id}/${module_id}/${subModule_id}/get-analytics/getMonthlySalesPersonInvoiceFiltered`;
       const finalUrl = `${url}${params.toString() ? `?${params.toString()}` : ''}`;
 
       console.log(
-        `[useSelectedSalesPersonInvoice:${context}] finalUrl:`,
+        `[useMonthlySalesPersonInvoiceFiltered:${context}] finalUrl:`,
         finalUrl
       );
 
@@ -134,4 +134,4 @@ const useSelectedSalesPersonInvoice = ({
   };
 };
 
-export default useSelectedSalesPersonInvoice;
+export default useMonthlySalesPersonInvoiceFiltered;

@@ -18,7 +18,7 @@ import { useTheme } from 'next-themes';
 import { themes } from '@/config/thems';
 import gradientPlugin from 'chartjs-plugin-gradient';
 import { useToast } from '@/components/ui/use-toast';
-import useYearlySalesInvoiceByPoType from '@/queryHooks/analytics/sales/useYearlySalesInvoiceByPoType';
+import useMonthlySalesInvoiceByPoType from '@/queryHooks/analytics/sales/useMonthlySalesInvoiceByPoType';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { months } from '@/utils/monthNameMap';
@@ -57,9 +57,11 @@ const YearlySalesInvoiceByPoTypeChart: React.FC<
   })`;
   const hexBackground = hslToHex(hslBackground);
   const { toast } = useToast();
-  const { data, isLoading, isFetching, error } = useYearlySalesInvoiceByPoType({
-    context: 'salesInvoice',
-  });
+  const { data, isLoading, isFetching, error } = useMonthlySalesInvoiceByPoType(
+    {
+      context: 'salesInvoice',
+    }
+  );
 
   const colorMap: Record<
     string,

@@ -20,7 +20,7 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/components/ui/use-toast';
-import useProductSoldFromSelectedSalesPerson from '@/queryHooks/analytics/sales/useProductSoldFromSelectedSalesPerson';
+import useMonthlyProductSoldFromSalesPersonFiltered from '@/queryHooks/analytics/sales/useMonthlyProductSoldFromSalesPersonFiltered';
 import { getGridConfig, getLabel } from '@/lib/appex-chart-options';
 
 const Chart = dynamic(() => import('react-apexcharts'), { ssr: false });
@@ -35,15 +35,15 @@ ChartJS.register(
   gradientPlugin
 );
 
-interface ProductSoldFromSelectedSalesPersonProps {
+interface MonthlyProductSoldFromSalesPersonFilteredProps {
   salesPersonName: string;
   year?: string;
   month?: string;
   onClose: () => void;
 }
 
-const ProductSoldFromSelectedSalesPerson: React.FC<
-  ProductSoldFromSelectedSalesPersonProps
+const MonthlyProductSoldFromSalesPersonFiltered: React.FC<
+  MonthlyProductSoldFromSalesPersonFilteredProps
 > = ({ salesPersonName, year, month, onClose }) => {
   const { toast } = useToast();
   const { theme: config, isRtl } = useThemeStore();
@@ -65,7 +65,7 @@ const ProductSoldFromSelectedSalesPerson: React.FC<
     data: productData,
     isLoading,
     error,
-  } = useProductSoldFromSelectedSalesPerson({
+  } = useMonthlyProductSoldFromSalesPersonFiltered({
     context: 'salesPersonInvoice',
     salesPersonName,
     year,
@@ -198,11 +198,14 @@ const ProductSoldFromSelectedSalesPerson: React.FC<
 
   // Validasi prop
   if (!salesPersonName || !year || !normalizedMonth) {
-    console.warn('ProductSoldFromSelectedSalesPerson: Missing required props', {
-      salesPersonName,
-      year,
-      normalizedMonth,
-    });
+    console.warn(
+      'PMonthlyProductSoldFromSalesPersonFiltered: Missing required props',
+      {
+        salesPersonName,
+        year,
+        normalizedMonth,
+      }
+    );
     return (
       <div className='flex flex-col items-center justify-center h-64 text-red-500'>
         <p>Error: Missing required props</p>
@@ -278,4 +281,4 @@ const ProductSoldFromSelectedSalesPerson: React.FC<
   );
 };
 
-export default ProductSoldFromSelectedSalesPerson;
+export default MonthlyProductSoldFromSalesPersonFiltered;

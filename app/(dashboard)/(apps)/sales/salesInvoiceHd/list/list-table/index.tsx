@@ -16,6 +16,7 @@ interface SalesInvoiceHdProps {
   setSorting: (
     sorting: SortingState | ((old: SortingState) => SortingState)
   ) => void;
+  showFilterButton: boolean; // Tambahkan prop showFilterButton
 }
 
 const columnLabels = {
@@ -44,6 +45,7 @@ export const InvoiceListTable: React.FC<SalesInvoiceHdProps> = ({
   setLimit,
   sorting,
   setSorting,
+  showFilterButton,
 }) => {
   return (
     <div>
@@ -65,6 +67,7 @@ export const InvoiceListTable: React.FC<SalesInvoiceHdProps> = ({
         columnLabels={columnLabels} // Pass columnLabels
         searchOptionItem={searchOptionItem} // Pass searchOptionItem
         context='salesInvoice' // Pass context
+        showFilterButton={false} // Pass showFilterButton
       />
     </div>
   );

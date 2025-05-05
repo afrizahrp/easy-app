@@ -32,19 +32,16 @@ export function FilterSidebar<TData>({
 }: FilterSidebarProps<TData>) {
   return (
     <Sheet open={open} onOpenChange={onClose}>
-      <SheetContent className='pt-5'>
+      <SheetContent className='pt-5 w-[600px]'>
         <SheetTitle>Filter Data</SheetTitle>
         <SheetHeader className='flex-row items-center justify-between mb-4'>
           <span className='text-sm text-default-400 mt-0'>
             To get specific data you needs
           </span>
         </SheetHeader>
-
         <Separator />
         <form className=' h-full flex flex-col justify-between'>
           <div className='space-y-4 w-full'>
-            {/* <DataTableToolbar table={table} /> */}
-            {/* <ProductsFilterSidebar table={table} /> */}
             <FilterSidebarButton table={table} pageName={pageName} />
           </div>
           <SheetFooter className='pb-12'>
@@ -52,7 +49,7 @@ export function FilterSidebar<TData>({
               <Button
                 className='w-full bg-primary text-primary-foreground hover:bg-primary-foreground hover:text-primary dark:bg-secondary dark:text-slate-400 dark:hover:bg-secondary dark:hover:text-slate-400'
                 type='button'
-                color='primary'
+                variant='primary'
                 // variant='outline'
               >
                 Back

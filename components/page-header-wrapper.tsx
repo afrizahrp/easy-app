@@ -1,4 +1,3 @@
-// components/page-header-wrapper.tsx
 import React from 'react';
 import PageHeader from '@/components/page-header';
 
@@ -15,7 +14,7 @@ export const PageHeaderWrapper: React.FC<PageHeaderWrapperProps> = ({
   title,
   breadcrumb = [],
   hideBreadcrumb = false,
-  disabled = true,
+  disabled = false, // Ubah default ke false
 }) => {
   if (!show) return null;
   return (
@@ -23,6 +22,7 @@ export const PageHeaderWrapper: React.FC<PageHeaderWrapperProps> = ({
       title={title ?? ''}
       breadcrumb={breadcrumb}
       hideBreadcrumb={hideBreadcrumb}
+      disabled={disabled} // Teruskan disabled ke PageHeader
     />
   );
 };

@@ -129,7 +129,7 @@ const SalesPersonPerformaAnalytics: React.FC<
         show={showHeader}
         title='Sales Person Performance Analytics'
         disabled={selectedSalesPerson !== null}
-        hideBreadcrumb={selectedSalesPerson !== null}
+        // hideBreadcrumb={selectedSalesPerson !== null}
         breadcrumb={[
           { name: 'Analytics', href: '/analytics/sales' },
           {

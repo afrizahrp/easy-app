@@ -41,14 +41,14 @@ interface DataTableProps<TData, TValue> {
   onPageChange: (page: number) => void;
   limit: number;
   setLimit: (limit: number) => void;
-  sorting: SortingState; // Tambah prop
-
+  sorting: SortingState;
   setSorting: (
     sorting: SortingState | ((old: SortingState) => SortingState)
   ) => void;
   columnLabels?: Record<string, string>;
   searchOptionItem: Record<string, string>;
-  context: SearchContext; // Tambahkan prop context
+  context: SearchContext;
+  showFilterButton: boolean; // Tambahkan prop context
 }
 
 export function DataTable<TData, TValue>({
@@ -69,6 +69,7 @@ export function DataTable<TData, TValue>({
   columnLabels,
   searchOptionItem,
   context,
+  showFilterButton,
 }: DataTableProps<TData, TValue>) {
   const [rowSelection, setRowSelection] = React.useState({});
   const [columnVisibility, setColumnVisibility] =
@@ -127,6 +128,7 @@ export function DataTable<TData, TValue>({
           columnLabels={columnLabels} // Pass columnLabels ke DataTableToolbar
           searchOptionItem={searchOptionItem} // Pass searchOptionItem ke DataTableToolbar
           context={context} // Pass context ke DataTableToolbar
+          showFilterButton={showFilterButton} // Pass showFilterButton ke DataTableToolbar
         />
 
         <div className='rounded-md border'>

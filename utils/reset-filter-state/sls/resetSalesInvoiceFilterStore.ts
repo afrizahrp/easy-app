@@ -1,6 +1,7 @@
 // @/utils/reset-filter-state/sls/resetSalesInvoiceFilterStore.ts
 import { Table } from '@tanstack/react-table';
 import { useSalesInvoiceHdFilterStore, useMonthYearPeriodStore } from '@/store';
+import { useToast } from '@/components/ui/use-toast';
 
 interface UseResetSalesInvoiceFilterParams {
   table?: Table<any>;
@@ -11,6 +12,8 @@ export const useResetSalesInvoiceFilter = ({
   table,
   context,
 }: UseResetSalesInvoiceFilterParams) => {
+  const { toast } = useToast();
+
   const { resetSalesInvoiceFilters, resetSalesPersonInvoiceFilters } =
     useSalesInvoiceHdFilterStore();
   const { resetSalesInvoicePeriod, resetSalesPersonInvoicePeriod } =
@@ -21,39 +24,31 @@ export const useResetSalesInvoiceFilter = ({
       if (!table) {
         throw new Error('Table instance is undefined');
       }
-      console.log(
-        `[useResetSalesInvoiceFilter:${context}] Resetting column filters`
-      );
+
       table.resetColumnFilters();
       if (context === 'salesInvoice') {
-        console.log(
-          `[useResetSalesInvoiceFilter:${context}] Resetting salesInvoice filters and period`
-        );
         resetSalesInvoiceFilters();
         resetSalesInvoicePeriod();
       } else if (context === 'salesPersonInvoice') {
-        console.log(
-          `[useResetSalesInvoiceFilter:${context}] Resetting salesPersonInvoice filters and period`
-        );
         resetSalesPersonInvoiceFilters();
         resetSalesPersonInvoicePeriod();
       }
-      console.log(`[useResetSalesInvoiceFilter:${context}] Reset successful`);
+      toast({
+        description: 'All filters and period have been reset.',
+        variant: 'success',
+      });
+
       return {
         success: true,
         message: 'All filters and period have been reset.',
       };
     } catch (error) {
-      console.error(
-        `[useResetSalesInvoiceFilter:${context}] Filter and period reset failed:`,
-        error
-      );
-      return {
-        success: false,
-        message: `Reset failed: ${
+      toast({
+        description: `Filter reset failed: ${
           error instanceof Error ? error.message : String(error)
         }`,
-      };
+        variant: 'destructive',
+      });
     }
   };
 

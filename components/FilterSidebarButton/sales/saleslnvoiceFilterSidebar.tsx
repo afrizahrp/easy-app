@@ -2,7 +2,6 @@
 import { useEffect, useState } from 'react';
 import { Cross2Icon } from '@radix-ui/react-icons';
 import { Table } from '@tanstack/react-table';
-import { AlertCircle } from 'lucide-react';
 import { startOfMonth, endOfMonth } from 'date-fns';
 import { zonedTimeToUtc } from 'date-fns-tz';
 
@@ -14,16 +13,18 @@ import { useResetSalesInvoiceFilter } from '@/utils/reset-filter-state/sls/reset
 import { Button } from '@/components/ui/button';
 import { DataTableFacetedFilter } from '@/components/ui/data-table-faceted-filter';
 import { useMonthYearPeriodStore, useSalesInvoiceHdFilterStore } from '@/store';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { SearchContext } from '@/constants/searchContexts';
 import { useToast } from '@/components/ui/use-toast';
 
-interface GeneralInvoiceFilterSidebarProps<TData> {
+interface SalesInvoiceFilterSidebarProps<TData> {
   table: Table<TData>;
+  context?: SearchContext;
 }
 
-export function GeneralInvoiceFilterSidebar<TData>({
+export function SalesInvoiceFilterSidebar<TData>({
   table,
-}: GeneralInvoiceFilterSidebarProps<TData>) {
+  context,
+}: SalesInvoiceFilterSidebarProps<TData>) {
   const { salesInvoicePeriod, setSalesInvoicePeriod } =
     useMonthYearPeriodStore();
   const { salesInvoiceFilters, setSalesInvoiceFilters } =
@@ -57,7 +58,7 @@ export function GeneralInvoiceFilterSidebar<TData>({
 
     if (normalizedStart && normalizedEnd && normalizedEnd < normalizedStart) {
       console.warn(
-        '[GeneralInvoiceFilterSidebar] Invalid date range: endPeriod is before startPeriod. Resetting endPeriod.',
+        '[SalesInvoiceFilterSidebar] Invalid date range: endPeriod is before startPeriod. Resetting endPeriod.',
         {
           startPeriod: normalizedStart.toISOString(),
           endPeriod: normalizedEnd.toISOString(),
@@ -68,7 +69,7 @@ export function GeneralInvoiceFilterSidebar<TData>({
       toast({
         description:
           'End Period cannot be earlier than Start Period. End Period has been reset.',
-        color: 'destructive',
+        variant: 'destructive',
       });
     }
 
@@ -133,18 +134,18 @@ export function GeneralInvoiceFilterSidebar<TData>({
 
   const handleReset = () => {
     try {
-      console.log('[GeneralInvoiceFilterSidebar] Initiating reset');
+      console.log('[SalesInvoiceFilterSidebar] Initiating reset');
       const result = reset();
       toast({
-        description: result.message,
-        color: result.success ? 'default' : 'destructive',
+        description: result?.message ?? 'Reset successful.',
+        variant: 'success',
       });
-      console.log('[GeneralInvoiceFilterSidebar] Reset result:', result);
+      console.log('[SalesInvoiceFilterSidebar] Reset result:', result);
     } catch (error) {
-      console.error('[GeneralInvoiceFilterSidebar] Reset error:', error);
+      console.error('[SalesInvoiceFilterSidebar] Reset error:', error);
       toast({
         description: `Reset failed: ${error instanceof Error ? error.message : String(error)}`,
-        color: 'destructive',
+        variant: 'destructive',
       });
     }
   };
@@ -183,9 +184,9 @@ export function GeneralInvoiceFilterSidebar<TData>({
       </div>
 
       <div className='w-full py-3'>
-        {table.getColumn('poType') && (
+        {table?.getColumn('poType') && (
           <DataTableFacetedFilter
-            column={table.getColumn('poType')}
+            column={table?.getColumn('poType')}
             title='PO Type'
             options={poTypeOptionList}
             isLoading={isPoTypeLoading}

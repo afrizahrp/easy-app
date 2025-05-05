@@ -5,15 +5,19 @@ import { set as setDate } from 'date-fns';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { useMonthYearPeriodStore } from '@/store';
-import { SearchContext } from '@/constants/searchContexts'; // Impor SearchContext
+import { SearchContext } from '@/constants/searchContexts';
 import { useToast } from '@/components/ui/use-toast';
+
+// Definisikan tipe Period
+interface Period {
+  startPeriod: Date | null;
+  endPeriod: Date | null;
+}
 
 interface PeriodFilterProps {
   context: SearchContext;
-  onChange?: (
-    period: Partial<{ startPeriod: Date | null; endPeriod: Date | null }>
-  ) => void;
-  value?: { startPeriod: Date | null; endPeriod: Date | null };
+  onChange?: (period: Partial<Period>) => void;
+  value?: Partial<Period>;
 }
 
 export function PeriodFilter({ context, onChange, value }: PeriodFilterProps) {
@@ -29,8 +33,7 @@ export function PeriodFilter({ context, onChange, value }: PeriodFilterProps) {
   } = useMonthYearPeriodStore();
   const { toast } = useToast();
 
-  // Gunakan value dari prop jika ada, jika tidak ambil dari store
-  const period =
+  const period: Partial<Period> =
     value ||
     (context === 'salesInvoice'
       ? salesInvoicePeriod
@@ -40,15 +43,27 @@ export function PeriodFilter({ context, onChange, value }: PeriodFilterProps) {
           ? purchasingPeriod
           : inventoryPeriod);
 
-  const prevPeriodRef = useRef({
-    startPeriod: period.startPeriod,
-    endPeriod: period.endPeriod,
+  const normalizedPeriod: Partial<Period> = {
+    startPeriod: period.startPeriod ?? null,
+    endPeriod: period.endPeriod ?? null,
+  };
+
+  const prevPeriodRef = useRef<Partial<Period>>({
+    startPeriod: normalizedPeriod.startPeriod,
+    endPeriod: normalizedPeriod.endPeriod,
   });
 
-  // Default setter berdasarkan context jika tidak ada onChange
-  const setPeriodDefault = (
-    newPeriod: Partial<{ startPeriod: Date | null; endPeriod: Date | null }>
-  ) => {
+  // Hitung maxDate berdasarkan bulan saat ini
+  const currentDate = new Date();
+
+  const computedMinDate = new Date(currentDate.getFullYear(), 0, 1);
+
+  const computedMaxDate =
+    currentDate.getMonth() === 4 // 4 artinya Mei
+      ? endOfMonth(new Date(currentDate.getFullYear(), 3, 1)) // April (3) pada tahun yang sama
+      : endOfMonth(currentDate);
+
+  const setPeriodDefault = (newPeriod: Partial<Period>) => {
     switch (context) {
       case 'salesInvoice':
         setSalesInvoicePeriod(newPeriod);
@@ -56,51 +71,55 @@ export function PeriodFilter({ context, onChange, value }: PeriodFilterProps) {
       case 'salesPersonInvoice':
         setSalesPersonInvoicePeriod(newPeriod);
         break;
-      // case 'purchasing':
-      //   setPurchasingPeriod(newPeriod);
-      //   break;
-      // case 'inventory':
-      //   setInventoryPeriod(newPeriod);
-      //   break;
+      case 'purchasing':
+        setPurchasingPeriod(newPeriod);
+        break;
+      case 'inventory':
+        setInventoryPeriod(newPeriod);
+        break;
       default:
         console.warn(`Unknown context: ${context}`);
     }
   };
 
-  // Handler untuk mengatur periode
   const setPeriod = onChange || setPeriodDefault;
 
   useEffect(() => {
     const prev = prevPeriodRef.current;
     if (
-      period.startPeriod !== prev.startPeriod ||
-      period.endPeriod !== prev.endPeriod
+      normalizedPeriod.startPeriod !== prev.startPeriod ||
+      normalizedPeriod.endPeriod !== prev.endPeriod
     ) {
       console.log(`[PeriodFilter:${context}] useEffect triggered with:`, {
-        startPeriod: period.startPeriod,
-        endPeriod: period.endPeriod,
+        startPeriod: normalizedPeriod.startPeriod,
+        endPeriod: normalizedPeriod.endPeriod,
       });
       if (onChange) {
         onChange({
-          startPeriod: period.startPeriod,
-          endPeriod: period.endPeriod,
+          startPeriod: normalizedPeriod.startPeriod,
+          endPeriod: normalizedPeriod.endPeriod,
         });
       }
       prevPeriodRef.current = {
-        startPeriod: period.startPeriod,
-        endPeriod: period.endPeriod,
+        startPeriod: normalizedPeriod.startPeriod,
+        endPeriod: normalizedPeriod.endPeriod,
       };
     }
-  }, [period.startPeriod, period.endPeriod, onChange, context]);
+  }, [
+    normalizedPeriod.startPeriod,
+    normalizedPeriod.endPeriod,
+    onChange,
+    context,
+  ]);
 
   return (
     <div className='w-full flex justify-center items-center'>
-      <div className='flex flex-wrap gap-2 py-3'>
-        <div className='min-w-[120px]'>
+      <div className='w-full flex flex-col sm:flex-row justify-evenly items-center gap-4 py-3'>
+        <div className='flex flex-col items-center flex-1 max-w-[150px]'>
           <label className='text-sm font-medium mb-1 block'>Start Period</label>
           <DatePicker
-            selected={period.startPeriod}
-            onChange={(date) => {
+            selected={normalizedPeriod.startPeriod}
+            onChange={(date: Date | null) => {
               console.log(`[${context}] Start Period changed to:`, date);
               const newStart = date
                 ? setDate(startOfMonth(date), {
@@ -113,34 +132,35 @@ export function PeriodFilter({ context, onChange, value }: PeriodFilterProps) {
               setPeriod({ startPeriod: newStart });
               if (
                 newStart &&
-                period.endPeriod &&
-                startOfMonth(period.endPeriod) < startOfMonth(newStart)
+                normalizedPeriod.endPeriod &&
+                startOfMonth(normalizedPeriod.endPeriod) <
+                  startOfMonth(newStart)
               ) {
                 setPeriod({ endPeriod: null });
                 toast({
                   description:
                     'End Period was reset because it was earlier than the new Start Period.',
-                  color: 'destructive',
+                  variant: 'destructive', // Ganti color dengan variant
                 });
               }
             }}
             showMonthYearPicker
             dateFormat='MMM yyyy'
-            placeholderText='Jan 2025'
+            placeholderText={format(computedMinDate, 'MMM yyyy')}
             shouldCloseOnSelect={false}
             showYearDropdown
             yearDropdownItemNumber={15}
             scrollableYearDropdown
-            maxDate={endOfMonth(new Date())}
+            maxDate={computedMaxDate}
             className='w-[120px] h-10 px-3 border rounded-md bg-white text-gray-900 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-600 custom-datepicker'
           />
         </div>
 
-        <div className='min-w-[120px]'>
+        <div className='flex flex-col items-center flex-1 max-w-[150px]'>
           <label className='text-sm font-medium mb-1 block'>End Period</label>
           <DatePicker
-            selected={period.endPeriod}
-            onChange={(date) => {
+            selected={normalizedPeriod.endPeriod ?? computedMaxDate}
+            onChange={(date: Date | null) => {
               console.log(`[${context}] End Period changed to:`, date);
               setPeriod({
                 endPeriod: date
@@ -155,16 +175,20 @@ export function PeriodFilter({ context, onChange, value }: PeriodFilterProps) {
             }}
             showMonthYearPicker
             dateFormat='MMM yyyy'
-            placeholderText={format(endOfMonth(new Date()), 'MMM yyyy')}
+            placeholderText={
+              computedMaxDate ? format(computedMaxDate, 'MMM yyyy') : ''
+            }
             minDate={
-              period.startPeriod ? startOfMonth(period.startPeriod) : undefined
+              normalizedPeriod.startPeriod
+                ? startOfMonth(normalizedPeriod.startPeriod)
+                : undefined
             }
             shouldCloseOnSelect={false}
             showYearDropdown
             yearDropdownItemNumber={15}
             scrollableYearDropdown
-            maxDate={endOfMonth(new Date())}
-            className='w-[120px] h-10 px-3 border rounded-md bg-white text-gray-900 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-600 custom-datepicker'
+            maxDate={computedMaxDate}
+            className='w-full h-10 px-3 border rounded-md bg-white text-gray-900 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-600 custom-datepicker'
           />
         </div>
       </div>

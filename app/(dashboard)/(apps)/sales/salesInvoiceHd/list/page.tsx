@@ -16,7 +16,11 @@ import { FooterSummaryItem } from '@/components/footer-summary-item';
 import { routes } from '@/config/routes';
 import PageHeader from '@/components/page-header';
 
-const SalesInvoiceHdPage = () => {
+interface SalesInvoiceHdProps {
+  showFilterButton: boolean;
+}
+
+const SalesInvoiceHdPage = ({ showFilterButton }: SalesInvoiceHdProps) => {
   const { currentPage, sorting, limit, setCurrentPage, setSorting, setLimit } =
     usePageStore();
   const sort = sorting?.[0];
@@ -86,6 +90,7 @@ const SalesInvoiceHdPage = () => {
               setLimit={setLimit}
               sorting={sorting}
               setSorting={setSorting}
+              showFilterButton={showFilterButton}
             />
           </CardContent>
         </Card>

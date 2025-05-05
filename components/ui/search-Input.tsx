@@ -4,12 +4,13 @@ import { Input } from '@/components/ui/input';
 import { useSearchParamsStore, usePageStore } from '@/store';
 import { Icon } from '@iconify/react';
 import { useDebounce } from 'use-debounce';
+import { SearchContext } from '@/constants/searchContexts';
 
 interface SearchInputProps {
   className?: string;
   searchBy?: string;
   placeholder?: string;
-  context: 'salesInvoice' | 'salesPersonInvoice'; // Tambahkan konteks
+  context: SearchContext; // Use SearchContext type for context prop
 }
 
 export default function SearchInput({

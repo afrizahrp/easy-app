@@ -1,13 +1,9 @@
 'use client';
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Table } from '@tanstack/react-table';
 import SalesInvoiceFilterSummary from '@/components/sales/salesInvoiceFilterSummary';
 import SalesInvoiceOverview from '../salesinvoice-chart/components/salesInvoiceOverview';
-import { GeneralInvoiceFilterSidebar } from '@/components/FilterSidebarButton/sales/generalnvoiceFilterSidebar';
-import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
 import { PageHeaderWrapper } from '@/components/page-header-wrapper';
-import { ChartPeriodFilterSidebar } from '@/components/FilterSidebarButton/chartPeriodFilterSidebar';
 
 interface SalesInvoiceAnalyticsProps {
   showList?: boolean;
@@ -34,20 +30,6 @@ const SalesInvoiceAnalytics: React.FC<SalesInvoiceAnalyticsProps> = ({
     }
   };
 
-  const dummyTable = {
-    getState: () => ({
-      columnFilters: [],
-      sorting: [],
-      pagination: { pageIndex: 0, pageSize: 10 },
-      globalFilter: '',
-      rowSelection: {},
-    }),
-    getColumn: () => undefined,
-    getFilteredRowModel: () => ({ rows: [] }),
-    resetColumnFilters: () => {},
-    setColumnFilters: () => {},
-  } as unknown as Table<any>;
-
   const containerVariants = {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
@@ -68,12 +50,12 @@ const SalesInvoiceAnalytics: React.FC<SalesInvoiceAnalyticsProps> = ({
         >
           <PageHeaderWrapper
             show={showHeader}
-            title='Sales Invoice Analytics'
+            title='Sales Invoice Overview'
             hideBreadcrumb={false}
             breadcrumb={[
               { name: 'Analytics', href: '/analytics/sales' },
               {
-                name: 'Sales Invoice Analytics',
+                name: 'Sales Invoice Overview',
                 href: '/analytics/sales/salesinvoice-chart',
               },
             ]}
