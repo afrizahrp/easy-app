@@ -57,7 +57,7 @@ export default function SalesAnalyticsPage({
   const isInView2 = useInView(ref2, { once: true });
 
   const handleBack = () => {
-    router.push('/analytics'); // Kembali ke /analytics tanpa parameter
+    router.push('/dashboard'); // Kembali ke /analytics tanpa parameter
   };
 
   // Gunakan urlStartPeriod dan urlEndPeriod untuk kondisi, prioritaskan prop jika ada
@@ -107,35 +107,6 @@ export default function SalesAnalyticsPage({
           Explore sales performance and invoice summaries with interactive
           insights.
         </p>
-
-        {/* Opsi 2: Tombol Back di bawah deskripsi (dikomentari) */}
-        {/* {startPeriod && endPeriod && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
-            className="mt-2"
-          >
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleBack}
-                    className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
-                  >
-                    <ArrowLeft className="w-4 h-4 mr-1" />
-                    Back to Analytics Overview
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Back to Analytics Overview</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </motion.div>
-        )} */}
       </div>
       <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
         <motion.div

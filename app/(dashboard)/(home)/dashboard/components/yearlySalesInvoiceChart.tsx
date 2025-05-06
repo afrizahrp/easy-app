@@ -23,6 +23,7 @@ import useYearlySalesInvoice from '@/queryHooks/dashboard/sales/useYearlySalesIn
 import CustomTooltip from './customTooltip';
 import { Button } from '@/components/ui/button';
 import { Maximize2, Minimize2 } from 'lucide-react';
+import { useMonthYearPeriodStore } from '@/store';
 
 ChartJS.register(
   CategoryScale,
@@ -47,8 +48,6 @@ const YearlySalesInvoiceChart: React.FC<YearlySalesInvoiceChartProps> = ({
   isFullWidth = false,
   onModeChange,
 }) => {
-  console.log('YearlySalesInvoiceChart rendered'); // Log untuk melacak render
-
   const { theme: config } = useThemeStore();
   const { theme: mode } = useTheme();
   const theme = themes.find((theme) => theme.name === config);
@@ -76,6 +75,8 @@ const YearlySalesInvoiceChart: React.FC<YearlySalesInvoiceChartProps> = ({
     growth: 0,
     year: '',
   });
+  const { setSalesInvoicePeriod, setSalesPersonInvoicePeriod } =
+    useMonthYearPeriodStore();
 
   // useEffect untuk menangani perubahan full-screen
   useEffect(() => {
@@ -226,7 +227,7 @@ const YearlySalesInvoiceChart: React.FC<YearlySalesInvoiceChartProps> = ({
       elements: import('chart.js').ActiveElement[],
       chart: import('chart.js').Chart
     ) => {
-      // console.log('handleChartClick triggered');
+      console.log('handleChartClick triggered');
       if (isCompact || elements.length === 0) return;
 
       const element = elements[0];
@@ -239,18 +240,22 @@ const YearlySalesInvoiceChart: React.FC<YearlySalesInvoiceChartProps> = ({
           : undefined;
 
       if (year) {
-        const startPeriod = `Jan${year}`;
-        const endPeriod = `Dec${year}`;
-        console.log('Navigating with:', startPeriod, endPeriod);
-        router.push(
-          `/analytics?startPeriod=${startPeriod}&endPeriod=${endPeriod}`
-        );
-        // router.push(
-        //   `/analytics/sales/salesinvoice-chart?startPeriod=${startPeriod}&endPeriod=${endPeriod}`
-        // );
+        const yearNum = parseInt(year, 10);
+        const startPeriod = new Date(yearNum, 0, 1); // 1 Januari
+        const endPeriod = new Date(yearNum, 11, 31, 23, 59, 59, 999); // 31 Desember
+        console.log('Updating salesInvoicePeriod:', { startPeriod, endPeriod });
+        setSalesInvoicePeriod({ startPeriod, endPeriod });
+        setSalesPersonInvoicePeriod({ startPeriod, endPeriod });
+        router.push('/analytics');
       }
     },
-    [isCompact, chartData, router]
+    [
+      isCompact,
+      chartData,
+      router,
+      setSalesInvoicePeriod,
+      setSalesPersonInvoicePeriod,
+    ]
   );
 
   // Logika tooltip dengan pembatasan pembaruan state
@@ -425,6 +430,7 @@ const YearlySalesInvoiceChart: React.FC<YearlySalesInvoiceChartProps> = ({
               y={tooltipState.y}
               invoice={tooltipState.invoice}
               growth={tooltipState.growth}
+              isFullScreen={isFullScreen}
             />
           </>
         ) : (

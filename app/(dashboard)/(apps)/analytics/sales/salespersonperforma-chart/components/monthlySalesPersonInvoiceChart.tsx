@@ -58,6 +58,8 @@ interface MonthlySalesPersonInvoiceProps {
   height?: number;
   isCompact?: boolean;
   isFullWidth?: boolean;
+  startPeriod?: string;
+  endPeriod?: string;
   onModeChange?: (isFullPage: boolean) => void;
   onSalesPersonSelect?: (selection: SalesPersonSelection | null) => void;
 }
@@ -68,6 +70,8 @@ const MonthlySalesPersonInvoiceChart: React.FC<
   height = 400,
   isCompact = false,
   isFullWidth = true,
+  startPeriod,
+  endPeriod,
   onModeChange,
   onSalesPersonSelect,
 }) => {

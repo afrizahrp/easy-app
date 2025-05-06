@@ -14,6 +14,7 @@ interface CustomTooltipProps {
   y: number;
   invoice: string;
   growth: number;
+  isFullScreen?: boolean;
 }
 
 const CustomTooltip: React.FC<CustomTooltipProps> = ({
@@ -22,14 +23,14 @@ const CustomTooltip: React.FC<CustomTooltipProps> = ({
   y,
   invoice,
   growth,
+  isFullScreen = false,
 }) => {
-  const { theme: config } = useThemeStore();
-  const { theme: mode } = useTheme();
-  const theme = themes.find((theme) => theme.name === config);
-
   if (!visible || !document.body) return null;
 
   const isUp = growth >= 0;
+  const { theme: config } = useThemeStore();
+  const { theme: mode } = useTheme();
+  const theme = themes.find((theme) => theme.name === config);
 
   return createPortal(
     <div
@@ -42,9 +43,17 @@ const CustomTooltip: React.FC<CustomTooltipProps> = ({
       style={{ left: `${x}px`, top: `${y}px` }}
     >
       <div className='flex items-center'>
-        <span className='mr-2'>Sales {invoice} ,</span>
         <span
-          className={cn(isUp ? 'text-success' : 'text-destructive', 'mr-1')}
+          className={cn('mr-2', isFullScreen ? 'text-[14px]' : 'text-[12px]')}
+        >
+          Sales {invoice},
+        </span>
+        <span
+          className={cn(
+            isUp ? 'text-green-400' : 'text-red-400',
+            'mr-1 font-medium',
+            isFullScreen ? 'text-[12px]' : 'text-[10px]'
+          )}
         >
           {Math.abs(growth)}%
         </span>
@@ -55,11 +64,14 @@ const CustomTooltip: React.FC<CustomTooltipProps> = ({
               : 'heroicons:arrow-trending-down-16-solid'
           }
           className={cn(
-            isUp ? 'text-success' : 'text-destructive',
-            'text-xl mr-1'
+            isUp ? 'text-green-400' : 'text-red-400',
+            'w-3 h-3 mr-1',
+            isFullScreen ? 'text-[12px]' : 'text-[10px]'
           )}
         />
-        <span>vs previous year</span>
+        <span className={cn(isFullScreen ? 'text-[12px]' : 'text-[10px]')}>
+          vs previous year
+        </span>
       </div>
     </div>,
     document.body
