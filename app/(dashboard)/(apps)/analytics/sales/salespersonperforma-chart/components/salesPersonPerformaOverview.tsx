@@ -15,8 +15,6 @@ interface SalesPersonPerformaOverviewProps {
   showFloatingButton?: boolean;
   showList?: boolean;
   isFullWidth?: boolean;
-  startPeriod?: string;
-  endPeriod?: string;
   onModeChange?: (isFullPage: boolean) => void;
   onSalesPersonSelect?: (selection: SalesPersonSelection | null) => void;
 }
@@ -27,8 +25,6 @@ const SalesPersonPerformaOverview: React.FC<
   showFloatingButton,
   showList = true,
   isFullWidth = true,
-  startPeriod,
-  endPeriod,
   onModeChange,
   onSalesPersonSelect,
 }) => {
@@ -94,8 +90,6 @@ const SalesPersonPerformaOverview: React.FC<
               isCompact={!showList}
               onModeChange={setIsFullWidthState}
               onSalesPersonSelect={handleSalesPersonSelect}
-              startPeriod={startPeriod}
-              endPeriod={endPeriod}
             />
           </div>
         )}

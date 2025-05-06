@@ -14,8 +14,6 @@ interface SalesInvoiceOverviewProps {
   showFloatingButton?: boolean;
   showList?: boolean;
   fullChart?: 'period' | 'poType' | null;
-  startPeriod?: string | null;
-  endPeriod?: string | null;
   onFilterChange?: (filters: { period?: string; poType?: string }) => void;
 }
 
@@ -23,8 +21,6 @@ const SalesInvoiceOverview: React.FC<SalesInvoiceOverviewProps> = ({
   showFloatingButton = true,
   showList = true,
   fullChart = null,
-  startPeriod,
-  endPeriod,
   onFilterChange,
 }) => {
   const chartLayoutClass =
@@ -124,8 +120,6 @@ const SalesInvoiceOverview: React.FC<SalesInvoiceOverviewProps> = ({
             onModeChange={handlePeriodModeChange}
             height={250}
             isCompact={true}
-            startPeriod={startPeriod ?? undefined}
-            endPeriod={endPeriod ?? undefined}
           />
         </div>
       )}

@@ -48,8 +48,6 @@ const MonthlySalesInvoiceChart: React.FC<MonthlySalesInvoiceChartProps> = ({
   isCompact = false,
   isFullWidth = false,
   onModeChange,
-  startPeriod: propStartPeriod,
-  endPeriod: propEndPeriod,
 }) => {
   const { theme: config } = useThemeStore();
   const { theme: mode } = useTheme();
@@ -60,17 +58,9 @@ const MonthlySalesInvoiceChart: React.FC<MonthlySalesInvoiceChartProps> = ({
   const hexBackground = hslToHex(hslBackground);
   const { toast } = useToast();
   const searchParams = useSearchParams();
-  const router = useRouter();
-  const urlStartPeriod = searchParams.get('startPeriod');
-  const urlEndPeriod = searchParams.get('endPeriod');
-
-  const startPeriod = propStartPeriod ?? urlStartPeriod ?? undefined;
-  const endPeriod = propEndPeriod ?? urlEndPeriod ?? undefined;
 
   const { data, isLoading, isFetching, error } = useMonthlySalesInvoice({
     context: 'salesInvoice',
-    startPeriod,
-    endPeriod,
   });
 
   const chartContainerRef = useRef<HTMLDivElement>(null);
@@ -229,7 +219,6 @@ const MonthlySalesInvoiceChart: React.FC<MonthlySalesInvoiceChartProps> = ({
       <div className='relative flex items-center justify-between mb-2'>
         <h2 className='text-sm text-muted-foreground font-semibold ml-2'>
           Sales Invoice by Monthly (in Millions IDR)
-          {startPeriod && endPeriod ? ` - ${startPeriod.slice(-4)}` : ''}
         </h2>
         <div className='flex items-center space-x-2'>
           {!isCompact && (

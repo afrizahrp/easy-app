@@ -32,15 +32,12 @@ const cardVariants = {
   }),
 };
 
-interface SalesAnalyticsPageProps {
-  startPeriod?: string | null;
-  endPeriod?: string | null;
-}
+// interface SalesAnalyticsPageProps {
+//   startPeriod?: string | null;
+//   endPeriod?: string | null;
+// }
 
-export default function SalesAnalyticsPage({
-  startPeriod: propStartPeriod,
-  endPeriod: propEndPeriod,
-}: SalesAnalyticsPageProps) {
+export default function SalesAnalyticsPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const urlStartPeriod = searchParams.get('startPeriod');
@@ -60,10 +57,6 @@ export default function SalesAnalyticsPage({
     router.push('/dashboard');
   };
 
-  // Gunakan urlStartPeriod dan urlEndPeriod untuk kondisi, prioritaskan prop jika ada
-  const startPeriod = propStartPeriod || urlStartPeriod;
-  const endPeriod = propEndPeriod || urlEndPeriod;
-
   return (
     <div className='flex flex-col w-full pt-2 pb-4 px-2 md:pt-4 md:pb-8 md:px-8 lg:pt-4 lg:pb-10 lg:px-10 gap-8 bg-gray-100 dark:bg-gray-900'>
       <div className='flex flex-col gap-4'>
@@ -81,7 +74,7 @@ export default function SalesAnalyticsPage({
                   Home
                 </Button>
               </TooltipTrigger>
-              <TooltipContent>
+              <TooltipContent className='max-w-xs whitespace-normal text-sm text-slate-300 dark:text-slate-100'>
                 <p>Back to Dashboard</p>
               </TooltipContent>
             </Tooltip>
@@ -149,12 +142,7 @@ export default function SalesAnalyticsPage({
             hideBreadcrumb={true}
           />
           <div className='flex-1 min-h-0 overflow-hidden'>
-            <SalesInvoiceAnalytics
-              showList={false}
-              showHeader={false}
-              startPeriod={startPeriod}
-              endPeriod={endPeriod}
-            />
+            <SalesInvoiceAnalytics showList={false} showHeader={false} />
           </div>
         </motion.div>
 
@@ -209,12 +197,7 @@ export default function SalesAnalyticsPage({
             hideBreadcrumb={true}
           />
           <div className='flex-1 min-h-0 overflow-hidden'>
-            <SalesPersonPerformaAnalytics
-              showList={false}
-              showHeader={false}
-              startPeriod={startPeriod}
-              endPeriod={endPeriod}
-            />
+            <SalesPersonPerformaAnalytics showList={false} showHeader={false} />
           </div>
         </motion.div>
 

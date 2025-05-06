@@ -250,7 +250,7 @@ const YearlySalesInvoiceChart: React.FC<YearlySalesInvoiceChartProps> = ({
         const endPeriod = new Date(yearNum, 11, 31, 23, 59, 59, 999); // 31 Desember
         console.log('Updating salesInvoicePeriod:', { startPeriod, endPeriod });
         setSalesInvoicePeriod({ startPeriod, endPeriod });
-        setSalesPersonInvoicePeriod({ startPeriod, endPeriod });
+        // setSalesPersonInvoicePeriod({ startPeriod, endPeriod });
         router.push('/analytics');
       }
     },

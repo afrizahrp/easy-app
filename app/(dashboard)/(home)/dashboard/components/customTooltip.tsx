@@ -8,6 +8,7 @@ import { useThemeStore } from '@/store';
 import { useTheme } from 'next-themes';
 import { themes } from '@/config/thems';
 
+// CustomTooltip.tsx
 interface CustomTooltipProps {
   visible: boolean;
   x: number;
@@ -15,6 +16,7 @@ interface CustomTooltipProps {
   invoice: string;
   growth: number;
   isFullScreen?: boolean;
+  parentRef?: React.RefObject<HTMLElement>;
 }
 
 const CustomTooltip: React.FC<CustomTooltipProps> = ({
@@ -24,18 +26,20 @@ const CustomTooltip: React.FC<CustomTooltipProps> = ({
   invoice,
   growth,
   isFullScreen = false,
+  parentRef,
 }) => {
-  if (!visible || !document.body) return null;
+  console.log('CustomTooltip rendering:', { visible, x, y, isFullScreen });
+  if (!visible) return null;
 
   const isUp = growth >= 0;
   const { theme: config } = useThemeStore();
   const { theme: mode } = useTheme();
   const theme = themes.find((theme) => theme.name === config);
 
-  return createPortal(
+  const tooltipContent = (
     <div
       className={cn(
-        'absolute z-50 rounded-md p-2 text-md shadow-md whitespace-nowrap',
+        'absolute z-[100] rounded-md p-2 text-md shadow-md whitespace-nowrap',
         'bg-gray-800 text-slate-100'
       )}
       style={{ left: `${x}px`, top: `${y}px` }}
@@ -71,9 +75,12 @@ const CustomTooltip: React.FC<CustomTooltipProps> = ({
           vs previous year
         </span>
       </div>
-    </div>,
-    document.body
+    </div>
   );
+
+  return parentRef?.current
+    ? createPortal(tooltipContent, parentRef.current)
+    : createPortal(tooltipContent, document.body);
 };
 
 export default memo(CustomTooltip);
