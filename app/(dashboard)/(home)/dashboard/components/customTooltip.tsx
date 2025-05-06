@@ -36,9 +36,7 @@ const CustomTooltip: React.FC<CustomTooltipProps> = ({
     <div
       className={cn(
         'absolute z-50 rounded-md p-2 text-md shadow-md whitespace-nowrap',
-        mode === 'dark'
-          ? 'bg-gray-800 text-slate-100'
-          : 'bg-white text-slate-900'
+        'bg-gray-800 text-slate-100'
       )}
       style={{ left: `${x}px`, top: `${y}px` }}
     >

@@ -130,6 +130,12 @@ const YearlySalesInvoiceChart: React.FC<YearlySalesInvoiceChartProps> = ({
     };
   }, []);
 
+  useEffect(() => {
+    if (chartContainerRef.current) {
+      window.dispatchEvent(new Event('resize'));
+    }
+  }, [isFullScreen]);
+
   const toggleFullScreen = useCallback(() => {
     console.log('toggleFullScreen called');
     if (!chartContainerRef.current) return;
@@ -210,7 +216,7 @@ const YearlySalesInvoiceChart: React.FC<YearlySalesInvoiceChartProps> = ({
           borderColor: colorPalette.map(([from]) => from),
           borderWidth: 1,
           barThickness: isFullScreen ? 30 : 25,
-          borderRadius: 15,
+          borderRadius: 10,
         },
       ],
     } as import('chart.js').ChartData<'bar', number[], string>;
@@ -227,7 +233,6 @@ const YearlySalesInvoiceChart: React.FC<YearlySalesInvoiceChartProps> = ({
       elements: import('chart.js').ActiveElement[],
       chart: import('chart.js').Chart
     ) => {
-      console.log('handleChartClick triggered');
       if (isCompact || elements.length === 0) return;
 
       const element = elements[0];
@@ -264,6 +269,10 @@ const YearlySalesInvoiceChart: React.FC<YearlySalesInvoiceChartProps> = ({
       chart: import('chart.js').Chart;
       tooltip: import('chart.js').TooltipModel<'bar'>;
     }) => {
+      console.log('handleTooltip called', {
+        isFullScreen,
+        tooltipOpacity: context.tooltip.opacity,
+      });
       const { chart, tooltip } = context;
       if (!chartData || !chartData.labels) {
         if (tooltipState.visible) {
@@ -286,10 +295,10 @@ const YearlySalesInvoiceChart: React.FC<YearlySalesInvoiceChartProps> = ({
           'id-ID'
         );
         const growth = yearData?.growthPercentage ?? 0;
-        const x = chart.canvas.offsetLeft + tooltip.caretX + 10;
-        const y = chart.canvas.offsetTop + tooltip.caretY - 3;
+        const canvasRect = chart.canvas.getBoundingClientRect();
+        const x = canvasRect.left + tooltip.caretX + 10;
+        const y = canvasRect.top + tooltip.caretY - 3;
 
-        // Hanya perbarui state jika data benar-benar berubah
         setTooltipState((prev) => {
           if (
             prev.visible === true &&
@@ -299,7 +308,7 @@ const YearlySalesInvoiceChart: React.FC<YearlySalesInvoiceChartProps> = ({
             prev.x === x &&
             prev.y === y
           ) {
-            return prev; // Tidak perlu perbarui state
+            return prev;
           }
           console.log('Updating tooltip state:', {
             year,
@@ -312,9 +321,8 @@ const YearlySalesInvoiceChart: React.FC<YearlySalesInvoiceChartProps> = ({
         });
       }
     },
-    [chartData, data, tooltipState.visible]
+    [chartData, data, tooltipState.visible, isFullScreen]
   );
-
   return (
     <motion.div
       ref={chartContainerRef}
@@ -431,6 +439,7 @@ const YearlySalesInvoiceChart: React.FC<YearlySalesInvoiceChartProps> = ({
               invoice={tooltipState.invoice}
               growth={tooltipState.growth}
               isFullScreen={isFullScreen}
+              parentRef={isFullScreen ? chartContainerRef : undefined}
             />
           </>
         ) : (

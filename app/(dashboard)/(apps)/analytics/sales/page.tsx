@@ -57,7 +57,7 @@ export default function SalesAnalyticsPage({
   const isInView2 = useInView(ref2, { once: true });
 
   const handleBack = () => {
-    router.push('/dashboard'); // Kembali ke /analytics tanpa parameter
+    router.push('/dashboard');
   };
 
   // Gunakan urlStartPeriod dan urlEndPeriod untuk kondisi, prioritaskan prop jika ada
@@ -66,47 +66,36 @@ export default function SalesAnalyticsPage({
 
   return (
     <div className='flex flex-col w-full pt-2 pb-4 px-2 md:pt-4 md:pb-8 md:px-8 lg:pt-4 lg:pb-10 lg:px-10 gap-8 bg-gray-100 dark:bg-gray-900'>
-      <div className='text-center md:text-left'>
-        {/* Opsi 1: Tombol Back di kiri atas */}
-        <div className='flex items-center justify-between mb-2'>
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={
-              startPeriod && endPeriod
-                ? { opacity: 1, x: 0 }
-                : { opacity: 0, x: -20 }
-            }
-            transition={{ duration: 0.3 }}
-          >
-            {/* {startPeriod && endPeriod && ( */}
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant='default'
-                    size='sm'
-                    onClick={handleBack}
-                    className='text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
-                  >
-                    <ArrowLeft className='w-4 h-4 mr-1' />
-                    Back
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Back to Analytics Overview</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-            {/* )} */}
-          </motion.div>
-          <h1 className='text-2xl font-bold tracking-tight text-gray-900 dark:text-slate-100'>
+      <div className='flex flex-col gap-4'>
+        <div className='flex flex-col gap-2'>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant='ghost'
+                  size='sm'
+                  onClick={handleBack}
+                  className='text-blue-600 border-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:border-blue-400 dark:hover:bg-gray-700 w-fit mt-2'
+                >
+                  <ArrowLeft className='w-4 h-4 mr-1' />
+                  Home
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Back to Dashboard</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+          <h1 className='text-2xl font-bold tracking-tight text-gray-900 dark:text-slate-100 text-left'>
             📊 Sales Analytics
           </h1>
+          <div className='flex flex-col gap-2'>
+            <p className='text-lg text-slate-600 dark:text-slate-400'>
+              Explore sales performance and invoice summaries with interactive
+              insights.
+            </p>
+          </div>
         </div>
-        <p className='text-lg text-slate-600 dark:text-slate-400 mt-2'>
-          Explore sales performance and invoice summaries with interactive
-          insights.
-        </p>
       </div>
       <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
         <motion.div
