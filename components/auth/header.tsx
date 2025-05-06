@@ -29,7 +29,7 @@ export const Header: React.FC<HeaderProps> = ({
       />
       <h1
         className={cn(
-          'text-md font-semibold text-primary-foreground dark:text-slate-200 drop-shadow-md -mt-2',
+          'text-md font-semibold text-primary dark:text-slate-200 drop-shadow-md -mt-2',
           font.className
         )}
       >
