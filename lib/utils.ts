@@ -133,34 +133,30 @@ export const getDefaultYears = (): string[] => {
 
 // src/lib/utils.ts
 // src/lib/utils.ts
+
 export const generateYearColorPalette = (years: string[]) => {
-  // Palet warna dengan hue berbeda untuk setiap tahun
-  const baseColors = [
-    { hue: 120, fromLightness: 30, toLightness: 50 }, // Hijau (2025)
-    { hue: 220, fromLightness: 40, toLightness: 60 }, // Biru (2024)
-    { hue: 60, fromLightness: 50, toLightness: 70 }, // Kuning (2023)
-    { hue: 0, fromLightness: 40, toLightness: 60 }, // Merah (2022)
-    { hue: 300, fromLightness: 40, toLightness: 60 }, // Ungu
-    { hue: 180, fromLightness: 40, toLightness: 60 }, // Cyan
-    { hue: 30, fromLightness: 40, toLightness: 60 }, // Oranye
-    { hue: 90, fromLightness: 40, toLightness: 60 }, // Hijau muda
-    { hue: 270, fromLightness: 40, toLightness: 60 }, // Magenta
-    { hue: 150, fromLightness: 40, toLightness: 60 }, // Hijau kebiruan
-    { hue: 240, fromLightness: 40, toLightness: 60 }, // Biru tua
-    { hue: 330, fromLightness: 40, toLightness: 60 }, // Pink
-    { hue: 15, fromLightness: 40, toLightness: 60 }, // Merah oranye
-    { hue: 210, fromLightness: 40, toLightness: 60 }, // Biru muda
-  ];
+  // Pemetaan warna statis untuk setiap tahun (gradient dari gelap ke terang)
+  const yearColorMap: { [key: string]: [string, string] } = {
+    '2025': ['hsl(120, 70%, 30%)', 'hsl(120, 70%, 50%)'], // Hijau
+    '2024': ['hsl(220, 70%, 40%)', 'hsl(220, 70%, 60%)'], // Biru
+    '2023': ['hsl(30, 70%, 40%)', 'hsl(30, 70%, 60%)'], // Oranye
+    '2022': ['hsl(60, 70%, 50%)', 'hsl(60, 70%, 70%)'], // Kuning
+    '2021': ['hsl(300, 70%, 40%)', 'hsl(300, 70%, 60%)'], // Ungu
+    '2020': ['hsl(180, 70%, 40%)', 'hsl(180, 70%, 60%)'], // Cyan
+    '2019': ['hsl(30, 70%, 40%)', 'hsl(30, 70%, 60%)'], // Oranye
+    '2018': ['hsl(90, 70%, 40%)', 'hsl(90, 70%, 60%)'], // Hijau muda
+    '2017': ['hsl(270, 70%, 40%)', 'hsl(270, 70%, 60%)'], // Magenta
+    '2016': ['hsl(150, 70%, 40%)', 'hsl(150, 70%, 60%)'], // Hijau kebiruan
+    '2015': ['hsl(240, 70%, 40%)', 'hsl(240, 70%, 60%)'], // Biru tua
+    '2014': ['hsl(330, 70%, 40%)', 'hsl(330, 70%, 60%)'], // Pink
+    '2013': ['hsl(15, 70%, 40%)', 'hsl(15, 70%, 60%)'], // Merah oranye
+    '2012': ['hsl(210, 70%, 40%)', 'hsl(210, 70%, 60%)'], // Biru muda
+  };
 
-  // Urutkan tahun dari baru ke lama untuk memetakan warna
-  const sortedYears = [...years].sort((a, b) => Number(b) - Number(a));
-
-  return sortedYears.map((year, index) => {
-    // Gunakan warna dari baseColors, ulang jika tahun lebih banyak dari warna
-    const color = baseColors[index % baseColors.length];
-    const fromColor = `hsl(${color.hue}, 70%, ${color.fromLightness}%)`;
-    const toColor = `hsl(${color.hue}, 70%, ${color.toLightness}%)`;
-    return [fromColor, toColor];
+  // Kembalikan array warna hanya untuk tahun yang ada di input
+  return years.map((year) => {
+    // Gunakan warna dari yearColorMap, fallback ke biru jika tahun tidak ditemukan
+    return yearColorMap[year] || ['hsl(220, 70%, 40%)', 'hsl(220, 70%, 60%)'];
   });
 };
 

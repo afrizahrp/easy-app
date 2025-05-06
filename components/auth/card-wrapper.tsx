@@ -50,7 +50,7 @@ export const CardWrapper = ({
     company || {};
 
   return (
-    <Card className='w-[400px]  shadow-md'>
+    <Card className='w-[400px] shadow-md'>
       <CardHeader>
         <Header
           label={storedCompanyName || 'PT. BUMI INDAH SARANAMEDIS'}

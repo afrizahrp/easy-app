@@ -31,9 +31,12 @@ const DashboardPageView = () => {
 
   return (
     <div className='p-4'>
-      <FloatingFilterButton>
+      <FloatingFilterButton
+        title='Show Chart by Years'
+        description='Show Chart by Years'
+      >
         <ChartYearFilter
-          title='Filter All Charts by Year'
+          title='Show Charts by Year'
           className='max-w-xs mb-6'
         />
       </FloatingFilterButton>

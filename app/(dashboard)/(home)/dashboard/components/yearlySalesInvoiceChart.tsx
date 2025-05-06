@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Bar } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -19,9 +19,7 @@ import { themes } from '@/config/thems';
 import gradientPlugin from 'chartjs-plugin-gradient';
 import { useToast } from '@/components/ui/use-toast';
 import useYearlySalesInvoice from '@/queryHooks/dashboard/sales/useYearlySalesInvoice';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
-import { Years } from '@/utils/getYears';
+import CustomTooltip from './customTooltip';
 
 ChartJS.register(
   CategoryScale,
@@ -56,64 +54,84 @@ const YearlySalesInvoiceChart: React.FC<YearlySalesInvoiceChartProps> = ({
   const { toast } = useToast();
   const { data, isLoading, isFetching, error } = useYearlySalesInvoice();
 
+  // State untuk tooltip
+  const [tooltipState, setTooltipState] = useState<{
+    visible: boolean;
+    x: number;
+    y: number;
+    invoice: string;
+    growth: number;
+    year: string;
+  }>({
+    visible: false,
+    x: 0,
+    y: 0,
+    invoice: '',
+    growth: 0,
+    year: '',
+  });
+
   const chartData = React.useMemo(() => {
     if (!data || data.length === 0) return null;
 
-    // Gunakan tahun dari data, urutkan sesuai Years
-    const years = data
-      .map((d) => d.period)
-      .sort((a, b) => Years.indexOf(a) - Years.indexOf(b));
+    const sortedData = [...data].sort(
+      (a, b) => Number(a.period) - Number(b.period)
+    );
+    const years = sortedData.map((d) => d.period);
+    const colorPalette = generateYearColorPalette(years);
 
-    // Generate palet warna untuk semua tahun di Years
-    const fullColorPalette = generateYearColorPalette(Years);
+    // const handleChartClick = (event: any, elements: any[]) => {
+    //     if (isCompact || elements.length === 0) return;
 
-    // Pilih warna hanya untuk tahun yang ada di data
-    const colorPalette = years.map((year) => {
-      const yearIndex = Years.indexOf(year);
-      return fullColorPalette[yearIndex] || ['#1e3a8a', '#3b82f6']; // Fallback
-    });
-
-    const dataset = {
-      label: 'Sales Invoice (Millions IDR)',
-      data: years.map((year) => {
-        const yearData = data.find((d) => d.period === year);
-        return yearData ? yearData.totalInvoice / 1_000_000 : 0;
-      }),
-      backgroundColor: (ctx: import('chart.js').ScriptableContext<'bar'>) => {
-        const chart = ctx.chart;
-        const { ctx: canvasCtx, chartArea } = chart;
-
-        // Gunakan warna berdasarkan tahun
-        const year = years[ctx.dataIndex];
-        const yearIndex = Years.indexOf(year);
-        const [from, to] = fullColorPalette[yearIndex] || [
-          '#1e3a8a',
-          '#3b82f6',
-        ];
-
-        if (!chartArea) return to;
-
-        const gradient = canvasCtx.createLinearGradient(
-          0,
-          chartArea.bottom,
-          0,
-          chartArea.top
-        );
-        gradient.addColorStop(0, from);
-        gradient.addColorStop(1, to);
-
-        return gradient;
-      },
-      borderColor: colorPalette.map(([from]) => from),
-      borderWidth: 1,
-      barThickness: 25,
-      borderRadius: 15,
-    };
+    //     const element = elements[0];
+    //     const datasetIndex = element.datasetIndex;
+    //     const monthIndex = element.index;
+    //     const salesPersonName = chartData?.datasets[datasetIndex]?.label;
+    //     const year = chartData?.datasets[datasetIndex]?.period;
+    //     const month = chartData?.labels[monthIndex];
+    //   };
 
     return {
       labels: years,
-      datasets: [dataset],
-    };
+      datasets: [
+        {
+          label: '',
+          data: years.map((year) => {
+            const yearData = sortedData.find((d) => d.period === year);
+            return yearData ? yearData.totalInvoice / 1_000_000 : 0;
+          }),
+          backgroundColor: (
+            ctx: import('chart.js').ScriptableContext<'bar'>
+          ) => {
+            const chart = ctx.chart;
+            const { ctx: canvasCtx, chartArea } = chart;
+
+            const year = years[ctx.dataIndex];
+            const [from, to] = colorPalette[years.indexOf(year)] || [
+              'hsl(220, 70%, 40%)',
+              'hsl(220, 70%, 60%)',
+            ];
+
+            if (!chartArea) return to;
+
+            const gradient = canvasCtx.createLinearGradient(
+              0,
+              chartArea.bottom,
+              0,
+              chartArea.top
+            );
+            gradient.addColorStop(0, from);
+            gradient.addColorStop(1, to);
+
+            return gradient;
+          },
+          borderColor: colorPalette.map(([from]) => from),
+          borderWidth: 1,
+          barThickness: 25,
+          borderRadius: 15,
+        },
+      ],
+    } as import('chart.js').ChartData<'bar', number[], string>;
   }, [data]);
 
   const maxValue = React.useMemo(() => {
@@ -129,6 +147,15 @@ const YearlySalesInvoiceChart: React.FC<YearlySalesInvoiceChartProps> = ({
       });
     }
   }, [error, toast]);
+
+  React.useEffect(() => {
+    return () => {
+      const tooltipEl = document.getElementById('chartjs-tooltip');
+      if (tooltipEl) {
+        tooltipEl.remove();
+      }
+    };
+  }, []);
 
   const isDataReady =
     !!chartData &&
@@ -155,84 +182,123 @@ const YearlySalesInvoiceChart: React.FC<YearlySalesInvoiceChartProps> = ({
     >
       <div className='relative flex items-center mb-2'>
         <h2 className='text-sm text-muted-foreground font-semibold ml-2'>
-          Yearly Sales Invoice (in Millions IDR)
+          Sales Invoice by Yearly(in Millions IDR)
         </h2>
-        {!isCompact && (
-          <div className='absolute right-0 top-0 flex items-center text-muted-foreground text-xs space-x-2'>
-            <Label htmlFor='chart-mode-period'>
-              {isFullWidth ? 'Full Width' : 'Half Width'}
-            </Label>
-            <Switch
-              id='chart-mode-period'
-              checked={isFullWidth}
-              onCheckedChange={(checked) => onModeChange?.(checked)}
-              aria-label='Toggle full width chart'
-            />
-          </div>
-        )}
       </div>
+
       <div className='flex-1 min-h-0 w-full'>
         {isLoading || isFetching ? (
           <div className='flex items-center justify-center h-full'>
             <div className='w-3/4 h-1/2 rounded-lg shimmer' />
           </div>
         ) : isDataReady ? (
-          <Bar
-            key={isFullWidth ? 'full' : 'half'}
-            height={isCompact ? 250 : height}
-            data={chartData}
-            options={{
-              responsive: true,
-              maintainAspectRatio: false,
-              layout: {
-                padding: {
-                  bottom: isCompact ? 10 : 20,
-                  top: isCompact ? 5 : 10,
-                },
-              },
-              scales: {
-                y: {
-                  beginAtZero: true,
-                  grid: {
-                    drawTicks: false,
-                    color: `hsl(${theme?.cssVars[mode === 'dark' ? 'dark' : 'light'].chartGird})`,
+          <>
+            <Bar
+              key={isFullWidth ? 'full' : 'half'}
+              height={isCompact ? 250 : height}
+              data={chartData}
+              options={{
+                responsive: true,
+                maintainAspectRatio: false,
+                layout: {
+                  padding: {
+                    bottom: isCompact ? 10 : 20,
+                    top: isCompact ? 5 : 10,
                   },
-                  ticks: {
-                    callback: (value: unknown) => {
-                      const val = Number(value);
-                      return `${val.toLocaleString('id-ID')}`;
+                },
+                scales: {
+                  y: {
+                    beginAtZero: true,
+                    grid: {
+                      drawTicks: false,
+                      color: `hsl(${theme?.cssVars[mode === 'dark' ? 'dark' : 'light'].chartGird})`,
+                    },
+                    ticks: {
+                      callback: (value: unknown) => {
+                        const val = Number(value);
+                        return `${val.toLocaleString('id-ID')}`;
+                      },
+                    },
+                  },
+                  x: {
+                    title: { display: false, text: 'Year' },
+                    ticks: {
+                      callback: (_: unknown, index: number) =>
+                        Array.isArray(chartData?.labels)
+                          ? chartData.labels[index]
+                          : '',
+                    },
+                    grid: {
+                      drawTicks: false,
+                      color: `hsl(${theme?.cssVars[mode === 'dark' ? 'dark' : 'light'].chartGird})`,
+                      display: false,
                     },
                   },
                 },
-                x: {
-                  title: { display: false, text: 'Year' },
-                  ticks: {
-                    callback: (value, index) => chartData.labels[index] ?? '',
-                  },
-                  grid: {
-                    drawTicks: false,
-                    color: `hsl(${theme?.cssVars[mode === 'dark' ? 'dark' : 'light'].chartGird})`,
+                plugins: {
+                  legend: {
                     display: false,
                   },
-                },
-              },
-              plugins: {
-                legend: {
-                  display: !isCompact,
-                  position: 'top',
-                },
-                title: {
-                  display: false,
-                },
-                tooltip: {
-                  callbacks: {
-                    label: (context) =>
-                      `${(context.raw as number).toLocaleString('id-ID')} million IDR`,
+                  title: {
+                    display: false,
+                  },
+                  tooltip: {
+                    enabled: false,
+                    external: (context) => {
+                      const { chart, tooltip } = context;
+                      if (!chartData || !chartData.labels) {
+                        setTooltipState((prev) => ({
+                          ...prev,
+                          visible: false,
+                        }));
+                        return;
+                      }
+
+                      if (tooltip.opacity === 0) {
+                        setTooltipState((prev) => ({
+                          ...prev,
+                          visible: false,
+                        }));
+                        return;
+                      }
+
+                      if (tooltip.body) {
+                        const year =
+                          chartData.labels[tooltip.dataPoints[0].dataIndex] ??
+                          '';
+                        const yearData = data.find((d) => d.period === year);
+                        const invoice = (
+                          tooltip.dataPoints[0].raw as number
+                        ).toLocaleString('id-ID');
+                        const growth = yearData?.growthPercentage ?? 0;
+
+                        setTooltipState({
+                          visible: true,
+                          x: chart.canvas.offsetLeft + tooltip.caretX + 10, // Offset kecil ke kanan
+                          y: chart.canvas.offsetTop + tooltip.caretY - 3, // Lebih dekat ke bar
+                          invoice,
+                          growth,
+                          year,
+                        });
+
+                        console.log(
+                          `Year: ${year}, Growth: ${growth}, Status: ${growth >= 0 ? 'Growth' : 'Down'}`
+                        );
+                      }
+                    },
                   },
                 },
-              },
-            }}
-          />
+              }}
+            />
+            <CustomTooltip
+              visible={tooltipState.visible}
+              x={tooltipState.x}
+              y={tooltipState.y}
+              invoice={tooltipState.invoice}
+              growth={tooltipState.growth}
+              year={tooltipState.year}
+            />
+          </>
         ) : (
           <div className='flex flex-col items-center justify-center h-full text-gray-400'>
             <svg

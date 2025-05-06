@@ -13,7 +13,7 @@ interface YearlySalesInvoiceResponse {
     period: string;
     totalInvoice: number;
     quantity: number;
-    growthPercentage: number | null;
+    growthPercentage: number;
   }[];
 }
 

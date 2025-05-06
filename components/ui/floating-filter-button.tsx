@@ -103,7 +103,7 @@ export function FloatingFilterButton({
                   <span>{title}</span>
                 </motion.div>
               </TooltipTrigger>
-              <TooltipContent className='text-sm text-gray-700 dark:text-slate-100'>
+              <TooltipContent className='text-sm text-slate-100 dark:text-slate-100'>
                 <p>{description}</p>
               </TooltipContent>
             </Tooltip>

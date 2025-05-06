@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { Years } from '@/utils/getYears';
+import { Years } from '@/lib/utils';
 import { useYearlyPeriodStore } from '@/store';
 import { Button } from '@/components/ui/button';
 import { Cross2Icon } from '@radix-ui/react-icons';

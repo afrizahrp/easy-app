@@ -59,7 +59,7 @@ export function YearFacetedFilter({
               <Separator orientation='vertical' className='mx-2 h-4' />
               <Badge
                 variant='outline'
-                className='rounded-sm px-1 font-normal text-slate dark:text-slate-400'
+                className='rounded-sm px-1 font-normal text-primary-foreground dark:text-slate-400'
               >
                 {selectedValues.size}
               </Badge>

@@ -1,8 +1,8 @@
 'use client';
+
 import React from 'react';
 import { Table } from '@tanstack/react-table';
-
-import { motion, AnimatePresence } from 'framer-motion'; // Impor Framer Motion
+import { motion, AnimatePresence } from 'framer-motion';
 import MonthlySalesInvoiceChart from './monthlySalesInvoiceChart';
 import MonthlySalesInvoiceByPoTypeChart from './monthlySalesInvoiceByPoTypeChart';
 import SalesInvoiceHdList from '@/app/(dashboard)/(apps)/sales/salesInvoiceHd/list/page';
@@ -75,32 +75,13 @@ const SalesInvoiceOverview: React.FC<SalesInvoiceOverviewProps> = ({
       {showList ? (
         <div className={chartLayoutClass}>
           <AnimatePresence>
-            {(fullChart === null || fullChart === 'poType') && (
-              <motion.div
-                key='poTypeChart'
-                className={`flex-none ${fullChart === 'poType' ? 'w-full' : 'w-full md:w-1/2'} overflow-x-auto max-w-full`}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.3, ease: 'easeInOut' }}
-              >
-                <MonthlySalesInvoiceByPoTypeChart
-                  isFullWidth={fullChart === 'poType'}
-                  onModeChange={handlePoTypeModeChange}
-                  height={400}
-                  isCompact={false}
-                />
-              </motion.div>
-            )}
-          </AnimatePresence>
-          <AnimatePresence>
             {(fullChart === null || fullChart === 'period') && (
               <motion.div
                 key='periodChart'
                 className={`flex-none ${fullChart === 'period' ? 'w-full' : 'w-full md:w-1/2'} overflow-x-auto max-w-full`}
-                initial={{ opacity: 0, x: 20 }}
+                initial={{ opacity: 0, x: -20 }} // Animasi dari kiri
                 animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: 20 }}
+                exit={{ opacity: 0, x: -20 }}
                 transition={{ duration: 0.3, ease: 'easeInOut' }}
               >
                 <MonthlySalesInvoiceChart
@@ -112,12 +93,31 @@ const SalesInvoiceOverview: React.FC<SalesInvoiceOverviewProps> = ({
               </motion.div>
             )}
           </AnimatePresence>
+          <AnimatePresence>
+            {(fullChart === null || fullChart === 'poType') && (
+              <motion.div
+                key='poTypeChart'
+                className={`flex-none ${fullChart === 'poType' ? 'w-full' : 'w-full md:w-1/2'} overflow-x-auto max-w-full`}
+                initial={{ opacity: 0, x: 20 }} // Animasi dari kanan
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 20 }}
+                transition={{ duration: 0.3, ease: 'easeInOut' }}
+              >
+                <MonthlySalesInvoiceByPoTypeChart
+                  isFullWidth={fullChart === 'poType'}
+                  onModeChange={handlePoTypeModeChange}
+                  height={400}
+                  isCompact={false}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       ) : (
         <div className='w-full overflow-x-auto max-w-full h-fit min-h-0'>
-          <MonthlySalesInvoiceByPoTypeChart
-            isFullWidth={fullChart === 'poType'}
-            onModeChange={handlePoTypeModeChange}
+          <MonthlySalesInvoiceChart
+            isFullWidth={fullChart === 'period'}
+            onModeChange={handlePeriodModeChange}
             height={250}
             isCompact={true}
           />

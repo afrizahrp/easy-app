@@ -733,3 +733,19 @@ html[dir='rtl'] .react-select .select__loading-indicator {
 .chart-container:not(.fullscreen) {
   position: relative;
 }
+/* Di globals.css */
+#chartjs-tooltip {
+  transition: all 0.1s ease;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+
+#chartjs-tooltip svg {
+  vertical-align: middle;
+  display: inline-block;
+}
+
+/* Untuk pendekatan JSX */
+.absolute svg {
+  vertical-align: middle;
+}

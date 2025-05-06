@@ -1,4 +1,5 @@
 'use client';
+
 import React from 'react';
 import { Bar } from 'react-chartjs-2';
 import {
@@ -11,7 +12,7 @@ import {
   Legend,
 } from 'chart.js';
 import { motion } from 'framer-motion';
-import { hslToHex } from '@/lib/utils';
+import { hslToHex, generateYearColorPalette } from '@/lib/utils'; // Impor generateYearColorPalette
 import { useThemeStore } from '@/store';
 import { useTheme } from 'next-themes';
 import { themes } from '@/config/thems';
@@ -61,15 +62,7 @@ const MonthlySalesInvoiceChart: React.FC<MonthlySalesInvoiceChartProps> = ({
     if (!data) return null;
 
     const allYears = data.map((d) => d.period);
-
-    const colorPalette = [
-      ['#1e3a8a', '#3b82f6'], // Navy → Blue
-      ['#10b981', '#6ee7b7'], // Green → Light Green
-      ['#e11d48', '#f472b6'], // Red → Pink
-      ['#9333ea', '#c084fc'], // Purple
-      ['#f59e0b', '#fcd34d'], // Amber
-      ['#0ea5e9', '#7dd3fc'], // Sky
-    ];
+    const colorPalette = generateYearColorPalette(allYears); // Gunakan generateYearColorPalette
 
     const datasets = allYears.map((year, idx) => ({
       label: `Sales ${year}`,
@@ -117,7 +110,7 @@ const MonthlySalesInvoiceChart: React.FC<MonthlySalesInvoiceChartProps> = ({
     if (error) {
       toast({
         description: 'Failed to load sales data. Please try again.',
-        color: 'destructive',
+        variant: 'destructive', // Sesuaikan dengan varian toast
       });
     }
   }, [error, toast]);
@@ -133,7 +126,7 @@ const MonthlySalesInvoiceChart: React.FC<MonthlySalesInvoiceChartProps> = ({
 
   return (
     <motion.div
-      className={`chart-container ${isCompact ? 'compact' : ''} bg-white dark:bg-[#18181b] p-4 rounded-lg shadow-sm flex flex-col h-fit min-h-[250px] w-full`} // Lebar dikontrol oleh parent
+      className={`chart-container ${isCompact ? 'compact' : ''} bg-white dark:bg-[#18181b] p-4 rounded-lg shadow-sm flex flex-col h-fit min-h-[250px] w-full`}
       style={{ backgroundColor: hexBackground }}
       animate={{
         opacity: isFullWidth ? 1 : 0.95,
@@ -147,7 +140,7 @@ const MonthlySalesInvoiceChart: React.FC<MonthlySalesInvoiceChartProps> = ({
     >
       <div className='relative flex items-center mb-2'>
         <h2 className='text-sm text-muted-foreground font-semibold ml-2'>
-          Sales Invoice by Monthly Period (in Millions IDR)
+          Sales Invoice by Monthly (in Millions IDR)
         </h2>
         {!isCompact && (
           <div className='absolute right-0 top-0 flex items-center text-muted-foreground text-xs space-x-2'>
