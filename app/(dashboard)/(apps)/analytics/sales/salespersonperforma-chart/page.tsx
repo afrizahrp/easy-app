@@ -131,10 +131,11 @@ const SalesPersonPerformaAnalytics: React.FC<
         disabled={selectedSalesPerson !== null}
         // hideBreadcrumb={selectedSalesPerson !== null}
         breadcrumb={[
+          { name: 'Dashboard', href: '/dashboard' },
           { name: 'Analytics', href: '/analytics/sales' },
           {
             name: 'Sales Person Performance',
-            href: '/analytics/sales/salespersonperforma-chart',
+            href: '#',
           },
         ]}
       />

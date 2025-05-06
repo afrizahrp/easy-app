@@ -1,98 +1,110 @@
 import { api } from '@/config/axios.config';
 import { useQuery } from '@tanstack/react-query';
-import { useSessionStore, useMonthYearPeriodStore } from '@/store';
-import { format, isValid } from 'date-fns';
-import { AxiosError } from 'axios';
+import { useSessionStore, useYearlyPeriodStore } from '@/store';
+import { getDefaultYears } from '@/lib/utils';
+import axios from 'axios';
 
-interface SalesDataWithoutFilter {
+interface SalesPerson {
+  salesPersonName: string;
+  amount: number;
+  quantity: number;
+  growthPercentage: number;
+}
+
+interface SalesData {
   period: string;
   totalInvoice: number;
-  months: {
-    month: string;
-    sales: { salesPersonName: string; amount: number }[];
-  }[];
+  sales: SalesPerson[];
 }
 
 interface SalesPeriodResponse {
   company_id: string;
   module_id: string;
   subModule_id: string;
-  data: SalesDataWithoutFilter[];
+  data: SalesData[];
 }
 
-interface UseMonthlySalesPersonInvoiceProps {
-  context: 'salesPersonInvoice';
+interface UseYearlySalesPersonInvoiceProps {
+  context?: 'salesPersonInvoice'; // Opsional, untuk fleksibilitas
 }
 
-const useMonthlySalesPersonInvoice = ({
+const useYearlySalesPersonInvoice = ({
   context,
-}: UseMonthlySalesPersonInvoiceProps) => {
+  company_id,
+  module_id = 'dsb',
+  subModule_id = 'sls',
+}: UseYearlySalesPersonInvoiceProps & {
+  company_id?: string;
+  module_id?: string;
+  subModule_id?: string;
+} = {}) => {
   const user = useSessionStore((state) => state.user);
-  const company_id = user?.company_id?.toUpperCase();
-  const module_id = 'SLS';
-  const subModule_id = 'sls';
+  const resolvedCompanyId = company_id || user?.company_id?.toUpperCase();
+  const { selectedYears } = useYearlyPeriodStore();
 
-  const { salesPersonInvoicePeriod } = useMonthYearPeriodStore();
+  // Gunakan selectedYears jika ada, fallback ke getDefaultYears
+  const years = selectedYears.length > 0 ? selectedYears : getDefaultYears();
 
-  const isValidRequest = Boolean(company_id && module_id && subModule_id);
-
-  // Validasi dan format periode
-  const getFormattedPeriod = (date: Date | null, defaultDate: Date): string => {
-    return date && isValid(date)
-      ? format(date, 'MMMyyyy')
-      : format(defaultDate, 'MMMyyyy');
-  };
-
-  const defaultStartPeriod = new Date(new Date().getFullYear(), 0, 1); // 1 Januari tahun berjalan
-  const defaultEndPeriod = new Date(); // Tanggal saat ini
-
-  const formattedStartPeriod = getFormattedPeriod(
-    salesPersonInvoicePeriod.startPeriod,
-    defaultStartPeriod
-  );
-  const formattedEndPeriod = getFormattedPeriod(
-    salesPersonInvoicePeriod.endPeriod,
-    defaultEndPeriod
+  const isValidRequest = Boolean(
+    resolvedCompanyId && module_id && subModule_id && years && years.length > 0
   );
 
   const { data, isLoading, isFetching, error, ...rest } = useQuery<
     SalesPeriodResponse,
-    AxiosError<{ message?: string }>
+    Error
   >({
     queryKey: [
-      'salesPersonChartUnfiltered',
-      context,
-      company_id,
+      'yearlySalesPersonInvoice',
+      resolvedCompanyId,
       module_id,
       subModule_id,
-      formattedStartPeriod,
-      formattedEndPeriod,
+      years,
     ],
     queryFn: async () => {
-      const params = new URLSearchParams();
-      params.append('startPeriod', formattedStartPeriod);
-      params.append('endPeriod', formattedEndPeriod);
+      if (!process.env.NEXT_PUBLIC_API_URL) {
+        throw new Error('NEXT_PUBLIC_API_URL is not defined');
+      }
 
-      const url = `${process.env.NEXT_PUBLIC_API_URL}/${company_id}/${module_id}/${subModule_id}/get-analytics/getMonthlySalespersonInvoice`;
-      const finalUrl = `${url}?${params.toString()}`;
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/${resolvedCompanyId}/${module_id}/${subModule_id}/get-dashboard/getYearlySalespersonInvoice`;
 
       try {
-        const response = await api.get<SalesPeriodResponse>(finalUrl);
+        const response = await api.get<SalesPeriodResponse>(url, {
+          params: { years },
+          paramsSerializer: (params) => {
+            // Serialisasi array years seperti useYearlySalesInvoice
+            return years
+              .map((year) => `years=${encodeURIComponent(year)}`)
+              .join('&');
+          },
+        });
+
+        console.log('Sales Person Invoice Response:', response.data);
+
         return response.data;
-      } catch (err) {
-        const axiosError = err as AxiosError<{ message?: string }>;
-        throw new Error(
-          axiosError.response?.data?.message || 'Failed to fetch sales data'
-        );
+      } catch (error) {
+        if (axios.isAxiosError(error)) {
+          console.error('Axios Error:', {
+            status: error.response?.status,
+            message: error.response?.data?.message,
+            url,
+            params: { years },
+          });
+          throw new Error(
+            error.response?.data?.message ||
+              'Failed to fetch yearly salesperson invoice data'
+          );
+        }
+        console.error('Unexpected Error:', error);
+        throw error;
       }
     },
     enabled: isValidRequest,
-    staleTime: 60 * 1000,
-    retry: (failureCount, err) => {
-      if (err instanceof AxiosError && err.response?.status === 400) {
+    staleTime: 5 * 60 * 1000, // 5 menit, seperti useYearlySalesInvoice
+    retry: (failureCount, error) => {
+      if (axios.isAxiosError(error) && error.response?.status === 400) {
         return false;
       }
-      return failureCount < 2;
+      return failureCount < 3; // Konsisten dengan useYearlySalesInvoice
     },
   });
 
@@ -105,4 +117,4 @@ const useMonthlySalesPersonInvoice = ({
   };
 };
 
-export default useMonthlySalesPersonInvoice;
+export default useYearlySalesPersonInvoice;

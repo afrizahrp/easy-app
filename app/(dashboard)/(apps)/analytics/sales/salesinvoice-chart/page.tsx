@@ -61,10 +61,11 @@ const SalesInvoiceAnalytics: React.FC<SalesInvoiceAnalyticsProps> = ({
             title='Sales Invoice Overview'
             hideBreadcrumb={false}
             breadcrumb={[
+              { name: 'Dashboard', href: '/dashboard' },
               { name: 'Analytics', href: '/analytics/sales' },
               {
                 name: 'Sales Invoice Overview',
-                href: '/analytics/sales/salesinvoice-chart',
+                href: '#',
               },
             ]}
           />
@@ -88,8 +89,6 @@ const SalesInvoiceAnalytics: React.FC<SalesInvoiceAnalyticsProps> = ({
             showList={showList}
             fullChart={fullChart}
             onFilterChange={handleFilterChange}
-            startPeriod={startPeriod}
-            endPeriod={endPeriod}
           />
         </motion.div>
       </div>

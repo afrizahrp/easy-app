@@ -17,10 +17,6 @@ interface YearlySalesInvoiceResponse {
   }[];
 }
 
-interface QueryParams {
-  years: string[];
-}
-
 const useYearlySalesInvoice = (
   company_id?: string,
   module_id: string = 'dsb',
