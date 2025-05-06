@@ -5,17 +5,25 @@ import SalesInvoiceFilterSummary from '@/components/sales/salesInvoiceFilterSumm
 import SalesInvoiceOverview from '../salesinvoice-chart/components/salesInvoiceOverview';
 import { PageHeaderWrapper } from '@/components/page-header-wrapper';
 
+// interface SalesInvoiceAnalyticsProps {
+//   showList?: boolean;
+//   showHeader?: boolean;
+// }
+
 interface SalesInvoiceAnalyticsProps {
   showList?: boolean;
   showHeader?: boolean;
+  startPeriod?: string | null;
+  endPeriod?: string | null;
 }
 
 const SalesInvoiceAnalytics: React.FC<SalesInvoiceAnalyticsProps> = ({
   showList = true,
   showHeader = true,
+  startPeriod,
+  endPeriod,
 }) => {
   const [fullChart, setFullChart] = useState<'period' | 'poType' | null>(null);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const handleFilterChange = (filters: {
     period?: string;
@@ -80,6 +88,8 @@ const SalesInvoiceAnalytics: React.FC<SalesInvoiceAnalyticsProps> = ({
             showList={showList}
             fullChart={fullChart}
             onFilterChange={handleFilterChange}
+            startPeriod={startPeriod}
+            endPeriod={endPeriod}
           />
         </motion.div>
       </div>

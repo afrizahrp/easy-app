@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Bar } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -12,15 +12,16 @@ import {
   Legend,
 } from 'chart.js';
 import { motion } from 'framer-motion';
-import { hslToHex, generateYearColorPalette } from '@/lib/utils'; // Impor generateYearColorPalette
+import { hslToHex, generateYearColorPalette } from '@/lib/utils';
 import { useThemeStore } from '@/store';
 import { useTheme } from 'next-themes';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { themes } from '@/config/thems';
 import gradientPlugin from 'chartjs-plugin-gradient';
 import { useToast } from '@/components/ui/use-toast';
 import useMonthlySalesInvoice from '@/queryHooks/analytics/sales/useMonthlySalesInvoice';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
+import { Maximize2, Minimize2 } from 'lucide-react';
 import { months } from '@/utils/monthNameMap';
 
 ChartJS.register(
@@ -38,6 +39,8 @@ interface MonthlySalesInvoiceChartProps {
   isCompact?: boolean;
   isFullWidth?: boolean;
   onModeChange?: (isFull: boolean) => void;
+  startPeriod?: string;
+  endPeriod?: string;
 }
 
 const MonthlySalesInvoiceChart: React.FC<MonthlySalesInvoiceChartProps> = ({
@@ -45,6 +48,8 @@ const MonthlySalesInvoiceChart: React.FC<MonthlySalesInvoiceChartProps> = ({
   isCompact = false,
   isFullWidth = false,
   onModeChange,
+  startPeriod: propStartPeriod,
+  endPeriod: propEndPeriod,
 }) => {
   const { theme: config } = useThemeStore();
   const { theme: mode } = useTheme();
@@ -54,15 +59,89 @@ const MonthlySalesInvoiceChart: React.FC<MonthlySalesInvoiceChartProps> = ({
   })`;
   const hexBackground = hslToHex(hslBackground);
   const { toast } = useToast();
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const urlStartPeriod = searchParams.get('startPeriod');
+  const urlEndPeriod = searchParams.get('endPeriod');
+
+  const startPeriod = propStartPeriod ?? urlStartPeriod ?? undefined;
+  const endPeriod = propEndPeriod ?? urlEndPeriod ?? undefined;
+
   const { data, isLoading, isFetching, error } = useMonthlySalesInvoice({
     context: 'salesInvoice',
+    startPeriod,
+    endPeriod,
   });
+
+  const chartContainerRef = useRef<HTMLDivElement>(null);
+  const [isFullScreen, setIsFullScreen] = useState(false);
+
+  const toggleFullScreen = () => {
+    if (!chartContainerRef.current) return;
+
+    if (!isFullScreen) {
+      const requestFullscreen =
+        chartContainerRef.current.requestFullscreen ||
+        (chartContainerRef.current as any).webkitRequestFullscreen ||
+        (chartContainerRef.current as any).mozRequestFullScreen ||
+        (chartContainerRef.current as any).msRequestFullscreen;
+
+      if (requestFullscreen) {
+        requestFullscreen.call(chartContainerRef.current);
+      } else {
+        setIsFullScreen(true);
+      }
+    } else {
+      if (document.fullscreenElement) {
+        const exitFullscreen =
+          document.exitFullscreen ||
+          (document as any).webkitExitFullscreen ||
+          (document as any).mozCancelFullScreen ||
+          (document as any).msExitFullscreen;
+
+        if (exitFullscreen) {
+          exitFullscreen.call(document);
+        }
+      } else {
+        setIsFullScreen(false);
+      }
+    }
+  };
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      const isNowFullScreen = !!document.fullscreenElement;
+      setIsFullScreen(isNowFullScreen);
+      onModeChange?.(isNowFullScreen);
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+    document.addEventListener('mozfullscreenchange', handleFullscreenChange);
+    document.addEventListener('MSFullscreenChange', handleFullscreenChange);
+
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      document.removeEventListener(
+        'webkitfullscreenchange',
+        handleFullscreenChange
+      );
+      document.removeEventListener(
+        'mozfullscreenchange',
+        handleFullscreenChange
+      );
+      document.removeEventListener(
+        'MSFullscreenChange',
+        handleFullscreenChange
+      );
+    };
+  }, [onModeChange]);
 
   const chartData = React.useMemo(() => {
     if (!data) return null;
 
     const allYears = data.map((d) => d.period);
-    const colorPalette = generateYearColorPalette(allYears); // Gunakan generateYearColorPalette
+    const colorPalette = generateYearColorPalette(allYears);
 
     const datasets = allYears.map((year, idx) => ({
       label: `Sales ${year}`,
@@ -91,7 +170,7 @@ const MonthlySalesInvoiceChart: React.FC<MonthlySalesInvoiceChartProps> = ({
       },
       borderColor: colorPalette[idx % colorPalette.length][0],
       borderWidth: 1,
-      barThickness: 25,
+      barThickness: isFullScreen ? 30 : 25,
       borderRadius: 15,
     }));
 
@@ -99,7 +178,7 @@ const MonthlySalesInvoiceChart: React.FC<MonthlySalesInvoiceChartProps> = ({
       labels: months,
       datasets,
     };
-  }, [data]);
+  }, [data, isFullScreen]);
 
   const maxValue = React.useMemo(() => {
     if (!chartData) return 0;
@@ -110,7 +189,7 @@ const MonthlySalesInvoiceChart: React.FC<MonthlySalesInvoiceChartProps> = ({
     if (error) {
       toast({
         description: 'Failed to load sales data. Please try again.',
-        variant: 'destructive', // Sesuaikan dengan varian toast
+        variant: 'destructive',
       });
     }
   }, [error, toast]);
@@ -124,9 +203,18 @@ const MonthlySalesInvoiceChart: React.FC<MonthlySalesInvoiceChartProps> = ({
       (ds) => Array.isArray(ds.data) && ds.data.length > 0
     );
 
+  // const handleBack = () => {
+  //   router.push('/dashboard');
+  // };
+
   return (
     <motion.div
-      className={`chart-container ${isCompact ? 'compact' : ''} bg-white dark:bg-[#18181b] p-4 rounded-lg shadow-sm flex flex-col h-fit min-h-[250px] w-full`}
+      ref={chartContainerRef}
+      className={`chart-container ${isCompact ? 'compact' : ''} ${
+        isFullScreen && !document.fullscreenElement
+          ? 'fixed inset-0 z-50 bg-white dark:bg-[#18181b] p-4 rounded-lg shadow-md'
+          : 'relative bg-white dark:bg-[#18181b] p-4 rounded-lg shadow-sm'
+      } flex flex-col h-fit min-h-[250px] w-full`}
       style={{ backgroundColor: hexBackground }}
       animate={{
         opacity: isFullWidth ? 1 : 0.95,
@@ -138,23 +226,35 @@ const MonthlySalesInvoiceChart: React.FC<MonthlySalesInvoiceChartProps> = ({
       }}
       transition={{ duration: 0.3, ease: 'easeInOut' }}
     >
-      <div className='relative flex items-center mb-2'>
+      <div className='relative flex items-center justify-between mb-2'>
         <h2 className='text-sm text-muted-foreground font-semibold ml-2'>
           Sales Invoice by Monthly (in Millions IDR)
+          {startPeriod && endPeriod ? ` - ${startPeriod.slice(-4)}` : ''}
         </h2>
-        {!isCompact && (
-          <div className='absolute right-0 top-0 flex items-center text-muted-foreground text-xs space-x-2'>
-            <Label htmlFor='chart-mode-period'>
-              {isFullWidth ? 'Full Width' : 'Half Width'}
-            </Label>
-            <Switch
-              id='chart-mode-period'
-              checked={isFullWidth}
-              onCheckedChange={(checked) => onModeChange?.(checked)}
-              aria-label='Toggle full width chart'
-            />
-          </div>
-        )}
+        <div className='flex items-center space-x-2'>
+          {!isCompact && (
+            <Button
+              variant='outline'
+              size='sm'
+              onClick={toggleFullScreen}
+              className='mr-2'
+            >
+              {isFullScreen ? (
+                <Minimize2 className='h-4 w-4' />
+              ) : (
+                <Maximize2 className='h-4 w-4' />
+              )}
+            </Button>
+          )}
+          {/* {(startPeriod && endPeriod) || (propStartPeriod && propEndPeriod) ? (
+            <Button
+              onClick={handleBack}
+              className='px-4 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 text-xs transition'
+            >
+              ← Back
+            </Button>
+          ) : null} */}
+        </div>
       </div>
       <div className='flex-1 min-h-0 w-full'>
         {isLoading || isFetching ? (
@@ -164,15 +264,15 @@ const MonthlySalesInvoiceChart: React.FC<MonthlySalesInvoiceChartProps> = ({
         ) : isDataReady ? (
           <Bar
             key={isFullWidth ? 'full' : 'half'}
-            height={isCompact ? 250 : height}
+            height={isFullScreen ? undefined : isCompact ? 250 : height}
             data={chartData}
             options={{
               responsive: true,
               maintainAspectRatio: false,
               layout: {
                 padding: {
-                  bottom: isCompact ? 10 : 20,
-                  top: isCompact ? 5 : 10,
+                  bottom: isFullScreen ? 10 : isCompact ? 10 : 20,
+                  top: isFullScreen ? 10 : isCompact ? 5 : 10,
                 },
               },
               scales: {
@@ -188,12 +288,18 @@ const MonthlySalesInvoiceChart: React.FC<MonthlySalesInvoiceChartProps> = ({
                       const val = Number(value) / 1000000;
                       return `${val.toLocaleString('id-ID')}`;
                     },
+                    font: {
+                      size: isFullScreen ? 14 : 12,
+                    },
                   },
                 },
                 x: {
                   title: { display: false, text: 'Month' },
                   ticks: {
                     callback: (value, index) => chartData.labels[index] ?? '',
+                    font: {
+                      size: isFullScreen ? 14 : 12,
+                    },
                   },
                   grid: {
                     drawTicks: false,
@@ -206,6 +312,9 @@ const MonthlySalesInvoiceChart: React.FC<MonthlySalesInvoiceChartProps> = ({
                 legend: {
                   display: !isCompact,
                   position: 'top',
+                  labels: {
+                    font: { size: isFullScreen ? 12 : 10 },
+                  },
                 },
                 title: {
                   display: false,
@@ -215,6 +324,8 @@ const MonthlySalesInvoiceChart: React.FC<MonthlySalesInvoiceChartProps> = ({
                     label: (context) =>
                       ` ${(context.raw as number).toLocaleString('id-ID')}`,
                   },
+                  titleFont: { size: isFullScreen ? 14 : 12 },
+                  bodyFont: { size: isFullScreen ? 12 : 10 },
                 },
               },
             }}

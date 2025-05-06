@@ -1,9 +1,10 @@
 'use client';
-import Link from 'next/link';
 
-import { ArrowRight, BarChart2, FileText } from 'lucide-react';
+import Link from 'next/link';
+import { ArrowRight, BarChart2, FileText, ArrowLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
 import AnalyticsNav from '@/components/AnalyticsNav';
+import { useSearchParams, useRouter } from 'next/navigation';
 import SalesInvoiceAnalytics from './salesinvoice-chart/page';
 import SalesPersonPerformaAnalytics from './salespersonperforma-chart/page';
 import { PageHeaderWrapper } from '@/components/page-header-wrapper';
@@ -16,68 +17,135 @@ import {
 } from '@/components/ui/tooltip';
 import { FloatingFilterButton } from '@/components/ui/floating-filter-button';
 import { ChartPeriodFilter } from '@/components/ui/chartPeriodFilter';
+import { useInView } from 'framer-motion';
+import { useRef } from 'react';
 
 const cardVariants = {
-  hidden: { opacity: 0, y: 50 }, // Tingkatkan jarak pergeseran agar lebih terlihat
+  hidden: { opacity: 0, y: 50 },
   visible: (i: number) => ({
     opacity: 1,
     y: 0,
     transition: {
       duration: 0.5,
-      delay: i * 0.2, // Delay berdasarkan indeks card untuk efek stagger
+      delay: i * 0.2,
     },
   }),
 };
 
-// Gunakan useInView untuk memicu animasi saat elemen masuk viewport
-import { useInView } from 'framer-motion';
-import { useRef } from 'react';
+interface SalesAnalyticsPageProps {
+  startPeriod?: string | null;
+  endPeriod?: string | null;
+}
 
-export default function SalesAnalyticsPage() {
-  const cardVariants = {
-    hidden: { opacity: 0, y: 50 },
-    visible: (i: number) => ({
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.5,
-        delay: i * 0.2,
-      },
-    }),
-  };
+export default function SalesAnalyticsPage({
+  startPeriod: propStartPeriod,
+  endPeriod: propEndPeriod,
+}: SalesAnalyticsPageProps) {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const urlStartPeriod = searchParams.get('startPeriod');
+  const urlEndPeriod = searchParams.get('endPeriod');
 
   const tooltipTextViewDetailsSalesInvoice =
     'Explore sales invoices to spot trends and track performance.';
   const tooltipTextViewDetailsSalesPersonPerforma =
     'Click to view detailed performance of this salesperson, including their top 3 selling products.';
 
-  // Ref untuk masing-masing card
   const ref1 = useRef(null);
   const ref2 = useRef(null);
-  const isInView1 = useInView(ref1, { once: true }); // Animasi hanya dipicu sekali saat masuk viewport
+  const isInView1 = useInView(ref1, { once: true });
   const isInView2 = useInView(ref2, { once: true });
+
+  const handleBack = () => {
+    router.push('/analytics'); // Kembali ke /analytics tanpa parameter
+  };
+
+  // Gunakan urlStartPeriod dan urlEndPeriod untuk kondisi, prioritaskan prop jika ada
+  const startPeriod = propStartPeriod || urlStartPeriod;
+  const endPeriod = propEndPeriod || urlEndPeriod;
 
   return (
     <div className='flex flex-col w-full pt-2 pb-4 px-2 md:pt-4 md:pb-8 md:px-8 lg:pt-4 lg:pb-10 lg:px-10 gap-8 bg-gray-100 dark:bg-gray-900'>
       <div className='text-center md:text-left'>
-        <h1 className='text-2xl font-bold tracking-tight text-gray-900 dark:text-slate-100'>
-          📊 Sales Analytics
-        </h1>
+        {/* Opsi 1: Tombol Back di kiri atas */}
+        <div className='flex items-center justify-between mb-2'>
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={
+              startPeriod && endPeriod
+                ? { opacity: 1, x: 0 }
+                : { opacity: 0, x: -20 }
+            }
+            transition={{ duration: 0.3 }}
+          >
+            {/* {startPeriod && endPeriod && ( */}
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant='default'
+                    size='sm'
+                    onClick={handleBack}
+                    className='text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
+                  >
+                    <ArrowLeft className='w-4 h-4 mr-1' />
+                    Back
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Back to Analytics Overview</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+            {/* )} */}
+          </motion.div>
+          <h1 className='text-2xl font-bold tracking-tight text-gray-900 dark:text-slate-100'>
+            📊 Sales Analytics
+          </h1>
+        </div>
         <p className='text-lg text-slate-600 dark:text-slate-400 mt-2'>
           Explore sales performance and invoice summaries with interactive
           insights.
         </p>
+
+        {/* Opsi 2: Tombol Back di bawah deskripsi (dikomentari) */}
+        {/* {startPeriod && endPeriod && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+            className="mt-2"
+          >
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleBack}
+                    className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+                  >
+                    <ArrowLeft className="w-4 h-4 mr-1" />
+                    Back to Analytics Overview
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Back to Analytics Overview</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </motion.div>
+        )} */}
       </div>
       <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
         <motion.div
           ref={ref1}
           className='bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-md border border-gray-200 dark:border-gray-700 flex flex-col min-h-0 h-fit'
-          custom={0} // Indeks untuk stagger
+          custom={0}
           variants={cardVariants}
           initial='hidden'
           animate={isInView1 ? 'visible' : 'hidden'}
           aria-label='Sales Invoice Overview'
-          // Pindahkan efek hover ke motion.div
           whileHover={{
             y: -4,
             boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
@@ -109,7 +177,7 @@ export default function SalesAnalyticsPage() {
                     </Link>
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent className='max-w-xs whitespace-normal text-sm  text-slate-300 dark:text-slate-100'>
+                <TooltipContent className='max-w-xs whitespace-normal text-sm text-slate-300 dark:text-slate-100'>
                   <p>{tooltipTextViewDetailsSalesInvoice}</p>
                 </TooltipContent>
               </Tooltip>
@@ -121,14 +189,19 @@ export default function SalesAnalyticsPage() {
             hideBreadcrumb={true}
           />
           <div className='flex-1 min-h-0 overflow-hidden'>
-            <SalesInvoiceAnalytics showList={false} showHeader={false} />
+            <SalesInvoiceAnalytics
+              showList={false}
+              showHeader={false}
+              startPeriod={startPeriod}
+              endPeriod={endPeriod}
+            />
           </div>
         </motion.div>
 
         <motion.div
           ref={ref2}
           className='bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-md border border-gray-200 dark:border-gray-700 flex flex-col min-h-0 h-fit'
-          custom={1} // Indeks untuk stagger
+          custom={1}
           variants={cardVariants}
           initial='hidden'
           animate={isInView2 ? 'visible' : 'hidden'}
@@ -176,7 +249,12 @@ export default function SalesAnalyticsPage() {
             hideBreadcrumb={true}
           />
           <div className='flex-1 min-h-0 overflow-hidden'>
-            <SalesPersonPerformaAnalytics showList={false} showHeader={false} />
+            <SalesPersonPerformaAnalytics
+              showList={false}
+              showHeader={false}
+              startPeriod={startPeriod}
+              endPeriod={endPeriod}
+            />
           </div>
         </motion.div>
 

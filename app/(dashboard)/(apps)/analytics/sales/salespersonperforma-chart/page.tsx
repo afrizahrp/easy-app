@@ -19,11 +19,18 @@ interface SalesPersonSelection {
 interface SalesPersonPerformaAnalyticsProps {
   showList?: boolean;
   showHeader?: boolean;
+  startPeriod?: string | null;
+  endPeriod?: string | null;
 }
 
 const SalesPersonPerformaAnalytics: React.FC<
   SalesPersonPerformaAnalyticsProps
-> = ({ showList = true, showHeader = true }) => {
+> = ({
+  showList = true,
+  showHeader = true,
+  startPeriod = null,
+  endPeriod = null,
+}) => {
   const [fullChart, setFullChart] = useState<'period' | null>('period');
   const [selectedSalesPerson, setSelectedSalesPerson] = useState<string | null>(
     null

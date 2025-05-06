@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { memo } from 'react';
 import { createPortal } from 'react-dom';
 import { Icon } from '@iconify/react';
 import { cn } from '@/lib/utils';
@@ -14,7 +14,6 @@ interface CustomTooltipProps {
   y: number;
   invoice: string;
   growth: number;
-  year: string;
 }
 
 const CustomTooltip: React.FC<CustomTooltipProps> = ({
@@ -23,13 +22,12 @@ const CustomTooltip: React.FC<CustomTooltipProps> = ({
   y,
   invoice,
   growth,
-  year,
 }) => {
   const { theme: config } = useThemeStore();
   const { theme: mode } = useTheme();
   const theme = themes.find((theme) => theme.name === config);
 
-  if (!visible) return null;
+  if (!visible || !document.body) return null;
 
   const isUp = growth >= 0;
 
@@ -44,9 +42,7 @@ const CustomTooltip: React.FC<CustomTooltipProps> = ({
       style={{ left: `${x}px`, top: `${y}px` }}
     >
       <div className='flex items-center'>
-        {/* Invoice */}
         <span className='mr-2'>Sales {invoice} ,</span>
-        {/* Growth, Icon, dan Teks */}
         <span
           className={cn(isUp ? 'text-success' : 'text-destructive', 'mr-1')}
         >
@@ -63,12 +59,11 @@ const CustomTooltip: React.FC<CustomTooltipProps> = ({
             'text-xl mr-1'
           )}
         />
-        <span> vs previous year</span>
-        {/* <span>{isUp ? 'Growth' : 'Down'} vs previous year</span> */}
+        <span>vs previous year</span>
       </div>
     </div>,
     document.body
   );
 };
 
-export default CustomTooltip;
+export default memo(CustomTooltip);

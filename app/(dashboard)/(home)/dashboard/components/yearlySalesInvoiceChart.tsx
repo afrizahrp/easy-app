@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { Bar } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -15,11 +15,14 @@ import { motion } from 'framer-motion';
 import { hslToHex, generateYearColorPalette } from '@/lib/utils';
 import { useThemeStore } from '@/store';
 import { useTheme } from 'next-themes';
+import { useRouter } from 'next/navigation';
 import { themes } from '@/config/thems';
 import gradientPlugin from 'chartjs-plugin-gradient';
 import { useToast } from '@/components/ui/use-toast';
 import useYearlySalesInvoice from '@/queryHooks/dashboard/sales/useYearlySalesInvoice';
 import CustomTooltip from './customTooltip';
+import { Button } from '@/components/ui/button';
+import { Maximize2, Minimize2 } from 'lucide-react';
 
 ChartJS.register(
   CategoryScale,
@@ -44,6 +47,8 @@ const YearlySalesInvoiceChart: React.FC<YearlySalesInvoiceChartProps> = ({
   isFullWidth = false,
   onModeChange,
 }) => {
+  console.log('YearlySalesInvoiceChart rendered'); // Log untuk melacak render
+
   const { theme: config } = useThemeStore();
   const { theme: mode } = useTheme();
   const theme = themes.find((theme) => theme.name === config);
@@ -53,8 +58,9 @@ const YearlySalesInvoiceChart: React.FC<YearlySalesInvoiceChartProps> = ({
   const hexBackground = hslToHex(hslBackground);
   const { toast } = useToast();
   const { data, isLoading, isFetching, error } = useYearlySalesInvoice();
-
-  // State untuk tooltip
+  const router = useRouter();
+  const chartContainerRef = useRef<HTMLDivElement>(null);
+  const [isFullScreen, setIsFullScreen] = useState(false);
   const [tooltipState, setTooltipState] = useState<{
     visible: boolean;
     x: number;
@@ -71,6 +77,92 @@ const YearlySalesInvoiceChart: React.FC<YearlySalesInvoiceChartProps> = ({
     year: '',
   });
 
+  // useEffect untuk menangani perubahan full-screen
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      console.log('Fullscreen change triggered');
+      const isNowFullScreen = !!document.fullscreenElement;
+      setIsFullScreen(isNowFullScreen);
+      onModeChange?.(isNowFullScreen);
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+    document.addEventListener('mozfullscreenchange', handleFullscreenChange);
+    document.addEventListener('MSFullscreenChange', handleFullscreenChange);
+
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      document.removeEventListener(
+        'webkitfullscreenchange',
+        handleFullscreenChange
+      );
+      document.removeEventListener(
+        'mozfullscreenchange',
+        handleFullscreenChange
+      );
+      document.removeEventListener(
+        'MSFullscreenChange',
+        handleFullscreenChange
+      );
+    };
+  }, [onModeChange]);
+
+  // useEffect untuk menangani error toast
+  useEffect(() => {
+    if (error) {
+      console.log('Error detected:', error);
+      toast({
+        description: 'Failed to load sales data. Please try again.',
+        variant: 'destructive',
+      });
+    }
+  }, [error, toast]);
+
+  // useEffect untuk pembersihan tooltip saat unmount
+  useEffect(() => {
+    return () => {
+      const tooltipEl = document.getElementById('chartjs-tooltip');
+      if (tooltipEl) {
+        tooltipEl.remove();
+      }
+    };
+  }, []);
+
+  const toggleFullScreen = useCallback(() => {
+    console.log('toggleFullScreen called');
+    if (!chartContainerRef.current) return;
+
+    if (!isFullScreen) {
+      const requestFullscreen =
+        chartContainerRef.current.requestFullscreen ||
+        (chartContainerRef.current as any).webkitRequestFullscreen ||
+        (chartContainerRef.current as any).mozRequestFullScreen ||
+        (chartContainerRef.current as any).msRequestFullscreen;
+
+      if (requestFullscreen) {
+        requestFullscreen.call(chartContainerRef.current);
+      } else {
+        setIsFullScreen(true);
+      }
+    } else {
+      if (document.fullscreenElement) {
+        const exitFullscreen =
+          document.exitFullscreen ||
+          (document as any).webkitExitFullscreen ||
+          (document as any).mozCancelFullScreen ||
+          (document as any).msExitFullscreen;
+
+        if (exitFullscreen) {
+          exitFullscreen.call(document);
+        }
+      } else {
+        setIsFullScreen(false);
+      }
+    }
+    onModeChange?.(!isFullScreen);
+  }, [isFullScreen, onModeChange]);
+
   const chartData = React.useMemo(() => {
     if (!data || data.length === 0) return null;
 
@@ -79,17 +171,6 @@ const YearlySalesInvoiceChart: React.FC<YearlySalesInvoiceChartProps> = ({
     );
     const years = sortedData.map((d) => d.period);
     const colorPalette = generateYearColorPalette(years);
-
-    // const handleChartClick = (event: any, elements: any[]) => {
-    //     if (isCompact || elements.length === 0) return;
-
-    //     const element = elements[0];
-    //     const datasetIndex = element.datasetIndex;
-    //     const monthIndex = element.index;
-    //     const salesPersonName = chartData?.datasets[datasetIndex]?.label;
-    //     const year = chartData?.datasets[datasetIndex]?.period;
-    //     const month = chartData?.labels[monthIndex];
-    //   };
 
     return {
       labels: years,
@@ -127,48 +208,116 @@ const YearlySalesInvoiceChart: React.FC<YearlySalesInvoiceChartProps> = ({
           },
           borderColor: colorPalette.map(([from]) => from),
           borderWidth: 1,
-          barThickness: 25,
+          barThickness: isFullScreen ? 30 : 25,
           borderRadius: 15,
         },
       ],
     } as import('chart.js').ChartData<'bar', number[], string>;
-  }, [data]);
+  }, [data, isFullScreen]);
 
   const maxValue = React.useMemo(() => {
     if (!chartData) return 0;
     return Math.max(...chartData.datasets.flatMap((ds) => ds.data));
   }, [chartData]);
 
-  React.useEffect(() => {
-    if (error) {
-      toast({
-        description: 'Failed to load sales data. Please try again.',
-        variant: 'destructive',
-      });
-    }
-  }, [error, toast]);
+  const handleChartClick = useCallback(
+    (
+      event: import('chart.js').ChartEvent,
+      elements: import('chart.js').ActiveElement[],
+      chart: import('chart.js').Chart
+    ) => {
+      // console.log('handleChartClick triggered');
+      if (isCompact || elements.length === 0) return;
 
-  React.useEffect(() => {
-    return () => {
-      const tooltipEl = document.getElementById('chartjs-tooltip');
-      if (tooltipEl) {
-        tooltipEl.remove();
+      const element = elements[0];
+      const dataIndex = element.index;
+      const year =
+        chartData &&
+        Array.isArray(chartData.labels) &&
+        chartData.labels[dataIndex]
+          ? chartData.labels[dataIndex]
+          : undefined;
+
+      if (year) {
+        const startPeriod = `Jan${year}`;
+        const endPeriod = `Dec${year}`;
+        console.log('Navigating with:', startPeriod, endPeriod);
+        router.push(
+          `/analytics?startPeriod=${startPeriod}&endPeriod=${endPeriod}`
+        );
+        // router.push(
+        //   `/analytics/sales/salesinvoice-chart?startPeriod=${startPeriod}&endPeriod=${endPeriod}`
+        // );
       }
-    };
-  }, []);
+    },
+    [isCompact, chartData, router]
+  );
 
-  const isDataReady =
-    !!chartData &&
-    Array.isArray(chartData.labels) &&
-    chartData.labels.length > 0 &&
-    Array.isArray(chartData.datasets) &&
-    chartData.datasets.some(
-      (ds) => Array.isArray(ds.data) && ds.data.length > 0
-    );
+  // Logika tooltip dengan pembatasan pembaruan state
+  const handleTooltip = useCallback(
+    (context: {
+      chart: import('chart.js').Chart;
+      tooltip: import('chart.js').TooltipModel<'bar'>;
+    }) => {
+      const { chart, tooltip } = context;
+      if (!chartData || !chartData.labels) {
+        if (tooltipState.visible) {
+          setTooltipState((prev) => ({ ...prev, visible: false }));
+        }
+        return;
+      }
+
+      if (tooltip.opacity === 0) {
+        if (tooltipState.visible) {
+          setTooltipState((prev) => ({ ...prev, visible: false }));
+        }
+        return;
+      }
+
+      if (tooltip.body) {
+        const year = chartData.labels[tooltip.dataPoints[0].dataIndex] ?? '';
+        const yearData = data?.find((d) => d.period === year);
+        const invoice = (tooltip.dataPoints[0].raw as number).toLocaleString(
+          'id-ID'
+        );
+        const growth = yearData?.growthPercentage ?? 0;
+        const x = chart.canvas.offsetLeft + tooltip.caretX + 10;
+        const y = chart.canvas.offsetTop + tooltip.caretY - 3;
+
+        // Hanya perbarui state jika data benar-benar berubah
+        setTooltipState((prev) => {
+          if (
+            prev.visible === true &&
+            prev.year === year &&
+            prev.invoice === invoice &&
+            prev.growth === growth &&
+            prev.x === x &&
+            prev.y === y
+          ) {
+            return prev; // Tidak perlu perbarui state
+          }
+          console.log('Updating tooltip state:', {
+            year,
+            invoice,
+            growth,
+            x,
+            y,
+          });
+          return { visible: true, x, y, invoice, growth, year };
+        });
+      }
+    },
+    [chartData, data, tooltipState.visible]
+  );
 
   return (
     <motion.div
-      className={`chart-container ${isCompact ? 'compact' : ''} bg-white dark:bg-[#18181b] p-4 rounded-lg shadow-sm flex flex-col h-fit min-h-[250px] w-full`}
+      ref={chartContainerRef}
+      className={`chart-container ${isCompact ? 'compact' : ''} ${
+        isFullScreen && !document.fullscreenElement
+          ? 'fixed inset-0 z-50 bg-white dark:bg-[#18181b] p-4 rounded-lg shadow-md'
+          : 'relative bg-white dark:bg-[#18181b] p-4 rounded-lg shadow-sm'
+      } flex flex-col h-fit min-h-[250px] w-full`}
       style={{ backgroundColor: hexBackground }}
       animate={{
         opacity: isFullWidth ? 1 : 0.95,
@@ -180,10 +329,24 @@ const YearlySalesInvoiceChart: React.FC<YearlySalesInvoiceChartProps> = ({
       }}
       transition={{ duration: 0.3, ease: 'easeInOut' }}
     >
-      <div className='relative flex items-center mb-2'>
+      <div className='relative flex items-center justify-between mb-2'>
         <h2 className='text-sm text-muted-foreground font-semibold ml-2'>
-          Sales Invoice by Yearly(in Millions IDR)
+          Sales Invoice by Yearly (in Millions IDR)
         </h2>
+        {!isCompact && (
+          <Button
+            variant='outline'
+            size='sm'
+            onClick={toggleFullScreen}
+            className='mr-2'
+          >
+            {isFullScreen ? (
+              <Minimize2 className='h-4 w-4' />
+            ) : (
+              <Maximize2 className='h-4 w-4' />
+            )}
+          </Button>
+        )}
       </div>
 
       <div className='flex-1 min-h-0 w-full'>
@@ -191,19 +354,19 @@ const YearlySalesInvoiceChart: React.FC<YearlySalesInvoiceChartProps> = ({
           <div className='flex items-center justify-center h-full'>
             <div className='w-3/4 h-1/2 rounded-lg shimmer' />
           </div>
-        ) : isDataReady ? (
+        ) : chartData ? (
           <>
             <Bar
               key={isFullWidth ? 'full' : 'half'}
-              height={isCompact ? 250 : height}
+              height={isFullScreen ? undefined : isCompact ? 250 : height}
               data={chartData}
               options={{
                 responsive: true,
                 maintainAspectRatio: false,
                 layout: {
                   padding: {
-                    bottom: isCompact ? 10 : 20,
-                    top: isCompact ? 5 : 10,
+                    bottom: isFullScreen ? 10 : isCompact ? 10 : 20,
+                    top: isFullScreen ? 10 : isCompact ? 5 : 10,
                   },
                 },
                 scales: {
@@ -218,6 +381,9 @@ const YearlySalesInvoiceChart: React.FC<YearlySalesInvoiceChartProps> = ({
                         const val = Number(value);
                         return `${val.toLocaleString('id-ID')}`;
                       },
+                      font: {
+                        size: isFullScreen ? 14 : 12,
+                      },
                     },
                   },
                   x: {
@@ -227,6 +393,9 @@ const YearlySalesInvoiceChart: React.FC<YearlySalesInvoiceChartProps> = ({
                         Array.isArray(chartData?.labels)
                           ? chartData.labels[index]
                           : '',
+                      font: {
+                        size: isFullScreen ? 14 : 12,
+                      },
                     },
                     grid: {
                       drawTicks: false,
@@ -244,50 +413,10 @@ const YearlySalesInvoiceChart: React.FC<YearlySalesInvoiceChartProps> = ({
                   },
                   tooltip: {
                     enabled: false,
-                    external: (context) => {
-                      const { chart, tooltip } = context;
-                      if (!chartData || !chartData.labels) {
-                        setTooltipState((prev) => ({
-                          ...prev,
-                          visible: false,
-                        }));
-                        return;
-                      }
-
-                      if (tooltip.opacity === 0) {
-                        setTooltipState((prev) => ({
-                          ...prev,
-                          visible: false,
-                        }));
-                        return;
-                      }
-
-                      if (tooltip.body) {
-                        const year =
-                          chartData.labels[tooltip.dataPoints[0].dataIndex] ??
-                          '';
-                        const yearData = data.find((d) => d.period === year);
-                        const invoice = (
-                          tooltip.dataPoints[0].raw as number
-                        ).toLocaleString('id-ID');
-                        const growth = yearData?.growthPercentage ?? 0;
-
-                        setTooltipState({
-                          visible: true,
-                          x: chart.canvas.offsetLeft + tooltip.caretX + 10, // Offset kecil ke kanan
-                          y: chart.canvas.offsetTop + tooltip.caretY - 3, // Lebih dekat ke bar
-                          invoice,
-                          growth,
-                          year,
-                        });
-
-                        console.log(
-                          `Year: ${year}, Growth: ${growth}, Status: ${growth >= 0 ? 'Growth' : 'Down'}`
-                        );
-                      }
-                    },
+                    external: handleTooltip,
                   },
                 },
+                onClick: !isCompact ? handleChartClick : undefined,
               }}
             />
             <CustomTooltip
@@ -296,7 +425,6 @@ const YearlySalesInvoiceChart: React.FC<YearlySalesInvoiceChartProps> = ({
               y={tooltipState.y}
               invoice={tooltipState.invoice}
               growth={tooltipState.growth}
-              year={tooltipState.year}
             />
           </>
         ) : (
