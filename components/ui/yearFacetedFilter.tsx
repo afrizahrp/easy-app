@@ -56,10 +56,13 @@ export function YearFacetedFilter({
           Filter by {title}
           {selectedValues.size > 0 && (
             <>
-              <Separator orientation='vertical' className='mx-2 h-4' />
+              <Separator
+                orientation='vertical'
+                className='mx-2 h-4 text-slate dark:text-slate-400'
+              />
               <Badge
                 variant='outline'
-                className='rounded-sm px-1 font-normal text-primary-foreground dark:text-slate-400'
+                className='rounded-sm px-1 font-normal text-slate dark:text-slate-400'
               >
                 {selectedValues.size}
               </Badge>
@@ -70,7 +73,10 @@ export function YearFacetedFilter({
       {selectedValues.size > 0 && (
         <div className='hidden space-x-1 py-3 lg:flex'>
           {selectedValues.size > 3 ? (
-            <Badge variant='outline' className='rounded-sm px-1 font-normal'>
+            <Badge
+              variant='outline'
+              className='rounded-sm px-1 font-normal text-slate dark:text-slate-400'
+            >
               {selectedValues.size} years selected
             </Badge>
           ) : (
@@ -80,7 +86,7 @@ export function YearFacetedFilter({
                 <Badge
                   variant='outline'
                   key={option.value}
-                  className='rounded-sm px-1 text-xs text-slate-400'
+                  className='rounded-sm px-1 text-xs text-slate-600'
                 >
                   {option.label}
                   <Cross2Icon

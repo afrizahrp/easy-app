@@ -35,7 +35,7 @@ const CustomTooltip: React.FC<CustomTooltipProps> = ({
   return createPortal(
     <div
       className={cn(
-        'absolute z-50 rounded-md p-2 text-sm shadow-md whitespace-nowrap',
+        'absolute z-50 rounded-md p-2 text-md shadow-md whitespace-nowrap',
         mode === 'dark'
           ? 'bg-gray-800 text-slate-100'
           : 'bg-white text-slate-900'
@@ -44,7 +44,7 @@ const CustomTooltip: React.FC<CustomTooltipProps> = ({
     >
       <div className='flex items-center'>
         <span
-          className={cn('mr-2', isFullScreen ? 'text-[14px]' : 'text-[12px]')}
+          className={cn('mr-2', isFullScreen ? 'text-[16px]' : 'text-[14px]')}
         >
           Sales {invoice},
         </span>
@@ -52,7 +52,7 @@ const CustomTooltip: React.FC<CustomTooltipProps> = ({
           className={cn(
             isUp ? 'text-green-400' : 'text-red-400',
             'mr-1 font-medium',
-            isFullScreen ? 'text-[12px]' : 'text-[10px]'
+            isFullScreen ? 'text-[16px]' : 'text-[14px]'
           )}
         >
           {Math.abs(growth)}%
@@ -65,11 +65,11 @@ const CustomTooltip: React.FC<CustomTooltipProps> = ({
           }
           className={cn(
             isUp ? 'text-green-400' : 'text-red-400',
-            'w-3 h-3 mr-1',
-            isFullScreen ? 'text-[12px]' : 'text-[10px]'
+            'w-4 h-4 mr-1',
+            isFullScreen ? 'text-[16px]' : 'text-[14px]'
           )}
         />
-        <span className={cn(isFullScreen ? 'text-[12px]' : 'text-[10px]')}>
+        <span className={cn(isFullScreen ? 'text-[16px]' : 'text-[14px]')}>
           vs previous year
         </span>
       </div>

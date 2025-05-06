@@ -55,7 +55,10 @@ export function DataTableFacetedFilter<TData, TValue>({
           Filter data by {title}
           {selectedValues.size > 0 && (
             <>
-              <Separator orientation='vertical' className='mx-2 h-4' />
+              <Separator
+                orientation='vertical'
+                className='mx-2 h-4 text-slate dark:text-slate-400'
+              />
               <Badge
                 variant='outline'
                 className='rounded-sm px-1 font-normal text-slate dark:text-slate-400'
