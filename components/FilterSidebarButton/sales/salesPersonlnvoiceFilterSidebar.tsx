@@ -161,16 +161,17 @@ export function SalesPersonInvoiceFilterSidebar<TData>({
 
   const handleReset = () => {
     try {
+      console.log('[SalesPersonInvoiceFilterSidebar] Initiating reset');
       const result = reset();
       toast({
-        description: result.message,
-        variant: result.success ? 'default' : 'destructive',
+        description: result?.message ?? 'Reset successful.',
+        variant: 'success',
       });
+      console.log('[SalesInvoiceFilterSidebar] Reset result:', result);
     } catch (error) {
+      console.error('[SalesInvoiceFilterSidebar] Reset error:', error);
       toast({
-        description: `Reset failed: ${
-          error instanceof Error ? error.message : String(error)
-        }`,
+        description: `Reset failed: ${error instanceof Error ? error.message : String(error)}`,
         variant: 'destructive',
       });
     }

@@ -14,6 +14,9 @@ import React from 'react';
 // import { useSession } from 'next-auth/react';
 import { useSessionStore } from '@/store';
 import AnalyticPages from '../../(apps)/analytics/page';
+import { FloatingFilterButton } from '@/components/ui/floating-filter-button';
+import { ChartYearFilter } from '@/components/ui/chartYearFilter';
+import YearlySalesInvoiceChart from './components/yearlySalesInvoiceChart';
 
 interface DashboardPageViewProps {
   trans: {
@@ -27,8 +30,22 @@ const DashboardPageView = () => {
   const welcome = `Selamat datang ${user?.name}`;
 
   return (
-    <div>
-      <AnalyticPages />
+    <div className='p-4'>
+      <FloatingFilterButton>
+        <ChartYearFilter
+          title='Filter All Charts by Year'
+          className='max-w-xs mb-6'
+        />
+      </FloatingFilterButton>
+      <div className='grid grid-cols-2 gap-4'>
+        <YearlySalesInvoiceChart
+          height={400}
+          isCompact={false}
+          isFullWidth={false}
+          onModeChange={(isFull) => console.log('Mode changed:', isFull)}
+        />
+        {/* Chart lainnya: Revenue vs Expense, New Customers, Fast Moving */}
+      </div>
     </div>
   );
 };

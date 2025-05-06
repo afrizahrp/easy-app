@@ -320,9 +320,9 @@ export const useCategoryFilterStore = create<CategoryFilterState>()(
 );
 
 interface YearlyPeriodStore {
-  yearsByModule: Record<string, string[]>;
-  setYears: (module: string, years: string[]) => void;
-  resetYears: (module: string) => void;
+  selectedYears: string[];
+  setYears: (years: string[]) => void;
+  resetYears: () => void;
 }
 
 const getDefaultYears = (): string[] => {
@@ -330,37 +330,19 @@ const getDefaultYears = (): string[] => {
   return [`${currentYear - 1}`, `${currentYear}`]; // Misalnya, ["2024", "2025"]
 };
 
-const yearlyPersistOptions = {
-  name: 'yearly-period-store',
-  storage: createJSONStorage(() => localStorage),
-  partialize: (state: YearlyPeriodStore) => ({
-    yearsByModule: state.yearsByModule,
-  }),
-};
-
 export const useYearlyPeriodStore = create<YearlyPeriodStore>()(
   persist(
     (set) => ({
-      yearsByModule: {
-        salesInvoice: getDefaultYears(),
-        salesPersonInvoice: getDefaultYears(),
-      },
-      setYears: (module, years) =>
-        set((state) => ({
-          yearsByModule: { ...state.yearsByModule, [module]: years },
-        })),
-      resetYears: (module) =>
-        set((state) => ({
-          yearsByModule: {
-            ...state.yearsByModule,
-            [module]: getDefaultYears(),
-          },
-        })),
+      selectedYears: getDefaultYears(),
+      setYears: (years) => set({ selectedYears: years }),
+      resetYears: () => set({ selectedYears: getDefaultYears() }),
     }),
-    yearlyPersistOptions
+    {
+      name: 'yearly-period-store',
+      storage: createJSONStorage(() => localStorage),
+    }
   )
 );
-
 interface PeriodState {
   startPeriod: Date | null;
   endPeriod: Date | null;

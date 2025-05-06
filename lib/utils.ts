@@ -109,9 +109,59 @@ export const hexToRGB = (hex: string, alpha?: number): string => {
   }
 };
 
+export const Years = [
+  '2012',
+  '2013',
+  '2014',
+  '2015',
+  '2016',
+  '2017',
+  '2018',
+  '2019',
+  '2020',
+  '2021',
+  '2022',
+  '2023',
+  '2024',
+  '2025',
+];
+
 export const getDefaultYears = (): string[] => {
   const currentYear = new Date().getFullYear();
   return [`${currentYear - 1}`, `${currentYear}`];
+};
+
+// src/lib/utils.ts
+// src/lib/utils.ts
+export const generateYearColorPalette = (years: string[]) => {
+  // Palet warna dengan hue berbeda untuk setiap tahun
+  const baseColors = [
+    { hue: 120, fromLightness: 30, toLightness: 50 }, // Hijau (2025)
+    { hue: 220, fromLightness: 40, toLightness: 60 }, // Biru (2024)
+    { hue: 60, fromLightness: 50, toLightness: 70 }, // Kuning (2023)
+    { hue: 0, fromLightness: 40, toLightness: 60 }, // Merah (2022)
+    { hue: 300, fromLightness: 40, toLightness: 60 }, // Ungu
+    { hue: 180, fromLightness: 40, toLightness: 60 }, // Cyan
+    { hue: 30, fromLightness: 40, toLightness: 60 }, // Oranye
+    { hue: 90, fromLightness: 40, toLightness: 60 }, // Hijau muda
+    { hue: 270, fromLightness: 40, toLightness: 60 }, // Magenta
+    { hue: 150, fromLightness: 40, toLightness: 60 }, // Hijau kebiruan
+    { hue: 240, fromLightness: 40, toLightness: 60 }, // Biru tua
+    { hue: 330, fromLightness: 40, toLightness: 60 }, // Pink
+    { hue: 15, fromLightness: 40, toLightness: 60 }, // Merah oranye
+    { hue: 210, fromLightness: 40, toLightness: 60 }, // Biru muda
+  ];
+
+  // Urutkan tahun dari baru ke lama untuk memetakan warna
+  const sortedYears = [...years].sort((a, b) => Number(b) - Number(a));
+
+  return sortedYears.map((year, index) => {
+    // Gunakan warna dari baseColors, ulang jika tahun lebih banyak dari warna
+    const color = baseColors[index % baseColors.length];
+    const fromColor = `hsl(${color.hue}, 70%, ${color.fromLightness}%)`;
+    const toColor = `hsl(${color.hue}, 70%, ${color.toLightness}%)`;
+    return [fromColor, toColor];
+  });
 };
 
 export function lightenColor(hex: string, amount: number): string {

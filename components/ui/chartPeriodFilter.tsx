@@ -13,7 +13,7 @@ interface Period {
 }
 
 // Definisikan interface untuk props
-interface ChartPeriodFilterSidebarProps {
+interface ChartPeriodFilterProps {
   title?: string; // Judul filter (opsional)
   filterContext?: SearchContext; // Konteks untuk PeriodFilter (opsional, gunakan SearchContext)
   onPeriodChange?: (period: Partial<Period>) => void; // Handler kustom untuk perubahan periode (opsional)
@@ -30,13 +30,13 @@ interface MonthYearPeriodStore {
   resetSalesPersonInvoicePeriod: () => void;
 }
 
-export function ChartPeriodFilterSidebar({
+export function ChartPeriodFilter({
   title = 'Filter Chart by Period',
   filterContext = 'salesInvoice',
   onPeriodChange,
   onReset,
   className,
-}: ChartPeriodFilterSidebarProps) {
+}: ChartPeriodFilterProps) {
   const {
     salesInvoicePeriod,
     setSalesInvoicePeriod,

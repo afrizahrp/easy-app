@@ -2,7 +2,7 @@
 import { api } from '@/config/axios.config';
 import { useQuery } from '@tanstack/react-query';
 import { useSessionStore, useYearlyPeriodStore } from '@/store';
-import { getDefaultYears } from '@/utils';
+import { getDefaultYears } from '@/lib/utils';
 import axios from 'axios';
 
 interface YearlySalesInvoiceResponse {
@@ -13,7 +13,7 @@ interface YearlySalesInvoiceResponse {
     period: string;
     totalInvoice: number;
     quantity: number;
-    growthPercentage: number | null; // Izinkan null
+    growthPercentage: number | null;
   }[];
 }
 
@@ -23,14 +23,15 @@ interface QueryParams {
 
 const useYearlySalesInvoice = (
   company_id?: string,
-  module_id: string = 'dashboard',
+  module_id: string = 'dsb',
   subModule_id: string = 'sls'
 ) => {
   const user = useSessionStore((state) => state.user);
   const resolvedCompanyId = company_id || user?.company_id?.toUpperCase();
+  const { selectedYears } = useYearlyPeriodStore();
 
-  const { yearsByModule } = useYearlyPeriodStore();
-  const years = yearsByModule.salesInvoice || getDefaultYears();
+  // Gunakan selectedYears jika ada, fallback ke getDefaultYears jika kosong
+  const years = selectedYears.length > 0 ? selectedYears : getDefaultYears();
 
   const isValidRequest = Boolean(
     resolvedCompanyId && module_id && subModule_id && years && years.length > 0
@@ -51,10 +52,16 @@ const useYearlySalesInvoice = (
       if (!process.env.NEXT_PUBLIC_API_URL) {
         throw new Error('NEXT_PUBLIC_API_URL is not defined');
       }
-      const url = `${process.env.NEXT_PUBLIC_API_URL}/${resolvedCompanyId}/${module_id}/${subModule_id}/yearly/sales-invoice`;
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/${resolvedCompanyId}/${module_id}/${subModule_id}/get-dashboard/getYearlySalesInvoice`;
       try {
         const response = await api.get<YearlySalesInvoiceResponse>(url, {
-          params: { years: years.join(',') },
+          params: { years },
+          paramsSerializer: (params) => {
+            // Serialisasi array years menjadi years=2022&years=2023&years=2024
+            return years
+              .map((year) => `years=${encodeURIComponent(year)}`)
+              .join('&');
+          },
         });
         return response.data;
       } catch (error) {

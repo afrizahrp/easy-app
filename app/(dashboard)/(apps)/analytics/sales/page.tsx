@@ -1,5 +1,6 @@
 'use client';
 import Link from 'next/link';
+
 import { ArrowRight, BarChart2, FileText } from 'lucide-react';
 import { motion } from 'framer-motion';
 import AnalyticsNav from '@/components/AnalyticsNav';
@@ -14,7 +15,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { FloatingFilterButton } from '@/components/ui/floating-filter-button';
-import { ChartPeriodFilterSidebar } from '@/components/FilterSidebarButton/chartPeriodFilterSidebar';
+import { ChartPeriodFilter } from '@/components/ui/chartPeriodFilter';
 
 const cardVariants = {
   hidden: { opacity: 0, y: 50 }, // Tingkatkan jarak pergeseran agar lebih terlihat
@@ -183,7 +184,7 @@ export default function SalesAnalyticsPage() {
           title='Filter Period'
           description='Select the period for the chart'
         >
-          <ChartPeriodFilterSidebar filterContext='salesInvoice' />
+          <ChartPeriodFilter filterContext='salesInvoice' />
         </FloatingFilterButton>
       </div>
     </div>
