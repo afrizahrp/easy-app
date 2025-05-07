@@ -82,6 +82,7 @@ const useMonthlySalesPersonInvoice = ({
 
       try {
         const response = await api.get<SalesPeriodResponse>(finalUrl);
+        console.log('SalesPersonInvoiceUnfiltered', response.data);
         return response.data;
       } catch (err) {
         const axiosError = err as AxiosError<{ message?: string }>;
