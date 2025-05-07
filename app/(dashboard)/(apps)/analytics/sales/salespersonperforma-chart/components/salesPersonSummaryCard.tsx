@@ -105,7 +105,7 @@ const SalespersonSummaryCard: React.FC<SalespersonSummaryCardProps> = ({
             {data.salesPersonName}
           </CardTitle>
           <p className='text-xs text-gray-500 dark:text-gray-400'>
-            Semua jumlah dalam {currency}
+            All amounts in {currency}
           </p>
         </CardHeader>
         <CardContent className='space-y-3'>
@@ -118,13 +118,11 @@ const SalespersonSummaryCard: React.FC<SalespersonSummaryCardProps> = ({
               <TooltipTrigger asChild>
                 <div className='flex items-center text-sm font-medium text-gray-800 dark:text-gray-100'>
                   <DollarSign className='w-4 h-4 mr-2 text-green-500' />
-                  <span>
-                    Total Invoice: {formatCurrency(data.totalInvoice)}
-                  </span>
+                  <span>Total Invoice: {formatAmount(data.totalInvoice)}</span>
                 </div>
               </TooltipTrigger>
               <TooltipContent>
-                <p>Total penjualan untuk periode {data.period}</p>
+                <p>Sales period {data.period}</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
@@ -177,7 +175,7 @@ const SalespersonSummaryCard: React.FC<SalespersonSummaryCardProps> = ({
             {data.salesPersonName} Summary - {data.period}
           </DialogTitle>
           <p className='text-xs text-gray-500 dark:text-gray-400'>
-            Semua jumlah dalam {currency}
+            All amounts in {currency}
           </p>
         </DialogHeader>
         <div className='space-y-4 text-gray-700 dark:text-gray-200'>
@@ -185,7 +183,7 @@ const SalespersonSummaryCard: React.FC<SalespersonSummaryCardProps> = ({
             <div>
               <p className='text-sm font-semibold'>Total Invoice</p>
               <p className='text-lg font-medium text-green-600 dark:text-green-400'>
-                {formatCurrency(data.totalInvoice)}
+                {formatAmount(data.totalInvoice)}
               </p>
             </div>
             <div>

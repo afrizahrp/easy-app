@@ -34,8 +34,9 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import SalespersonSummaryCard from './salesPersonSumaryCard';
+import SalesPersonSummaryList from './salesPersonSummaryList';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 ChartJS.register(
   CategoryScale,
@@ -98,7 +99,6 @@ const MonthlySalesPersonInvoiceChart: React.FC<
       setSalesPersonInvoiceFilters: state.setSalesPersonInvoiceFilters,
     }));
 
-  // Stabilkan validSalesPersonNames dengan useMemo
   const validSalesPersonNames = React.useMemo(() => {
     const names = salesPersonInvoiceFilters.salesPersonName;
     return Array.isArray(names)
@@ -108,18 +108,21 @@ const MonthlySalesPersonInvoiceChart: React.FC<
         : [];
   }, [salesPersonInvoiceFilters.salesPersonName]);
 
+  const salespersons = React.useMemo(() => {
+    return validSalesPersonNames.map((name) => ({ name }));
+  }, [validSalesPersonNames]);
+
   const { data, isLoading, isFetching, error } =
     useMonthlyComparisonSalesPersonInvoiceFiltered({
       context: 'salesPersonInvoice',
       salesPersonNames: validSalesPersonNames,
     });
 
-  // Nonaktifkan refetch on window focus menggunakan queryClient
   useEffect(() => {
     queryClient.setQueryDefaults(['salesPersonInvoice'], {
       refetchOnWindowFocus: false,
       refetchInterval: false,
-      staleTime: 5 * 60 * 1000, // Cache selama 5 menit
+      staleTime: 5 * 60 * 1000,
     });
   }, [queryClient]);
 
@@ -142,7 +145,7 @@ const MonthlySalesPersonInvoiceChart: React.FC<
   });
 
   const [isSummaryOpen, setIsSummaryOpen] = useState(false);
-  const [selectedYear, setSelectedYear] = useState<string>('2024'); // Default tahun
+  const [selectedYear, setSelectedYear] = useState<string>('2024');
 
   const chartData = React.useMemo(() => {
     if (!data || !data.length) return null;
@@ -209,20 +212,15 @@ const MonthlySalesPersonInvoiceChart: React.FC<
       const position = chart.canvas.getBoundingClientRect();
       const bar = chart.getDatasetMeta(datasetIndex).data[dataIndex] as any;
 
-      // Hitung posisi tooltip relatif terhadap bar
       const x =
-        bar.x - position.left + container.scrollLeft + bar.width / 2 + 5; // Kanan bar
-      const y = bar.y - position.top + container.scrollTop - 30; // Atas bar
+        bar.x - position.left + container.scrollLeft + bar.width / 2 + 5;
+      const y = bar.y - position.top + container.scrollTop - 30;
 
-      // Batasi posisi tooltip agar tidak keluar container
       const containerRect = container.getBoundingClientRect();
-      const tooltipWidth = 150; // Estimasi lebar tooltip
-      const tooltipHeight = 50; // Estimasi tinggi tooltip
-      const adjustedX = Math.min(
-        x,
-        containerRect.width - tooltipWidth - 10 // Tidak keluar kanan
-      );
-      const adjustedY = Math.max(y, 10); // Tidak keluar atas
+      const tooltipWidth = 150;
+      const tooltipHeight = 50;
+      const adjustedX = Math.min(x, containerRect.width - tooltipWidth - 10);
+      const adjustedY = Math.max(y, 10);
 
       const newTooltipData: TooltipState = {
         visible: true,
@@ -260,7 +258,7 @@ const MonthlySalesPersonInvoiceChart: React.FC<
         : undefined;
 
       if (salesPersonName && year && month) {
-        setSelectedYear(year); // Simpan tahun yang dipilih
+        setSelectedYear(year);
         onSalesPersonSelect?.({ salesPersonName, year, month });
         onModeChange?.(false);
       }
@@ -329,21 +327,20 @@ const MonthlySalesPersonInvoiceChart: React.FC<
                 Summary
               </Button>
             </DialogTrigger>
-            <DialogContent className='max-w-4xl'>
+            <DialogContent className='max-w-4xl bg-white dark:bg-gray-800'>
               <DialogHeader>
-                <DialogTitle>Salesperson Summary</DialogTitle>
+                <DialogTitle className='text-gray-800 dark:text-gray-100'>
+                  Salesperson Summary
+                </DialogTitle>
               </DialogHeader>
-              <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-                {validSalesPersonNames.length > 0 ? (
-                  validSalesPersonNames.map((name) => (
-                    <SalespersonSummaryCard
-                      key={name}
-                      salesPersonName={name}
-                      year={selectedYear} // Teruskan tahun yang dipilih
-                    />
-                  ))
+              <div className='w-full'>
+                {salespersons.length > 0 ? (
+                  <SalesPersonSummaryList
+                    salespersons={salespersons}
+                    year={selectedYear}
+                  />
                 ) : (
-                  <p className='text-gray-500'>
+                  <p className='text-gray-500 dark:text-gray-400 text-center'>
                     No salespeople selected. Please select at least one
                     salesperson.
                   </p>
