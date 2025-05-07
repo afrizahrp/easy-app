@@ -95,6 +95,7 @@ const SalesPersonPerformaOverview: React.FC<
       {showFloatingButton && (
         <div className='flex-none w-full md:w-1/2'>
           <FloatingFilterButton
+            modalPosition='above'
             title='Filter Data'
             description='Filter sales invoice by salesperson and paid status.'
           >

@@ -61,6 +61,7 @@ const SalesInvoiceHdPage = ({ showFilterButton }: SalesInvoiceHdProps) => {
       invoiceDate: item.invoiceDate,
       invoice_id: item.invoice_id.trim(),
       customerName: item.customerName.trim(),
+      paidStatus: item.paidStatus.trim(),
       PoType: item.poType?.trim() ?? '',
       total_amount: item.total_amount,
       salesPersonName: item.salesPersonName.trim(),

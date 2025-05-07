@@ -113,6 +113,17 @@ const MonthlyProductSoldFromSalesPersonFiltered: React.FC<
     chart: {
       toolbar: { show: false },
     },
+    legend: {
+      labels: {
+        colors: mode === 'dark' ? '#e2e8f0' : '#000000', // warna legend
+      },
+      // offsetX: 5,
+      // offsetY: 5,
+      // itemMargin: {
+      //   horizontal: 10,
+      //   vertical: 5,
+      // },
+    },
     plotOptions: {
       bar: {
         barHeight: '100%',
@@ -138,14 +149,16 @@ const MonthlyProductSoldFromSalesPersonFiltered: React.FC<
       },
     },
     dataLabels: {
-      enabled: true,
+      enabled: false,
       textAnchor: 'start',
-      style: { colors: ['#fff'] },
+      style: {
+        colors: [mode === 'dark' ? '#e2e8f0' : '#000000'],
+      },
       formatter: function (val: number, opt: any) {
         return `${opt.w.globals.labels[opt.dataPointIndex]}: ${val.toLocaleString('id-ID')}`;
       },
       offsetX: 0,
-      dropShadow: { enabled: true },
+      dropShadow: { enabled: false },
     },
     stroke: {
       show: false,
@@ -187,9 +200,12 @@ const MonthlyProductSoldFromSalesPersonFiltered: React.FC<
     },
     xaxis: {
       categories: labels,
-      labels: getLabel(
-        `hsl(${theme?.cssVars[mode === 'dark' ? 'dark' : 'light'].chartLabel})`
-      ),
+      labels: {
+        formatter: (value: number) => value.toLocaleString('id-ID'),
+        style: {
+          colors: [mode === 'dark' ? '#e2e8f0' : '#000000'],
+        },
+      },
     },
   };
 
@@ -199,7 +215,7 @@ const MonthlyProductSoldFromSalesPersonFiltered: React.FC<
   // Validasi prop
   if (!salesPersonName || !year || !normalizedMonth) {
     console.warn(
-      'PMonthlyProductSoldFromSalesPersonFiltered: Missing required props',
+      'MonthlyProductSoldFromSalesPersonFiltered: Missing required props',
       {
         salesPersonName,
         year,

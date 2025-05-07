@@ -15,12 +15,14 @@ interface FloatingFilterButtonProps {
   title?: string;
   description?: string;
   children: React.ReactNode;
+  modalPosition?: 'above' | 'default'; // Prop baru untuk posisi modal
 }
 
 export function FloatingFilterButton({
   title,
   description,
   children,
+  modalPosition = 'default', // Default ke posisi asli
 }: FloatingFilterButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [position, setPosition] = useState({ x: 0, y: 0 }); // Posisi awal
@@ -38,10 +40,11 @@ export function FloatingFilterButton({
 
   // Hitung posisi modal berdasarkan posisi tombol
   const calculateModalPosition = () => {
-    const buttonWidth = 150; // Perkiraan lebar tombol (sesuaikan jika perlu)
-    const modalWidth = 300; // Perkiraan lebar modal (sesuaikan jika perlu)
-    const modalHeight = 400; // Perkiraan tinggi modal (sesuaikan jika perlu)
+    const buttonWidth = 150; // Perkiraan lebar tombol
+    const modalWidth = 300; // Perkiraan lebar modal
+    const modalHeight = 400; // Perkiraan tinggi modal
     const offsetY = 10; // Jarak vertikal dari tombol
+    const offsetX = 10; // Jarak horizontal dari tombol
 
     // Posisi tombol relatif terhadap kanan bawah (bottom-6 right-6)
     const buttonRight = 24; // right-6 = 24px
@@ -49,21 +52,34 @@ export function FloatingFilterButton({
 
     // Posisi absolut tombol di layar
     const buttonX = window.innerWidth - buttonRight - buttonWidth + position.x;
-    const buttonY = window.innerHeight - buttonBottom - 40 + position.y; // 40px = tinggi tombol (perkiraan)
+    const buttonY = window.innerHeight - buttonBottom - 40 + position.y; // 40px = tinggi tombol
 
     // Posisi modal
-    let modalX = buttonX;
-    let modalY = buttonY - modalHeight - offsetY; // Modal muncul di atas tombol
+    let modalX: number;
+    let modalY: number;
+
+    if (modalPosition === 'above') {
+      // Untuk SalesPersonInvoiceFilterSidebar: modal di atas tombol dan ke kiri
+      modalX = buttonX - modalWidth - offsetX; // Modal di kiri tombol
+      modalY = buttonY - modalHeight - offsetY - 40; // Modal di atas tombol, 40px = tinggi tombol
+    } else {
+      // Default: modal di bawah tombol dan sejajar dengan tombol
+      modalX = buttonX; // Modal sejajar dengan tombol
+      modalY = buttonY + 40 + offsetY; // Modal di bawah tombol
+    }
 
     // Pastikan modal tetap dalam batas layar
     if (modalX + modalWidth > window.innerWidth) {
-      modalX = window.innerWidth - modalWidth - 10; // Jaga jarak 10px dari tepi
+      modalX = window.innerWidth - modalWidth - 10; // Jaga jarak 10px dari tepi kanan
     }
     if (modalX < 0) {
       modalX = 10; // Jaga jarak 10px dari tepi kiri
     }
     if (modalY < 0) {
       modalY = buttonY + 40 + offsetY; // Jika tidak cukup ruang di atas, muncul di bawah tombol
+    }
+    if (modalY + modalHeight > window.innerHeight) {
+      modalY = window.innerHeight - modalHeight - 10; // Jaga jarak 10px dari tepi bawah
     }
 
     return { left: modalX, top: modalY };
@@ -75,7 +91,6 @@ export function FloatingFilterButton({
         nodeRef={draggableRef}
         position={position}
         onStop={handleDragStop}
-        // Tanpa bounds, tombol dapat di-drag ke mana saja
       >
         <div
           ref={draggableRef}

@@ -2,11 +2,9 @@
 import { useEffect, useState } from 'react';
 import { Cross2Icon } from '@radix-ui/react-icons';
 import { Table } from '@tanstack/react-table';
-import { AlertCircle } from 'lucide-react';
 import { startOfMonth, endOfMonth } from 'date-fns';
 import { zonedTimeToUtc } from 'date-fns-tz';
 import { SearchContext } from '@/constants/searchContexts';
-
 import useSalesInvoiceHdPaidStatusOptions from '@/queryHooks/sales/useSalesInvoiceHdPaidStatusOptions';
 import useSalesInvoiceHdSalesPersonOptions from '@/queryHooks/sales/useSalesInvoiceHdSalesPersonOptions';
 import { PeriodFilter } from '@/components/period-filter';
@@ -15,12 +13,7 @@ import { Button } from '@/components/ui/button';
 import { DataTableFacetedFilter } from '@/components/ui/data-table-faceted-filter';
 import { useMonthYearPeriodStore, useSalesInvoiceHdFilterStore } from '@/store';
 import { useToast } from '@/components/ui/use-toast';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
+
 interface SalesPersonInvoiceFilterSidebarProps<TData> {
   table: Table<TData>;
   context?: SearchContext;

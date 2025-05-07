@@ -23,7 +23,7 @@ export default function useSalesInvoiceHdStatusOptions({
   const options =
     statusData?.map((status) => ({
       value: status.name,
-      label: `${status.name} (${status.count.toLocaleString()})`,
+      label: status.name, //`${status.name} (${status.count.toLocaleString()})`,
       count: isNaN(Number(status.count)) ? 0 : Number(status.count), // Validasi count
     })) || [];
 

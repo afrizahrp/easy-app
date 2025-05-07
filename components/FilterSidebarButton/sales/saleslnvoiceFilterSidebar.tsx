@@ -5,8 +5,8 @@ import { Table } from '@tanstack/react-table';
 import { startOfMonth, endOfMonth } from 'date-fns';
 import { zonedTimeToUtc } from 'date-fns-tz';
 
+import useSalesInvoiceHdPaidStatusOptions from '@/queryHooks/sales/useSalesInvoiceHdPaidStatusOptions';
 import useSalesInvoiceHdSalesPersonOptions from '@/queryHooks/sales/useSalesInvoiceHdSalesPersonOptions';
-
 import useSalesInvoiceHdPoTypeOptions from '@/queryHooks/sales/useSalesInvoiceHdPoTypeOptions';
 import { PeriodFilter } from '@/components/period-filter';
 import { useResetSalesInvoiceFilter } from '@/utils/reset-filter-state/sls/resetSalesInvoiceFilterStore';
@@ -121,16 +121,22 @@ export function SalesInvoiceFilterSidebar<TData>({
   }, [salesPersonName, setSalesInvoiceFilters]);
 
   const {
-    options: salesPersonOptionList,
-    isLoading: isSalesPersonLoading,
-    error: salesPersonError,
-  } = useSalesInvoiceHdSalesPersonOptions({ context: 'salesInvoice' });
+    options: paidStatusOptions,
+    isLoading: isPaidStatusLoading,
+    error: paidStatusError,
+  } = useSalesInvoiceHdPaidStatusOptions({ context: 'salesInvoice' });
 
   const {
     options: poTypeOptionList,
     isLoading: isPoTypeLoading,
     error: poTypeError,
   } = useSalesInvoiceHdPoTypeOptions({ context: 'salesInvoice' });
+
+  const {
+    options: salesPersonOptionList,
+    isLoading: isSalesPersonLoading,
+    error: salesPersonError,
+  } = useSalesInvoiceHdSalesPersonOptions({ context: 'salesInvoice' });
 
   const handleReset = () => {
     try {
@@ -160,28 +166,27 @@ export function SalesInvoiceFilterSidebar<TData>({
     <div className='flex flex-col space-y-4 w-full py-2'>
       <PeriodFilter context='salesInvoice' />
 
-      {/* <div className='w-full py-3 dark:text-slate-400'> */}
-      {/* <DataTableFacetedFilter
-          column={table?.getColumn('salesPersonName')}
-          title='Sales Person'
-          options={salesPersonOptionList}
-          isLoading={isSalesPersonLoading}
-          selectedValues={new Set(salesPersonName)}
+      <div className='w-full py-3'>
+        <DataTableFacetedFilter
+          column={table?.getColumn('paidStatus')}
+          title='Paid Status'
+          options={paidStatusOptions}
+          isLoading={isPaidStatusLoading}
+          disabled={salesPersonName.length > 1}
+          selectedValues={new Set(paidStatus)}
           onSelect={(value) => {
-            const updatedValues = new Set(salesPersonName);
-            if (value) {
-              updatedValues.has(value)
+            const updatedValues = new Set(paidStatus);
+            value
+              ? updatedValues.has(value)
                 ? updatedValues.delete(value)
-                : updatedValues.add(value);
-            } else {
-              updatedValues.clear();
-            }
+                : updatedValues.add(value)
+              : updatedValues.clear();
             setSalesInvoiceFilters({
-              salesPersonName: Array.from(updatedValues),
+              paidStatus: Array.from(updatedValues),
             });
           }}
         />
-      </div> */}
+      </div>
 
       <div className='w-full py-3'>
         <DataTableFacetedFilter
@@ -200,6 +205,29 @@ export function SalesInvoiceFilterSidebar<TData>({
               : updatedValues.clear();
             setSalesInvoiceFilters({
               poType: Array.from(updatedValues),
+            });
+          }}
+        />
+      </div>
+
+      <div className='w-full py-3 dark:text-slate-400'>
+        <DataTableFacetedFilter
+          column={table?.getColumn('salesPersonName')}
+          title='Sales Person'
+          options={salesPersonOptionList}
+          isLoading={isSalesPersonLoading}
+          selectedValues={new Set(salesPersonName)}
+          onSelect={(value) => {
+            const updatedValues = new Set(salesPersonName);
+            if (value) {
+              updatedValues.has(value)
+                ? updatedValues.delete(value)
+                : updatedValues.add(value);
+            } else {
+              updatedValues.clear();
+            }
+            setSalesInvoiceFilters({
+              salesPersonName: Array.from(updatedValues),
             });
           }}
         />

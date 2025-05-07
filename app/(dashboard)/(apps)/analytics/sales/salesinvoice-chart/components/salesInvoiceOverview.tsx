@@ -61,6 +61,7 @@ const SalesInvoiceOverview: React.FC<SalesInvoiceOverviewProps> = ({
       {showFloatingButton && (
         <div className='flex-none w-full md:w-1/2'>
           <FloatingFilterButton
+            modalPosition='above'
             title='Filter Data'
             description='Filter sales invoice by po type.'
           >
