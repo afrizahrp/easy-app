@@ -131,6 +131,16 @@ export const getDefaultYears = (): string[] => {
   return [`${currentYear - 1}`, `${currentYear}`];
 };
 
+export const CURRENCY = 'IDR';
+
+export const formatCurrency = (
+  amount: number,
+  currency: string = CURRENCY,
+  locale: string = 'id-ID'
+): string => {
+  return `${amount.toLocaleString(locale)} ${currency}`;
+};
+
 // src/lib/utils.ts
 // src/lib/utils.ts
 

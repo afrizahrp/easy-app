@@ -25,6 +25,17 @@ import { useSalesInvoiceHdFilterStore } from '@/store';
 import { months } from '@/utils/monthNameMap';
 import { getSalesPersonColor } from '@/utils/getSalesPersonColor';
 import CustomTooltip from '@/components/ui/customTooltip';
+import { useQueryClient } from '@tanstack/react-query';
+import { BarChart2 } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import SalespersonSummaryCard from './salesPersonSumaryCard';
+import { Button } from '@/components/ui/button';
 
 ChartJS.register(
   CategoryScale,
@@ -71,6 +82,7 @@ interface TooltipState {
 const MonthlySalesPersonInvoiceChart: React.FC<
   MonthlySalesPersonInvoiceChartProps
 > = ({ isFullWidth = true, onModeChange, onSalesPersonSelect }) => {
+  const queryClient = useQueryClient();
   const { theme: config } = useThemeStore();
   const { theme: mode } = useTheme();
   const theme = themes.find((theme) => theme.name === config);
@@ -100,9 +112,16 @@ const MonthlySalesPersonInvoiceChart: React.FC<
     useMonthlyComparisonSalesPersonInvoiceFiltered({
       context: 'salesPersonInvoice',
       salesPersonNames: validSalesPersonNames,
+    });
+
+  // Nonaktifkan refetch on window focus menggunakan queryClient
+  useEffect(() => {
+    queryClient.setQueryDefaults(['salesPersonInvoice'], {
       refetchOnWindowFocus: false,
       refetchInterval: false,
+      staleTime: 5 * 60 * 1000, // Cache selama 5 menit
     });
+  }, [queryClient]);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<ChartJS<'bar'>>(null);
@@ -121,6 +140,9 @@ const MonthlySalesPersonInvoiceChart: React.FC<
     invoice: '',
     growth: 0,
   });
+
+  const [isSummaryOpen, setIsSummaryOpen] = useState(false);
+  const [selectedYear, setSelectedYear] = useState<string>('2024'); // Default tahun
 
   const chartData = React.useMemo(() => {
     if (!data || !data.length) return null;
@@ -198,7 +220,7 @@ const MonthlySalesPersonInvoiceChart: React.FC<
       const tooltipHeight = 50; // Estimasi tinggi tooltip
       const adjustedX = Math.min(
         x,
-        containerRect.width - tooltipWidth - 10 // Tid10px dari tepi kanan
+        containerRect.width - tooltipWidth - 10 // Tidak keluar kanan
       );
       const adjustedY = Math.max(y, 10); // Tidak keluar atas
 
@@ -231,13 +253,14 @@ const MonthlySalesPersonInvoiceChart: React.FC<
       const monthIndex = element.index;
       const salesPersonName = chartData?.datasets[datasetIndex]?.label;
       const year =
-        chartData?.datasets[datasetIndex]?.period.match(/\d{4}/)?.[0] || '2025';
+        chartData?.datasets[datasetIndex]?.period.match(/\d{4}/)?.[0] || '2024';
       const rawMonth = chartData?.labels[monthIndex] as string;
       const month = rawMonth
         ? rawMonth.charAt(0).toUpperCase() + rawMonth.slice(1).toLowerCase()
         : undefined;
 
       if (salesPersonName && year && month) {
+        setSelectedYear(year); // Simpan tahun yang dipilih
         onSalesPersonSelect?.({ salesPersonName, year, month });
         onModeChange?.(false);
       }
@@ -282,7 +305,7 @@ const MonthlySalesPersonInvoiceChart: React.FC<
                   } (in Millions IDR)`
                 : 'Monthly Sales (in Millions of IDR)'}
         </h2>
-        <div className='flex flex股份-col items-end space-y-2'>
+        <div className='flex flex-col items-end space-y-2'>
           <button
             onClick={() => {
               setSalesPersonInvoiceFilters({
@@ -295,25 +318,45 @@ const MonthlySalesPersonInvoiceChart: React.FC<
           >
             ← All Salesperson
           </button>
-
-          <button
-            onClick={() => {
-              setSalesPersonInvoiceFilters({
-                salesPersonName: [],
-              });
-              onSalesPersonSelect?.(null);
-              onModeChange?.(true);
-            }}
-            className='px-4 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 text-xs transition'
-          >
-            ← Summary
-          </button>
+          <Dialog open={isSummaryOpen} onOpenChange={setIsSummaryOpen}>
+            <DialogTrigger asChild>
+              <Button
+                variant={'outline'}
+                className='px-4 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 text-xs transition flex items-center'
+                onClick={() => setIsSummaryOpen(true)}
+              >
+                <BarChart2 className='mr-2 h-4 w-4' />
+                Summary
+              </Button>
+            </DialogTrigger>
+            <DialogContent className='max-w-4xl'>
+              <DialogHeader>
+                <DialogTitle>Salesperson Summary</DialogTitle>
+              </DialogHeader>
+              <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+                {validSalesPersonNames.length > 0 ? (
+                  validSalesPersonNames.map((name) => (
+                    <SalespersonSummaryCard
+                      key={name}
+                      salesPersonName={name}
+                      year={selectedYear} // Teruskan tahun yang dipilih
+                    />
+                  ))
+                ) : (
+                  <p className='text-gray-500'>
+                    No salespeople selected. Please select at least one
+                    salesperson.
+                  </p>
+                )}
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
 
       <div className='flex flex-col'>
         <div className='w-full'>
-          {isLoading ? ( // Hanya tampilkan skeleton saat isLoading
+          {isLoading ? (
             <div className='flex items-center justify-center h-80'>
               <Skeleton className='w-3/4 h-1/2 rounded-lg' />
             </div>
@@ -376,7 +419,6 @@ const MonthlySalesPersonInvoiceChart: React.FC<
                     },
                   },
                   onClick: handleChartClick,
-                  // Tambahkan onHover untuk mengatur kursor
                   onHover: (event, chartElements) => {
                     if (event.native && (event.native.target as HTMLElement)) {
                       if (chartElements.length > 0) {

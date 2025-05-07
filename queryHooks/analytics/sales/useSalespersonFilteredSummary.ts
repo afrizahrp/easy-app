@@ -31,19 +31,33 @@ const useSalespersonFilteredSummary = ({
 }: UseSalespersonFilteredSummaryProps) => {
   const user = useSessionStore((state) => state.user);
   const company_id = user?.company_id?.toUpperCase() || '';
-  const module_id = 'dsb'; // Sesuaikan dengan modul Anda
+  const module_id = 'dsb';
   const subModule_id = 'sls';
 
   const { salesPersonInvoicePeriod } = useMonthYearPeriodStore();
   const isValidRequest = Boolean(company_id && module_id && subModule_id);
 
-  // Gunakan periode dari store jika tidak disediakan
+  // Gunakan periode dari store jika tidak disediakan, pastikan tanpa spasi
+  const normalizePeriod = (period: string | Date): string => {
+    if (typeof period === 'string') return period.replace(/\s+/g, '');
+    return format(period, 'MMMyyyy').replace(/\s+/g, '');
+  };
+
   const effectiveStartPeriod =
     startPeriod ||
-    format(salesPersonInvoicePeriod.startPeriod || new Date(), 'MMMyyyy');
+    normalizePeriod(salesPersonInvoicePeriod.startPeriod || new Date());
   const effectiveEndPeriod =
     endPeriod ||
-    format(salesPersonInvoicePeriod.endPeriod || new Date(), 'MMMyyyy');
+    normalizePeriod(salesPersonInvoicePeriod.endPeriod || new Date());
+
+  // Log untuk debug
+  console.log('Effective periods:', {
+    salesPersonName,
+    startPeriod,
+    endPeriod,
+    effectiveStartPeriod,
+    effectiveEndPeriod,
+  });
 
   const { data, isLoading, isFetching, error, ...rest } = useQuery<
     SalespersonSummary,
@@ -64,12 +78,23 @@ const useSalespersonFilteredSummary = ({
       params.append('endPeriod', effectiveEndPeriod);
       if (salesPersonName) params.append('salesPersonName', salesPersonName);
 
-      const url = `${process.env.NEXT_PUBLIC_API_URL}/${company_id}/${module_id}/${subModule_id}/getSalespersonFilteredSummary`;
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/${company_id}/${module_id}/${subModule_id}/get-analytics/getSalespersonFilteredSummary`;
       const finalUrl = `${url}?${params.toString()}`;
 
       try {
-        const response = await api.get<{ data: SalespersonSummary }>(finalUrl);
-        return response.data.data; // Asumsi endpoint mengembalikan { data: ... }
+        // Asumsi API mengembalikan { data: SalespersonSummary[] }
+        const response = await api.get<{ data: SalespersonSummary[] }>(
+          finalUrl
+        );
+        const responseData = response.data.data;
+
+        // Pastikan data adalah array dan tidak kosong
+        if (!Array.isArray(responseData) || responseData.length === 0) {
+          throw new Error('No salesperson summary data found');
+        }
+
+        // Ambil objek pertama dari array
+        return responseData[0];
       } catch (err) {
         const axiosError = err as AxiosError<{ message?: string }>;
         throw new Error(
@@ -78,8 +103,8 @@ const useSalespersonFilteredSummary = ({
         );
       }
     },
-    enabled: isValidRequest && !!salesPersonName, // Aktifkan hanya jika salesPersonName ada
-    staleTime: 5 * 60 * 1000, // 5 menit
+    enabled: isValidRequest && !!salesPersonName,
+    staleTime: 5 * 60 * 1000,
   });
 
   return {
