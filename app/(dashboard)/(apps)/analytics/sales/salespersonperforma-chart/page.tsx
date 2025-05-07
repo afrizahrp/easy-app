@@ -127,14 +127,14 @@ const SalesPersonPerformaAnalytics: React.FC<
       {}
       <PageHeaderWrapper
         show={showHeader}
-        title='Sales Person Performance Analytics'
+        title='Salesperson Performance Analytics'
         disabled={selectedSalesPerson !== null}
         // hideBreadcrumb={selectedSalesPerson !== null}
         breadcrumb={[
           { name: 'Dashboard', href: '/dashboard' },
           { name: 'Analytics', href: '/analytics/sales' },
           {
-            name: 'Sales Person Performance',
+            name: 'Salesperson Performance',
             href: '#',
           },
         ]}
@@ -161,7 +161,7 @@ const SalesPersonPerformaAnalytics: React.FC<
             className='w-full rounded-lg'
           >
             <SalesPersonPerformaOverview
-              showFloatingButton={true}
+              showFloatingButton={showList}
               showList={showList}
               isFullWidth={fullChart === 'period'}
               onModeChange={handleModeChange}

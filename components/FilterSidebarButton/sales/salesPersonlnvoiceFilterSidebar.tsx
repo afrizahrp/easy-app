@@ -5,6 +5,7 @@ import { Table } from '@tanstack/react-table';
 import { AlertCircle } from 'lucide-react';
 import { startOfMonth, endOfMonth } from 'date-fns';
 import { zonedTimeToUtc } from 'date-fns-tz';
+import { SearchContext } from '@/constants/searchContexts';
 
 import useSalesInvoiceHdPaidStatusOptions from '@/queryHooks/sales/useSalesInvoiceHdPaidStatusOptions';
 import useSalesInvoiceHdSalesPersonOptions from '@/queryHooks/sales/useSalesInvoiceHdSalesPersonOptions';
@@ -22,10 +23,12 @@ import {
 } from '@/components/ui/tooltip';
 interface SalesPersonInvoiceFilterSidebarProps<TData> {
   table: Table<TData>;
+  context?: SearchContext;
 }
 
 export function SalesPersonInvoiceFilterSidebar<TData>({
   table,
+  context,
 }: SalesPersonInvoiceFilterSidebarProps<TData>) {
   const { salesPersonInvoicePeriod, setSalesPersonInvoicePeriod } =
     useMonthYearPeriodStore();
@@ -236,30 +239,30 @@ export function SalesPersonInvoiceFilterSidebar<TData>({
       </div>
 
       <div className='w-full py-3'>
-        {table?.getColumn('paidStatus') && (
-          <DataTableFacetedFilter
-            column={table.getColumn('paidStatus')}
-            title='Paid Status'
-            options={statusOptionList}
-            isLoading={isStatusLoading}
-            disabled={salesPersonName.length > 1}
-            selectedValues={new Set(paidStatus)}
-            onSelect={(value) => {
-              const updatedValues = new Set(paidStatus);
-              if (value) {
-                updatedValues.has(value)
-                  ? updatedValues.delete(value)
-                  : updatedValues.add(value);
-              } else {
-                updatedValues.clear();
-              }
-              setSalesPersonInvoiceFilters({
-                paidStatus: Array.from(updatedValues),
-              });
-            }}
-            aria-label='paidStatus sales person invoice filter'
-          />
-        )}
+        {/* {table?.getColumn('paidStatus') && ( */}
+        <DataTableFacetedFilter
+          column={table.getColumn('paidStatus')}
+          title='Paid Status'
+          options={statusOptionList}
+          isLoading={isStatusLoading}
+          disabled={salesPersonName.length > 1}
+          selectedValues={new Set(paidStatus)}
+          onSelect={(value) => {
+            const updatedValues = new Set(paidStatus);
+            if (value) {
+              updatedValues.has(value)
+                ? updatedValues.delete(value)
+                : updatedValues.add(value);
+            } else {
+              updatedValues.clear();
+            }
+            setSalesPersonInvoiceFilters({
+              paidStatus: Array.from(updatedValues),
+            });
+          }}
+          aria-label='paidStatus sales person invoice filter'
+        />
+        {/* )} */}
       </div>
 
       {hasActiveFilters && (

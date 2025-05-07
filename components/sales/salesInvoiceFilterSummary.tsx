@@ -84,7 +84,7 @@ export default function SalesInvoiceFilterSummary({
     ...(salesPersonName.length > 0
       ? [
           {
-            label: 'Sales Person',
+            label: 'Salesperson',
             value: salesPersonName,
             isClearable: true,
             onClear: () => handleClear('salesPersonName'),

@@ -61,7 +61,7 @@ export function FilterSummary({
         {filters.map((f, i) => (
           <div key={i} className='flex items-center justify-center w-full'>
             <span className='text-center'>
-              {f.label === 'Invoice Period' ? '' : `Selected ${f.label}: `}
+              {f.label === 'Invoice Period' ? '' : ` ${f.label}: `}
               {renderValue(f.value)}
             </span>
             {f.isClearable && f.onClear && (

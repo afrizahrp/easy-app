@@ -1,8 +1,12 @@
 'use client';
 import React, { useState } from 'react';
+import { Table } from '@tanstack/react-table';
+
 import { useSalesInvoiceHdFilterStore } from '@/store';
 import MonthlySalesPersonInvoiceChart from './monthlySalesPersonInvoiceChart';
 import MonthlySalesPersonInvoiceChartChart from './monthlySalesPersonInvoiceFilteredChart';
+import { FloatingFilterButton } from '@/components/ui/floating-filter-button';
+import { SalesPersonInvoiceFilterSidebar } from '@/components/FilterSidebarButton/sales/salesPersonlnvoiceFilterSidebar';
 
 interface SalesPersonSelection {
   salesPersonName: string;
@@ -70,10 +74,37 @@ const SalesPersonPerformaOverview: React.FC<
     }
   };
 
+  const dummyTable = {
+    getState: () => ({
+      columnFilters: [],
+      sorting: [],
+      pagination: { pageIndex: 0, pageSize: 10 },
+      globalFilter: '',
+      rowSelection: {},
+    }),
+    getColumn: () => undefined,
+    getFilteredRowModel: () => ({ rows: [] }),
+    resetColumnFilters: () => {},
+    setColumnFilters: () => {},
+  } as unknown as Table<any>;
+
   return (
     <div
       className={`flex flex-col w-full p-2 gap-4 ${showList ? 'h-fit' : 'h-fit min-h-0'}`}
     >
+      {showFloatingButton && (
+        <div className='flex-none w-full md:w-1/2'>
+          <FloatingFilterButton
+            title='Filter Data'
+            description='Filter sales invoice by salesperson and paid status.'
+          >
+            <SalesPersonInvoiceFilterSidebar
+              table={dummyTable}
+              context='salesPersonInvoice'
+            />
+          </FloatingFilterButton>
+        </div>
+      )}
       <div className='w-full'>
         {validSalesPersonNames.length > 0 ? (
           <MonthlySalesPersonInvoiceChartChart

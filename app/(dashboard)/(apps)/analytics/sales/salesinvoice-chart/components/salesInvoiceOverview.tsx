@@ -61,8 +61,8 @@ const SalesInvoiceOverview: React.FC<SalesInvoiceOverviewProps> = ({
       {showFloatingButton && (
         <div className='flex-none w-full md:w-1/2'>
           <FloatingFilterButton
-            title='Filter Sales Invoice'
-            description='Filter sales invoices by date and type.'
+            title='Filter Data'
+            description='Filter sales invoice by po type.'
           >
             <SalesInvoiceFilterSidebar
               table={dummyTable}

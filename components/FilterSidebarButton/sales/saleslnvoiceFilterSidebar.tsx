@@ -160,8 +160,8 @@ export function SalesInvoiceFilterSidebar<TData>({
     <div className='flex flex-col space-y-4 w-full py-2'>
       <PeriodFilter context='salesInvoice' />
 
-      <div className='w-full py-3 dark:text-slate-400'>
-        <DataTableFacetedFilter
+      {/* <div className='w-full py-3 dark:text-slate-400'> */}
+      {/* <DataTableFacetedFilter
           column={table?.getColumn('salesPersonName')}
           title='Sales Person'
           options={salesPersonOptionList}
@@ -181,30 +181,28 @@ export function SalesInvoiceFilterSidebar<TData>({
             });
           }}
         />
-      </div>
+      </div> */}
 
       <div className='w-full py-3'>
-        {table?.getColumn('poType') && (
-          <DataTableFacetedFilter
-            column={table?.getColumn('poType')}
-            title='PO Type'
-            options={poTypeOptionList}
-            isLoading={isPoTypeLoading}
-            disabled={salesPersonName.length > 1}
-            selectedValues={new Set(poType)}
-            onSelect={(value) => {
-              const updatedValues = new Set(poType);
-              value
-                ? updatedValues.has(value)
-                  ? updatedValues.delete(value)
-                  : updatedValues.add(value)
-                : updatedValues.clear();
-              setSalesInvoiceFilters({
-                poType: Array.from(updatedValues),
-              });
-            }}
-          />
-        )}
+        <DataTableFacetedFilter
+          column={table?.getColumn('poType')}
+          title='PO Type'
+          options={poTypeOptionList}
+          isLoading={isPoTypeLoading}
+          disabled={salesPersonName.length > 1}
+          selectedValues={new Set(poType)}
+          onSelect={(value) => {
+            const updatedValues = new Set(poType);
+            value
+              ? updatedValues.has(value)
+                ? updatedValues.delete(value)
+                : updatedValues.add(value)
+              : updatedValues.clear();
+            setSalesInvoiceFilters({
+              poType: Array.from(updatedValues),
+            });
+          }}
+        />
       </div>
 
       {hasActiveFilters && (
