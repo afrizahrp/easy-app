@@ -20,7 +20,7 @@ import { themes } from '@/config/thems';
 import gradientPlugin from 'chartjs-plugin-gradient';
 import { useToast } from '@/components/ui/use-toast';
 import useYearlySalesPersonInvoice from '@/queryHooks/dashboard/sales/useYearlySalesPersonInvoice';
-import CustomTooltip from './customTooltip';
+import CustomTooltip from '@/components/ui/customTooltip';
 import { Button } from '@/components/ui/button';
 import { Maximize2, Minimize2 } from 'lucide-react';
 import { useMonthYearPeriodStore } from '@/store';

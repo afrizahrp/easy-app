@@ -216,7 +216,7 @@ const MonthlyProductSoldFromSalesPersonFiltered: React.FC<
   return (
     <div
       ref={containerRef}
-      className={`bg-white dark:bg-[#18181b] p-4 rounded-lg shadow-sm h-96 w-full mt-2`}
+      className={`bg-white dark:bg-[#18181b] p-4 rounded-lg shadow-sm h-96 w-full mt-6`}
       style={{ backgroundColor: hexBackground }}
     >
       <div className='flex items-center justify-between mb-2'>

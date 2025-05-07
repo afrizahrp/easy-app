@@ -749,3 +749,15 @@ html[dir='rtl'] .react-select .select__loading-indicator {
 .absolute svg {
   vertical-align: middle;
 }
+.tooltip-with-pointer::after {
+  content: '';
+  position: absolute;
+  bottom: -8px; /* Jarak dari bawah tooltip */
+  left: 50%; /* Posisikan di tengah tooltip */
+  transform: translateX(-50%); /* Pusatkan panah */
+  width: 0;
+  height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-top: 8px solid #1f2937; /* Warna sama dengan bg-gray-800 */
+}
