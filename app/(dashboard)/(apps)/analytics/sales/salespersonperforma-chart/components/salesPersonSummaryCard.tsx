@@ -82,7 +82,7 @@ const SalespersonSummaryCard: React.FC<SalespersonSummaryCardProps> = ({
         </CardHeader>
         <CardContent>
           <p className='text-sm text-gray-500'>
-            Data tidak tersedia untuk {salesPersonName}
+            Data not available for {salesPersonName} in {year}.
           </p>
         </CardContent>
       </Card>
@@ -143,19 +143,19 @@ const SalespersonSummaryCard: React.FC<SalespersonSummaryCardProps> = ({
               Growth: {data.growthPercentage ?? 'N/A'}%
             </span>
           </div>
-          <div className='flex items-center text-sm text-gray-600 dark:text-gray-300'>
+          {/* <div className='flex items-center text-sm text-gray-600 dark:text-gray-300'>
             <BarChart2 className='w-4 h-4 mr-2 text-blue-400' />
             <span>
               Highest Month: {data.highestMonth?.month ?? 'N/A'} (
               {formatAmount(data.highestMonth?.amount ?? 0)})
             </span>
-          </div>
-          <div className='flex items-center text-sm text-gray-600 dark:text-gray-300'>
+          </div> */}
+          {/* <div className='flex items-center text-sm text-gray-600 dark:text-gray-300'>
             <DollarSign className='w-4 h-4 mr-2 text-gray-400' />
             <span>
               Average Monthly: {formatAmount(data.averageMonthlySales ?? 0)}
             </span>
-          </div>
+          </div> */}
         </CardContent>
         <CardFooter>
           <DialogTrigger asChild>

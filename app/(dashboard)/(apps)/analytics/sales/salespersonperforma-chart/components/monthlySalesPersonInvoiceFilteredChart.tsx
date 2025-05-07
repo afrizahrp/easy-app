@@ -118,6 +118,17 @@ const MonthlySalesPersonInvoiceChart: React.FC<
       salesPersonNames: validSalesPersonNames,
     });
 
+  const handleSummaryOpen = () => {
+    if (salespersons.length > 4) {
+      toast({
+        description: `Cannot open summary. Maximum 4 salespeople allowed, but you selected ${salespersons.length}.`,
+        color: 'destructive',
+      });
+      return; // Pastikan eksekusi berhenti di sini
+    }
+    setIsSummaryOpen(true);
+  };
+
   useEffect(() => {
     queryClient.setQueryDefaults(['salesPersonInvoice'], {
       refetchOnWindowFocus: false,
@@ -283,6 +294,8 @@ const MonthlySalesPersonInvoiceChart: React.FC<
     Array.isArray(chartData.datasets) &&
     chartData.datasets.some((ds) => ds.data.some((value) => value > 0));
 
+  const limitedSalespersons = salespersons.slice(0, 4);
+
   return (
     <div
       ref={containerRef}
@@ -316,12 +329,14 @@ const MonthlySalesPersonInvoiceChart: React.FC<
           >
             ← All Salesperson
           </button>
+
+          {/* {salespersons.length > 4 && ( */}
           <Dialog open={isSummaryOpen} onOpenChange={setIsSummaryOpen}>
             <DialogTrigger asChild>
               <Button
-                variant={'outline'}
+                variant='outline'
                 className='px-4 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 text-xs transition flex items-center'
-                onClick={() => setIsSummaryOpen(true)}
+                onClick={handleSummaryOpen}
               >
                 <BarChart2 className='mr-2 h-4 w-4' />
                 Summary
@@ -334,9 +349,9 @@ const MonthlySalesPersonInvoiceChart: React.FC<
                 </DialogTitle>
               </DialogHeader>
               <div className='w-full'>
-                {salespersons.length > 0 ? (
+                {limitedSalespersons.length > 0 ? (
                   <SalesPersonSummaryList
-                    salespersons={salespersons}
+                    salespersons={limitedSalespersons}
                     year={selectedYear}
                   />
                 ) : (
@@ -348,6 +363,7 @@ const MonthlySalesPersonInvoiceChart: React.FC<
               </div>
             </DialogContent>
           </Dialog>
+          {/* )} */}
         </div>
       </div>
 

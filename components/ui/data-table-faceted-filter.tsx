@@ -72,7 +72,10 @@ export function DataTableFacetedFilter<TData, TValue>({
       {selectedValues.size > 0 && (
         <div className='hidden space-x-1 py-3 lg:flex'>
           {selectedValues.size > 3 ? (
-            <Badge variant='outline' className='rounded-sm px-1 font-normal'>
+            <Badge
+              variant='outline'
+              className='rounded-sm px-1 font-normal text-slate dark:text-slate-400'
+            >
               {selectedValues.size} data filtered
             </Badge>
           ) : (
