@@ -49,7 +49,6 @@ export function DataTableToolbar<TData>({
   const currentSearchBy = searchParams?.[context]?.searchBy || 'invoice_id'; // Gunakan context secara dinamis
 
   const searchOptions = toSearchOptionArray(searchOptionItem);
-  console.log('showFilterButton', showFilterButton);
   return (
     <div className='flex flex-wrap items-center gap-2 sm:gap-4 w-full'>
       {/* Sidebar Filter */}
