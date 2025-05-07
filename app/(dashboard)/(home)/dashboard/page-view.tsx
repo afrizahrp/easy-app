@@ -6,35 +6,29 @@ import { ChartYearFilter } from '@/components/ui/chartYearFilter';
 import YearlySalesInvoiceChart from './components/yearlySalesInvoiceChart';
 import YearlySalesPersonInvoiceChart from './components/yearlySalesPersonInvoiceChart';
 import ChartYearFilterSummary from '@/components/ui/chartYearFilterSummary';
-import { cn } from '@/lib/utils'; // Utility for className concatenation
-import { motion, AnimatePresence } from 'framer-motion'; // Framer Motion for animations
-import { Skeleton } from '@/components/ui/skeleton'; // Skeleton for loading states
+import { cn } from '@/lib/utils';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Skeleton } from '@/components/ui/skeleton';
 
-// Define types for session store
 interface User {
-  // Define user properties based on your store
   id?: string;
   name?: string;
-  // Add other relevant fields
 }
 
 interface SessionStore {
   user: User | null;
 }
 
-// Define props for DashboardPageView
 interface DashboardPageViewProps {
-  trans: Record<string, string>;
+  trans?: Record<string, string>;
 }
 
-// Define props for Card component
 interface CardProps {
   children: React.ReactNode;
   className?: string;
   title?: string;
 }
 
-// Reusable Card component
 const Card: React.FC<CardProps> = ({ children, className, title }) => (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
@@ -54,19 +48,33 @@ const Card: React.FC<CardProps> = ({ children, className, title }) => (
   </motion.div>
 );
 
-const DashboardPageView: React.FC<DashboardPageViewProps> = ({ trans }) => {
+const DashboardPageView: React.FC<DashboardPageViewProps> = ({
+  trans = {},
+}) => {
   const { user } = useSessionStore() as SessionStore;
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  // Simulate loading (replace with actual data fetching logic)
   useEffect(() => {
     const timer = setTimeout(() => setIsLoading(false), 2000);
     return () => clearTimeout(timer);
   }, []);
 
+  // Default translations
+  const defaultTrans = {
+    showChartByYears: 'Show Chart by Years',
+    filterChartsByYear: 'Filter charts by year',
+    openChartYearFilter: 'Open chart year filter',
+    showChartsByYear: 'Show Charts by Year',
+    selectChartYear: 'Select chart year',
+    yearlySalesInvoice: 'Yearly Sales Invoice',
+    salesPersonInvoice: 'Sales Person Invoice',
+  };
+
+  // Merge provided trans with defaults
+  const t = { ...defaultTrans, ...trans };
+
   return (
     <div className='p-4 md:p-6 lg:p-8 bg-gray-50 dark:bg-gray-900 min-h-screen transition-colors duration-300'>
-      {/* Sticky Floating Filter Button with Animation */}
       <motion.div
         className='sticky top-4 z-10'
         initial={{ opacity: 0, scale: 0.95 }}
@@ -74,20 +82,19 @@ const DashboardPageView: React.FC<DashboardPageViewProps> = ({ trans }) => {
         transition={{ duration: 0.3, ease: 'easeOut' }}
       >
         <FloatingFilterButton
-          title={trans['showChartByYears'] || 'Show Chart by Years'}
-          description={trans['filterChartsByYear'] || 'Filter charts by year'}
-          className='mb-4 hover:scale-105 transition-transform duration-200 hover:bg-gray-100 dark:hover:bg-gray-700'
-          aria-label={trans['openChartYearFilter'] || 'Open chart year filter'}
+          title={t.showChartByYears}
+          description={t.filterChartsByYear}
+          className='mb-4 hover:scale-105 transition-transform duration-200'
+          aria-label={t.openChartYearFilter}
         >
           <ChartYearFilter
-            title={trans['showChartsByYear'] || 'Show Charts by Year'}
-            className='max-w-xs mb-6 font-semibold text-gray-800 dark:text-gray-200'
-            aria-label={trans['selectChartYear'] || 'Select chart year'}
+            title={t.showChartsByYear}
+            className='max-w-xs mb-6'
+            aria-label={t.selectChartYear}
           />
         </FloatingFilterButton>
       </motion.div>
 
-      {/* Chart Year Filter Summary with Fade-in */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -96,7 +103,6 @@ const DashboardPageView: React.FC<DashboardPageViewProps> = ({ trans }) => {
         <ChartYearFilterSummary className='mb-6 text-gray-700 dark:text-gray-300' />
       </motion.div>
 
-      {/* Responsive Grid with Loading States */}
       <div className='grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6'>
         <AnimatePresence>
           {isLoading ? (
@@ -110,10 +116,7 @@ const DashboardPageView: React.FC<DashboardPageViewProps> = ({ trans }) => {
             </>
           ) : (
             <>
-              <Card
-                title={trans['yearlySalesInvoice'] || 'Yearly Sales Invoice'}
-                key='chart1'
-              >
+              <Card title={t.yearlySalesInvoice} key='chart1'>
                 <YearlySalesInvoiceChart
                   height={400}
                   isCompact={false}
@@ -123,10 +126,7 @@ const DashboardPageView: React.FC<DashboardPageViewProps> = ({ trans }) => {
                   }
                 />
               </Card>
-              <Card
-                title={trans['salesPersonInvoice'] || 'Sales Person Invoice'}
-                key='chart2'
-              >
+              <Card title={t.salesPersonInvoice} key='chart2'>
                 <YearlySalesPersonInvoiceChart
                   isCompact={false}
                   isFullWidth={false}

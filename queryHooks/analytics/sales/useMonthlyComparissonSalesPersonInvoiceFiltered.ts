@@ -30,11 +30,15 @@ interface SalesPeriodResponse {
 interface UseMonthlyComparisonSalesPersonInvoiceFilteredProps {
   context: 'salesPersonInvoice';
   salesPersonNames: string[];
+  refetchOnWindowFocus?: boolean;
+  refetchInterval?: number | false;
 }
 
 const useMonthlyComparisonSalesPersonInvoiceFiltered = ({
   context,
   salesPersonNames,
+  refetchOnWindowFocus,
+  refetchInterval,
 }: UseMonthlyComparisonSalesPersonInvoiceFilteredProps) => {
   const user = useSessionStore((state) => state.user);
   const company_id = user?.company_id?.toUpperCase();
@@ -121,7 +125,9 @@ const useMonthlyComparisonSalesPersonInvoiceFiltered = ({
       }
     },
     enabled: isValidRequest && validSalesPersonNames.length > 0,
-    staleTime: 60 * 1000,
+    staleTime: 5 * 60 * 1000, // 5 menit
+    refetchOnWindowFocus: false,
+    refetchInterval: false,
     retry: (failureCount, err) => {
       if (err instanceof AxiosError && err.response?.status === 400) {
         return false;

@@ -1,5 +1,4 @@
 'use client';
-
 import * as React from 'react';
 import { Years } from '@/lib/utils';
 import { useYearlyPeriodStore } from '@/store';
@@ -7,12 +6,26 @@ import { Button } from '@/components/ui/button';
 import { Cross2Icon } from '@radix-ui/react-icons';
 import { useToast } from '@/components/ui/use-toast';
 import { YearFacetedFilter } from '@/components/ui/yearFacetedFilter';
+import { motion } from 'framer-motion';
+import { cn } from '@/lib/utils';
 
 interface ChartYearFilterProps {
   title?: string;
   isLoading?: boolean;
   disabled?: boolean;
   className?: string;
+  'aria-label'?: string;
+}
+
+interface YearOption {
+  value: string;
+  label: string;
+}
+
+interface YearlyPeriodStore {
+  selectedYears: string[];
+  setYears: (years: string[]) => void;
+  resetYears: () => void;
 }
 
 export function ChartYearFilter({
@@ -20,11 +33,13 @@ export function ChartYearFilter({
   isLoading,
   disabled,
   className,
+  'aria-label': ariaLabel = 'Filter by year',
 }: ChartYearFilterProps) {
-  const { selectedYears, setYears, resetYears } = useYearlyPeriodStore();
+  const { selectedYears, setYears, resetYears } =
+    useYearlyPeriodStore() as YearlyPeriodStore;
   const { toast } = useToast();
 
-  const yearOptions = React.useMemo(
+  const yearOptions = React.useMemo<YearOption[]>(
     () =>
       Years.sort((a, b) => Number(b) - Number(a)).map((year) => ({
         value: year,
@@ -35,9 +50,14 @@ export function ChartYearFilter({
 
   if (!yearOptions.length) {
     return (
-      <div className='text-center text-sm text-slate-500'>
+      <motion.div
+        className='text-center text-sm text-gray-500 dark:text-gray-400'
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.3 }}
+      >
         No years available
-      </div>
+      </motion.div>
     );
   }
 
@@ -71,9 +91,16 @@ export function ChartYearFilter({
   };
 
   return (
-    <div className={`flex flex-col space-y-4 w-full py-2 ${className || ''}`}>
+    <motion.div
+      className={cn('flex flex-col space-y-4 w-full py-2', className)}
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3, ease: 'easeOut' }}
+    >
       <div>
-        <h3 className='text-lg font-semibold mb-2 text-center'>{title}</h3>
+        <h3 className='text-lg font-semibold mb-2 text-center text-gray-800 dark:text-gray-200'>
+          {title}
+        </h3>
         <YearFacetedFilter
           title='Year'
           options={yearOptions}
@@ -81,19 +108,29 @@ export function ChartYearFilter({
           disabled={disabled}
           selectedValues={new Set(selectedYears)}
           onSelect={handleSelect}
-          ariaLabel='dashboard year filter'
+          ariaLabel={ariaLabel}
         />
       </div>
 
-      <Button
-        variant='outline'
-        onClick={handleReset}
-        className='h-10 px-2 w-full mb-5 bg-secondary text-slate hover:bg-secondary-dark dark:bg-secondary dark:text-slate-100 dark:hover:bg-secondary dark:hover:text-slate-400'
-        aria-label='Reset dashboard year filter'
+      <motion.div
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
+        transition={{ duration: 0.2 }}
       >
-        <Cross2Icon className='ml-2 h-4 w-4' />
-        Reset Year
-      </Button>
-    </div>
+        <Button
+          variant='outline'
+          onClick={handleReset}
+          className={cn(
+            'h-10 px-2 w-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200',
+            disabled && 'opacity-50 cursor-not-allowed'
+          )}
+          aria-label='Reset year filter'
+          disabled={disabled}
+        >
+          <Cross2Icon className='ml-2 h-4 w-4' />
+          Reset Year
+        </Button>
+      </motion.div>
+    </motion.div>
   );
 }

@@ -86,22 +86,22 @@ const MonthlySalesPersonInvoiceChart: React.FC<
       setSalesPersonInvoiceFilters: state.setSalesPersonInvoiceFilters,
     }));
 
-  const validSalesPersonNames = Array.isArray(
-    salesPersonInvoiceFilters.salesPersonName
-  )
-    ? salesPersonInvoiceFilters.salesPersonName.filter(
-        (name) => typeof name === 'string' && name.trim()
-      )
-    : salesPersonInvoiceFilters.salesPersonName &&
-        typeof salesPersonInvoiceFilters.salesPersonName === 'string' &&
-        salesPersonInvoiceFilters.salesPersonName
-      ? [salesPersonInvoiceFilters.salesPersonName]
-      : [];
+  // Stabilkan validSalesPersonNames dengan useMemo
+  const validSalesPersonNames = React.useMemo(() => {
+    const names = salesPersonInvoiceFilters.salesPersonName;
+    return Array.isArray(names)
+      ? names.filter((name) => typeof name === 'string' && name.trim())
+      : names && typeof names === 'string' && names
+        ? [names]
+        : [];
+  }, [salesPersonInvoiceFilters.salesPersonName]);
 
   const { data, isLoading, isFetching, error } =
     useMonthlyComparisonSalesPersonInvoiceFiltered({
       context: 'salesPersonInvoice',
       salesPersonNames: validSalesPersonNames,
+      refetchOnWindowFocus: false,
+      refetchInterval: false,
     });
 
   const containerRef = useRef<HTMLDivElement>(null);
@@ -198,7 +198,7 @@ const MonthlySalesPersonInvoiceChart: React.FC<
       const tooltipHeight = 50; // Estimasi tinggi tooltip
       const adjustedX = Math.min(
         x,
-        containerRect.width - tooltipWidth - 10 // Tidak keluar kanan
+        containerRect.width - tooltipWidth - 10 // Tid10px dari tepi kanan
       );
       const adjustedY = Math.max(y, 10); // Tidak keluar atas
 
@@ -282,7 +282,7 @@ const MonthlySalesPersonInvoiceChart: React.FC<
                   } (in Millions IDR)`
                 : 'Monthly Sales (in Millions of IDR)'}
         </h2>
-        <div className='flex flex-col items-end space-y-2'>
+        <div className='flex flex股份-col items-end space-y-2'>
           <button
             onClick={() => {
               setSalesPersonInvoiceFilters({
@@ -295,12 +295,25 @@ const MonthlySalesPersonInvoiceChart: React.FC<
           >
             ← All Salesperson
           </button>
+
+          <button
+            onClick={() => {
+              setSalesPersonInvoiceFilters({
+                salesPersonName: [],
+              });
+              onSalesPersonSelect?.(null);
+              onModeChange?.(true);
+            }}
+            className='px-4 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 text-xs transition'
+          >
+            ← Summary
+          </button>
         </div>
       </div>
 
       <div className='flex flex-col'>
         <div className='w-full'>
-          {isLoading || isFetching ? (
+          {isLoading ? ( // Hanya tampilkan skeleton saat isLoading
             <div className='flex items-center justify-center h-80'>
               <Skeleton className='w-3/4 h-1/2 rounded-lg' />
             </div>

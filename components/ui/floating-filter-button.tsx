@@ -10,76 +10,78 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 interface FloatingFilterButtonProps {
-  title?: string;
-  description?: string;
+  title: string;
+  description: string;
   children: React.ReactNode;
-  modalPosition?: 'above' | 'default'; // Prop baru untuk posisi modal
+  modalPosition?: 'above' | 'default';
+  className?: string;
+  'aria-label'?: string;
 }
 
 export function FloatingFilterButton({
   title,
   description,
   children,
-  modalPosition = 'default', // Default ke posisi asli
+  modalPosition = 'default',
+  className,
+  'aria-label': ariaLabel = 'Open filter',
 }: FloatingFilterButtonProps) {
-  const [isOpen, setIsOpen] = useState(false);
-  const [position, setPosition] = useState({ x: 0, y: 0 }); // Posisi awal
-  const draggableRef = useRef<HTMLDivElement>(null); // Ref untuk Draggable
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [position, setPosition] = useState<{ x: number; y: number }>({
+    x: 0,
+    y: 0,
+  });
+  const draggableRef = useRef<HTMLDivElement>(null);
 
-  // Simpan posisi saat drag
+  // Handle drag stop
   const handleDragStop = (e: any, data: any) => {
     setPosition({ x: data.x, y: data.y });
   };
 
-  // Reset posisi ke awal (bottom-6 right-6)
+  // Reset position to initial (bottom-6 right-6)
   const resetPosition = () => {
     setPosition({ x: 0, y: 0 });
   };
 
-  // Hitung posisi modal berdasarkan posisi tombol
+  // Calculate modal position
   const calculateModalPosition = () => {
-    const buttonWidth = 150; // Perkiraan lebar tombol
-    const modalWidth = 300; // Perkiraan lebar modal
-    const modalHeight = 400; // Perkiraan tinggi modal
-    const offsetY = 10; // Jarak vertikal dari tombol
-    const offsetX = 10; // Jarak horizontal dari tombol
+    const buttonWidth = 150;
+    const modalWidth = 300;
+    const modalHeight = 400;
+    const offsetY = 10;
+    const offsetX = 10;
 
-    // Posisi tombol relatif terhadap kanan bawah (bottom-6 right-6)
     const buttonRight = 24; // right-6 = 24px
     const buttonBottom = 24; // bottom-6 = 24px
 
-    // Posisi absolut tombol di layar
     const buttonX = window.innerWidth - buttonRight - buttonWidth + position.x;
-    const buttonY = window.innerHeight - buttonBottom - 40 + position.y; // 40px = tinggi tombol
+    const buttonY = window.innerHeight - buttonBottom - 40 + position.y;
 
-    // Posisi modal
     let modalX: number;
     let modalY: number;
 
     if (modalPosition === 'above') {
-      // Untuk SalesPersonInvoiceFilterSidebar: modal di atas tombol dan ke kiri
-      modalX = buttonX - modalWidth - offsetX; // Modal di kiri tombol
-      modalY = buttonY - modalHeight - offsetY - 40; // Modal di atas tombol, 40px = tinggi tombol
+      modalX = buttonX - modalWidth - offsetX;
+      modalY = buttonY - modalHeight - offsetY - 40;
     } else {
-      // Default: modal di bawah tombol dan sejajar dengan tombol
-      modalX = buttonX; // Modal sejajar dengan tombol
-      modalY = buttonY + 40 + offsetY; // Modal di bawah tombol
+      modalX = buttonX;
+      modalY = buttonY + 40 + offsetY;
     }
 
-    // Pastikan modal tetap dalam batas layar
     if (modalX + modalWidth > window.innerWidth) {
-      modalX = window.innerWidth - modalWidth - 10; // Jaga jarak 10px dari tepi kanan
+      modalX = window.innerWidth - modalWidth - 10;
     }
     if (modalX < 0) {
-      modalX = 10; // Jaga jarak 10px dari tepi kiri
+      modalX = 10;
     }
     if (modalY < 0) {
-      modalY = buttonY + 40 + offsetY; // Jika tidak cukup ruang di atas, muncul di bawah tombol
+      modalY = buttonY + 40 + offsetY;
     }
     if (modalY + modalHeight > window.innerHeight) {
-      modalY = window.innerHeight - modalHeight - 10; // Jaga jarak 10px dari tepi bawah
+      modalY = window.innerHeight - modalHeight - 10;
     }
 
     return { left: modalX, top: modalY };
@@ -94,14 +96,17 @@ export function FloatingFilterButton({
       >
         <div
           ref={draggableRef}
-          className='fixed bottom-6 right-6 z-50 cursor-move'
-          aria-label='Draggable filter button'
+          className={cn('fixed bottom-6 right-6 z-50 cursor-move', className)}
+          aria-label={ariaLabel}
         >
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
                 <motion.div
-                  className='flex items-center gap-2 px-4 py-2 rounded-full shadow-lg bg-gradient-to-r from-blue-500 to-indigo-600 text-white hover:from-blue-600 hover:to-indigo-700 transition-all'
+                  className={cn(
+                    'flex items-center gap-2 px-4 py-2 rounded-full shadow-lg bg-gradient-to-r from-blue-500 to-indigo-600 dark:from-blue-600 dark:to-indigo-800 text-white hover:from-blue-600 hover:to-indigo-700 dark:hover:from-blue-700 dark:hover:to-indigo-900 transition-all duration-300',
+                    className
+                  )}
                   initial={{ scale: 0.8, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
                   transition={{ duration: 0.3, ease: 'easeOut' }}
@@ -118,7 +123,7 @@ export function FloatingFilterButton({
                   <span>{title}</span>
                 </motion.div>
               </TooltipTrigger>
-              <TooltipContent className='text-sm text-slate-100 dark:text-slate-100'>
+              <TooltipContent className='text-sm bg-gray-800 dark:bg-gray-900 text-white dark:text-gray-100'>
                 <p>{description}</p>
               </TooltipContent>
             </Tooltip>
@@ -130,32 +135,33 @@ export function FloatingFilterButton({
         {isOpen && (
           <>
             <motion.div
-              className='fixed inset-0 bg-black/50 z-40'
+              className='fixed inset-0 bg-black/50 dark:bg-black/60 z-40'
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
               onClick={() => setIsOpen(false)}
             />
             <motion.div
-              className='fixed bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg z-50'
-              style={calculateModalPosition()} // Posisi dinamis
+              className='fixed bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg z-50 transition-colors duration-300'
+              style={calculateModalPosition()}
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: 20, opacity: 0 }}
-              transition={{ duration: 0.3 }}
+              transition={{ duration: 0.3, ease: 'easeOut' }}
             >
               {children}
               <div className='flex gap-2 mt-4'>
                 <Button
                   variant='outline'
-                  className='w-full'
+                  className='w-full text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700'
                   onClick={() => setIsOpen(false)}
                 >
                   Close
                 </Button>
                 <Button
                   variant='default'
-                  className='w-full'
+                  className='w-full bg-blue-500 dark:bg-blue-600 text-white hover:bg-blue-600 dark:hover:bg-blue-700'
                   onClick={resetPosition}
                 >
                   Reset Position
