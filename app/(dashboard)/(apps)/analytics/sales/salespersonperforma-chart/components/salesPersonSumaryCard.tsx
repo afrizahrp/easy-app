@@ -36,14 +36,12 @@ interface SalespersonSummaryCardProps {
   salesPersonName: string;
   year?: string;
   currency?: string;
-  isSingle?: boolean; // Prop baru untuk menentukan apakah kartu tunggal
 }
 
 const SalespersonSummaryCard: React.FC<SalespersonSummaryCardProps> = ({
   salesPersonName,
   year = '2024',
   currency = CURRENCY,
-  isSingle = false,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -59,12 +57,7 @@ const SalespersonSummaryCard: React.FC<SalespersonSummaryCardProps> = ({
 
   if (isLoading) {
     return (
-      <div
-        className={cn(
-          'relative w-full max-w-sm h-64 rounded-xl overflow-hidden bg-gray-200 dark:bg-gray-700',
-          isSingle && 'mx-auto'
-        )}
-      >
+      <div className='relative w-full max-w-sm h-64 rounded-xl overflow-hidden bg-gray-200 dark:bg-gray-700'>
         <div className='absolute inset-0 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 dark:from-gray-700 dark:via-gray-600 dark:to-gray-700 animate-shimmer' />
       </div>
     );
@@ -72,12 +65,7 @@ const SalespersonSummaryCard: React.FC<SalespersonSummaryCardProps> = ({
 
   if (error) {
     return (
-      <div
-        className={cn(
-          'text-red-500 bg-red-50 p-4 rounded-xl w-full max-w-sm',
-          isSingle && 'mx-auto'
-        )}
-      >
+      <div className='text-red-500 bg-red-50 p-4 rounded-xl w-full max-w-sm'>
         Error: {error.message}
       </div>
     );
@@ -86,20 +74,18 @@ const SalespersonSummaryCard: React.FC<SalespersonSummaryCardProps> = ({
   if (!data || !data.totalInvoice) {
     console.log('Data tidak lengkap:', { salesPersonName, data });
     return (
-      <div className={cn('w-full max-w-sm', isSingle && 'mx-auto')}>
-        <Card className='w-full border border-gray-200 rounded-xl hover:shadow-xl transition-all duration-300'>
-          <CardHeader className='pb-2'>
-            <CardTitle className='text-lg font-semibold text-gray-800 dark:text-gray-100'>
-              {salesPersonName}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className='text-sm text-gray-500'>
-              Data tidak tersedia untuk {salesPersonName}
-            </p>
-          </CardContent>
-        </Card>
-      </div>
+      <Card className='w-full max-w-sm border border-gray-200 rounded-xl hover:shadow-xl transition-all duration-300'>
+        <CardHeader className='pb-2'>
+          <CardTitle className='text-lg font-semibold text-gray-800 dark:text-gray-100'>
+            {salesPersonName}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className='text-sm text-gray-500'>
+            Data tidak tersedia untuk {salesPersonName}
+          </p>
+        </CardContent>
+      </Card>
     );
   }
 
@@ -112,81 +98,79 @@ const SalespersonSummaryCard: React.FC<SalespersonSummaryCardProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <div className={cn('w-full max-w-sm', isSingle && 'mx-auto')}>
-        <Card className='w-full border border-gray-200 rounded-xl hover:shadow-xl transition-all duration-300 bg-white dark:bg-gray-800'>
-          <CardHeader className='pb-2'>
-            <CardTitle className='text-lg font-semibold text-gray-800 dark:text-gray-100 flex items-center'>
-              <BarChart2 className='w-5 h-5 mr-2 text-blue-500' />
-              {data.salesPersonName}
-            </CardTitle>
-            <p className='text-xs text-gray-500 dark:text-gray-400'>
-              Semua jumlah dalam {currency}
-            </p>
-          </CardHeader>
-          <CardContent className='space-y-3'>
-            <div className='flex items-center text-sm text-gray-600 dark:text-gray-300'>
-              <Calendar className='w-4 h-4 mr-2 text-gray-400' />
-              <span>Period: {data.period}</span>
-            </div>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div className='flex items-center text-sm font-medium text-gray-800 dark:text-gray-100'>
-                    <DollarSign className='w-4 h-4 mr-2 text-green-500' />
-                    <span>
-                      Total Invoice: {formatCurrency(data.totalInvoice)}
-                    </span>
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Total penjualan untuk periode {data.period}</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-            <div className='flex items-center text-sm'>
-              {isPositiveGrowth ? (
-                <TrendingUp className='w-4 h-4 mr-2 text-green-500' />
-              ) : (
-                <TrendingDown className='w-4 h-4 mr-2 text-red-500' />
+      <Card className='w-full max-w-sm border border-gray-200 rounded-xl hover:shadow-xl transition-all duration-300 bg-white dark:bg-gray-800'>
+        <CardHeader className='pb-2'>
+          <CardTitle className='text-lg font-semibold text-gray-800 dark:text-gray-100 flex items-center'>
+            <BarChart2 className='w-5 h-5 mr-2 text-blue-500' />
+            {data.salesPersonName}
+          </CardTitle>
+          <p className='text-xs text-gray-500 dark:text-gray-400'>
+            Semua jumlah dalam {currency}
+          </p>
+        </CardHeader>
+        <CardContent className='space-y-3'>
+          <div className='flex items-center text-sm text-gray-600 dark:text-gray-300'>
+            <Calendar className='w-4 h-4 mr-2 text-gray-400' />
+            <span>Period: {data.period}</span>
+          </div>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className='flex items-center text-sm font-medium text-gray-800 dark:text-gray-100'>
+                  <DollarSign className='w-4 h-4 mr-2 text-green-500' />
+                  <span>
+                    Total Invoice: {formatCurrency(data.totalInvoice)}
+                  </span>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Total penjualan untuk periode {data.period}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+          <div className='flex items-center text-sm'>
+            {isPositiveGrowth ? (
+              <TrendingUp className='w-4 h-4 mr-2 text-green-500' />
+            ) : (
+              <TrendingDown className='w-4 h-4 mr-2 text-red-500' />
+            )}
+            <span
+              className={cn(
+                'font-medium',
+                isPositiveGrowth
+                  ? 'text-green-600 dark:text-green-400'
+                  : 'text-red-600 dark:text-red-400'
               )}
-              <span
-                className={cn(
-                  'font-medium',
-                  isPositiveGrowth
-                    ? 'text-green-600 dark:text-green-400'
-                    : 'text-red-600 dark:text-red-400'
-                )}
-              >
-                Growth: {data.growthPercentage ?? 'N/A'}%
-              </span>
-            </div>
-            <div className='flex items-center text-sm text-gray-600 dark:text-gray-300'>
-              <BarChart2 className='w-4 h-4 mr-2 text-blue-400' />
-              <span>
-                Highest Month: {data.highestMonth?.month ?? 'N/A'} (
-                {formatAmount(data.highestMonth?.amount ?? 0)})
-              </span>
-            </div>
-            <div className='flex items-center text-sm text-gray-600 dark:text-gray-300'>
-              <DollarSign className='w-4 h-4 mr-2 text-gray-400' />
-              <span>
-                Average Monthly: {formatAmount(data.averageMonthlySales ?? 0)}
-              </span>
-            </div>
-          </CardContent>
-          <CardFooter>
-            <DialogTrigger asChild>
-              <Button
-                variant='outline'
-                className='w-full rounded-lg border-blue-500 text-blue-500 hover:bg-blue-50 hover:text-blue-600 dark:border-blue-400 dark:text-blue-400 dark:hover:bg-blue-900 dark:hover:text-blue-300 transition-colors duration-200'
-                onClick={() => setIsOpen(true)}
-              >
-                View Details
-              </Button>
-            </DialogTrigger>
-          </CardFooter>
-        </Card>
-      </div>
+            >
+              Growth: {data.growthPercentage ?? 'N/A'}%
+            </span>
+          </div>
+          <div className='flex items-center text-sm text-gray-600 dark:text-gray-300'>
+            <BarChart2 className='w-4 h-4 mr-2 text-blue-400' />
+            <span>
+              Highest Month: {data.highestMonth?.month ?? 'N/A'} (
+              {formatAmount(data.highestMonth?.amount ?? 0)})
+            </span>
+          </div>
+          <div className='flex items-center text-sm text-gray-600 dark:text-gray-300'>
+            <DollarSign className='w-4 h-4 mr-2 text-gray-400' />
+            <span>
+              Average Monthly: {formatAmount(data.averageMonthlySales ?? 0)}
+            </span>
+          </div>
+        </CardContent>
+        <CardFooter>
+          <DialogTrigger asChild>
+            <Button
+              variant='outline'
+              className='w-full rounded-lg border-blue-500 text-blue-500 hover:bg-blue-50 hover:text-blue-600 dark:border-blue-400 dark:text-blue-400 dark:hover:bg-blue-900 dark:hover:text-blue-300 transition-colors duration-200'
+              onClick={() => setIsOpen(true)}
+            >
+              View Details
+            </Button>
+          </DialogTrigger>
+        </CardFooter>
+      </Card>
       <DialogContent className='max-w-lg bg-white dark:bg-gray-800 rounded-xl'>
         <DialogHeader>
           <DialogTitle className='text-xl font-bold text-gray-800 dark:text-gray-100'>
