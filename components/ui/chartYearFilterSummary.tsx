@@ -1,0 +1,64 @@
+'use client';
+import { useYearlyPeriodStore } from '@/store';
+import { FilterSummary } from '@/components/filterSummary';
+import clsx from 'clsx';
+
+interface ChartYearFilterSummaryProps {
+  className?: string;
+}
+
+export default function ChartYearFilterSummary({
+  className = '',
+}: ChartYearFilterSummaryProps) {
+  const { selectedYears, setYears, resetYears } = useYearlyPeriodStore();
+
+  const getDefaultYears = (): string[] => {
+    const currentYear = new Date().getFullYear();
+    return [`${currentYear - 1}`, `${currentYear}`]; // Misalnya, ["2024", "2025"]
+  };
+
+  const defaultYear = getDefaultYears().join(', ');
+
+  const handleClear = (year: string) => {
+    const updatedYears = new Set(selectedYears);
+    updatedYears.delete(year);
+    setYears(Array.from(updatedYears));
+  };
+
+  const filtersList = [
+    {
+      label: 'Selected Years',
+      value:
+        selectedYears.length > 0
+          ? selectedYears.sort().join(', ')
+          : defaultYear,
+      isClearable: selectedYears.length > 0 && selectedYears[0] !== defaultYear,
+      onClear: () => resetYears(),
+    },
+    ...(selectedYears.length > 0 && selectedYears[0] !== defaultYear
+      ? selectedYears.map((year) => ({
+          label: 'Year',
+          value: year,
+          isClearable: true,
+          onClear: () => handleClear(year),
+        }))
+      : []),
+  ];
+
+  return (
+    <div
+      className={clsx(
+        'w-full flex items-center bg-secondary text-primary dark:text-slate-400 px-2 py-2 rounded-md shadow-sm',
+        className
+      )}
+    >
+      <div className='w-full flex justify-center font-semibold text-md'>
+        <FilterSummary
+          layout='inline'
+          filters={filtersList}
+          className='text-slate-700 dark:text-slate-400 text-lg'
+        />
+      </div>
+    </div>
+  );
+}

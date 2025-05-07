@@ -41,6 +41,11 @@ export function YearFacetedFilter({
   onSelect,
   ariaLabel,
 }: YearFacetedFilterProps) {
+  const defaultYears = [
+    (new Date().getFullYear() - 1).toString(),
+    new Date().getFullYear().toString(),
+  ]; // Misalnya, ["2024", "2025"]
+
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -137,19 +142,20 @@ export function YearFacetedFilter({
                 );
               })}
             </CommandGroup>
-            {selectedValues.size > 0 && (
-              <>
-                <CommandSeparator />
-                <CommandGroup>
-                  <CommandItem
-                    onSelect={() => !disabled && onSelect('')}
-                    className='justify-center text-center'
-                  >
-                    Clear filter
-                  </CommandItem>
-                </CommandGroup>
-              </>
-            )}
+            {selectedValues.size > 0 &&
+              !defaultYears.every((year) => selectedValues.has(year)) && (
+                <>
+                  <CommandSeparator />
+                  <CommandGroup>
+                    <CommandItem
+                      onSelect={() => !disabled && onSelect('')} // Mengembalikan ke default
+                      className='justify-center text-center'
+                    >
+                      Clear filter
+                    </CommandItem>
+                  </CommandGroup>
+                </>
+              )}
           </CommandList>
         </Command>
       </PopoverContent>
