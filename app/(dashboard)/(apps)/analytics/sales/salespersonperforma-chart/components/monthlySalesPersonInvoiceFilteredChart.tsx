@@ -271,16 +271,16 @@ const MonthlySalesPersonInvoiceChart: React.FC<
       <div className='flex flex-row items-center justify-between mb-2'>
         <h2 className='text-md font-semibold text-muted-foreground'>
           {validSalesPersonNames.length === 1
-            ? `Sales Performance by ${validSalesPersonNames[0]} (in Millions IDR)`
+            ? `Monthly Sales by ${validSalesPersonNames[0]} (in Millions IDR)`
             : validSalesPersonNames.length === 2
-              ? `Sales Performance by ${validSalesPersonNames.join(' and ')} (in Millions IDR)`
+              ? `Monthly Sales by ${validSalesPersonNames.join(' and ')} (in Millions IDR)`
               : validSalesPersonNames.length > 2
-                ? `Sales Performance by ${validSalesPersonNames
+                ? `Monthly Sales by ${validSalesPersonNames
                     .slice(0, validSalesPersonNames.length - 1)
                     .join(', ')} and ${
                     validSalesPersonNames[validSalesPersonNames.length - 1]
                   } (in Millions IDR)`
-                : 'Sales Performance (in Millions IDR)'}
+                : 'Monthly Sales (in Millions of IDR)'}
         </h2>
         <div className='flex flex-col items-end space-y-2'>
           <button

@@ -34,15 +34,15 @@ ChartJS.register(
   gradientPlugin
 );
 
-interface YearlySalesInvoiceByPoTypeChartProps {
+interface MonthlySalesInvoiceByPoTypeChartProps {
   height?: number;
   isCompact?: boolean;
   isFullWidth?: boolean;
   onModeChange?: (isFull: boolean) => void;
 }
 
-const YearlySalesInvoiceByPoTypeChart: React.FC<
-  YearlySalesInvoiceByPoTypeChartProps
+const MonthlySalesInvoiceByPoTypeChart: React.FC<
+  MonthlySalesInvoiceByPoTypeChartProps
 > = ({
   height = 400,
   isCompact = false,
@@ -154,7 +154,7 @@ const YearlySalesInvoiceByPoTypeChart: React.FC<
     >
       <div className='relative flex items-center'>
         <h2 className='text-sm text-muted-foreground font-semibold ml-2'>
-          Yearly Sales Invoice by PO Type (in Millions IDR)
+          Monthly Sales by PO Type (in Millions of IDR)
         </h2>
         {!isCompact && (
           <div className='absolute right-0 top-0 flex items-center text-muted-foreground text-xs space-x-2'>
@@ -258,4 +258,4 @@ const YearlySalesInvoiceByPoTypeChart: React.FC<
   );
 };
 
-export default YearlySalesInvoiceByPoTypeChart;
+export default MonthlySalesInvoiceByPoTypeChart;

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Bar } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -15,11 +15,11 @@ import { motion } from 'framer-motion';
 import { hslToHex, generateYearColorPalette } from '@/lib/utils';
 import { useThemeStore } from '@/store';
 import { useTheme } from 'next-themes';
-import { useSearchParams, useRouter } from 'next/navigation';
 import { themes } from '@/config/thems';
 import gradientPlugin from 'chartjs-plugin-gradient';
 import { useToast } from '@/components/ui/use-toast';
-import useMonthlySalesInvoice from '@/queryHooks/analytics/sales/useMonthlySalesInvoice';
+import useMonthlyComparisonSalesInvoice from '@/queryHooks/analytics/sales/useMonthlyComparisonSalesInvoice';
+import CustomTooltip from '@/components/ui/customTooltip';
 import { Button } from '@/components/ui/button';
 import { Maximize2, Minimize2 } from 'lucide-react';
 import { months } from '@/utils/monthNameMap';
@@ -39,8 +39,6 @@ interface MonthlySalesInvoiceChartProps {
   isCompact?: boolean;
   isFullWidth?: boolean;
   onModeChange?: (isFull: boolean) => void;
-  startPeriod?: string;
-  endPeriod?: string;
 }
 
 const MonthlySalesInvoiceChart: React.FC<MonthlySalesInvoiceChartProps> = ({
@@ -57,16 +55,31 @@ const MonthlySalesInvoiceChart: React.FC<MonthlySalesInvoiceChartProps> = ({
   })`;
   const hexBackground = hslToHex(hslBackground);
   const { toast } = useToast();
-  const searchParams = useSearchParams();
 
-  const { data, isLoading, isFetching, error } = useMonthlySalesInvoice({
-    context: 'salesInvoice',
-  });
+  const { data, isLoading, isFetching, error } =
+    useMonthlyComparisonSalesInvoice({
+      context: 'salesInvoice',
+    });
 
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const [isFullScreen, setIsFullScreen] = useState(false);
+  const [tooltipState, setTooltipState] = useState<{
+    visible: boolean;
+    x: number;
+    y: number;
+    invoice: string;
+    growth: number;
+    month: string;
+  }>({
+    visible: false,
+    x: 0,
+    y: 0,
+    invoice: '',
+    growth: 0,
+    month: '',
+  });
 
-  const toggleFullScreen = () => {
+  const toggleFullScreen = useCallback(() => {
     if (!chartContainerRef.current) return;
 
     if (!isFullScreen) {
@@ -96,7 +109,8 @@ const MonthlySalesInvoiceChart: React.FC<MonthlySalesInvoiceChartProps> = ({
         setIsFullScreen(false);
       }
     }
-  };
+    onModeChange?.(!isFullScreen);
+  }, [isFullScreen, onModeChange]);
 
   useEffect(() => {
     const handleFullscreenChange = () => {
@@ -127,23 +141,50 @@ const MonthlySalesInvoiceChart: React.FC<MonthlySalesInvoiceChartProps> = ({
     };
   }, [onModeChange]);
 
+  useEffect(() => {
+    if (error) {
+      toast({
+        description:
+          error.message || 'Failed to load sales data. Please try again.',
+        variant: 'destructive',
+      });
+    }
+  }, [error, toast]);
+
+  useEffect(() => {
+    return () => {
+      const tooltipEl = document.getElementById('chartjs-tooltip');
+      if (tooltipEl) {
+        tooltipEl.remove();
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (chartContainerRef.current) {
+      window.dispatchEvent(new Event('resize'));
+    }
+  }, [isFullScreen]);
+
   const chartData = React.useMemo(() => {
-    if (!data) return null;
+    if (!data || data.length === 0) return null;
 
     const allYears = data.map((d) => d.period);
     const colorPalette = generateYearColorPalette(allYears);
 
-    const datasets = allYears.map((year, idx) => ({
-      label: `Sales ${year}`,
-      data: months.map((month) => {
-        const yearData = data.find((d) => d.period === year);
-        return yearData?.months[month] || 0;
-      }),
+    const datasets = data.map((yearData, idx) => ({
+      label: `Sales ${yearData.period}`,
+      data: months.map(
+        (month) => (yearData.months[month]?.amount || 0) / 1_000_000
+      ),
       backgroundColor: (ctx: import('chart.js').ScriptableContext<'bar'>) => {
         const chart = ctx.chart;
         const { ctx: canvasCtx, chartArea } = chart;
 
-        const [from, to] = colorPalette[idx % colorPalette.length];
+        const [from, to] = colorPalette[idx % colorPalette.length] || [
+          'hsl(220, 70%, 40%)',
+          'hsl(220, 70%, 60%)',
+        ];
 
         if (!chartArea) return to;
 
@@ -162,6 +203,9 @@ const MonthlySalesInvoiceChart: React.FC<MonthlySalesInvoiceChartProps> = ({
       borderWidth: 1,
       barThickness: isFullScreen ? 30 : 25,
       borderRadius: 15,
+      growthPercentages: months.map(
+        (month) => yearData.months[month]?.growthPercentage || 0
+      ),
     }));
 
     return {
@@ -175,14 +219,100 @@ const MonthlySalesInvoiceChart: React.FC<MonthlySalesInvoiceChartProps> = ({
     return Math.max(...chartData.datasets.flatMap((ds) => ds.data));
   }, [chartData]);
 
-  React.useEffect(() => {
-    if (error) {
-      toast({
-        description: 'Failed to load sales data. Please try again.',
-        variant: 'destructive',
+  const handleTooltip = useCallback(
+    (context: {
+      chart: import('chart.js').Chart;
+      tooltip: import('chart.js').TooltipModel<'bar'>;
+    }) => {
+      console.log('handleTooltip called', {
+        isFullScreen,
+        tooltipOpacity: context.tooltip.opacity,
       });
-    }
-  }, [error, toast]);
+      const { chart, tooltip } = context;
+      const container = chartContainerRef.current;
+
+      if (!chartData || !chartData.labels || !container) {
+        if (tooltipState.visible) {
+          setTooltipState((prev) => ({ ...prev, visible: false }));
+        }
+        return;
+      }
+
+      if (tooltip.opacity === 0) {
+        if (tooltipState.visible) {
+          setTooltipState((prev) => ({ ...prev, visible: false }));
+        }
+        return;
+      }
+
+      if (tooltip.dataPoints && tooltip.dataPoints.length > 0) {
+        const dataIndex = tooltip.dataPoints[0].dataIndex;
+        const datasetIndex = tooltip.dataPoints[0].datasetIndex;
+        const month = chartData.labels[dataIndex] ?? '';
+        const invoice =
+          ((tooltip.dataPoints[0].raw as number) * 1_000_000).toLocaleString(
+            'id-ID'
+          ) + ' IDR';
+        const growth = (chartData.datasets[datasetIndex] as any)
+          .growthPercentages[dataIndex];
+
+        const canvasRect = chart.canvas.getBoundingClientRect();
+        const bar = chart.getDatasetMeta(datasetIndex).data[dataIndex] as any;
+
+        // Posisi tooltip di kanan atas bar, lebih dekat ke bar
+        const x = bar.x + bar.width / 2 + 3; // Tengah bar + offset kanan kecil
+        const y = bar.y - 3; // Atas bar, sangat dekat
+
+        // Konversi ke koordinat relatif terhadap container
+        const containerRect = container.getBoundingClientRect();
+        const tooltipWidth = 150; // Estimasi lebar tooltip
+        const tooltipHeight = 50; // Estimasi tinggi tooltip
+        const adjustedX = Math.min(
+          x, // Langsung gunakan x relatif terhadap canvas
+          containerRect.width - tooltipWidth - 10 // Tidak keluar kanan
+        );
+        const adjustedY = Math.max(
+          y, // Langsung gunakan y relatif terhadap canvas
+          10 // Tidak keluar atas
+        );
+
+        setTooltipState((prev) => {
+          if (
+            prev.visible === true &&
+            prev.month === month &&
+            prev.invoice === invoice &&
+            prev.growth === growth &&
+            prev.x === adjustedX &&
+            prev.y === adjustedY
+          ) {
+            return prev;
+          }
+          console.log('Updating tooltip state:', {
+            month,
+            invoice,
+            growth,
+            x,
+            y,
+            adjustedX,
+            adjustedY,
+            barX: bar.x,
+            barY: bar.y,
+            canvasLeft: canvasRect.left,
+            canvasTop: canvasRect.top,
+          });
+          return {
+            visible: true,
+            x: adjustedX,
+            y: adjustedY,
+            invoice,
+            growth,
+            month,
+          };
+        });
+      }
+    },
+    [chartData, tooltipState.visible, isFullScreen]
+  );
 
   const isDataReady =
     !!chartData &&
@@ -190,12 +320,8 @@ const MonthlySalesInvoiceChart: React.FC<MonthlySalesInvoiceChartProps> = ({
     chartData.labels.length > 0 &&
     Array.isArray(chartData.datasets) &&
     chartData.datasets.some(
-      (ds) => Array.isArray(ds.data) && ds.data.length > 0
+      (ds) => Array.isArray(ds.data) && ds.data.some((value) => value > 0)
     );
-
-  // const handleBack = () => {
-  //   router.push('/dashboard');
-  // };
 
   return (
     <motion.div
@@ -218,32 +344,22 @@ const MonthlySalesInvoiceChart: React.FC<MonthlySalesInvoiceChartProps> = ({
     >
       <div className='relative flex items-center justify-between mb-2'>
         <h2 className='text-sm text-muted-foreground font-semibold ml-2'>
-          Sales Invoice by Monthly (in Millions IDR)
+          Monthly Sales (in Millions of IDR)
         </h2>
-        <div className='flex items-center space-x-2'>
-          {!isCompact && (
-            <Button
-              variant='outline'
-              size='sm'
-              onClick={toggleFullScreen}
-              className='mr-2'
-            >
-              {isFullScreen ? (
-                <Minimize2 className='h-4 w-4' />
-              ) : (
-                <Maximize2 className='h-4 w-4' />
-              )}
-            </Button>
-          )}
-          {/* {(startPeriod && endPeriod) || (propStartPeriod && propEndPeriod) ? (
-            <Button
-              onClick={handleBack}
-              className='px-4 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 text-xs transition'
-            >
-              ← Back
-            </Button>
-          ) : null} */}
-        </div>
+        {!isCompact && (
+          <Button
+            variant='outline'
+            size='sm'
+            onClick={toggleFullScreen}
+            className='mr-2'
+          >
+            {isFullScreen ? (
+              <Minimize2 className='h-4 w-4' />
+            ) : (
+              <Maximize2 className='h-4 w-4' />
+            )}
+          </Button>
+        )}
       </div>
       <div className='flex-1 min-h-0 w-full'>
         {isLoading || isFetching ? (
@@ -251,74 +367,87 @@ const MonthlySalesInvoiceChart: React.FC<MonthlySalesInvoiceChartProps> = ({
             <div className='w-3/4 h-1/2 rounded-lg shimmer' />
           </div>
         ) : isDataReady ? (
-          <Bar
-            key={isFullWidth ? 'full' : 'half'}
-            height={isFullScreen ? undefined : isCompact ? 250 : height}
-            data={chartData}
-            options={{
-              responsive: true,
-              maintainAspectRatio: false,
-              layout: {
-                padding: {
-                  bottom: isFullScreen ? 10 : isCompact ? 10 : 20,
-                  top: isFullScreen ? 10 : isCompact ? 5 : 10,
-                },
-              },
-              scales: {
-                y: {
-                  beginAtZero: true,
-                  min: maxValue < 1_000_000_000 ? 100_000_000 : undefined,
-                  grid: {
-                    drawTicks: false,
-                    color: `hsl(${theme?.cssVars[mode === 'dark' ? 'dark' : 'light'].chartGird})`,
-                  },
-                  ticks: {
-                    callback: (value: unknown) => {
-                      const val = Number(value) / 1000000;
-                      return `${val.toLocaleString('id-ID')}`;
-                    },
-                    font: {
-                      size: isFullScreen ? 14 : 12,
-                    },
+          <>
+            <Bar
+              key={isFullWidth ? 'full' : 'half'}
+              height={isFullScreen ? undefined : isCompact ? 250 : height}
+              data={chartData}
+              options={{
+                responsive: true,
+                maintainAspectRatio: false,
+                layout: {
+                  padding: {
+                    bottom: isFullScreen ? 10 : isCompact ? 10 : 20,
+                    top: isFullScreen ? 10 : isCompact ? 5 : 10,
                   },
                 },
-                x: {
-                  title: { display: false, text: 'Month' },
-                  ticks: {
-                    callback: (value, index) => chartData.labels[index] ?? '',
-                    font: {
-                      size: isFullScreen ? 14 : 12,
+                scales: {
+                  y: {
+                    beginAtZero: true,
+                    grid: {
+                      drawTicks: false,
+                      color: `hsl(${
+                        theme?.cssVars[mode === 'dark' ? 'dark' : 'light']
+                          .chartGird
+                      })`,
+                    },
+                    ticks: {
+                      callback: (value: unknown) => {
+                        const val = Number(value);
+                        return `${val.toLocaleString('id-ID')}`;
+                      },
+                      font: {
+                        size: isFullScreen ? 14 : 12,
+                      },
                     },
                   },
-                  grid: {
-                    drawTicks: false,
-                    color: `hsl(${theme?.cssVars[mode === 'dark' ? 'dark' : 'light'].chartGird})`,
+                  x: {
+                    title: { display: false, text: 'Month' },
+                    ticks: {
+                      callback: (value, index) => chartData.labels[index] ?? '',
+                      font: {
+                        size: isFullScreen ? 14 : 12,
+                      },
+                    },
+                    grid: {
+                      drawTicks: false,
+                      color: `hsl(${
+                        theme?.cssVars[mode === 'dark' ? 'dark' : 'light']
+                          .chartGird
+                      })`,
+                      display: false,
+                    },
+                  },
+                },
+                plugins: {
+                  legend: {
+                    display: !isCompact,
+                    position: 'top',
+                    labels: {
+                      font: { size: isFullScreen ? 12 : 10 },
+                    },
+                  },
+                  title: {
                     display: false,
                   },
-                },
-              },
-              plugins: {
-                legend: {
-                  display: !isCompact,
-                  position: 'top',
-                  labels: {
-                    font: { size: isFullScreen ? 12 : 10 },
+                  tooltip: {
+                    enabled: false,
+                    external: handleTooltip,
                   },
                 },
-                title: {
-                  display: false,
-                },
-                tooltip: {
-                  callbacks: {
-                    label: (context) =>
-                      ` ${(context.raw as number).toLocaleString('id-ID')}`,
-                  },
-                  titleFont: { size: isFullScreen ? 14 : 12 },
-                  bodyFont: { size: isFullScreen ? 12 : 10 },
-                },
-              },
-            }}
-          />
+              }}
+            />
+            <CustomTooltip
+              visible={tooltipState.visible}
+              x={tooltipState.x}
+              y={tooltipState.y}
+              invoice={tooltipState.invoice}
+              growth={tooltipState.growth}
+              isFullScreen={isFullScreen}
+              parentRef={isFullScreen ? chartContainerRef : undefined}
+              isCompact={isCompact}
+            />
+          </>
         ) : (
           <div className='flex flex-col items-center justify-center h-full text-gray-400'>
             <svg

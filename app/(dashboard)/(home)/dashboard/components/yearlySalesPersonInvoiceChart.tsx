@@ -400,7 +400,7 @@ const YearlySalesPersonInvoiceChart: React.FC<
     >
       <div className='relative flex items-center justify-between mb-2'>
         <h2 className='text-sm text-muted-foreground font-semibold ml-2'>
-          Salespersons with Yearly Sales Above 3.600 Million IDR
+          Yearly Sales Above 3.6 Billion IDR by Salesperson
         </h2>
         {!isCompact && (
           <Button

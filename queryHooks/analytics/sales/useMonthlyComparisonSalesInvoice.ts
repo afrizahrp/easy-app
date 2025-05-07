@@ -83,6 +83,9 @@ const useMonthlyComparisonSalesInvoice = ({
 
       try {
         const response = await api.get<SalesPeriodResponse>(finalUrl);
+
+        console.log('response:', response.data);
+
         return response.data;
       } catch (err) {
         const axiosError = err as AxiosError<{ message?: string }>;

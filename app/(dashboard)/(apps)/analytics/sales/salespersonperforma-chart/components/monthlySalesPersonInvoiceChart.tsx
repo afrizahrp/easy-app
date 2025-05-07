@@ -266,7 +266,7 @@ const MonthlySalesPersonInvoiceChart: React.FC<
     >
       <div className='relative flex items-center justify-between mb-2'>
         <h2 className='text-sm text-muted-foreground font-semibold ml-2'>
-          Salespersons with Monthly Sales Above 300 Million IDR
+          Monthly Sales Over 300 Million IDR by Salesperson
         </h2>
         {!isCompact && (
           <Button
