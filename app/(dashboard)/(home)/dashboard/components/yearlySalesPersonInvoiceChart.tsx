@@ -248,7 +248,7 @@ const YearlySalesPersonInvoiceChart: React.FC<
     });
 
     const chartDataResult = { labels: years, datasets };
-    console.log('Final chartData:', chartDataResult);
+    // console.log('Final chartData:', chartDataResult);
     return chartDataResult as import('chart.js').ChartData<
       'bar',
       number[],
@@ -281,11 +281,11 @@ const YearlySalesPersonInvoiceChart: React.FC<
         const yearNum = parseInt(year, 10);
         const startPeriod = new Date(yearNum, 0, 1);
         const endPeriod = new Date(yearNum, 11, 31, 23, 59, 59, 999);
-        console.log('Updating salesPersonInvoicePeriod:', {
-          startPeriod,
-          endPeriod,
-          salesPersonName,
-        });
+        // console.log('Updating salesPersonInvoicePeriod:', {
+        //   startPeriod,
+        //   endPeriod,
+        //   salesPersonName,
+        // });
         setSalesPersonInvoicePeriod({ startPeriod, endPeriod });
         setSalesPersonInvoiceFilters({ salesPersonName: [salesPersonName] });
         router.push('/analytics/sales/salespersonperforma-chart');
@@ -400,7 +400,7 @@ const YearlySalesPersonInvoiceChart: React.FC<
     >
       <div className='relative flex items-center justify-between mb-2'>
         <h2 className='text-sm text-muted-foreground font-semibold ml-2'>
-          Salesperson Performance by Year (in Millions IDR)
+          Salespersons with Yearly Sales Above 3.600 Million IDR
         </h2>
         {!isCompact && (
           <Button
@@ -435,11 +435,12 @@ const YearlySalesPersonInvoiceChart: React.FC<
                 layout: {
                   padding: {
                     bottom: isFullScreen ? 60 : isCompact ? 40 : 60,
-                    top: isFullScreen ? 20 : isCompact ? 10 : 20,
+                    top: isFullScreen ? 60 : 40,
                     left: 20,
                     right: 20,
                   },
                 },
+
                 scales: {
                   x: {
                     title: { display: false, text: 'Year' },
@@ -452,7 +453,8 @@ const YearlySalesPersonInvoiceChart: React.FC<
                   },
                   y: {
                     beginAtZero: true,
-                    max: maxValue > 0 ? maxValue * 1.2 : 1000,
+                    min: 0,
+                    max: maxValue > 0 ? maxValue * 1.5 : 1000,
                     grid: {
                       color: `hsl(${theme?.cssVars[mode === 'dark' ? 'dark' : 'light'].chartGird})`,
                     },
@@ -468,13 +470,14 @@ const YearlySalesPersonInvoiceChart: React.FC<
                 plugins: {
                   legend: {
                     display: !isCompact,
-                    position: 'top',
+                    position: 'bottom',
                     labels: {
                       color: `hsl(${theme?.cssVars[mode === 'dark' ? 'dark' : 'light'].chartLabel})`,
                       boxWidth: 8,
                       font: { size: isFullScreen ? 12 : 10 },
                       usePointStyle: true,
                       pointStyle: 'circle',
+                      padding: 20,
                     },
                     maxHeight: isFullScreen ? 80 : 60,
                   },

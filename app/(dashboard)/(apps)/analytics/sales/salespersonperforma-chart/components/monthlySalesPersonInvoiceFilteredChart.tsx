@@ -211,7 +211,7 @@ const MonthlySalesPersonInvoiceChartChart: React.FC<
             }}
             className='px-4 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 text-xs transition'
           >
-            ← Back
+            ← Back to All Salesperson
           </button>
         </div>
       </div>

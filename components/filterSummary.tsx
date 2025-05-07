@@ -52,10 +52,15 @@ export function FilterSummary({
 
   if (layout === 'inline') {
     return (
-      <div className={clsx('text-sm space-y-1', className)}>
+      <div
+        className={clsx(
+          'text-sm flex flex-col justify-center items-center gap-1',
+          className
+        )}
+      >
         {filters.map((f, i) => (
-          <div key={i} className='flex items-center'>
-            <span>
+          <div key={i} className='flex items-center justify-center w-full'>
+            <span className='text-center'>
               {f.label === 'Invoice Period' ? '' : `Selected ${f.label}: `}
               {renderValue(f.value)}
             </span>
@@ -73,7 +78,6 @@ export function FilterSummary({
       </div>
     );
   }
-
   // Default layout
   return (
     <div className={clsx('text-sm space-y-1', className)}>

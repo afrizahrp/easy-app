@@ -14,7 +14,6 @@ interface DashboardPageViewProps {
 }
 const DashboardPageView = () => {
   const { user } = useSessionStore();
-  const [selectedYears, setSelectedYears] = useState<number[]>([2021, 2022]); // State untuk tahun
 
   return (
     <div className='p-4'>
@@ -36,16 +35,12 @@ const DashboardPageView = () => {
         />
 
         <YearlySalesPersonInvoiceChart
-          height={400}
+          // height={400}
           isCompact={false}
           isFullWidth={false}
-          // years={selectedYears} // Teruskan tahun ke chart
           onModeChange={(isFull) =>
             console.log('Sales Person Mode changed:', isFull)
           }
-          // onSalesPersonSelect={(selection) =>
-          //   console.log('Sales Person Selected:', selection)
-          // }
         />
       </div>
     </div>
