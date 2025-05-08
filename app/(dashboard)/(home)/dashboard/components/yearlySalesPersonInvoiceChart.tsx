@@ -454,16 +454,18 @@ const YearlySalesPersonInvoiceChart: React.FC<
                   },
                   y: {
                     beginAtZero: true,
-                    min: 0, // Mulai dari 0 untuk memastikan bar terlihat
-                    max: maxValue > 0 ? maxValue * 1.2 : 1000, // Kurangi faktor max menjadi 1.2
+                    min: 0,
+                    max: maxValue > 0 ? maxValue * 1.2 : 1000, // 20% dari nilai maksimum
                     grid: {
                       drawTicks: false,
                       color: `hsl(${theme?.cssVars[mode === 'dark' ? 'dark' : 'light'].chartGird})`,
                     },
                     ticks: {
+                      // stepSize: 3000, // Interval ticks dimulai dari 3800 (3.8 miliar)
                       callback: (value: unknown) => {
                         const val = Number(value);
-                        return `${val.toLocaleString('id-ID')}M`; // Tambahkan 'M' untuk jutaan
+                        const rounded = Math.round(val / 1000) * 1000;
+                        return rounded.toLocaleString('id-ID'); // 3800M = 3.8 miliar
                       },
                       font: { size: isFullScreen ? 14 : 12 },
                     },
