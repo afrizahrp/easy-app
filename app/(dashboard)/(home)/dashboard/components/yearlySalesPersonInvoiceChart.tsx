@@ -63,7 +63,7 @@ const YearlySalesPersonInvoiceChart: React.FC<
 > = ({
   height = 400,
   isCompact = false,
-  isFullWidth = false,
+  isFullWidth = true,
   onModeChange,
   years,
 }) => {
@@ -156,9 +156,13 @@ const YearlySalesPersonInvoiceChart: React.FC<
 
   useEffect(() => {
     if (chartContainerRef.current) {
+      console.log('Chart Container Dimensions:', {
+        width: chartContainerRef.current.offsetWidth,
+        height: chartContainerRef.current.offsetHeight,
+      });
       window.dispatchEvent(new Event('resize'));
     }
-  }, [isFullScreen]);
+  }, [isFullScreen, isFullWidth]);
 
   const toggleFullScreen = useCallback(() => {
     console.log('toggleFullScreen called');
@@ -218,23 +222,25 @@ const YearlySalesPersonInvoiceChart: React.FC<
         border: 'hsl(220, 70%, 50%)',
       };
 
+      const dataValues = years.map((year) => {
+        const yearData = sortedData.find((d) => d.period === year);
+        const salesPersonData = yearData?.sales.find(
+          (s) => s.salesPersonName === salesPersonName
+        );
+        return salesPersonData ? salesPersonData.amount / 1_000_000 : 0;
+      });
+
       return {
         label: salesPersonName,
-        data: years.map((year) => {
-          const yearData = sortedData.find((d) => d.period === year);
-          const salesPersonData = yearData?.sales.find(
-            (s) => s.salesPersonName === salesPersonName
-          );
-          return salesPersonData ? salesPersonData.amount / 1_000_000 : 0;
-        }),
+        data: dataValues,
         backgroundColor: (ctx: ScriptableContext<'bar'>) => {
           const { chartArea, ctx: canvasCtx } = ctx.chart;
           if (!chartArea) return colorConfig.from;
           const gradient = canvasCtx.createLinearGradient(
             0,
-            chartArea.top,
+            chartArea.bottom,
             0,
-            chartArea.bottom
+            chartArea.top
           );
           gradient.addColorStop(0, colorConfig.from);
           gradient.addColorStop(1, colorConfig.to);
@@ -242,13 +248,17 @@ const YearlySalesPersonInvoiceChart: React.FC<
         },
         borderColor: colorConfig.border,
         borderWidth: 1,
-        barThickness: isFullScreen ? 30 : 20,
-        borderRadius: 8,
+        maxBarThickness: isFullScreen ? 30 : 20,
+        borderRadius: 15,
       };
     });
 
-    const chartDataResult = { labels: years, datasets };
-    // console.log('Final chartData:', chartDataResult);
+    console.log('Datasets:', datasets); // Debugging datasets
+
+    const chartDataResult = {
+      labels: years.length > 0 ? years : [''],
+      datasets,
+    };
     return chartDataResult as import('chart.js').ChartData<
       'bar',
       number[],
@@ -281,11 +291,6 @@ const YearlySalesPersonInvoiceChart: React.FC<
         const yearNum = parseInt(year, 10);
         const startPeriod = new Date(yearNum, 0, 1);
         const endPeriod = new Date(yearNum, 11, 31, 23, 59, 59, 999);
-        // console.log('Updating salesPersonInvoicePeriod:', {
-        //   startPeriod,
-        //   endPeriod,
-        //   salesPersonName,
-        // });
         setSalesPersonInvoicePeriod({ startPeriod, endPeriod });
         setSalesPersonInvoiceFilters({ salesPersonName: [salesPersonName] });
         router.push('/analytics/sales/salespersonperforma-chart');
@@ -380,26 +385,17 @@ const YearlySalesPersonInvoiceChart: React.FC<
   );
 
   return (
-    <motion.div
+    <div
       ref={chartContainerRef}
       className={`chart-container ${isCompact ? 'compact' : ''} ${
         isFullScreen && !document.fullscreenElement
-          ? 'fixed inset-0 z-50 bg-white dark:bg-[#18181b] p-4 rounded-lg shadow-md'
-          : 'relative bg-white dark:bg-[#18181b] p-4 rounded-lg shadow-sm'
-      } flex flex-col h-fit min-h-[400px] w-full max-h-[800px]`}
+          ? 'fixed inset-0 z-50 bg-white dark:bg-[#18181b] p-2 rounded-lg shadow-md'
+          : 'relative rounded-lg shadow-md'
+      } flex flex-col h-fit min-h-0 w-full overflow-x-auto max-w-full`}
       style={{ backgroundColor: hexBackground }}
-      animate={{
-        opacity: isFullWidth ? 1 : 0.95,
-        scale: isFullWidth ? 1 : 0.98,
-      }}
-      initial={{
-        opacity: isFullWidth ? 1 : 0.95,
-        scale: isFullWidth ? 1 : 0.98,
-      }}
-      transition={{ duration: 0.3, ease: 'easeInOut' }}
     >
-      <div className='relative flex items-center justify-between mb-2'>
-        <h2 className='text-sm text-muted-foreground font-semibold ml-2'>
+      <div className='relative flex items-center justify-between mb-2 px-2'>
+        <h2 className='text-sm text-muted-foreground font-semibold'>
           Yearly Sales Above 3.6 Billion IDR by Salesperson
         </h2>
         {!isCompact && (
@@ -417,7 +413,7 @@ const YearlySalesPersonInvoiceChart: React.FC<
           </Button>
         )}
       </div>
-      <div className='flex-1 min-h-0 w-full'>
+      <div className='flex-1 min-h-0'>
         {isLoading || isFetching ? (
           <div className='flex items-center justify-center h-full'>
             <div className='w-3/4 h-1/2 rounded-lg shimmer' />
@@ -426,42 +422,48 @@ const YearlySalesPersonInvoiceChart: React.FC<
           <>
             <Bar
               key={isFullWidth ? 'full' : 'half'}
-              height={isFullScreen ? undefined : isCompact ? 300 : 600}
+              height={isFullScreen ? undefined : isCompact ? 300 : height}
               data={chartData}
               options={{
-                indexAxis: 'x',
                 responsive: true,
                 maintainAspectRatio: false,
                 layout: {
                   padding: {
-                    bottom: isFullScreen ? 60 : isCompact ? 40 : 60,
-                    top: isFullScreen ? 60 : 40,
-                    left: 20,
-                    right: 20,
+                    bottom: isFullScreen ? 10 : isCompact ? 5 : 10,
+                    top: isFullScreen ? 10 : isCompact ? 5 : 10,
+                    left: 0,
+                    right: 0,
                   },
                 },
-
                 scales: {
                   x: {
                     title: { display: false, text: 'Year' },
-                    ticks: {
-                      font: { size: isFullScreen ? 12 : 10 },
-                      autoSkip: true,
-                      padding: 10,
+                    grid: {
+                      drawTicks: false,
+                      display: false,
                     },
-                    grid: { display: false },
+                    ticks: {
+                      font: { size: isFullScreen ? 14 : 12 },
+                      autoSkip: false,
+                      callback: (value, index) => {
+                        return chartData && chartData.labels
+                          ? (chartData.labels[index] ?? '')
+                          : '';
+                      },
+                    },
                   },
                   y: {
                     beginAtZero: true,
-                    min: 0,
-                    max: maxValue > 0 ? maxValue * 1.5 : 1000,
+                    min: 0, // Mulai dari 0 untuk memastikan bar terlihat
+                    max: maxValue > 0 ? maxValue * 1.2 : 1000, // Kurangi faktor max menjadi 1.2
                     grid: {
+                      drawTicks: false,
                       color: `hsl(${theme?.cssVars[mode === 'dark' ? 'dark' : 'light'].chartGird})`,
                     },
                     ticks: {
                       callback: (value: unknown) => {
                         const val = Number(value);
-                        return `${val.toLocaleString('id-ID')}`;
+                        return `${val.toLocaleString('id-ID')}M`; // Tambahkan 'M' untuk jutaan
                       },
                       font: { size: isFullScreen ? 14 : 12 },
                     },
@@ -470,14 +472,13 @@ const YearlySalesPersonInvoiceChart: React.FC<
                 plugins: {
                   legend: {
                     display: !isCompact,
-                    position: 'bottom',
+                    position: 'top',
                     labels: {
                       color: `hsl(${theme?.cssVars[mode === 'dark' ? 'dark' : 'light'].chartLabel})`,
                       boxWidth: 8,
                       font: { size: isFullScreen ? 12 : 10 },
                       usePointStyle: true,
                       pointStyle: 'circle',
-                      padding: 20,
                     },
                     maxHeight: isFullScreen ? 80 : 60,
                   },
@@ -485,6 +486,19 @@ const YearlySalesPersonInvoiceChart: React.FC<
                   tooltip: {
                     enabled: false,
                     external: handleTooltip,
+                    callbacks: {
+                      label: (context) =>
+                        `${context.dataset.label}: ${(context.raw as number).toLocaleString('id-ID')}M`,
+                    },
+                    titleFont: { size: isFullScreen ? 14 : 12 },
+                    bodyFont: { size: isFullScreen ? 12 : 10 },
+                  },
+                },
+                datasets: {
+                  bar: {
+                    barThickness: isFullScreen ? 30 : 20,
+                    categoryPercentage: 0.9, // Sesuaikan untuk single label
+                    barPercentage: 0.8, // Sesuaikan untuk single label
                   },
                 },
                 onClick: !isCompact ? handleChartClick : undefined,
@@ -510,8 +524,6 @@ const YearlySalesPersonInvoiceChart: React.FC<
               isFullScreen={isFullScreen}
               parentRef={isFullScreen ? chartContainerRef : undefined}
               isCompact={isCompact}
-              // salesPersonName={tooltipState.salesPersonName}
-              // quantity={tooltipState.quantity}
             />
           </>
         ) : (
@@ -534,7 +546,7 @@ const YearlySalesPersonInvoiceChart: React.FC<
           </div>
         )}
       </div>
-    </motion.div>
+    </div>
   );
 };
 

@@ -35,12 +35,12 @@ const Card: React.FC<CardProps> = ({ children, className, title }) => (
     animate={{ opacity: 1, y: 0 }}
     transition={{ duration: 0.5, ease: 'easeOut' }}
     className={cn(
-      'bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 transition-colors duration-300',
+      'bg-white dark:bg-gray-800 rounded-lg shadow-md p-2 transition-colors duration-300', // Kurangi padding
       className
     )}
   >
     {title && (
-      <h2 className='text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4'>
+      <h2 className='text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2'>
         {title}
       </h2>
     )}
@@ -70,11 +70,10 @@ const DashboardPageView: React.FC<DashboardPageViewProps> = ({
     salesPersonInvoice: 'Sales Person Invoice',
   };
 
-  // Merge provided trans with defaults
   const t = { ...defaultTrans, ...trans };
 
   return (
-    <div className='p-4 md:p-6 lg:p-8 bg-gray-50 dark:bg-gray-900 min-h-screen transition-colors duration-300'>
+    <div className='p-2 md:p-4 lg:p-6 bg-gray-50 dark:bg-gray-900 min-h-screen transition-colors duration-300 w-full max-w-full'>
       <motion.div
         className='sticky top-4 z-10'
         initial={{ opacity: 0, scale: 0.95 }}
@@ -103,24 +102,24 @@ const DashboardPageView: React.FC<DashboardPageViewProps> = ({
         <ChartYearFilterSummary className='mb-6 text-gray-700 dark:text-gray-300' />
       </motion.div>
 
-      <div className='grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6'>
+      <div className='grid grid-cols-1 md:grid-cols-2 gap-2 w-full overflow-x-auto max-w-full'>
         <AnimatePresence>
           {isLoading ? (
             <>
               <Card key='skeleton1'>
-                <Skeleton className='h-[400px] w-full rounded-lg' />
+                <Skeleton className='h-[600px] w-full rounded-lg' />
               </Card>
               <Card key='skeleton2'>
-                <Skeleton className='h-[400px] w-full rounded-lg' />
+                <Skeleton className='h-[600px] w-full rounded-lg' />
               </Card>
             </>
           ) : (
             <>
               <Card title={t.yearlySalesInvoice} key='chart1'>
                 <YearlySalesInvoiceChart
-                  height={400}
+                  height={600}
                   isCompact={false}
-                  isFullWidth={false}
+                  isFullWidth={true}
                   onModeChange={(isFull: boolean) =>
                     console.log('Mode changed:', isFull)
                   }
@@ -128,8 +127,9 @@ const DashboardPageView: React.FC<DashboardPageViewProps> = ({
               </Card>
               <Card title={t.salesPersonInvoice} key='chart2'>
                 <YearlySalesPersonInvoiceChart
+                  height={600}
                   isCompact={false}
-                  isFullWidth={false}
+                  isFullWidth={true}
                   onModeChange={(isFull: boolean) =>
                     console.log('Sales Person Mode changed:', isFull)
                   }
