@@ -478,7 +478,8 @@ const YearlySalesPersonInvoiceChart: React.FC<
                     ticks: {
                       callback: (value: unknown) => {
                         const val = Number(value);
-                        return `${val.toLocaleString('id-ID')}`;
+                        const rounded = Math.round(val / 1000) * 1000;
+                        return rounded.toLocaleString('id-ID');
                       },
                       font: { size: isFullScreen ? 14 : 12 },
                     },
