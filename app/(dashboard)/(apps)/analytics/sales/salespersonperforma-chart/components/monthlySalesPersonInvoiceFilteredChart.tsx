@@ -342,6 +342,7 @@ const MonthlySalesPersonInvoiceChart: React.FC<
               onModeChange?.(true);
             }}
             className='px-4 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 text-xs transition'
+            aria-label='Show all salespeople'
           >
             ← All Salesperson
           </button>
@@ -353,6 +354,8 @@ const MonthlySalesPersonInvoiceChart: React.FC<
                 variant='outline'
                 className='px-4 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 text-xs transition flex items-center'
                 onClick={handleSummaryOpen}
+                disabled={salespersons.length > 4}
+                aria-label='Open salesperson summary'
               >
                 <BarChart2 className='mr-2 h-4 w-4' />
                 Summary
