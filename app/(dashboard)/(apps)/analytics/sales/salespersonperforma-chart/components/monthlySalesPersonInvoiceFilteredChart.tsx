@@ -1,6 +1,6 @@
 'use client';
 import React, { useRef, useEffect, useState, useCallback } from 'react';
-import { Bar, Chart } from 'react-chartjs-2';
+import { Bar } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -10,7 +10,6 @@ import {
   Tooltip,
   Legend,
   ScriptableContext,
-  ChartData,
   TooltipModel,
 } from 'chart.js';
 import { hslToHex } from '@/lib/utils';
@@ -383,18 +382,7 @@ const MonthlySalesPersonInvoiceChart: React.FC<
                 )}
               </UiTooltip>
             </TooltipProvider>
-            {/* <DialogTrigger asChild>
-              <Button
-                variant='outline'
-                className='px-4 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 text-xs transition flex items-center'
-                onClick={handleSummaryOpen}
-                disabled={salespersons.length > 4}
-                aria-label='Open salesperson summary'
-              >
-                <BarChart2 className='mr-2 h-4 w-4' />
-                Summary
-              </Button>
-            </DialogTrigger> */}
+
             <DialogContent className='max-w-4xl bg-white dark:bg-gray-800'>
               <DialogHeader>
                 <DialogTitle className='text-gray-800 dark:text-gray-100'>
@@ -419,7 +407,6 @@ const MonthlySalesPersonInvoiceChart: React.FC<
               </div>
             </DialogContent>
           </Dialog>
-          {/* )} */}
         </div>
       </div>
 
@@ -438,7 +425,7 @@ const MonthlySalesPersonInvoiceChart: React.FC<
                   responsive: true,
                   maintainAspectRatio: false,
                   layout: {
-                    padding: { bottom: 20 },
+                    padding: { bottom: 40 },
                   },
                   scales: {
                     y: {
