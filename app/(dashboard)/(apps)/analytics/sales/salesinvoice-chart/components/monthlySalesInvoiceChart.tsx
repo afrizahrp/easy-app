@@ -224,10 +224,6 @@ const MonthlySalesInvoiceChart: React.FC<MonthlySalesInvoiceChartProps> = ({
       chart: import('chart.js').Chart;
       tooltip: import('chart.js').TooltipModel<'bar'>;
     }) => {
-      console.log('handleTooltip called', {
-        isFullScreen,
-        tooltipOpacity: context.tooltip.opacity,
-      });
       const { chart, tooltip } = context;
       const container = chartContainerRef.current;
 
@@ -259,22 +255,14 @@ const MonthlySalesInvoiceChart: React.FC<MonthlySalesInvoiceChartProps> = ({
         const canvasRect = chart.canvas.getBoundingClientRect();
         const bar = chart.getDatasetMeta(datasetIndex).data[dataIndex] as any;
 
-        // Posisi tooltip di kanan atas bar, lebih dekat ke bar
-        const x = bar.x + bar.width / 2 + 3; // Tengah bar + offset kanan kecil
-        const y = bar.y - 3; // Atas bar, sangat dekat
+        const x = bar.x + bar.width / 2 + 3;
+        const y = bar.y - 3;
 
-        // Konversi ke koordinat relatif terhadap container
         const containerRect = container.getBoundingClientRect();
-        const tooltipWidth = 150; // Estimasi lebar tooltip
-        const tooltipHeight = 50; // Estimasi tinggi tooltip
-        const adjustedX = Math.min(
-          x, // Langsung gunakan x relatif terhadap canvas
-          containerRect.width - tooltipWidth - 10 // Tidak keluar kanan
-        );
-        const adjustedY = Math.max(
-          y, // Langsung gunakan y relatif terhadap canvas
-          10 // Tidak keluar atas
-        );
+        const tooltipWidth = 150;
+        const tooltipHeight = 50;
+        const adjustedX = Math.min(x, containerRect.width - tooltipWidth - 10);
+        const adjustedY = Math.max(y, 10);
 
         setTooltipState((prev) => {
           if (
@@ -287,19 +275,6 @@ const MonthlySalesInvoiceChart: React.FC<MonthlySalesInvoiceChartProps> = ({
           ) {
             return prev;
           }
-          console.log('Updating tooltip state:', {
-            month,
-            invoice,
-            growth,
-            x,
-            y,
-            adjustedX,
-            adjustedY,
-            barX: bar.x,
-            barY: bar.y,
-            canvasLeft: canvasRect.left,
-            canvasTop: canvasRect.top,
-          });
           return {
             visible: true,
             x: adjustedX,
@@ -330,7 +305,7 @@ const MonthlySalesInvoiceChart: React.FC<MonthlySalesInvoiceChartProps> = ({
         isFullScreen && !document.fullscreenElement
           ? 'fixed inset-0 z-50 bg-white dark:bg-[#18181b] p-4 rounded-lg shadow-md'
           : 'relative bg-white dark:bg-[#18181b] p-4 rounded-lg shadow-sm'
-      } flex flex-col h-fit min-h-[250px] w-full`}
+      } flex flex-col h-fit min-h-[250px] w-full box-border`}
       style={{ backgroundColor: hexBackground }}
       animate={{
         opacity: isFullWidth ? 1 : 0.95,
@@ -377,8 +352,10 @@ const MonthlySalesInvoiceChart: React.FC<MonthlySalesInvoiceChartProps> = ({
                 maintainAspectRatio: false,
                 layout: {
                   padding: {
-                    bottom: isFullScreen ? 10 : isCompact ? 10 : 20,
-                    top: isFullScreen ? 10 : isCompact ? 5 : 10,
+                    bottom: isCompact ? 10 : 20,
+                    top: isCompact ? 5 : 10,
+                    left: 10,
+                    right: 10,
                   },
                 },
                 scales: {
@@ -408,6 +385,12 @@ const MonthlySalesInvoiceChart: React.FC<MonthlySalesInvoiceChartProps> = ({
                       font: {
                         size: isFullScreen ? 14 : 12,
                       },
+                      align: 'center',
+                      crossAlign: 'center',
+                      autoSkip: false,
+                      maxRotation: 0,
+                      minRotation: 0,
+                      padding: 10,
                     },
                     grid: {
                       drawTicks: false,

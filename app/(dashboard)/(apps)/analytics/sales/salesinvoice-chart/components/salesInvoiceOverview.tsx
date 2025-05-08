@@ -79,8 +79,8 @@ const SalesInvoiceOverview: React.FC<SalesInvoiceOverviewProps> = ({
             {(fullChart === null || fullChart === 'period') && (
               <motion.div
                 key='periodChart'
-                className={`flex-none ${fullChart === 'period' ? 'w-full' : 'w-full md:w-1/2'} overflow-x-auto max-w-full`}
-                initial={{ opacity: 0, x: -20 }} // Animasi dari kiri
+                className={`flex-1 ${fullChart === 'period' ? 'w-full' : 'w-full md:w-1/2'} min-w-0 box-border`}
+                initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
                 transition={{ duration: 0.3, ease: 'easeInOut' }}
@@ -98,8 +98,8 @@ const SalesInvoiceOverview: React.FC<SalesInvoiceOverviewProps> = ({
             {(fullChart === null || fullChart === 'poType') && (
               <motion.div
                 key='poTypeChart'
-                className={`flex-none ${fullChart === 'poType' ? 'w-full' : 'w-full md:w-1/2'} overflow-x-auto max-w-full`}
-                initial={{ opacity: 0, x: 20 }} // Animasi dari kanan
+                className={`flex-1 ${fullChart === 'poType' ? 'w-full' : 'w-full md:w-1/2'} min-w-0 box-border`}
+                initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: 20 }}
                 transition={{ duration: 0.3, ease: 'easeInOut' }}
@@ -115,7 +115,7 @@ const SalesInvoiceOverview: React.FC<SalesInvoiceOverviewProps> = ({
           </AnimatePresence>
         </div>
       ) : (
-        <div className='w-full overflow-x-auto max-w-full h-fit min-h-0'>
+        <div className='w-full min-w-0 h-fit min-h-0'>
           <MonthlySalesInvoiceChart
             isFullWidth={fullChart === 'period'}
             onModeChange={handlePeriodModeChange}

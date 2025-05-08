@@ -112,7 +112,9 @@ const MonthlySalesInvoiceByPoTypeChart: React.FC<
 
           return {
             label: `${poTypeData.poType} (${poTypeData.period})`,
-            data: months.map((month) => poTypeData.months[month] || 0),
+            data: months.map(
+              (month) => (poTypeData.months[month] || 0) / 1_000_000
+            ),
             borderColor,
             backgroundColor,
             tension: 0.4,
@@ -133,14 +135,14 @@ const MonthlySalesInvoiceByPoTypeChart: React.FC<
         description:
           error.message ||
           'Failed to load sales by PO type data. Please try again.',
-        color: 'destructive',
+        variant: 'destructive',
       });
     }
   }, [error, toast]);
 
   return (
     <motion.div
-      className={`chart-container ${isCompact ? 'compact' : ''} bg-white dark:bg-[#18181b] p-2 rounded-lg shadow-sm flex flex-col w-full min-h-[250px]`} // Lebar dikontrol oleh parent
+      className={`chart-container ${isCompact ? 'compact' : ''} bg-white dark:bg-[#18181b] p-4 rounded-lg shadow-sm flex flex-col w-full min-h-[250px] box-border`}
       style={{ backgroundColor: hexBackground }}
       animate={{
         opacity: isFullWidth ? 1 : 0.95,
@@ -192,7 +194,7 @@ const MonthlySalesInvoiceByPoTypeChart: React.FC<
                     boxWidth: 15,
                     padding: 4,
                     font: {
-                      size: 10,
+                      size: isFullWidth ? 12 : 10,
                     },
                   },
                 },
@@ -210,14 +212,29 @@ const MonthlySalesInvoiceByPoTypeChart: React.FC<
                     display: true,
                     color: 'rgba(200,200,200,0.2)',
                   },
+                  ticks: {
+                    callback: (value, index) => chartData.labels[index] ?? '',
+                    font: {
+                      size: isFullWidth ? 14 : 12,
+                    },
+                    align: 'center',
+                    crossAlign: 'center',
+                    autoSkip: false,
+                    maxRotation: 0,
+                    minRotation: 0,
+                    padding: 10,
+                  },
                 },
                 y: {
                   beginAtZero: true,
                   ticks: {
                     maxTicksLimit: 5,
                     callback: (value) => {
-                      const val = Number(value) / 1000000;
+                      const val = Number(value);
                       return `${val.toLocaleString('id-ID')}`;
+                    },
+                    font: {
+                      size: isFullWidth ? 14 : 12,
                     },
                   },
                   grid: {
@@ -228,8 +245,10 @@ const MonthlySalesInvoiceByPoTypeChart: React.FC<
               },
               layout: {
                 padding: {
-                  bottom: isCompact ? 2 : 5,
-                  top: isCompact ? 2 : 5,
+                  bottom: isCompact ? 10 : 20,
+                  top: isCompact ? 5 : 10,
+                  left: 10,
+                  right: 10,
                 },
               },
             }}
