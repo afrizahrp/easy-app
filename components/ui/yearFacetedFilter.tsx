@@ -41,10 +41,12 @@ export function YearFacetedFilter({
   onSelect,
   ariaLabel,
 }: YearFacetedFilterProps) {
-  const defaultYears = [
-    (new Date().getFullYear() - 1).toString(),
-    new Date().getFullYear().toString(),
-  ]; // Misalnya, ["2024", "2025"]
+  const getDefaultYears = (): string[] => {
+    const currentYear = new Date().getFullYear();
+    return [`${currentYear - 1}`, `${currentYear}`]; // Misalnya, ["2024", "2025"]
+  };
+
+  const defaultYears = getDefaultYears();
 
   return (
     <Popover>
@@ -96,7 +98,12 @@ export function YearFacetedFilter({
                   {option.label}
                   <Cross2Icon
                     className='ml-1 h-3 w-3 cursor-pointer text-red-500'
-                    onClick={() => onSelect(option.value)}
+                    onClick={() => {
+                      onSelect(option.value);
+                      console.log('Cross2Icon Clicked:', {
+                        value: option.value,
+                      });
+                    }}
                   />
                 </Badge>
               ))
@@ -148,7 +155,7 @@ export function YearFacetedFilter({
                   <CommandSeparator />
                   <CommandGroup>
                     <CommandItem
-                      onSelect={() => !disabled && onSelect('')} // Mengembalikan ke default
+                      onSelect={() => !disabled && onSelect('')}
                       className='justify-center text-center'
                     >
                       Clear filter

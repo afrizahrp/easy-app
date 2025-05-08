@@ -17,7 +17,8 @@ export default function ChartYearFilterSummary({
     return [`${currentYear - 1}`, `${currentYear}`]; // Misalnya, ["2024", "2025"]
   };
 
-  const defaultYear = getDefaultYears().join(', ');
+  const defaultYears = getDefaultYears();
+  const defaultYear = defaultYears.join(', ');
 
   const handleClear = (year: string) => {
     const updatedYears = new Set(selectedYears);
@@ -25,6 +26,12 @@ export default function ChartYearFilterSummary({
     setYears(Array.from(updatedYears));
   };
 
+  // Cek apakah ada tahun non-default
+  const hasNonDefaultYears = selectedYears.some(
+    (year) => !defaultYears.includes(year)
+  );
+
+  // Filter hanya menampilkan Selected Years, kecuali ada tahun non-default
   const filtersList = [
     {
       label: 'Selected Years',
@@ -32,18 +39,28 @@ export default function ChartYearFilterSummary({
         selectedYears.length > 0
           ? selectedYears.sort().join(', ')
           : defaultYear,
-      isClearable: selectedYears.length > 0 && selectedYears[0] !== defaultYear,
+      isClearable: selectedYears.length > 0 && hasNonDefaultYears,
       onClear: () => resetYears(),
     },
-    ...(selectedYears.length > 0 && selectedYears[0] !== defaultYear
-      ? selectedYears.map((year) => ({
-          label: 'Year',
-          value: year,
-          isClearable: true,
-          onClear: () => handleClear(year),
-        }))
+    // Hanya tambah entri per tahun kalau ada tahun non-default
+    ...(hasNonDefaultYears
+      ? selectedYears
+          .filter((year) => !defaultYears.includes(year))
+          .map((year) => ({
+            label: 'Year',
+            value: year,
+            isClearable: true,
+            onClear: () => handleClear(year),
+          }))
       : []),
   ];
+
+  // Log untuk debugging
+  console.log('ChartYearFilterSummary Render:', {
+    selectedYears,
+    hasNonDefaultYears,
+    filtersList,
+  });
 
   return (
     <div

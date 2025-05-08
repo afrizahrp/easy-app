@@ -130,7 +130,7 @@ const MonthlyProductSoldFromSalesPersonFiltered: React.FC<
         distributed: true,
         horizontal: true,
         dataLabels: {
-          position: 'bottom',
+          position: 'top',
         },
         colors: {
           backgroundBarColor: 'rgba(0,0,0,0.1)',

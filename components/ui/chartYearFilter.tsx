@@ -67,10 +67,15 @@ export function ChartYearFilter({
       updatedYears.has(value)
         ? updatedYears.delete(value)
         : updatedYears.add(value);
+      setYears(Array.from(updatedYears));
     } else {
-      updatedYears.clear();
+      resetYears();
     }
-    setYears(Array.from(updatedYears));
+    // Log untuk debugging
+    console.log('handleSelect:', {
+      value,
+      selectedYears: Array.from(updatedYears),
+    });
   };
 
   const handleReset = () => {
