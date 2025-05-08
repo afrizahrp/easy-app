@@ -40,6 +40,12 @@ import {
 } from '@/components/ui/dialog';
 import SalesPersonSummaryList from './salesPersonSummaryList';
 import { Button } from '@/components/ui/button';
+import {
+  Tooltip as UiTooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 ChartJS.register(
   CategoryScale,
@@ -349,7 +355,35 @@ const MonthlySalesPersonInvoiceChart: React.FC<
 
           {/* {salespersons.length > 4 && ( */}
           <Dialog open={isSummaryOpen} onOpenChange={setIsSummaryOpen}>
-            <DialogTrigger asChild>
+            <TooltipProvider>
+              <UiTooltip>
+                <TooltipTrigger asChild>
+                  <div>
+                    <DialogTrigger asChild>
+                      <Button
+                        variant='outline'
+                        className='px-4 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 text-xs transition flex items-center'
+                        onClick={handleSummaryOpen}
+                        disabled={salespersons.length > 4}
+                        aria-label='Open salesperson summary'
+                      >
+                        <BarChart2 className='mr-2 h-4 w-4' />
+                        Summary
+                      </Button>
+                    </DialogTrigger>
+                  </div>
+                </TooltipTrigger>
+                {salespersons.length > 4 && (
+                  <TooltipContent>
+                    <p>
+                      Cannot open summary: Maximum 4 salespersons allowed, but
+                      you selected {salespersons.length}.
+                    </p>
+                  </TooltipContent>
+                )}
+              </UiTooltip>
+            </TooltipProvider>
+            {/* <DialogTrigger asChild>
               <Button
                 variant='outline'
                 className='px-4 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 text-xs transition flex items-center'
@@ -360,15 +394,14 @@ const MonthlySalesPersonInvoiceChart: React.FC<
                 <BarChart2 className='mr-2 h-4 w-4' />
                 Summary
               </Button>
-            </DialogTrigger>
+            </DialogTrigger> */}
             <DialogContent className='max-w-4xl bg-white dark:bg-gray-800'>
               <DialogHeader>
                 <DialogTitle className='text-gray-800 dark:text-gray-100'>
                   Salesperson Summary
                 </DialogTitle>
-                <DialogDescription>
-                  This dialog shows the monthly sales performance for selected
-                  salesperson.
+                <DialogDescription className='text-gray-500 dark:text-gray-400 text-xs'>
+                  Salesperson summary list for {selectedYear} in millions of IDR
                 </DialogDescription>
               </DialogHeader>
               <div className='w-full'>
@@ -379,7 +412,7 @@ const MonthlySalesPersonInvoiceChart: React.FC<
                   />
                 ) : (
                   <p className='text-gray-500 dark:text-gray-400 text-center'>
-                    No salespeople selected. Please select at least one
+                    No salesperson selected. Please select at least one
                     salesperson.
                   </p>
                 )}
