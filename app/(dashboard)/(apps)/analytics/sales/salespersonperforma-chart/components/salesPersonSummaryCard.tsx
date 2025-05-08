@@ -40,7 +40,7 @@ interface SalespersonSummaryCardProps {
 
 const SalespersonSummaryCard: React.FC<SalespersonSummaryCardProps> = ({
   salesPersonName,
-  year = '2024',
+  year,
   currency = CURRENCY,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -48,6 +48,13 @@ const SalespersonSummaryCard: React.FC<SalespersonSummaryCardProps> = ({
   // Hasilkan startPeriod dan endPeriod berdasarkan year
   const startPeriod = `Jan${year}`;
   const endPeriod = `Dec${year}`;
+
+  console.log('SalespersonSummaryCard:', {
+    salesPersonName,
+    year,
+    startPeriod,
+    endPeriod,
+  });
 
   const { data, isLoading, error } = useSalespersonFilteredSummary({
     salesPersonName,
@@ -76,7 +83,7 @@ const SalespersonSummaryCard: React.FC<SalespersonSummaryCardProps> = ({
     return (
       <Card className='w-full max-w-sm border border-gray-200 rounded-xl hover:shadow-xl transition-all duration-300'>
         <CardHeader className='pb-2'>
-          <CardTitle className='text-lg font-semibold text-gray-800 dark:text-gray-100'>
+          <CardTitle className='text-md font-semibold text-gray-800 dark:text-gray-100'>
             {salesPersonName}
           </CardTitle>
         </CardHeader>
@@ -91,6 +98,7 @@ const SalespersonSummaryCard: React.FC<SalespersonSummaryCardProps> = ({
 
   const isPositiveGrowth = (data.growthPercentage ?? 0) >= 0;
 
+  const growthLabel = isPositiveGrowth ? 'Growth' : 'Decline';
   // Fungsi untuk memformat jumlah tanpa satuan (kecuali untuk metrik utama)
   const formatAmount = (amount: number): string => {
     return amount.toLocaleString('id-ID');
@@ -100,7 +108,7 @@ const SalespersonSummaryCard: React.FC<SalespersonSummaryCardProps> = ({
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <Card className='w-full max-w-sm border border-gray-200 rounded-xl hover:shadow-xl transition-all duration-300 bg-white dark:bg-gray-800'>
         <CardHeader className='pb-2'>
-          <CardTitle className='text-lg font-semibold text-gray-800 dark:text-gray-100 flex items-center'>
+          <CardTitle className='text-md font-semibold text-gray-800 dark:text-gray-100 flex items-center'>
             <BarChart2 className='w-5 h-5 mr-2 text-blue-500' />
             {data.salesPersonName}
           </CardTitle>
@@ -140,7 +148,10 @@ const SalespersonSummaryCard: React.FC<SalespersonSummaryCardProps> = ({
                   : 'text-red-600 dark:text-red-400'
               )}
             >
-              Growth: {data.growthPercentage ?? 'N/A'}%
+              {isPositiveGrowth ? 'Growth' : 'Decline'}:{' '}
+              {data.growthPercentage ?? 'N/A'}%
+              {/* 
+              Growth: {data.growthPercentage ?? 'N/A'}% */}
             </span>
           </div>
           {/* <div className='flex items-center text-sm text-gray-600 dark:text-gray-300'>
@@ -171,7 +182,7 @@ const SalespersonSummaryCard: React.FC<SalespersonSummaryCardProps> = ({
       </Card>
       <DialogContent className='max-w-lg bg-white dark:bg-gray-800 rounded-xl'>
         <DialogHeader>
-          <DialogTitle className='text-xl font-bold text-gray-800 dark:text-gray-100'>
+          <DialogTitle className='text-md font-bold text-gray-800 dark:text-gray-100'>
             {data.salesPersonName} Summary - {data.period}
           </DialogTitle>
           <p className='text-xs text-gray-500 dark:text-gray-400'>
@@ -182,21 +193,21 @@ const SalespersonSummaryCard: React.FC<SalespersonSummaryCardProps> = ({
           <div className='grid grid-cols-2 gap-4'>
             <div>
               <p className='text-sm font-semibold'>Total Invoice</p>
-              <p className='text-lg font-medium text-green-600 dark:text-green-400'>
+              <p className='text-md font-medium text-green-600 dark:text-green-400'>
                 {formatAmount(data.totalInvoice)}
               </p>
             </div>
             <div>
               <p className='text-sm font-semibold'>Previous Year</p>
-              <p className='text-lg font-medium'>
+              <p className='text-md font-medium'>
                 {formatAmount(data.previousYearInvoice ?? 0)}
               </p>
             </div>
             <div>
-              <p className='text-sm font-semibold'>Growth Percentage</p>
+              <p className='text-sm font-semibold'>{growthLabel} Percentage</p>
               <p
                 className={cn(
-                  'text-lg font-medium',
+                  'text-md font-medium',
                   isPositiveGrowth
                     ? 'text-green-600 dark:text-green-400'
                     : 'text-red-600 dark:text-red-400'
@@ -207,27 +218,27 @@ const SalespersonSummaryCard: React.FC<SalespersonSummaryCardProps> = ({
             </div>
             <div>
               <p className='text-sm font-semibold'>Average Monthly</p>
-              <p className='text-lg font-medium'>
+              <p className='text-md font-medium'>
                 {formatAmount(data.averageMonthlySales ?? 0)}
               </p>
             </div>
             <div>
               <p className='text-sm font-semibold'>Highest Month</p>
-              <p className='text-lg font-medium text-blue-600 dark:text-blue-400'>
+              <p className='text-md font-medium text-blue-600 dark:text-blue-400'>
                 {data.highestMonth?.month ?? 'N/A'} (
                 {formatAmount(data.highestMonth?.amount ?? 0)})
               </p>
             </div>
             <div>
               <p className='text-sm font-semibold'>Lowest Month</p>
-              <p className='text-lg font-medium text-blue-600 dark:text-blue-400'>
+              <p className='text-md font-medium text-blue-600 dark:text-blue-400'>
                 {data.lowestMonth?.month ?? 'N/A'} (
                 {formatAmount(data.lowestMonth?.amount ?? 0)})
               </p>
             </div>
             <div className='col-span-2'>
               <p className='text-sm font-semibold'>Target Suggestion</p>
-              <p className='text-lg font-medium text-orange-600 dark:text-orange-400'>
+              <p className='text-md font-medium text-orange-600 dark:text-orange-400'>
                 {formatAmount(data.targetSalesSuggestion ?? 0)}
               </p>
             </div>
@@ -237,11 +248,11 @@ const SalespersonSummaryCard: React.FC<SalespersonSummaryCardProps> = ({
               Monthly Breakdown
             </h4>
             <div className='mt-2 max-h-64 overflow-y-auto pr-2'>
-              <ul className='space-y-2'>
+              <ul className='space-y-1'>
                 {(data.months ?? []).map((monthData) => (
                   <li
                     key={monthData.month}
-                    className='flex justify-between items-center text-sm bg-gray-50 dark:bg-gray-700 p-2 rounded-md'
+                    className='flex justify-between items-center text-xs bg-gray-50 dark:bg-gray-700 p-2 rounded-md'
                   >
                     <span>{monthData.month}</span>
                     <span className='font-medium'>

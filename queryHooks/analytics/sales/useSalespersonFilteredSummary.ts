@@ -51,13 +51,13 @@ const useSalespersonFilteredSummary = ({
     normalizePeriod(salesPersonInvoicePeriod.endPeriod || new Date());
 
   // Log untuk debug
-  console.log('Effective periods:', {
-    salesPersonName,
-    startPeriod,
-    endPeriod,
-    effectiveStartPeriod,
-    effectiveEndPeriod,
-  });
+  // console.log('Effective periods:', {
+  //   salesPersonName,
+  //   startPeriod,
+  //   endPeriod,
+  //   effectiveStartPeriod,
+  //   effectiveEndPeriod,
+  // });
 
   const { data, isLoading, isFetching, error, ...rest } = useQuery<
     SalespersonSummary,

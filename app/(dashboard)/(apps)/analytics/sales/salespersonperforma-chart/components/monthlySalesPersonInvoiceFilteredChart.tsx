@@ -22,6 +22,9 @@ import { useToast } from '@/components/ui/use-toast';
 import useMonthlyComparisonSalesPersonInvoiceFiltered from '@/queryHooks/analytics/sales/useMonthlyComparissonSalesPersonInvoiceFiltered';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useSalesInvoiceHdFilterStore } from '@/store';
+
+import { useMonthYearPeriodStore } from '@/store';
+
 import { months } from '@/utils/monthNameMap';
 import { getSalesPersonColor } from '@/utils/getSalesPersonColor';
 import CustomTooltip from '@/components/ui/customTooltip';
@@ -32,11 +35,11 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
   DialogTrigger,
 } from '@/components/ui/dialog';
 import SalesPersonSummaryList from './salesPersonSummaryList';
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
 
 ChartJS.register(
   CategoryScale,
@@ -68,6 +71,7 @@ interface SalesPersonSelection {
 
 interface MonthlySalesPersonInvoiceChartProps {
   isFullWidth?: boolean;
+  year?: string;
   onModeChange?: (isFullPage: boolean) => void;
   onSalesPersonSelect?: (selection: SalesPersonSelection | null) => void;
 }
@@ -82,7 +86,7 @@ interface TooltipState {
 
 const MonthlySalesPersonInvoiceChart: React.FC<
   MonthlySalesPersonInvoiceChartProps
-> = ({ isFullWidth = true, onModeChange, onSalesPersonSelect }) => {
+> = ({ isFullWidth = true, year, onModeChange, onSalesPersonSelect }) => {
   const queryClient = useQueryClient();
   const { theme: config } = useThemeStore();
   const { theme: mode } = useTheme();
@@ -91,6 +95,19 @@ const MonthlySalesPersonInvoiceChart: React.FC<
     theme?.cssVars[mode === 'dark' ? 'dark' : 'light'].background
   })`;
   const hexBackground = hslToHex(hslBackground);
+
+  const { salesPersonInvoicePeriod } = useMonthYearPeriodStore();
+  const { startPeriod } = salesPersonInvoicePeriod; // cukup ambil startPeriod buat filter tahun
+
+  const yearString = startPeriod
+    ? new Date(startPeriod).getFullYear().toString()
+    : new Date().getFullYear().toString();
+
+  const defaultYear = new Date().getFullYear().toString();
+  const [selectedYear, setSelectedYear] = useState<string>(
+    yearString ?? defaultYear
+  );
+
   const { toast } = useToast();
 
   const { salesPersonInvoiceFilters, setSalesPersonInvoiceFilters } =
@@ -124,7 +141,7 @@ const MonthlySalesPersonInvoiceChart: React.FC<
         description: `Cannot open summary. Maximum 4 salespeople allowed, but you selected ${salespersons.length}.`,
         color: 'destructive',
       });
-      return; // Pastikan eksekusi berhenti di sini
+      return;
     }
     setIsSummaryOpen(true);
   };
@@ -156,7 +173,6 @@ const MonthlySalesPersonInvoiceChart: React.FC<
   });
 
   const [isSummaryOpen, setIsSummaryOpen] = useState(false);
-  const [selectedYear, setSelectedYear] = useState<string>('2024');
 
   const chartData = React.useMemo(() => {
     if (!data || !data.length) return null;
@@ -347,6 +363,10 @@ const MonthlySalesPersonInvoiceChart: React.FC<
                 <DialogTitle className='text-gray-800 dark:text-gray-100'>
                   Salesperson Summary
                 </DialogTitle>
+                <DialogDescription>
+                  This dialog shows the monthly sales performance for selected
+                  salesperson.
+                </DialogDescription>
               </DialogHeader>
               <div className='w-full'>
                 {limitedSalespersons.length > 0 ? (

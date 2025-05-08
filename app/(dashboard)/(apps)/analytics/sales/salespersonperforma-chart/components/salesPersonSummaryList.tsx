@@ -15,7 +15,7 @@ interface SalesPersonSummaryListProps {
 
 const SalesPersonSummaryList: React.FC<SalesPersonSummaryListProps> = ({
   salespersons,
-  year = '2024',
+  year,
 }) => {
   return (
     <motion.div
