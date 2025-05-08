@@ -248,12 +248,12 @@ const YearlySalesPersonInvoiceChart: React.FC<
         },
         borderColor: colorConfig.border,
         borderWidth: 1,
-        maxBarThickness: isFullScreen ? 30 : 20,
-        borderRadius: 15,
+        maxBarThickness: isFullScreen ? 30 : 25,
+        borderRadius: 10,
       };
     });
 
-    console.log('Datasets:', datasets); // Debugging datasets
+    console.log('Datasets:', datasets);
 
     const chartDataResult = {
       labels: years.length > 0 ? years : [''],
@@ -385,17 +385,28 @@ const YearlySalesPersonInvoiceChart: React.FC<
   );
 
   return (
-    <div
+    <motion.div
       ref={chartContainerRef}
       className={`chart-container ${isCompact ? 'compact' : ''} ${
         isFullScreen && !document.fullscreenElement
-          ? 'fixed inset-0 z-50 bg-white dark:bg-[#18181b] p-2 rounded-lg shadow-md'
-          : 'relative rounded-lg shadow-md'
-      } flex flex-col h-fit min-h-0 w-full overflow-x-auto max-w-full`}
+          ? 'fixed inset-0 z-50 bg-white dark:bg-[#18181b] p-4 rounded-lg shadow-md'
+          : 'relative bg-white dark:bg-[#18181b] p-4 rounded-lg shadow-sm'
+      } flex flex-col h-fit min-h-[250px] w-full`} // Hapus overflow-x-auto untuk konsistensi
       style={{ backgroundColor: hexBackground }}
+      animate={{
+        opacity: isFullWidth ? 1 : 0.95,
+        scale: isFullWidth ? 1 : 0.98,
+      }}
+      initial={{
+        opacity: isFullWidth ? 1 : 0.95,
+        scale: isFullWidth ? 1 : 0.98,
+      }}
+      transition={{ duration: 0.3, ease: 'easeInOut' }}
     >
-      <div className='relative flex items-center justify-between mb-2 px-2'>
-        <h2 className='text-sm text-muted-foreground font-semibold'>
+      <div className='relative flex items-center justify-between mb-2'>
+        <h2 className='text-sm text-muted-foreground font-semibold ml-2'>
+          {' '}
+          {/* Sesuaikan dengan YearlySalesInvoiceChart */}
           Yearly Sales Above 3.6 Billion IDR by Salesperson
         </h2>
         {!isCompact && (
@@ -413,7 +424,9 @@ const YearlySalesPersonInvoiceChart: React.FC<
           </Button>
         )}
       </div>
-      <div className='flex-1 min-h-0'>
+      <div className='flex-1 min-h-0 w-full'>
+        {' '}
+        {/* Tambahkan w-full untuk konsistensi */}
         {isLoading || isFetching ? (
           <div className='flex items-center justify-center h-full'>
             <div className='w-3/4 h-1/2 rounded-lg shimmer' />
@@ -422,14 +435,14 @@ const YearlySalesPersonInvoiceChart: React.FC<
           <>
             <Bar
               key={isFullWidth ? 'full' : 'half'}
-              height={isFullScreen ? undefined : isCompact ? 300 : height}
+              height={isFullScreen ? undefined : isCompact ? 400 : height} // Sesuaikan tinggi default
               data={chartData}
               options={{
                 responsive: true,
                 maintainAspectRatio: false,
                 layout: {
                   padding: {
-                    bottom: isFullScreen ? 10 : isCompact ? 5 : 10,
+                    bottom: isFullScreen ? 10 : isCompact ? 10 : 20,
                     top: isFullScreen ? 10 : isCompact ? 5 : 10,
                     left: 0,
                     right: 0,
@@ -440,11 +453,13 @@ const YearlySalesPersonInvoiceChart: React.FC<
                     title: { display: false, text: 'Year' },
                     grid: {
                       drawTicks: false,
+                      color: `hsl(${theme?.cssVars[mode === 'dark' ? 'dark' : 'light'].chartGird})`, // Sesuaikan dengan YearlySalesInvoiceChart
                       display: false,
                     },
                     ticks: {
                       font: { size: isFullScreen ? 14 : 12 },
                       autoSkip: false,
+                      padding: 5, // Tambahkan padding kecil untuk fine-tuning
                       callback: (value, index) => {
                         return chartData && chartData.labels
                           ? (chartData.labels[index] ?? '')
@@ -455,17 +470,15 @@ const YearlySalesPersonInvoiceChart: React.FC<
                   y: {
                     beginAtZero: true,
                     min: 0,
-                    max: maxValue > 0 ? maxValue * 1.2 : 1000, // 20% dari nilai maksimum
+                    max: maxValue > 0 ? maxValue * 1.2 : 1000,
                     grid: {
                       drawTicks: false,
                       color: `hsl(${theme?.cssVars[mode === 'dark' ? 'dark' : 'light'].chartGird})`,
                     },
                     ticks: {
-                      // stepSize: 3000, // Interval ticks dimulai dari 3800 (3.8 miliar)
                       callback: (value: unknown) => {
                         const val = Number(value);
-                        const rounded = Math.round(val / 1000) * 1000;
-                        return rounded.toLocaleString('id-ID'); // 3800M = 3.8 miliar
+                        return `${val.toLocaleString('id-ID')}`;
                       },
                       font: { size: isFullScreen ? 14 : 12 },
                     },
@@ -490,7 +503,7 @@ const YearlySalesPersonInvoiceChart: React.FC<
                     external: handleTooltip,
                     callbacks: {
                       label: (context) =>
-                        `${context.dataset.label}: ${(context.raw as number).toLocaleString('id-ID')}M`,
+                        `${context.dataset.label}: ${(context.raw as number).toLocaleString('id-ID')}`,
                     },
                     titleFont: { size: isFullScreen ? 14 : 12 },
                     bodyFont: { size: isFullScreen ? 12 : 10 },
@@ -498,9 +511,9 @@ const YearlySalesPersonInvoiceChart: React.FC<
                 },
                 datasets: {
                   bar: {
-                    barThickness: isFullScreen ? 30 : 20,
-                    categoryPercentage: 0.9, // Sesuaikan untuk single label
-                    barPercentage: 0.8, // Sesuaikan untuk single label
+                    barThickness: isFullScreen ? 30 : 25,
+                    categoryPercentage: 0.9,
+                    barPercentage: 0.8,
                   },
                 },
                 onClick: !isCompact ? handleChartClick : undefined,
@@ -548,7 +561,7 @@ const YearlySalesPersonInvoiceChart: React.FC<
           </div>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 };
 
