@@ -64,7 +64,7 @@ const SalespersonSummaryCard: React.FC<SalespersonSummaryCardProps> = ({
 
   if (isLoading) {
     return (
-      <div className='relative w-full max-w-sm h-64 rounded-xl overflow-hidden bg-gray-200 dark:bg-gray-700'>
+      <div className='relative w-full max-w-md h-64 rounded-xl overflow-hidden bg-gray-200 dark:bg-gray-700'>
         <div className='absolute inset-0 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 dark:from-gray-700 dark:via-gray-600 dark:to-gray-700 animate-shimmer' />
       </div>
     );
@@ -72,7 +72,7 @@ const SalespersonSummaryCard: React.FC<SalespersonSummaryCardProps> = ({
 
   if (error) {
     return (
-      <div className='text-red-500 bg-red-50 p-4 rounded-xl w-full max-w-sm'>
+      <div className='text-red-500 bg-red-50 p-4 rounded-xl w-full max-w-md'>
         Error: {error.message}
       </div>
     );
@@ -81,7 +81,7 @@ const SalespersonSummaryCard: React.FC<SalespersonSummaryCardProps> = ({
   if (!data || !data.totalInvoice) {
     console.log('Data tidak lengkap:', { salesPersonName, data });
     return (
-      <Card className='w-full max-w-sm border border-gray-200 rounded-xl hover:shadow-xl transition-all duration-300'>
+      <Card className='w-full max-w-md border border-gray-200 rounded-xl hover:shadow-xl transition-all duration-300'>
         <CardHeader className='pb-2'>
           <CardTitle className='text-md font-semibold text-gray-800 dark:text-gray-100'>
             {salesPersonName}
@@ -106,7 +106,7 @@ const SalespersonSummaryCard: React.FC<SalespersonSummaryCardProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <Card className='w-full max-w-sm border border-gray-200 rounded-xl hover:shadow-xl transition-all duration-300 bg-white dark:bg-gray-800'>
+      <Card className='w-full max-w-md border border-gray-200 rounded-xl hover:shadow-xl transition-all duration-300 bg-white dark:bg-gray-800'>
         <CardHeader className='pb-2'>
           <CardTitle className='text-md font-semibold text-gray-800 dark:text-gray-100 flex items-center'>
             <BarChart2 className='w-5 h-5 mr-2 text-blue-500' />
@@ -165,7 +165,7 @@ const SalespersonSummaryCard: React.FC<SalespersonSummaryCardProps> = ({
           </DialogTrigger>
         </CardFooter>
       </Card>
-      <DialogContent className='max-w-lg bg-white dark:bg-gray-800 rounded-xl'>
+      <DialogContent className='max-w-xl bg-white dark:bg-gray-800 rounded-xl'>
         <DialogHeader>
           <DialogTitle className='text-md font-bold text-gray-800 dark:text-gray-100'>
             {data.salesPersonName} Summary - {data.period}
