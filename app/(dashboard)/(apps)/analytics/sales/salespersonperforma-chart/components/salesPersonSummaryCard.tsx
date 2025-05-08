@@ -189,7 +189,7 @@ const SalespersonSummaryCard: React.FC<SalespersonSummaryCardProps> = ({
               </p>
             </div>
             <div>
-              <p className='text-sm font-semibold'>{growthLabel} </p>
+              <p className='text-sm font-semibold'>{growthLabel}</p>
               <p
                 className={cn(
                   'text-md font-medium',
@@ -224,13 +224,11 @@ const SalespersonSummaryCard: React.FC<SalespersonSummaryCardProps> = ({
               </p>
             </div>
           </div>
-          <div className='flex justify-end'>
-            <div>
-              <p className='text-sm font-semibold'>Target Suggestion</p>
-              <p className='text-md font-medium text-orange-600 dark:text-orange-400'>
-                {formatAmount(data.targetSalesSuggestion ?? 0)}
-              </p>
-            </div>
+          <div>
+            <p className='text-sm font-semibold'>Target Suggestion</p>
+            <p className='text-md font-medium text-orange-600 dark:text-orange-400'>
+              {formatAmount(data.targetSalesSuggestion ?? 0)}
+            </p>
           </div>
           <div>
             <h4 className='font-semibold text-gray-800 dark:text-gray-100 mt-4'>
