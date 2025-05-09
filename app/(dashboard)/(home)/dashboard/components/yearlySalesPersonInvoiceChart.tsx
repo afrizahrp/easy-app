@@ -513,8 +513,8 @@ const YearlySalesPersonInvoiceChart: React.FC<
                 datasets: {
                   bar: {
                     barThickness: isFullScreen ? 30 : 25,
-                    categoryPercentage: 0.9,
-                    barPercentage: 0.8,
+                    categoryPercentage: 0.65,
+                    barPercentage: 0.55,
                   },
                 },
                 onClick: !isCompact ? handleChartClick : undefined,

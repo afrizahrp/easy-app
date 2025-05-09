@@ -225,9 +225,7 @@ const MonthlySalesInvoiceChart: React.FC<MonthlySalesInvoiceChartProps> = ({
       tooltip: import('chart.js').TooltipModel<'bar'>;
     }) => {
       const { chart, tooltip } = context;
-      const container = chartContainerRef.current;
-
-      if (!chartData || !chartData.labels || !container) {
+      if (!chartData || !chartData.labels) {
         if (tooltipState.visible) {
           setTooltipState((prev) => ({ ...prev, visible: false }));
         }
@@ -253,16 +251,8 @@ const MonthlySalesInvoiceChart: React.FC<MonthlySalesInvoiceChartProps> = ({
           .growthPercentages[dataIndex];
 
         const canvasRect = chart.canvas.getBoundingClientRect();
-        const bar = chart.getDatasetMeta(datasetIndex).data[dataIndex] as any;
-
-        const x = bar.x + bar.width / 2 + 3;
-        const y = bar.y - 3;
-
-        const containerRect = container.getBoundingClientRect();
-        const tooltipWidth = 150;
-        const tooltipHeight = 50;
-        const adjustedX = Math.min(x, containerRect.width - tooltipWidth - 10);
-        const adjustedY = Math.max(y, 10);
+        const x = canvasRect.left + tooltip.caretX + 10;
+        const y = canvasRect.top + tooltip.caretY - 3;
 
         setTooltipState((prev) => {
           if (
@@ -270,15 +260,15 @@ const MonthlySalesInvoiceChart: React.FC<MonthlySalesInvoiceChartProps> = ({
             prev.month === month &&
             prev.invoice === invoice &&
             prev.growth === growth &&
-            prev.x === adjustedX &&
-            prev.y === adjustedY
+            prev.x === x &&
+            prev.y === y
           ) {
             return prev;
           }
           return {
             visible: true,
-            x: adjustedX,
-            y: adjustedY,
+            x,
+            y,
             invoice,
             growth,
             month,
@@ -433,20 +423,6 @@ const MonthlySalesInvoiceChart: React.FC<MonthlySalesInvoiceChartProps> = ({
           </>
         ) : (
           <div className='flex flex-col items-center justify-center h-full text-gray-400'>
-            <svg
-              xmlns='http://www.w3.org/2000/svg'
-              className='w-24 h-24 mb-4 animate-bounce'
-              fill='none'
-              viewBox='0 0 24 24'
-              stroke='currentColor'
-              strokeWidth={1.5}
-            >
-              <path
-                strokeLinecap='round'
-                strokeLinejoin='round'
-                d='M3 3v18h18V3H3zm5 14h8m-8-4h8m-8-4h8'
-              />
-            </svg>
             <p className='text-sm font-medium'>No data available</p>
           </div>
         )}

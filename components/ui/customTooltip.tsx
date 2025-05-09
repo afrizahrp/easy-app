@@ -16,7 +16,7 @@ interface CustomTooltipProps {
   growth: number;
   isFullScreen?: boolean;
   parentRef?: React.RefObject<HTMLElement>;
-  isCompact?: boolean; // Tambahkan prop untuk mengecek mode compact
+  isCompact?: boolean;
 }
 
 const CustomTooltip: React.FC<CustomTooltipProps> = ({
@@ -40,23 +40,27 @@ const CustomTooltip: React.FC<CustomTooltipProps> = ({
   const tooltipContent = (
     <div
       className={cn(
-        'absolute z-[100] rounded-md p-2 text-md shadow-md whitespace-nowrap',
+        'absolute z-[100] rounded-md p-2 text-md shadow-md max-w-[200px]', // Tambahkan max-w untuk membatasi lebar
         'bg-gray-800 text-slate-100'
       )}
       style={{ left: `${x}px`, top: `${y}px` }}
     >
-      <div className='flex items-center gap-2'>
+      <div className='flex flex-col gap-1'>
+        {' '}
+        {/* Ubah ke flex-col untuk tata letak vertikal */}
+        <span
+          className={cn('block', isFullScreen ? 'text-[16px]' : 'text-[12px]')} // Gunakan block untuk teks
+        >
+          Sales {invoice}
+        </span>
         <div className='flex items-center'>
-          <span
-            className={cn('mr-2', isFullScreen ? 'text-[16px]' : 'text-[14px]')}
-          >
-            Sales {invoice},
-          </span>
+          {' '}
+          {/* Grup elemen growth secara horizontal */}
           <span
             className={cn(
               isUp ? 'text-green-400' : 'text-red-400',
               'mr-1 font-medium',
-              isFullScreen ? 'text-[16px]' : 'text-[14px]'
+              isFullScreen ? 'text-[16px]' : 'text-[12px]'
             )}
           >
             {Math.abs(growth)}%
@@ -70,23 +74,26 @@ const CustomTooltip: React.FC<CustomTooltipProps> = ({
             className={cn(
               isUp ? 'text-green-400' : 'text-red-400',
               'w-4 h-4 mr-1',
-              isFullScreen ? 'text-[16px]' : 'text-[14px]'
+              isFullScreen ? 'text-[16px]' : 'text-[12px]'
             )}
           />
-          <span className={cn(isFullScreen ? 'text-[16px]' : 'text-[14px]')}>
+          <span className={cn(isFullScreen ? 'text-[16px]' : 'text-[12px]')}>
             vs previous year
           </span>
         </div>
         {/* Tambahkan ikon drill-down hanya jika !isCompact */}
         {!isCompact && (
-          <Icon
-            icon='heroicons:cursor-arrow-rays-16-solid'
-            className={cn(
-              'w-4 h-4 text-blue-400',
-              isFullScreen ? 'text-[16px]' : 'text-[14px]'
-            )}
-            // title='Click to drill down'
-          />
+          <div className='flex justify-start'>
+            {' '}
+            {/* Ikon drill-down di baris terpisah */}
+            <Icon
+              icon='heroicons:cursor-arrow-rays-16-solid'
+              className={cn(
+                'w-4 h-4 text-blue-400',
+                isFullScreen ? 'text-[16px]' : 'text-[12px]'
+              )}
+            />
+          </div>
         )}
       </div>
     </div>
