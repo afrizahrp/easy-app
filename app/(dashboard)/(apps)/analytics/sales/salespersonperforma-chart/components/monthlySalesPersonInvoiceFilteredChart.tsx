@@ -416,7 +416,7 @@ const MonthlySalesInvoiceFilteredChart: React.FC<
                       })`,
                       borderWidth: 1,
                       padding: 8,
-                      bodyFont: { size: 11 },
+                      bodyFont: { size: 12 },
                       callbacks: {
                         label: (context) => {
                           const amount = (context.raw as number) * 1_000_000;
