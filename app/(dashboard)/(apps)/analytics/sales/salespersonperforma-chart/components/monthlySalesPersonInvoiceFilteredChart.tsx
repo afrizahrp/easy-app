@@ -397,7 +397,7 @@ const MonthlySalesInvoiceFilteredChart: React.FC<
                       enabled: true,
                       position: 'nearest',
                       yAlign: 'top',
-                      xAlign: 'right',
+                      xAlign: 'left',
 
                       borderWidth: 1,
                       padding: 8,
