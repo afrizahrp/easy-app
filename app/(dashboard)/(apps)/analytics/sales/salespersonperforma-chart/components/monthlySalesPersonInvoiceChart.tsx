@@ -11,6 +11,7 @@ import {
   Tooltip,
   Legend,
   ScriptableContext,
+  Chart,
 } from 'chart.js';
 import { hslToHex } from '@/lib/utils';
 import { useThemeStore } from '@/store';
@@ -18,16 +19,17 @@ import { useTheme } from 'next-themes';
 import { themes } from '@/config/thems';
 import gradientPlugin from 'chartjs-plugin-gradient';
 import { useToast } from '@/components/ui/use-toast';
-import useMonthlySalesPersonInvoice from '@/queryHooks/analytics/sales/useMonthlySalesPersonInvoice';
-import { useSalesInvoiceHdFilterStore } from '@/store';
-import { months } from '@/utils/monthNameMap';
-import { getSalesPersonColor } from '@/utils/getSalesPersonColor';
-import { Button } from '@/components/ui/button';
+import useMonthlyComparisonSalesPersonInvoiceUnfiltered from '@/queryHooks/analytics/sales/useMonthlyComparisonSalesPersonInvoiceUnfiltered';
 import {
   salesPersonColorMap,
   getFallbackColor,
 } from '@/utils/salesPersonColorMap';
+import { useSalesInvoiceHdFilterStore } from '@/store';
+import { months } from '@/utils/monthNameMap';
+import { getSalesPersonColor } from '@/utils/getSalesPersonColor';
+import { Button } from '@/components/ui/button';
 import { Maximize2, Minimize2 } from 'lucide-react';
+import { useQueryClient } from '@tanstack/react-query';
 
 ChartJS.register(
   CategoryScale,
@@ -44,7 +46,11 @@ interface SalesDataWithoutFilter {
   totalInvoice: number;
   months: {
     month: string;
-    sales: { salesPersonName: string; amount: number }[];
+    sales: {
+      salesPersonName: string;
+      amount: number;
+      growthPercentage: number;
+    }[];
   }[];
 }
 
@@ -72,6 +78,7 @@ const MonthlySalesPersonInvoiceChart: React.FC<
   onModeChange,
   onSalesPersonSelect,
 }) => {
+  const queryClient = useQueryClient();
   const { theme: config } = useThemeStore();
   const { theme: mode } = useTheme();
   const theme = themes.find((theme) => theme.name === config);
@@ -80,9 +87,10 @@ const MonthlySalesPersonInvoiceChart: React.FC<
   })`;
   const hexBackground = hslToHex(hslBackground);
   const { toast } = useToast();
-  const { data, isLoading, isFetching, error } = useMonthlySalesPersonInvoice({
-    context: 'salesPersonInvoice',
-  });
+  const { data, isLoading, isFetching, error } =
+    useMonthlyComparisonSalesPersonInvoiceUnfiltered({
+      context: 'salesPersonInvoice',
+    });
   const { salesPersonInvoiceFilters, setSalesPersonInvoiceFilters } =
     useSalesInvoiceHdFilterStore((state) => ({
       salesPersonInvoiceFilters: state.salesPersonInvoiceFilters,
@@ -90,6 +98,192 @@ const MonthlySalesPersonInvoiceChart: React.FC<
     }));
   const [isFullScreen, setIsFullScreen] = useState(false);
   const chartContainerRef = useRef<HTMLDivElement>(null);
+  const chartRef = useRef<Chart<'bar', number[], string> | null>(null);
+
+  // Log filter awal
+  useEffect(() => {
+    console.log('Initial filters:', salesPersonInvoiceFilters);
+  }, [salesPersonInvoiceFilters]);
+
+  // Invalidasi query saat mount untuk memastikan data segar
+  // useEffect(() => {
+  //   queryClient.invalidateQueries(['salesPersonInvoice']);
+  // }, [queryClient]);
+
+  // Atur query defaults
+  useEffect(() => {
+    queryClient.setQueryDefaults(['salesPersonInvoice'], {
+      refetchOnWindowFocus: false,
+      refetchInterval: false,
+      staleTime: 5 * 60 * 1000,
+      // cacheTime: 10 * 60 * 1000,
+    });
+  }, [queryClient]);
+
+  const chartData = React.useMemo(() => {
+    if (!data || !data.length) {
+      console.log('No data available');
+      return null;
+    }
+
+    console.log('Raw data:', JSON.stringify(data, null, 2));
+
+    const allSalesPersons = Array.from(
+      new Set(
+        (data as SalesDataWithoutFilter[])
+          .flatMap((d) => d.months)
+          .flatMap((m) => m.sales.map((s) => s.salesPersonName))
+      )
+    );
+
+    console.log('All Salespersons:', allSalesPersons);
+    console.log('Months:', months);
+    console.log('Months:', months);
+    console.log('Data:', data);
+    console.log(
+      'February data:',
+      data[0]?.months.find((m) => m.month === 'Feb')
+    );
+
+    const datasets = allSalesPersons.map((salesPersonName) => {
+      const color =
+        salesPersonColorMap[salesPersonName.toLowerCase()] ||
+        getFallbackColor(salesPersonName);
+
+      const growthPercentages = months.map((month) => {
+        let growth: number = 0;
+        (data as SalesDataWithoutFilter[]).forEach((yearData) => {
+          const monthData = yearData.months.find((m) => m.month === month);
+          if (monthData) {
+            const salesPersonData = monthData.sales.find(
+              (s) => s.salesPersonName === salesPersonName
+            );
+            if (
+              salesPersonData &&
+              salesPersonData.growthPercentage !== undefined
+            ) {
+              growth = salesPersonData.growthPercentage;
+            }
+          }
+        });
+        return growth;
+      });
+
+      const monthlyData = months.map((month) => {
+        let totalAmount = 0;
+        (data as SalesDataWithoutFilter[]).forEach((yearData) => {
+          const monthData = yearData.months.find((m) => m.month === month);
+          console.log(`Month ${month} in ${yearData.period}:`, monthData);
+          if (monthData && monthData.sales.length > 0) {
+            const salesPersonData = monthData.sales.find(
+              (s) => s.salesPersonName === salesPersonName
+            );
+            console.log(
+              `Salesperson ${salesPersonName} in ${month}:`,
+              salesPersonData
+            );
+            if (salesPersonData) {
+              totalAmount += salesPersonData.amount;
+            }
+          }
+        });
+        console.log(
+          `Total Amount for ${salesPersonName} in ${month}:`,
+          totalAmount
+        );
+        return totalAmount / 1_000_000;
+      });
+
+      console.log(`Data for ${salesPersonName}:`, monthlyData);
+      console.log(`Growth for ${salesPersonName}:`, growthPercentages);
+
+      return {
+        label: salesPersonName,
+        data: monthlyData,
+        backgroundColor: (ctx: ScriptableContext<'bar'>) => {
+          const { chartArea, ctx: canvasCtx } = ctx.chart;
+          if (!chartArea) return color.to;
+          const gradient = canvasCtx.createLinearGradient(
+            0,
+            chartArea.bottom,
+            0,
+            chartArea.top
+          );
+          gradient.addColorStop(0, color.from);
+          gradient.addColorStop(1, color.to);
+          return gradient;
+        },
+        borderColor: color.border,
+        borderWidth: 1,
+        barThickness: isFullScreen ? 10 : 6, // Kurangi untuk alignment
+        maxBarThickness: 10,
+        minBarLength: 2, // Pastikan bar terlihat
+        borderRadius: 15,
+        period: data && data.length > 0 ? data[0].period : undefined,
+        growthPercentages,
+      };
+    });
+
+    const result = { labels: months, datasets };
+    console.log('chartData:', result);
+    return result;
+  }, [data, isFullScreen]);
+
+  // Log dimensi chart
+  useEffect(() => {
+    if (chartRef.current) {
+      console.log(
+        'Chart width:',
+        chartRef.current.width,
+        'Chart area:',
+        chartRef.current.chartArea
+      );
+    }
+  }, [chartData, isFullScreen]);
+
+  const maxValue = React.useMemo(() => {
+    if (!chartData) return 0;
+    return Math.max(...chartData.datasets.flatMap((ds) => ds.data)) * 1.1;
+  }, [chartData]);
+
+  useEffect(() => {
+    if (error) {
+      toast({
+        description: 'Gagal memuat data penjualan. Coba lagi.',
+        variant: 'destructive',
+      });
+    }
+  }, [error, toast]);
+
+  const isDataReady =
+    !!chartData &&
+    Array.isArray(chartData.labels) &&
+    chartData.labels.length > 0 &&
+    Array.isArray(chartData.datasets) &&
+    chartData.datasets.some(
+      (ds) => Array.isArray(ds.data) && ds.data.length > 0
+    );
+
+  console.log('isDataReady', isDataReady);
+
+  console.log('chartData datasets:', chartData?.datasets);
+  const handleChartClick = (event: any, elements: any[]) => {
+    if (isCompact || elements.length === 0) return;
+
+    const element = elements[0];
+    const datasetIndex = element.datasetIndex;
+    const monthIndex = element.index;
+    const salesPersonName = chartData?.datasets[datasetIndex]?.label;
+    const year = chartData?.datasets[datasetIndex]?.period;
+    const month = chartData?.labels[monthIndex] as string;
+
+    if (salesPersonName) {
+      setSalesPersonInvoiceFilters({ salesPersonName: [salesPersonName] });
+      const colorObj = getSalesPersonColor(salesPersonName);
+      const color = typeof colorObj === 'string' ? colorObj : colorObj?.to;
+      onSalesPersonSelect?.({ salesPersonName, year, month, color });
+    }
+  };
 
   const toggleFullScreen = () => {
     if (!chartContainerRef.current) return;
@@ -153,148 +347,6 @@ const MonthlySalesPersonInvoiceChart: React.FC<
     };
   }, [onModeChange]);
 
-  const chartData = React.useMemo(() => {
-    if (!data || !data.length) return null;
-
-    const allSalesPersons = Array.from(
-      new Set(
-        (data as SalesDataWithoutFilter[])
-          .flatMap((d) => d.months)
-          .flatMap((m) => m.sales.map((s) => s.salesPersonName))
-      )
-    );
-
-    const datasets = allSalesPersons.map((salesPersonName) => {
-      const color =
-        salesPersonColorMap[salesPersonName.toLowerCase()] ||
-        getFallbackColor(salesPersonName);
-
-      // Hitung growthPercentage untuk setiap bulan
-      const growthPercentages = months.map((month, monthIndex) => {
-        let currentAmount = 0;
-        let previousAmount = 0;
-
-        // Jumlahkan amount untuk bulan saat ini
-        (data as SalesDataWithoutFilter[]).forEach((yearData) => {
-          const monthData = yearData.months.find((m) => m.month === month);
-          if (monthData) {
-            const salesPersonData = monthData.sales.find(
-              (s) => s.salesPersonName === salesPersonName
-            );
-            if (salesPersonData) {
-              currentAmount += salesPersonData.amount;
-            }
-          }
-        });
-
-        // Jumlahkan amount untuk bulan sebelumnya (jika ada)
-        if (monthIndex > 0) {
-          const previousMonth = months[monthIndex - 1];
-          (data as SalesDataWithoutFilter[]).forEach((yearData) => {
-            const monthData = yearData.months.find(
-              (m) => m.month === previousMonth
-            );
-            if (monthData) {
-              const salesPersonData = monthData.sales.find(
-                (s) => s.salesPersonName === salesPersonName
-              );
-              if (salesPersonData) {
-                previousAmount += salesPersonData.amount;
-              }
-            }
-          });
-        }
-
-        // Hitung growthPercentage
-        if (previousAmount === 0 || monthIndex === 0) {
-          return 0; // Tidak ada data sebelumnya atau bulan pertama
-        }
-        return ((currentAmount - previousAmount) / previousAmount) * 100;
-      });
-
-      return {
-        label: salesPersonName,
-        data: months.map((month) => {
-          let totalAmount = 0;
-          (data as SalesDataWithoutFilter[]).forEach((yearData) => {
-            const monthData = yearData.months.find((m) => m.month === month);
-            if (monthData) {
-              const salesPersonData = monthData.sales.find(
-                (s) => s.salesPersonName === salesPersonName
-              );
-              if (salesPersonData) {
-                totalAmount += salesPersonData.amount;
-              }
-            }
-          });
-          return totalAmount / 1_000_000; // Skala ke jutaan
-        }),
-        backgroundColor: (ctx: ScriptableContext<'bar'>) => {
-          const { chartArea, ctx: canvasCtx } = ctx.chart;
-          if (!chartArea) return color.to;
-          const gradient = canvasCtx.createLinearGradient(
-            0,
-            chartArea.bottom,
-            0,
-            chartArea.top
-          );
-          gradient.addColorStop(0, color.from);
-          gradient.addColorStop(1, color.to);
-          return gradient;
-        },
-        borderColor: color.border,
-        borderWidth: 1,
-        barThickness: isFullScreen ? 30 : 20,
-        borderRadius: 15,
-        period: data && data.length > 0 ? data[0].period : undefined,
-        growthPercentages, // Simpan untuk tooltip
-      };
-    });
-
-    return { labels: months, datasets };
-  }, [data, isFullScreen]);
-
-  const maxValue = React.useMemo(() => {
-    if (!chartData) return 0;
-    return Math.max(...chartData.datasets.flatMap((ds) => ds.data));
-  }, [chartData]);
-
-  React.useEffect(() => {
-    if (error) {
-      toast({
-        description: 'Gagal memuat data penjualan. Coba lagi.',
-        variant: 'destructive',
-      });
-    }
-  }, [error, toast]);
-
-  const isDataReady =
-    !!chartData &&
-    Array.isArray(chartData.labels) &&
-    chartData.labels.length > 0 &&
-    Array.isArray(chartData.datasets) &&
-    chartData.datasets.some(
-      (ds) => Array.isArray(ds.data) && ds.data.length > 0
-    );
-
-  const handleChartClick = (event: any, elements: any[]) => {
-    if (isCompact || elements.length === 0) return;
-
-    const element = elements[0];
-    const datasetIndex = element.datasetIndex;
-    const monthIndex = element.index;
-    const salesPersonName = chartData?.datasets[datasetIndex]?.label;
-    const year = chartData?.datasets[datasetIndex]?.period;
-    const month = chartData?.labels[monthIndex] as string;
-
-    if (salesPersonName) {
-      setSalesPersonInvoiceFilters({ salesPersonName: [salesPersonName] });
-      const colorObj = getSalesPersonColor(salesPersonName);
-      const color = typeof colorObj === 'string' ? colorObj : colorObj?.to;
-      onSalesPersonSelect?.({ salesPersonName, year, month, color });
-    }
-  };
-
   return (
     <div
       ref={chartContainerRef}
@@ -331,6 +383,7 @@ const MonthlySalesPersonInvoiceChart: React.FC<
           </div>
         ) : isDataReady ? (
           <Bar
+            ref={chartRef}
             height={isFullScreen ? undefined : isCompact ? 300 : height}
             data={chartData}
             options={{
@@ -340,13 +393,14 @@ const MonthlySalesPersonInvoiceChart: React.FC<
                 padding: {
                   bottom: isCompact ? 10 : 20,
                   top: isCompact ? 5 : 10,
-                  left: 10,
-                  right: 10,
+                  left: isCompact ? 30 : 40, // Tambah padding
+                  right: isCompact ? 30 : 40,
                 },
               },
               scales: {
                 y: {
                   beginAtZero: true,
+                  max: maxValue,
                   grid: {
                     drawTicks: false,
                     color: `hsl(${
@@ -365,6 +419,7 @@ const MonthlySalesPersonInvoiceChart: React.FC<
                   },
                 },
                 x: {
+                  offset: true,
                   title: { display: false, text: 'Bulan' },
                   grid: {
                     drawTicks: false,
@@ -376,7 +431,7 @@ const MonthlySalesPersonInvoiceChart: React.FC<
                   },
                   ticks: {
                     autoSkip: false,
-                    callback: (value, index) => chartData.labels[index] ?? '',
+                    callback: (value, index) => chartData?.labels[index] ?? '',
                     font: {
                       size: isFullScreen ? 14 : 12,
                     },
@@ -415,14 +470,27 @@ const MonthlySalesPersonInvoiceChart: React.FC<
                   bodyFont: { size: 12 },
                   titleFont: { size: isFullScreen ? 14 : 12 },
                   callbacks: {
+                    title: (tooltipItems) => {
+                      const index = tooltipItems[0].dataIndex;
+                      console.log(
+                        'Tooltip index:',
+                        index,
+                        'Label:',
+                        chartData?.labels[index]
+                      );
+                      return chartData?.labels[index] ?? '';
+                    },
                     label: (context) => {
                       const amount = (context.raw as number) * 1_000_000;
                       const growth = (context.dataset as any).growthPercentages[
                         context.dataIndex
                       ];
                       const icon = growth > 0 ? '🔼' : growth < 0 ? '🔻' : '➡️';
+                      const growthDisplay =
+                        growth !== undefined ? growth.toFixed(2) : '0.00';
                       return [
-                        `${amount.toLocaleString('id-ID')} ${icon} ${growth.toFixed(2)}%`,
+                        `${context.dataset.label}`,
+                        `${amount.toLocaleString('id-ID')} ${icon} ${growthDisplay}%`,
                       ];
                     },
                   },
@@ -430,9 +498,11 @@ const MonthlySalesPersonInvoiceChart: React.FC<
               },
               datasets: {
                 bar: {
-                  barThickness: isFullScreen ? 30 : 20,
-                  categoryPercentage: 0.9,
-                  barPercentage: 0.8,
+                  barThickness: isFullScreen ? 10 : 6,
+                  maxBarThickness: 10,
+                  minBarLength: 2,
+                  categoryPercentage: 0.5, // Kurangi untuk alignment
+                  barPercentage: 0.6,
                 },
               },
               onClick: !isCompact ? handleChartClick : undefined,
