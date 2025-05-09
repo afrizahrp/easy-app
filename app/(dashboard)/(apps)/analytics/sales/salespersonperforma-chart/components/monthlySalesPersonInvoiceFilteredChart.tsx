@@ -424,7 +424,7 @@ const MonthlySalesInvoiceFilteredChart: React.FC<
                             .growthPercentages[context.dataIndex];
                           // Tentukan ikon berdasarkan nilai growth
                           const icon =
-                            growth > 0 ? '🔺' : growth < 0 ? '🔻' : '➖';
+                            growth > 0 ? '🔼' : growth < 0 ? '🔻' : '➡️'; // Emoji baru
 
                           const growthStatus =
                             growth > 0

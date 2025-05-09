@@ -24,13 +24,13 @@ interface SalesPeriodResponse {
   data: SalesDataWithoutFilter[];
 }
 
-interface UseMonthlySalesPersonInvoiceProps {
+interface useMonthlyComparisonSalesPersonInvoiceUnfilteredProps {
   context: 'salesPersonInvoice';
 }
 
-const useMonthlySalesPersonInvoice = ({
+const useMonthlyComparisonSalesPersonInvoiceUnfiltered = ({
   context,
-}: UseMonthlySalesPersonInvoiceProps) => {
+}: useMonthlyComparisonSalesPersonInvoiceUnfilteredProps) => {
   const user = useSessionStore((state) => state.user);
   const company_id = user?.company_id?.toUpperCase();
   const module_id = 'ANT'; // Sesuaikan dengan endpoint (ANT)
@@ -110,4 +110,4 @@ const useMonthlySalesPersonInvoice = ({
   };
 };
 
-export default useMonthlySalesPersonInvoice;
+export default useMonthlyComparisonSalesPersonInvoiceUnfiltered;

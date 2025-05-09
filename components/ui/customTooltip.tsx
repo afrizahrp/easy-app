@@ -46,15 +46,13 @@ const CustomTooltip: React.FC<CustomTooltipProps> = ({
       style={{ left: `${x}px`, top: `${y}px` }}
     >
       <div className='flex flex-col gap-1'>
-        {' '}
         {/* Ubah ke flex-col untuk tata letak vertikal */}
         <span
           className={cn('block', isFullScreen ? 'text-[16px]' : 'text-[12px]')} // Gunakan block untuk teks
         >
-          Sales {invoice}
+          {invoice}
         </span>
         <div className='flex items-center'>
-          {' '}
           {/* Grup elemen growth secara horizontal */}
           <span
             className={cn(
@@ -82,10 +80,9 @@ const CustomTooltip: React.FC<CustomTooltipProps> = ({
           </span> */}
         </div>
         {/* Tambahkan ikon drill-down hanya jika !isCompact */}
-        {!isCompact && (
+        {/* {!isCompact && (
           <div className='flex justify-start'>
             {' '}
-            {/* Ikon drill-down di baris terpisah */}
             <Icon
               icon='heroicons:cursor-arrow-rays-16-solid'
               className={cn(
@@ -94,7 +91,7 @@ const CustomTooltip: React.FC<CustomTooltipProps> = ({
               )}
             />
           </div>
-        )}
+        )} */}
       </div>
     </div>
   );

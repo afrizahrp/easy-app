@@ -117,7 +117,7 @@ const DashboardPageView: React.FC<DashboardPageViewProps> = ({
             <>
               <Card title={t.yearlySalesInvoice} key='chart1'>
                 <YearlySalesInvoiceChart
-                  height={600}
+                  height={300}
                   isCompact={false}
                   isFullWidth={true}
                   onModeChange={(isFull: boolean) =>
@@ -127,7 +127,7 @@ const DashboardPageView: React.FC<DashboardPageViewProps> = ({
               </Card>
               <Card title={t.salesPersonInvoice} key='chart2'>
                 <YearlySalesPersonInvoiceChart
-                  height={600}
+                  height={300}
                   isCompact={false}
                   isFullWidth={true}
                   onModeChange={(isFull: boolean) =>
