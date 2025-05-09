@@ -77,9 +77,9 @@ const CustomTooltip: React.FC<CustomTooltipProps> = ({
               isFullScreen ? 'text-[16px]' : 'text-[12px]'
             )}
           />
-          <span className={cn(isFullScreen ? 'text-[16px]' : 'text-[12px]')}>
+          {/* <span className={cn(isFullScreen ? 'text-[16px]' : 'text-[12px]')}>
             vs previous year
-          </span>
+          </span> */}
         </div>
         {/* Tambahkan ikon drill-down hanya jika !isCompact */}
         {!isCompact && (

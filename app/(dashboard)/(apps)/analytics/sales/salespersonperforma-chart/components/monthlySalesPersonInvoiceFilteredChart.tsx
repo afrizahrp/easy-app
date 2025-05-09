@@ -12,6 +12,7 @@ import {
   Legend,
   ScriptableContext,
 } from 'chart.js';
+
 import { hslToHex } from '@/lib/utils';
 import { useThemeStore } from '@/store';
 import { useTheme } from 'next-themes';
@@ -416,24 +417,27 @@ const MonthlySalesInvoiceFilteredChart: React.FC<
                       borderWidth: 1,
                       padding: 8,
                       bodyFont: { size: 11 },
-
                       callbacks: {
                         label: (context) => {
                           const amount = (context.raw as number) * 1_000_000;
                           const growth = (context.dataset as any)
                             .growthPercentages[context.dataIndex];
+                          // Tentukan ikon berdasarkan nilai growth
+                          const icon =
+                            growth > 0 ? '🔺' : growth < 0 ? '🔻' : '➖';
+
                           const growthStatus =
                             growth > 0
                               ? `Increase:${growth}%`
                               : growth < 0
                                 ? `Decrease:${growth}%`
                                 : `No Change:${growth}%`;
+
                           const salesPerson = context.dataset.label;
                           return [
                             `${salesPerson}`,
-                            `Amount: ${amount.toLocaleString('id-ID')} IDR`,
-                            // `Growth: ${growth}%`,
-                            `${growthStatus}%`,
+                            `Sales: ${amount.toLocaleString('id-ID')} IDR`,
+                            `${icon} ${growthStatus}`,
                           ];
                         },
                       },

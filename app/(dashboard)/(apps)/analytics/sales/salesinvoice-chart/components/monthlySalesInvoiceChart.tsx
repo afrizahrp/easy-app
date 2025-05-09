@@ -243,10 +243,9 @@ const MonthlySalesInvoiceChart: React.FC<MonthlySalesInvoiceChartProps> = ({
         const dataIndex = tooltip.dataPoints[0].dataIndex;
         const datasetIndex = tooltip.dataPoints[0].datasetIndex;
         const month = chartData.labels[dataIndex] ?? '';
-        const invoice =
-          ((tooltip.dataPoints[0].raw as number) * 1_000_000).toLocaleString(
-            'id-ID'
-          ) + ' IDR';
+        const invoice = (
+          (tooltip.dataPoints[0].raw as number) * 1_000_000
+        ).toLocaleString('id-ID');
         const growth = (chartData.datasets[datasetIndex] as any)
           .growthPercentages[dataIndex];
 
