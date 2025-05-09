@@ -19,7 +19,6 @@ import { themes } from '@/config/thems';
 import gradientPlugin from 'chartjs-plugin-gradient';
 import { useToast } from '@/components/ui/use-toast';
 import useMonthlyComparisonSalesInvoice from '@/queryHooks/analytics/sales/useMonthlyComparisonSalesInvoice';
-import CustomTooltip from '@/components/ui/customTooltip';
 import { Button } from '@/components/ui/button';
 import { Maximize2, Minimize2 } from 'lucide-react';
 import { months } from '@/utils/monthNameMap';
@@ -63,21 +62,6 @@ const MonthlySalesInvoiceChart: React.FC<MonthlySalesInvoiceChartProps> = ({
 
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const [isFullScreen, setIsFullScreen] = useState(false);
-  const [tooltipState, setTooltipState] = useState<{
-    visible: boolean;
-    x: number;
-    y: number;
-    invoice: string;
-    growth: number;
-    month: string;
-  }>({
-    visible: false,
-    x: 0,
-    y: 0,
-    invoice: '',
-    growth: 0,
-    month: '',
-  });
 
   const toggleFullScreen = useCallback(() => {
     if (!chartContainerRef.current) return;
@@ -152,15 +136,6 @@ const MonthlySalesInvoiceChart: React.FC<MonthlySalesInvoiceChartProps> = ({
   }, [error, toast]);
 
   useEffect(() => {
-    return () => {
-      const tooltipEl = document.getElementById('chartjs-tooltip');
-      if (tooltipEl) {
-        tooltipEl.remove();
-      }
-    };
-  }, []);
-
-  useEffect(() => {
     if (chartContainerRef.current) {
       window.dispatchEvent(new Event('resize'));
     }
@@ -213,70 +188,6 @@ const MonthlySalesInvoiceChart: React.FC<MonthlySalesInvoiceChartProps> = ({
       datasets,
     };
   }, [data, isFullScreen]);
-
-  const maxValue = React.useMemo(() => {
-    if (!chartData) return 0;
-    return Math.max(...chartData.datasets.flatMap((ds) => ds.data));
-  }, [chartData]);
-
-  const handleTooltip = useCallback(
-    (context: {
-      chart: import('chart.js').Chart;
-      tooltip: import('chart.js').TooltipModel<'bar'>;
-    }) => {
-      const { chart, tooltip } = context;
-      if (!chartData || !chartData.labels) {
-        if (tooltipState.visible) {
-          setTooltipState((prev) => ({ ...prev, visible: false }));
-        }
-        return;
-      }
-
-      if (tooltip.opacity === 0) {
-        if (tooltipState.visible) {
-          setTooltipState((prev) => ({ ...prev, visible: false }));
-        }
-        return;
-      }
-
-      if (tooltip.dataPoints && tooltip.dataPoints.length > 0) {
-        const dataIndex = tooltip.dataPoints[0].dataIndex;
-        const datasetIndex = tooltip.dataPoints[0].datasetIndex;
-        const month = chartData.labels[dataIndex] ?? '';
-        const invoice = (
-          (tooltip.dataPoints[0].raw as number) * 1_000_000
-        ).toLocaleString('id-ID');
-        const growth = (chartData.datasets[datasetIndex] as any)
-          .growthPercentages[dataIndex];
-
-        const canvasRect = chart.canvas.getBoundingClientRect();
-        const x = canvasRect.left + tooltip.caretX + 10;
-        const y = canvasRect.top + tooltip.caretY - 3;
-
-        setTooltipState((prev) => {
-          if (
-            prev.visible === true &&
-            prev.month === month &&
-            prev.invoice === invoice &&
-            prev.growth === growth &&
-            prev.x === x &&
-            prev.y === y
-          ) {
-            return prev;
-          }
-          return {
-            visible: true,
-            x,
-            y,
-            invoice,
-            growth,
-            month,
-          };
-        });
-      }
-    },
-    [chartData, tooltipState.visible, isFullScreen]
-  );
 
   const isDataReady =
     !!chartData &&
@@ -331,95 +242,102 @@ const MonthlySalesInvoiceChart: React.FC<MonthlySalesInvoiceChartProps> = ({
             <div className='w-3/4 h-1/2 rounded-lg shimmer' />
           </div>
         ) : isDataReady ? (
-          <>
-            <Bar
-              key={isFullWidth ? 'full' : 'half'}
-              height={isFullScreen ? undefined : isCompact ? 250 : height}
-              data={chartData}
-              options={{
-                responsive: true,
-                maintainAspectRatio: false,
-                layout: {
-                  padding: {
-                    bottom: isCompact ? 10 : 20,
-                    top: isCompact ? 5 : 10,
-                    left: 10,
-                    right: 10,
-                  },
+          <Bar
+            key={isFullWidth ? 'full' : 'half'}
+            height={isFullScreen ? undefined : isCompact ? 250 : height}
+            data={chartData}
+            options={{
+              responsive: true,
+              maintainAspectRatio: false,
+              layout: {
+                padding: {
+                  bottom: isCompact ? 10 : 20,
+                  top: isCompact ? 5 : 10,
+                  left: 10,
+                  right: 10,
                 },
-                scales: {
-                  y: {
-                    beginAtZero: true,
-                    grid: {
-                      drawTicks: false,
-                      color: `hsl(${
-                        theme?.cssVars[mode === 'dark' ? 'dark' : 'light']
-                          .chartGird
-                      })`,
-                    },
-                    ticks: {
-                      callback: (value: unknown) => {
-                        const val = Number(value);
-                        return `${val.toLocaleString('id-ID')}`;
-                      },
-                      font: {
-                        size: isFullScreen ? 14 : 12,
-                      },
-                    },
+              },
+              scales: {
+                y: {
+                  beginAtZero: true,
+                  grid: {
+                    drawTicks: false,
+                    color: `hsl(${
+                      theme?.cssVars[mode === 'dark' ? 'dark' : 'light']
+                        .chartGird
+                    })`,
                   },
-                  x: {
-                    title: { display: false, text: 'Month' },
-                    ticks: {
-                      callback: (value, index) => chartData.labels[index] ?? '',
-                      font: {
-                        size: isFullScreen ? 14 : 12,
-                      },
-                      align: 'center',
-                      crossAlign: 'center',
-                      autoSkip: false,
-                      maxRotation: 0,
-                      minRotation: 0,
-                      padding: 10,
+                  ticks: {
+                    callback: (value: unknown) => {
+                      const val = Number(value);
+                      return `${val.toLocaleString('id-ID')}`;
                     },
-                    grid: {
-                      drawTicks: false,
-                      color: `hsl(${
-                        theme?.cssVars[mode === 'dark' ? 'dark' : 'light']
-                          .chartGird
-                      })`,
-                      display: false,
+                    font: {
+                      size: isFullScreen ? 14 : 12,
                     },
                   },
                 },
-                plugins: {
-                  legend: {
-                    display: !isCompact,
-                    position: 'top',
-                    labels: {
-                      font: { size: isFullScreen ? 12 : 10 },
+                x: {
+                  title: { display: false, text: 'Month' },
+                  ticks: {
+                    callback: (value, index) => chartData.labels[index] ?? '',
+                    font: {
+                      size: isFullScreen ? 14 : 12,
                     },
+                    align: 'center',
+                    crossAlign: 'center',
+                    autoSkip: false,
+                    maxRotation: 0,
+                    minRotation: 0,
+                    padding: 10,
                   },
-                  title: {
+                  grid: {
+                    drawTicks: false,
+                    color: `hsl(${
+                      theme?.cssVars[mode === 'dark' ? 'dark' : 'light']
+                        .chartGird
+                    })`,
                     display: false,
                   },
-                  tooltip: {
-                    enabled: false,
-                    external: handleTooltip,
+                },
+              },
+              plugins: {
+                legend: {
+                  display: !isCompact,
+                  position: 'top',
+                  labels: {
+                    font: { size: isFullScreen ? 12 : 10 },
                   },
                 },
-              }}
-            />
-            <CustomTooltip
-              visible={tooltipState.visible}
-              x={tooltipState.x}
-              y={tooltipState.y}
-              invoice={tooltipState.invoice}
-              growth={tooltipState.growth}
-              isFullScreen={isFullScreen}
-              parentRef={isFullScreen ? chartContainerRef : undefined}
-              isCompact={isCompact}
-            />
-          </>
+                title: {
+                  display: false,
+                },
+                tooltip: {
+                  enabled: true,
+                  position: 'nearest',
+                  yAlign: 'top',
+                  xAlign: 'left',
+
+                  borderWidth: 1,
+                  padding: 8,
+                  bodyFont: { size: 12 },
+                  callbacks: {
+                    label: (context) => {
+                      const amount = (context.raw as number) * 1_000_000;
+                      const growth = (context.dataset as any).growthPercentages[
+                        context.dataIndex
+                      ];
+                      const icon = growth > 0 ? '🔼' : growth < 0 ? '🔻' : '➡️'; // Emoji baru
+
+                      return [
+                        `${amount.toLocaleString('id-ID')} ${icon} ${growth}`,
+                      ];
+                    },
+                  },
+                },
+              },
+            }}
+          />
         ) : (
           <div className='flex flex-col items-center justify-center h-full text-gray-400'>
             <p className='text-sm font-medium'>No data available</p>
