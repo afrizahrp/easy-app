@@ -115,7 +115,7 @@ const SalesInvoiceOverview: React.FC<SalesInvoiceOverviewProps> = ({
           </AnimatePresence>
         </div>
       ) : (
-        <div className='w-full min-w-0 h-fit min-h-0'>
+        <div className='w-full h-fit min-h-0'>
           <MonthlySalesInvoiceChart
             isFullWidth={fullChart === 'period'}
             onModeChange={handlePeriodModeChange}

@@ -1,4 +1,5 @@
 'use client';
+
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { Bar } from 'react-chartjs-2';
 import {
@@ -10,7 +11,6 @@ import {
   Tooltip,
   Legend,
   ScriptableContext,
-  TooltipModel,
 } from 'chart.js';
 import { hslToHex } from '@/lib/utils';
 import { useThemeStore } from '@/store';
@@ -21,12 +21,9 @@ import { useToast } from '@/components/ui/use-toast';
 import useMonthlyComparisonSalesPersonInvoiceFiltered from '@/queryHooks/analytics/sales/useMonthlyComparissonSalesPersonInvoiceFiltered';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useSalesInvoiceHdFilterStore } from '@/store';
-
 import { useMonthYearPeriodStore } from '@/store';
-
 import { months } from '@/utils/monthNameMap';
 import { getSalesPersonColor } from '@/utils/getSalesPersonColor';
-import CustomTooltip from '@/components/ui/customTooltip';
 import { useQueryClient } from '@tanstack/react-query';
 import { BarChart2 } from 'lucide-react';
 import {
@@ -74,23 +71,15 @@ interface SalesPersonSelection {
   month?: string;
 }
 
-interface MonthlySalesPersonInvoiceChartProps {
+interface MonthlySalesInvoiceFilteredChartProps {
   isFullWidth?: boolean;
   year?: string;
   onModeChange?: (isFullPage: boolean) => void;
   onSalesPersonSelect?: (selection: SalesPersonSelection | null) => void;
 }
 
-interface TooltipState {
-  visible: boolean;
-  x: number;
-  y: number;
-  invoice: string;
-  growth: number;
-}
-
-const MonthlySalesPersonInvoiceChart: React.FC<
-  MonthlySalesPersonInvoiceChartProps
+const MonthlySalesInvoiceFilteredChart: React.FC<
+  MonthlySalesInvoiceFilteredChartProps
 > = ({ isFullWidth = true, year, onModeChange, onSalesPersonSelect }) => {
   const queryClient = useQueryClient();
   const { theme: config } = useThemeStore();
@@ -102,8 +91,7 @@ const MonthlySalesPersonInvoiceChart: React.FC<
   const hexBackground = hslToHex(hslBackground);
 
   const { salesPersonInvoicePeriod } = useMonthYearPeriodStore();
-  const { startPeriod } = salesPersonInvoicePeriod; // cukup ambil startPeriod buat filter tahun
-
+  const { startPeriod } = salesPersonInvoicePeriod;
   const yearString = startPeriod
     ? new Date(startPeriod).getFullYear().toString()
     : new Date().getFullYear().toString();
@@ -161,22 +149,6 @@ const MonthlySalesPersonInvoiceChart: React.FC<
 
   const containerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<ChartJS<'bar'>>(null);
-  const tooltipDataRef = useRef<TooltipState>({
-    visible: false,
-    x: 0,
-    y: 0,
-    invoice: '',
-    growth: 0,
-  });
-
-  const [tooltipState, setTooltipState] = useState<TooltipState>({
-    visible: false,
-    x: 0,
-    y: 0,
-    invoice: '',
-    growth: 0,
-  });
-
   const [isSummaryOpen, setIsSummaryOpen] = useState(false);
 
   const chartData = React.useMemo(() => {
@@ -218,64 +190,6 @@ const MonthlySalesPersonInvoiceChart: React.FC<
     return { labels: months, datasets };
   }, [data]);
 
-  const customTooltipHandler = useCallback(
-    (context: { chart: ChartJS<'bar'>; tooltip: TooltipModel<'bar'> }) => {
-      const { chart, tooltip } = context;
-      const container = containerRef.current;
-
-      if (!container || !chartData) return;
-
-      if (tooltip.opacity === 0) {
-        if (tooltipDataRef.current.visible) {
-          tooltipDataRef.current.visible = false;
-          setTooltipState((prev) => ({ ...prev, visible: false }));
-        }
-        return;
-      }
-
-      const dataIndex = tooltip.dataPoints[0].dataIndex;
-      const datasetIndex = tooltip.dataPoints[0].datasetIndex;
-      const amount =
-        (chartData.datasets[datasetIndex].data[dataIndex] as number) *
-        1_000_000;
-      const growth = (chartData.datasets[datasetIndex] as any)
-        .growthPercentages[dataIndex];
-
-      const position = chart.canvas.getBoundingClientRect();
-      const bar = chart.getDatasetMeta(datasetIndex).data[dataIndex] as any;
-
-      const x =
-        bar.x - position.left + container.scrollLeft + bar.width / 2 + 5;
-      const y = bar.y - position.top + container.scrollTop - 30;
-
-      const containerRect = container.getBoundingClientRect();
-      const tooltipWidth = 150;
-      const tooltipHeight = 50;
-      const adjustedX = Math.min(x, containerRect.width - tooltipWidth - 10);
-      const adjustedY = Math.max(y, 10);
-
-      const newTooltipData: TooltipState = {
-        visible: true,
-        x: adjustedX,
-        y: adjustedY,
-        invoice: amount.toLocaleString('id-ID') + ' IDR',
-        growth,
-      };
-
-      if (
-        tooltipDataRef.current.visible !== newTooltipData.visible ||
-        tooltipDataRef.current.x !== newTooltipData.x ||
-        tooltipDataRef.current.y !== newTooltipData.y ||
-        tooltipDataRef.current.invoice !== newTooltipData.invoice ||
-        tooltipDataRef.current.growth !== newTooltipData.growth
-      ) {
-        tooltipDataRef.current = newTooltipData;
-        setTooltipState(newTooltipData);
-      }
-    },
-    [chartData]
-  );
-
   const handleChartClick = (event: any, elements: any[]) => {
     if (elements.length > 0) {
       const element = elements[0];
@@ -315,7 +229,14 @@ const MonthlySalesPersonInvoiceChart: React.FC<
     Array.isArray(chartData.datasets) &&
     chartData.datasets.some((ds) => ds.data.some((value) => value > 0));
 
-  const limitedSalespersons = salespersons.slice(0, 4);
+  const limitedSalespersons = salespersons.slice(0, 3);
+
+  const dialogSize =
+    salespersons.length === 1
+      ? 'xl'
+      : salespersons.length === 2
+        ? '2xl'
+        : '3xl';
 
   return (
     <div
@@ -352,7 +273,6 @@ const MonthlySalesPersonInvoiceChart: React.FC<
             ← All Salesperson
           </button>
 
-          {/* {salespersons.length > 4 && ( */}
           <Dialog open={isSummaryOpen} onOpenChange={setIsSummaryOpen}>
             <TooltipProvider>
               <UiTooltip>
@@ -363,7 +283,7 @@ const MonthlySalesPersonInvoiceChart: React.FC<
                         variant='outline'
                         className='px-4 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 text-xs transition flex items-center'
                         onClick={handleSummaryOpen}
-                        disabled={salespersons.length > 4}
+                        disabled={salespersons.length > 3}
                         aria-label='Open salesperson summary'
                       >
                         <BarChart2 className='mr-2 h-4 w-4' />
@@ -372,10 +292,10 @@ const MonthlySalesPersonInvoiceChart: React.FC<
                     </DialogTrigger>
                   </div>
                 </TooltipTrigger>
-                {salespersons.length > 4 && (
+                {salespersons.length > 3 && (
                   <TooltipContent>
                     <p>
-                      Cannot open summary: Maximum 4 salespersons allowed, but
+                      Cannot open summary: Maximum 3 salespersons allowed, but
                       you selected {salespersons.length}.
                     </p>
                   </TooltipContent>
@@ -383,7 +303,10 @@ const MonthlySalesPersonInvoiceChart: React.FC<
               </UiTooltip>
             </TooltipProvider>
 
-            <DialogContent className='max-w-4xl bg-white dark:bg-gray-800'>
+            <DialogContent
+              size={dialogSize}
+              className='bg-white dark:bg-gray-800'
+            >
               <DialogHeader>
                 <DialogTitle className='text-gray-800 dark:text-gray-100'>
                   Salesperson Summary
@@ -470,8 +393,50 @@ const MonthlySalesPersonInvoiceChart: React.FC<
                       },
                     },
                     tooltip: {
-                      enabled: false,
-                      external: customTooltipHandler,
+                      enabled: true,
+                      position: 'nearest',
+                      yAlign: 'top',
+                      xAlign: 'right',
+                      backgroundColor: `hsl(${
+                        theme?.cssVars[mode === 'dark' ? 'dark' : 'light']
+                          .tooltipBackground
+                      })`,
+                      titleColor: `hsl(${
+                        theme?.cssVars[mode === 'dark' ? 'dark' : 'light']
+                          .chartLabel
+                      })`,
+                      bodyColor: `hsl(${
+                        theme?.cssVars[mode === 'dark' ? 'dark' : 'light']
+                          .chartLabel
+                      })`,
+                      borderColor: `hsl(${
+                        theme?.cssVars[mode === 'dark' ? 'dark' : 'light']
+                          .chartGird
+                      })`,
+                      borderWidth: 1,
+                      padding: 8,
+                      bodyFont: { size: 11 },
+
+                      callbacks: {
+                        label: (context) => {
+                          const amount = (context.raw as number) * 1_000_000;
+                          const growth = (context.dataset as any)
+                            .growthPercentages[context.dataIndex];
+                          const growthStatus =
+                            growth > 0
+                              ? `Increase:${growth}%`
+                              : growth < 0
+                                ? `Decrease:${growth}%`
+                                : `No Change:${growth}%`;
+                          const salesPerson = context.dataset.label;
+                          return [
+                            `${salesPerson}`,
+                            `Amount: ${amount.toLocaleString('id-ID')} IDR`,
+                            // `Growth: ${growth}%`,
+                            `${growthStatus}%`,
+                          ];
+                        },
+                      },
                     },
                   },
                   onClick: handleChartClick,
@@ -487,16 +452,6 @@ const MonthlySalesPersonInvoiceChart: React.FC<
                     }
                   },
                 }}
-              />
-              <CustomTooltip
-                visible={tooltipState.visible}
-                x={tooltipState.x}
-                y={tooltipState.y}
-                invoice={tooltipState.invoice}
-                growth={tooltipState.growth}
-                isFullScreen={false}
-                parentRef={containerRef}
-                isCompact={false}
               />
             </div>
           ) : (
@@ -524,4 +479,4 @@ const MonthlySalesPersonInvoiceChart: React.FC<
   );
 };
 
-export default MonthlySalesPersonInvoiceChart;
+export default MonthlySalesInvoiceFilteredChart;

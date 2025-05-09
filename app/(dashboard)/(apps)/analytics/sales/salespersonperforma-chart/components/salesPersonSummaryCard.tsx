@@ -39,6 +39,7 @@ interface SalespersonSummaryCardProps {
   isDialogOpen: boolean;
   onOpenDialog: () => void;
   onCloseDialog: () => void;
+  className?: string; // Tambah prop className
 }
 
 const SalespersonSummaryCard: React.FC<SalespersonSummaryCardProps> = ({
@@ -48,10 +49,10 @@ const SalespersonSummaryCard: React.FC<SalespersonSummaryCardProps> = ({
   isDialogOpen,
   onOpenDialog,
   onCloseDialog,
+  className,
 }) => {
   const { toast } = useToast();
 
-  // Hasilkan startPeriod dan endPeriod berdasarkan year
   const startPeriod = `Jan${year}`;
   const endPeriod = `Dec${year}`;
 
@@ -81,7 +82,7 @@ const SalespersonSummaryCard: React.FC<SalespersonSummaryCardProps> = ({
 
   if (isLoading) {
     return (
-      <div className='relative w-full max-w-md h-64 rounded-xl overflow-hidden bg-gray-200 dark:bg-gray-700'>
+      <div className='relative w-full h-64 rounded-xl overflow-hidden bg-gray-200 dark:bg-gray-700'>
         <div className='absolute inset-0 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 dark:from-gray-700 dark:via-gray-600 dark:to-gray-700 animate-shimmer' />
       </div>
     );
@@ -89,7 +90,7 @@ const SalespersonSummaryCard: React.FC<SalespersonSummaryCardProps> = ({
 
   if (error) {
     return (
-      <div className='text-red-500 bg-red-50 p-4 rounded-xl w-full max-w-md'>
+      <div className='text-red-500 bg-red-50 p-4 rounded-xl w-full'>
         Error: {error.message}
       </div>
     );
@@ -98,14 +99,18 @@ const SalespersonSummaryCard: React.FC<SalespersonSummaryCardProps> = ({
   const isPositiveGrowth = (data?.growthPercentage ?? 0) >= 0;
   const growthLabel = isPositiveGrowth ? 'Growth' : 'Decline';
 
-  // Fungsi untuk memformat jumlah tanpa satuan (kecuali untuk metrik utama)
   const formatAmount = (amount: number): string => {
     return amount.toLocaleString('id-ID');
   };
 
   return (
     <Dialog open={isDialogOpen} onOpenChange={onCloseDialog}>
-      <Card className='w-full max-w-md border border-gray-200 rounded-xl hover:shadow-xl transition-all duration-300 bg-white dark:bg-gray-800'>
+      <Card
+        className={cn(
+          'w-full min-h-64 h-full border border-gray-200 rounded-xl hover:shadow-xl transition-all duration-300 bg-white dark:bg-gray-800',
+          className
+        )}
+      >
         <CardHeader className='pb-2'>
           <CardTitle className='text-md font-semibold text-gray-800 dark:text-gray-100 flex items-center'>
             <BarChart2 className='w-5 h-5 mr-2 text-blue-500' />
@@ -180,15 +185,12 @@ const SalespersonSummaryCard: React.FC<SalespersonSummaryCardProps> = ({
               <TrendingDown className='w-4 h-4 ml-1 text-red-500' />
             )}
           </div>
-        </DialogHeader>{' '}
+        </DialogHeader>
         <div className='space-y-4 text-gray-700 dark:text-gray-200'>
           {data && data.totalInvoice ? (
             <>
               <div className='grid grid-cols-2 gap-4'>
                 <div>
-                  {/* <p className='text-xs text-gray-500 dark:text-gray-400'>
-                    All amounts in {currency}
-                  </p> */}
                   <p className='text-sm font-semibold'>Total Invoice</p>
                   <p className='text-md font-medium text-green-600 dark:text-green-400'>
                     {formatAmount(data.totalInvoice)}

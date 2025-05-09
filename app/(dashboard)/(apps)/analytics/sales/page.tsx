@@ -3,7 +3,6 @@
 import Link from 'next/link';
 import { ArrowRight, BarChart2, FileText, ArrowLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
-import AnalyticsNav from '@/components/AnalyticsNav';
 import { useSearchParams, useRouter } from 'next/navigation';
 import SalesInvoiceAnalytics from './salesinvoice-chart/page';
 import SalesPersonPerformaAnalytics from './salespersonperforma-chart/page';
@@ -31,11 +30,6 @@ const cardVariants = {
     },
   }),
 };
-
-// interface SalesAnalyticsPageProps {
-//   startPeriod?: string | null;
-//   endPeriod?: string | null;
-// }
 
 export default function SalesAnalyticsPage() {
   const searchParams = useSearchParams();
@@ -93,7 +87,7 @@ export default function SalesAnalyticsPage() {
       <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
         <motion.div
           ref={ref1}
-          className='bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-md border border-gray-200 dark:border-gray-700 flex flex-col min-h-0 h-fit'
+          className='bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-md border border-gray-200 dark:border-gray-700 flex flex-col min-h-0 h-fit w-full box-border'
           custom={0}
           variants={cardVariants}
           initial='hidden'
@@ -141,14 +135,14 @@ export default function SalesAnalyticsPage() {
             title='Sales Invoice Overview'
             hideBreadcrumb={true}
           />
-          <div className='flex-1 min-h-0 overflow-hidden'>
+          <div className='flex-1 min-h-0 w-full'>
             <SalesInvoiceAnalytics showList={false} showHeader={false} />
           </div>
         </motion.div>
 
         <motion.div
           ref={ref2}
-          className='bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-md border border-gray-200 dark:border-gray-700 flex flex-col min-h-0 h-fit'
+          className='bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-md border border-gray-200 dark:border-gray-700 flex flex-col min-h-0 h-fit w-full box-border'
           custom={1}
           variants={cardVariants}
           initial='hidden'
@@ -196,7 +190,7 @@ export default function SalesAnalyticsPage() {
             title='Salesperson Performance'
             hideBreadcrumb={true}
           />
-          <div className='flex-1 min-h-0 overflow-hidden'>
+          <div className='flex-1 min-h-0 w-full'>
             <SalesPersonPerformaAnalytics showList={false} showHeader={false} />
           </div>
         </motion.div>

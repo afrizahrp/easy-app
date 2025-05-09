@@ -71,7 +71,7 @@ const MonthlySalesPersonInvoiceChart: React.FC<
   onModeChange,
   onSalesPersonSelect,
 }) => {
-  const { theme: config, setTheme: setConfig } = useThemeStore();
+  const { theme: config } = useThemeStore();
   const { theme: mode } = useTheme();
   const theme = themes.find((theme) => theme.name === config);
   const hslBackground = `hsla(${
@@ -94,7 +94,6 @@ const MonthlySalesPersonInvoiceChart: React.FC<
     if (!chartContainerRef.current) return;
 
     if (!isFullScreen) {
-      // Masuk full-screen
       const requestFullscreen =
         chartContainerRef.current.requestFullscreen ||
         (chartContainerRef.current as any).webkitRequestFullscreen ||
@@ -104,11 +103,9 @@ const MonthlySalesPersonInvoiceChart: React.FC<
       if (requestFullscreen) {
         requestFullscreen.call(chartContainerRef.current);
       } else {
-        // Fallback: Gunakan CSS full-screen
         setIsFullScreen(true);
       }
     } else {
-      // Keluar full-screen
       if (document.fullscreenElement) {
         const exitFullscreen =
           document.exitFullscreen ||
@@ -120,13 +117,12 @@ const MonthlySalesPersonInvoiceChart: React.FC<
           exitFullscreen.call(document);
         }
       } else {
-        // Fallback: Nonaktifkan CSS full-screen
         setIsFullScreen(false);
       }
     }
+    onModeChange?.(!isFullScreen);
   };
 
-  // Sinkronkan state dengan Fullscreen API
   useEffect(() => {
     const handleFullscreenChange = () => {
       const isNowFullScreen = !!document.fullscreenElement;
@@ -187,7 +183,7 @@ const MonthlySalesPersonInvoiceChart: React.FC<
               }
             }
           });
-          return totalAmount;
+          return totalAmount / 1_000_000; // Samain skala ke jutaan
         }),
         backgroundColor: (ctx: ScriptableContext<'bar'>) => {
           const { chartArea, ctx: canvasCtx } = ctx.chart;
@@ -204,7 +200,7 @@ const MonthlySalesPersonInvoiceChart: React.FC<
         },
         borderColor: color.border,
         borderWidth: 1,
-        maxBarThickness: isFullScreen ? 30 : 20, // Bar lebih lebar di full-screen
+        barThickness: isFullScreen ? 30 : 20, // Samain dengan chart lain
         borderRadius: 15,
         period: data && data.length > 0 ? data[0].period : undefined,
       };
@@ -222,7 +218,7 @@ const MonthlySalesPersonInvoiceChart: React.FC<
     if (error) {
       toast({
         description: 'Failed to load sales data. Please try again.',
-        color: 'destructive',
+        variant: 'destructive',
       });
     }
   }, [error, toast]);
@@ -260,8 +256,8 @@ const MonthlySalesPersonInvoiceChart: React.FC<
       className={`chart-container ${isCompact ? 'compact' : ''} ${
         isFullScreen && !document.fullscreenElement
           ? 'fixed inset-0 z-50 bg-white dark:bg-[#18181b] p-4 rounded-lg shadow-md'
-          : 'relative rounded-lg shadow-md'
-      } flex flex-col h-fit min-h-0`}
+          : 'relative bg-white dark:bg-[#18181b] p-4 rounded-lg shadow-sm'
+      } flex flex-col h-fit min-h-[250px] w-full box-border`}
       style={{ backgroundColor: hexBackground }}
     >
       <div className='relative flex items-center justify-between mb-2'>
@@ -283,7 +279,7 @@ const MonthlySalesPersonInvoiceChart: React.FC<
           </Button>
         )}
       </div>
-      <div className='flex-1 min-h-0'>
+      <div className='flex-1 min-h-0 w-full'>
         {isLoading || isFetching ? (
           <div className='flex items-center justify-center h-full'>
             <div className='w-3/4 h-1/2 rounded-lg shimmer' />
@@ -297,46 +293,53 @@ const MonthlySalesPersonInvoiceChart: React.FC<
               maintainAspectRatio: false,
               layout: {
                 padding: {
-                  bottom: isFullScreen ? 10 : isCompact ? 5 : 10,
-                  top: isFullScreen ? 10 : isCompact ? 5 : 10,
-                  left: 0,
-                  right: 0,
+                  bottom: isCompact ? 10 : 20,
+                  top: isCompact ? 5 : 10,
+                  left: 10,
+                  right: 10,
                 },
               },
               scales: {
                 y: {
                   beginAtZero: true,
-                  min: maxValue < 1_000_000_000 ? 100_000_000 : undefined,
                   grid: {
                     drawTicks: false,
-                    color: `hsl(${theme?.cssVars[mode === 'dark' ? 'dark' : 'light'].chartGird})`,
+                    color: `hsl(${
+                      theme?.cssVars[mode === 'dark' ? 'dark' : 'light']
+                        .chartGird
+                    })`,
                   },
                   ticks: {
                     callback: (value: unknown) => {
-                      const val = Number(value) / 1000000;
+                      const val = Number(value);
                       return `${val.toLocaleString('id-ID')}`;
                     },
                     font: {
-                      size: isFullScreen ? 14 : 12, // Font lebih besar di full-screen
+                      size: isFullScreen ? 14 : 12,
                     },
                   },
                 },
                 x: {
                   title: { display: false, text: 'Month' },
-                  // offset: 5, // Jarak kecil antar bulan
                   grid: {
                     drawTicks: false,
-                    color: `hsl(${theme?.cssVars[mode === 'dark' ? 'dark' : 'light'].chartGird})`,
+                    color: `hsl(${
+                      theme?.cssVars[mode === 'dark' ? 'dark' : 'light']
+                        .chartGird
+                    })`,
                     display: false,
                   },
                   ticks: {
                     autoSkip: false,
-                    callback: (value, index, ticks) => {
-                      return chartData.labels[index] ?? '';
-                    },
+                    callback: (value, index) => chartData.labels[index] ?? '',
                     font: {
-                      size: isFullScreen ? 14 : 12, // Font lebih besar di full-screen
+                      size: isFullScreen ? 14 : 12,
                     },
+                    align: 'center',
+                    crossAlign: 'center',
+                    maxRotation: 0,
+                    minRotation: 0,
+                    padding: 10,
                   },
                 },
               },
@@ -345,7 +348,10 @@ const MonthlySalesPersonInvoiceChart: React.FC<
                   display: !isCompact,
                   position: 'top',
                   labels: {
-                    color: `hsl(${theme?.cssVars[mode === 'dark' ? 'dark' : 'light'].chartLabel})`,
+                    color: `hsl(${
+                      theme?.cssVars[mode === 'dark' ? 'dark' : 'light']
+                        .chartLabel
+                    })`,
                     boxWidth: 8,
                     font: { size: isFullScreen ? 12 : 10 },
                     usePointStyle: true,
@@ -357,7 +363,7 @@ const MonthlySalesPersonInvoiceChart: React.FC<
                 tooltip: {
                   callbacks: {
                     label: (context) =>
-                      `${context.dataset.label}: ${(context.raw as number).toLocaleString('id-ID')}`,
+                      `${context.dataset.label}: ${(context.raw as number).toLocaleString('id-ID')} IDR`,
                   },
                   titleFont: { size: isFullScreen ? 14 : 12 },
                   bodyFont: { size: isFullScreen ? 12 : 10 },
@@ -365,12 +371,11 @@ const MonthlySalesPersonInvoiceChart: React.FC<
               },
               datasets: {
                 bar: {
-                  barThickness: isFullScreen ? 30 : 20, // Lebar bar lebih besar di full-screen
-                  categoryPercentage: 0.95, // Minimalkan gap antar bulan
-                  barPercentage: 0.85, // Lebar bar dalam kategori
+                  barThickness: isFullScreen ? 30 : 20,
+                  categoryPercentage: 0.9, // Samain jarak antar bar
+                  barPercentage: 0.8,
                 },
               },
-
               onClick: !isCompact ? handleChartClick : undefined,
             }}
           />

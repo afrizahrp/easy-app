@@ -114,6 +114,10 @@ const MonthlyProductSoldFromSalesPersonFiltered: React.FC<
       toolbar: { show: false },
     },
     legend: {
+      position: 'top',
+      horizontalAlign: 'left',
+      // offsetY: 10, // Atur nilai offsetY sesuai kebutuhan
+
       labels: {
         colors: mode === 'dark' ? '#e2e8f0' : '#000000', // warna legend
       },
@@ -145,7 +149,7 @@ const MonthlyProductSoldFromSalesPersonFiltered: React.FC<
         },
         borderRadius: 15,
         borderRadiusApplication: 'end',
-        barGap: '20%',
+        barGap: '40%',
       },
     },
     dataLabels: {

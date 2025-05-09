@@ -1,10 +1,9 @@
 'use client';
 import React, { useState } from 'react';
 import { Table } from '@tanstack/react-table';
-
 import { useSalesInvoiceHdFilterStore } from '@/store';
 import MonthlySalesPersonInvoiceChart from './monthlySalesPersonInvoiceChart';
-import MonthlySalesPersonInvoiceChartChart from './monthlySalesPersonInvoiceFilteredChart';
+import MonthlySalesPersonInvoiceFilteredChart from './monthlySalesPersonInvoiceFilteredChart';
 import { FloatingFilterButton } from '@/components/ui/floating-filter-button';
 import { SalesPersonInvoiceFilterSidebar } from '@/components/FilterSidebarButton/sales/salesPersonlnvoiceFilterSidebar';
 
@@ -51,8 +50,6 @@ const SalesPersonPerformaOverview: React.FC<
         salesPersonInvoiceFilters.salesPersonName
       ? [salesPersonInvoiceFilters.salesPersonName]
       : [];
-
-  const [isFullWidthState, setIsFullWidthState] = useState(false);
 
   const handleSalesPersonSelect = (selection: SalesPersonSelection | null) => {
     if (selection) {
@@ -106,24 +103,22 @@ const SalesPersonPerformaOverview: React.FC<
           </FloatingFilterButton>
         </div>
       )}
-      <div className='w-full'>
+      <div className='w-full h-fit min-h-0'>
         {validSalesPersonNames.length > 0 ? (
-          <MonthlySalesPersonInvoiceChartChart
+          <MonthlySalesPersonInvoiceFilteredChart
             key={`filtered-${validSalesPersonNames.join('-')}`}
             isFullWidth={isFullWidth}
             onModeChange={onModeChange}
             onSalesPersonSelect={handleSalesPersonSelect}
           />
         ) : (
-          <div className='w-full overflow-x-auto max-w-full h-fit min-h-0'>
-            <MonthlySalesPersonInvoiceChart
-              isFullWidth={isFullWidth}
-              height={showList ? 400 : 300}
-              isCompact={!showList}
-              onModeChange={setIsFullWidthState}
-              onSalesPersonSelect={handleSalesPersonSelect}
-            />
-          </div>
+          <MonthlySalesPersonInvoiceChart
+            isFullWidth={isFullWidth}
+            height={showList ? 400 : 300}
+            isCompact={!showList}
+            onModeChange={onModeChange}
+            onSalesPersonSelect={handleSalesPersonSelect}
+          />
         )}
       </div>
     </div>
