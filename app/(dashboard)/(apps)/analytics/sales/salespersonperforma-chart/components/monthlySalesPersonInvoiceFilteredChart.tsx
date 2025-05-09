@@ -398,22 +398,7 @@ const MonthlySalesInvoiceFilteredChart: React.FC<
                       position: 'nearest',
                       yAlign: 'top',
                       xAlign: 'right',
-                      backgroundColor: `hsl(${
-                        theme?.cssVars[mode === 'dark' ? 'dark' : 'light']
-                          .tooltipBackground
-                      })`,
-                      titleColor: `hsl(${
-                        theme?.cssVars[mode === 'dark' ? 'dark' : 'light']
-                          .chartLabel
-                      })`,
-                      bodyColor: `hsl(${
-                        theme?.cssVars[mode === 'dark' ? 'dark' : 'light']
-                          .chartLabel
-                      })`,
-                      borderColor: `hsl(${
-                        theme?.cssVars[mode === 'dark' ? 'dark' : 'light']
-                          .chartGird
-                      })`,
+
                       borderWidth: 1,
                       padding: 8,
                       bodyFont: { size: 12 },
