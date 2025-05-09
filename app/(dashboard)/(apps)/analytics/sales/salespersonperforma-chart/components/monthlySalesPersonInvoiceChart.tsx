@@ -1,4 +1,5 @@
 'use client';
+
 import React, { useState, useRef, useEffect } from 'react';
 import { Bar } from 'react-chartjs-2';
 import {
@@ -18,14 +19,14 @@ import { themes } from '@/config/thems';
 import gradientPlugin from 'chartjs-plugin-gradient';
 import { useToast } from '@/components/ui/use-toast';
 import useMonthlySalesPersonInvoice from '@/queryHooks/analytics/sales/useMonthlySalesPersonInvoice';
-import {
-  salesPersonColorMap,
-  getFallbackColor,
-} from '@/utils/salesPersonColorMap';
 import { useSalesInvoiceHdFilterStore } from '@/store';
 import { months } from '@/utils/monthNameMap';
 import { getSalesPersonColor } from '@/utils/getSalesPersonColor';
 import { Button } from '@/components/ui/button';
+import {
+  salesPersonColorMap,
+  getFallbackColor,
+} from '@/utils/salesPersonColorMap';
 import { Maximize2, Minimize2 } from 'lucide-react';
 
 ChartJS.register(
@@ -168,6 +169,49 @@ const MonthlySalesPersonInvoiceChart: React.FC<
         salesPersonColorMap[salesPersonName.toLowerCase()] ||
         getFallbackColor(salesPersonName);
 
+      // Hitung growthPercentage untuk setiap bulan
+      const growthPercentages = months.map((month, monthIndex) => {
+        let currentAmount = 0;
+        let previousAmount = 0;
+
+        // Jumlahkan amount untuk bulan saat ini
+        (data as SalesDataWithoutFilter[]).forEach((yearData) => {
+          const monthData = yearData.months.find((m) => m.month === month);
+          if (monthData) {
+            const salesPersonData = monthData.sales.find(
+              (s) => s.salesPersonName === salesPersonName
+            );
+            if (salesPersonData) {
+              currentAmount += salesPersonData.amount;
+            }
+          }
+        });
+
+        // Jumlahkan amount untuk bulan sebelumnya (jika ada)
+        if (monthIndex > 0) {
+          const previousMonth = months[monthIndex - 1];
+          (data as SalesDataWithoutFilter[]).forEach((yearData) => {
+            const monthData = yearData.months.find(
+              (m) => m.month === previousMonth
+            );
+            if (monthData) {
+              const salesPersonData = monthData.sales.find(
+                (s) => s.salesPersonName === salesPersonName
+              );
+              if (salesPersonData) {
+                previousAmount += salesPersonData.amount;
+              }
+            }
+          });
+        }
+
+        // Hitung growthPercentage
+        if (previousAmount === 0 || monthIndex === 0) {
+          return 0; // Tidak ada data sebelumnya atau bulan pertama
+        }
+        return ((currentAmount - previousAmount) / previousAmount) * 100;
+      });
+
       return {
         label: salesPersonName,
         data: months.map((month) => {
@@ -183,7 +227,7 @@ const MonthlySalesPersonInvoiceChart: React.FC<
               }
             }
           });
-          return totalAmount / 1_000_000; // Samain skala ke jutaan
+          return totalAmount / 1_000_000; // Skala ke jutaan
         }),
         backgroundColor: (ctx: ScriptableContext<'bar'>) => {
           const { chartArea, ctx: canvasCtx } = ctx.chart;
@@ -200,9 +244,10 @@ const MonthlySalesPersonInvoiceChart: React.FC<
         },
         borderColor: color.border,
         borderWidth: 1,
-        barThickness: isFullScreen ? 30 : 20, // Samain dengan chart lain
+        barThickness: isFullScreen ? 30 : 20,
         borderRadius: 15,
         period: data && data.length > 0 ? data[0].period : undefined,
+        growthPercentages, // Simpan untuk tooltip
       };
     });
 
@@ -217,7 +262,7 @@ const MonthlySalesPersonInvoiceChart: React.FC<
   React.useEffect(() => {
     if (error) {
       toast({
-        description: 'Failed to load sales data. Please try again.',
+        description: 'Gagal memuat data penjualan. Coba lagi.',
         variant: 'destructive',
       });
     }
@@ -262,7 +307,7 @@ const MonthlySalesPersonInvoiceChart: React.FC<
     >
       <div className='relative flex items-center justify-between mb-2'>
         <h2 className='text-sm text-muted-foreground font-semibold ml-2'>
-          Monthly Sales Over 300 Million IDR by Salesperson
+          Penjualan Bulanan di Atas 300 Juta IDR per Salesperson
         </h2>
         {!isCompact && (
           <Button
@@ -320,7 +365,7 @@ const MonthlySalesPersonInvoiceChart: React.FC<
                   },
                 },
                 x: {
-                  title: { display: false, text: 'Month' },
+                  title: { display: false, text: 'Bulan' },
                   grid: {
                     drawTicks: false,
                     color: `hsl(${
@@ -361,18 +406,32 @@ const MonthlySalesPersonInvoiceChart: React.FC<
                 },
                 title: { display: false },
                 tooltip: {
-                  callbacks: {
-                    label: (context) =>
-                      `${context.dataset.label}: ${(context.raw as number).toLocaleString('id-ID')} IDR`,
-                  },
+                  enabled: true,
+                  position: 'nearest',
+                  yAlign: 'top',
+                  xAlign: 'left',
+                  borderWidth: 1,
+                  padding: 8,
+                  bodyFont: { size: 12 },
                   titleFont: { size: isFullScreen ? 14 : 12 },
-                  bodyFont: { size: isFullScreen ? 12 : 10 },
+                  callbacks: {
+                    label: (context) => {
+                      const amount = (context.raw as number) * 1_000_000;
+                      const growth = (context.dataset as any).growthPercentages[
+                        context.dataIndex
+                      ];
+                      const icon = growth > 0 ? '🔼' : growth < 0 ? '🔻' : '➡️';
+                      return [
+                        `${amount.toLocaleString('id-ID')} ${icon} ${growth.toFixed(2)}%`,
+                      ];
+                    },
+                  },
                 },
               },
               datasets: {
                 bar: {
                   barThickness: isFullScreen ? 30 : 20,
-                  categoryPercentage: 0.9, // Samain jarak antar bar
+                  categoryPercentage: 0.9,
                   barPercentage: 0.8,
                 },
               },
@@ -395,7 +454,7 @@ const MonthlySalesPersonInvoiceChart: React.FC<
                 d='M3 3v18h18V3H3zm5 14h8m-8-4h8m-8-4h8'
               />
             </svg>
-            <p className='text-sm font-medium'>No data available</p>
+            <p className='text-sm font-medium'>Data tidak tersedia</p>
           </div>
         )}
       </div>
