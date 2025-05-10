@@ -27,7 +27,7 @@ export default function useSalesInvoiceHdStatusOptions({
       count: isNaN(Number(status.count)) ? 0 : Number(status.count), // Validasi count
     })) || [];
 
-  console.log(`[useSalesInvoiceHdStatusOptions:${context}] Error:`, error);
+  // console.log(`[useSalesInvoiceHdStatusOptions:${context}] Error:`, error);
 
   return { options, isLoading, error };
 }

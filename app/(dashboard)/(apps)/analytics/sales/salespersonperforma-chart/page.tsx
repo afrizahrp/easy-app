@@ -180,6 +180,7 @@ const SalesPersonPerformaAnalytics: React.FC<
               exit={{ opacity: 0, x: 50 }}
             >
               <ProductSoldFromSelectedSalesPerson
+                height={300}
                 salesPersonName={selectedSalesPerson}
                 year={selectedYear ?? undefined}
                 month={selectedMonth ?? undefined}

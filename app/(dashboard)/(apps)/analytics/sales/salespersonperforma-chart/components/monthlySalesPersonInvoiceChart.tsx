@@ -111,25 +111,25 @@ const MonthlySalesPersonInvoiceChart: React.FC<
   const chartRef = useRef<Chart<'bar', number[], string> | null>(null);
 
   // Log filter, salesperson names, and hook state for debugging
-  useEffect(() => {
-    console.log(
-      'Initial filters:',
-      JSON.stringify(salesPersonInvoiceFilters, null, 2)
-    );
-    console.log('Salesperson Names:', salesPersonNames);
-    console.log('Hook Data:', JSON.stringify(data, null, 2));
-    console.log('Is Loading:', isLoading, 'Is Fetching:', isFetching);
-    if (error) {
-      console.error('Hook Error:', error);
-    }
-  }, [
-    salesPersonInvoiceFilters,
-    salesPersonNames,
-    data,
-    isLoading,
-    isFetching,
-    error,
-  ]);
+  // useEffect(() => {
+  //   console.log(
+  //     'Initial filters:',
+  //     JSON.stringify(salesPersonInvoiceFilters, null, 2)
+  //   );
+  //   console.log('Salesperson Names:', salesPersonNames);
+  //   console.log('Hook Data:', JSON.stringify(data, null, 2));
+  //   console.log('Is Loading:', isLoading, 'Is Fetching:', isFetching);
+  //   if (error) {
+  //     console.error('Hook Error:', error);
+  //   }
+  // }, [
+  //   salesPersonInvoiceFilters,
+  //   salesPersonNames,
+  //   data,
+  //   isLoading,
+  //   isFetching,
+  //   error,
+  // ]);
 
   // Set query defaults
   useEffect(() => {
@@ -146,7 +146,7 @@ const MonthlySalesPersonInvoiceChart: React.FC<
       return null;
     }
 
-    console.log('Raw data:', JSON.stringify(data, null, 2));
+    // console.log('Raw data:', JSON.stringify(data, null, 2));
 
     const allSalesPersons = Array.from(
       new Set(
@@ -156,13 +156,13 @@ const MonthlySalesPersonInvoiceChart: React.FC<
       )
     );
 
-    console.log('All Salespersons:', allSalesPersons);
-    console.log('Months:', months);
-    console.log('Data:', data);
-    console.log(
-      'February data:',
-      data[0]?.months.find((m) => m.month === 'Feb')
-    );
+    // console.log('All Salespersons:', allSalesPersons);
+    // console.log('Months:', months);
+    // console.log('Data:', data);
+    // console.log(
+    //   'February data:',
+    //   data[0]?.months.find((m) => m.month === 'Feb')
+    // );
 
     const datasets = allSalesPersons.map((salesPersonName) => {
       const color =
@@ -189,29 +189,19 @@ const MonthlySalesPersonInvoiceChart: React.FC<
         let totalAmount = 0;
         data.forEach((yearData) => {
           const monthData = yearData.months.find((m) => m.month === month);
-          console.log(`Month ${month} in ${yearData.period}:`, monthData);
           if (monthData && monthData.sales.length > 0) {
             const salesPersonData = monthData.sales.find(
               (s) => s.salesPersonName === salesPersonName
             );
-            console.log(
-              `Salesperson ${salesPersonName} in ${month}:`,
-              salesPersonData
-            );
+
             if (salesPersonData) {
               totalAmount += salesPersonData.amount;
             }
           }
         });
-        console.log(
-          `Total Amount for ${salesPersonName} in ${month}:`,
-          totalAmount
-        );
+
         return totalAmount / 1_000_000;
       });
-
-      console.log(`Data for ${salesPersonName}:`, monthlyData);
-      console.log(`Growth for ${salesPersonName}:`, growthPercentages);
 
       return {
         label: salesPersonName,
@@ -241,18 +231,11 @@ const MonthlySalesPersonInvoiceChart: React.FC<
     });
 
     const result = { labels: months, datasets };
-    console.log('chartData:', result);
     return result;
   }, [data, isFullScreen]);
 
   useEffect(() => {
     if (chartRef.current) {
-      console.log(
-        'Chart width:',
-        chartRef.current.width,
-        'Chart area:',
-        chartRef.current.chartArea
-      );
     }
   }, [chartData, isFullScreen]);
 
@@ -279,9 +262,6 @@ const MonthlySalesPersonInvoiceChart: React.FC<
     chartData.datasets.some(
       (ds) => Array.isArray(ds.data) && ds.data.length > 0
     );
-
-  console.log('isDataReady:', isDataReady);
-  console.log('chartData datasets:', chartData?.datasets);
 
   const handleChartClick = (event: any, elements: any[]) => {
     if (isCompact || elements.length === 0) return;
@@ -488,12 +468,7 @@ const MonthlySalesPersonInvoiceChart: React.FC<
                   callbacks: {
                     title: (tooltipItems) => {
                       const index = tooltipItems[0].dataIndex;
-                      console.log(
-                        'Tooltip index:',
-                        index,
-                        'Label:',
-                        chartData?.labels[index]
-                      );
+
                       return chartData?.labels[index] ?? '';
                     },
                     label: (context) => {

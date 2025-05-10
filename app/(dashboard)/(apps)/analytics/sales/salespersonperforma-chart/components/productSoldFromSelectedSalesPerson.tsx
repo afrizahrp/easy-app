@@ -36,6 +36,8 @@ ChartJS.register(
 );
 
 interface MonthlyProductSoldFromSalesPersonFilteredProps {
+  height?: number;
+
   salesPersonName: string;
   year?: string;
   month?: string;
@@ -44,7 +46,7 @@ interface MonthlyProductSoldFromSalesPersonFilteredProps {
 
 const MonthlyProductSoldFromSalesPersonFiltered: React.FC<
   MonthlyProductSoldFromSalesPersonFilteredProps
-> = ({ salesPersonName, year, month, onClose }) => {
+> = ({ salesPersonName, year, month, onClose, height = 300 }) => {
   const { toast } = useToast();
   const { theme: config, isRtl } = useThemeStore();
   const { theme: mode } = useTheme();
@@ -236,7 +238,8 @@ const MonthlyProductSoldFromSalesPersonFiltered: React.FC<
   return (
     <div
       ref={containerRef}
-      className={`bg-white dark:bg-[#18181b] p-4 rounded-lg shadow-sm h-96 w-full mt-6`}
+      // className={`bg-white dark:bg-[#18181b] p-4 rounded-lg shadow-sm h-96 w-full mt-6`}
+      className={`bg-white dark:bg-[#18181b] p-4 rounded-lg shadow-sm h-350 w-full mt-6`} // Ubah h-96 menjadi h-350
       style={{ backgroundColor: hexBackground }}
     >
       <div className='flex items-center justify-between mb-2'>

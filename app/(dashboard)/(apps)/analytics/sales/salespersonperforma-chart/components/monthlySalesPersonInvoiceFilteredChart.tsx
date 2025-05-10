@@ -13,8 +13,8 @@ import {
   ScriptableContext,
   Chart,
 } from 'chart.js';
-import { hslToHex } from '@/lib/utils';
-import { useThemeStore } from '@/store';
+import { hslToHex, cn } from '@/lib/utils';
+import { useMonthYearPeriodStore, useThemeStore } from '@/store';
 import { useTheme } from 'next-themes';
 import { themes } from '@/config/thems';
 import gradientPlugin from 'chartjs-plugin-gradient';
@@ -28,8 +28,24 @@ import { useSalesInvoiceHdFilterStore } from '@/store';
 import { months } from '@/utils/monthNameMap';
 import { getSalesPersonColor } from '@/utils/getSalesPersonColor';
 import { Button } from '@/components/ui/button';
-import { Maximize2, Minimize2 } from 'lucide-react';
+import { BarChart2, Maximize2, Minimize2 } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+
+import {
+  Tooltip as UiTooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { useQueryClient } from '@tanstack/react-query';
+import SalesPersonSummaryList from './salesPersonSummaryList';
 
 ChartJS.register(
   CategoryScale,
@@ -73,7 +89,7 @@ interface MonthlySalesPersonInvoiceFilteredChartProps {
 const MonthlySalesPersonInvoiceFilteredChart: React.FC<
   MonthlySalesPersonInvoiceFilteredChartProps
 > = ({
-  height = 400,
+  height = 250,
   isCompact = false,
   isFullWidth = true,
   onModeChange,
@@ -106,6 +122,16 @@ const MonthlySalesPersonInvoiceFilteredChart: React.FC<
     });
 
   const [isFullScreen, setIsFullScreen] = useState(false);
+  const [isSummaryOpen, setIsSummaryOpen] = useState(false);
+
+  const { salesPersonInvoicePeriod } = useMonthYearPeriodStore();
+  const { startPeriod } = salesPersonInvoicePeriod;
+  const yearString = startPeriod
+    ? new Date(startPeriod).getFullYear().toString()
+    : new Date().getFullYear().toString();
+
+  const [selectedYear, setSelectedYear] = useState<string>(yearString);
+
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<Chart<'bar', number[], string> | null>(null);
 
@@ -372,6 +398,28 @@ const MonthlySalesPersonInvoiceFilteredChart: React.FC<
               )} and ${salesPersonNames[salesPersonNames.length - 1]} (in Millions IDR)`
           : 'Sales Performance (in Millions IDR)';
 
+  const limitedSalespersons = salesPersonNames.slice(0, 3);
+  const handleSummaryOpen = () => {
+    if (limitedSalespersons.length > 3) {
+      toast({
+        description: `Cannot open summary: Maximum 3 salespersons allowed, but you selected ${limitedSalespersons.length}.`,
+        variant: 'destructive',
+      });
+    } else {
+      setIsSummaryOpen(true);
+    }
+  };
+
+  const dialogSize = () => {
+    if (limitedSalespersons.length === 1) {
+      return 'xs';
+    } else if (limitedSalespersons.length === 2) {
+      return '2xl';
+    } else {
+      return '3xl';
+    }
+  };
+
   return (
     <div
       ref={chartContainerRef}
@@ -379,11 +427,12 @@ const MonthlySalesPersonInvoiceFilteredChart: React.FC<
         isFullScreen && !document.fullscreenElement
           ? 'fixed inset-0 z-50 bg-white dark:bg-[#18181b] p-4 rounded-lg shadow-md'
           : 'relative bg-white dark:bg-[#18181b] p-4 rounded-lg shadow-sm'
-      } flex flex-col h-fit min-h-[250px] w-full box-border`}
+      } flex flex-col h-fit min-h-250 w-full box-border`}
       style={{ backgroundColor: hexBackground }}
     >
       <div className='relative flex items-center justify-between mb-2'>
         <h2 className='text-md font-semibold'>{chartTitle}</h2>
+
         {!isCompact && (
           <Button
             variant='outline'
@@ -398,7 +447,65 @@ const MonthlySalesPersonInvoiceFilteredChart: React.FC<
             )}
           </Button>
         )}
+
+        <Dialog open={isSummaryOpen} onOpenChange={setIsSummaryOpen}>
+          <TooltipProvider>
+            <UiTooltip>
+              <TooltipTrigger asChild>
+                <div>
+                  <DialogTrigger asChild>
+                    <Button
+                      variant='outline'
+                      className='px-4 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 text-xs transition flex items-center'
+                      onClick={handleSummaryOpen}
+                      disabled={limitedSalespersons.length > 3}
+                      aria-label='Open salesperson summary'
+                    >
+                      <BarChart2 className='mr-2 h-4 w-4' />
+                      Summary
+                    </Button>
+                  </DialogTrigger>
+                </div>
+              </TooltipTrigger>
+              {limitedSalespersons.length > 3 && (
+                <TooltipContent>
+                  <p>
+                    Cannot open summary: Maximum 3 salespersons allowed, but you
+                    selected {limitedSalespersons.length}.
+                  </p>
+                </TooltipContent>
+              )}
+            </UiTooltip>
+          </TooltipProvider>
+          <DialogContent
+            size={dialogSize()}
+            className='w-full bg-white dark:bg-gray-800'
+          >
+            <DialogHeader>
+              <DialogTitle className='text-gray-800 dark:text-gray-100'>
+                Salesperson Summary
+              </DialogTitle>
+              <DialogDescription className='text-gray-500 dark:text-gray-400 text-xs'>
+                Salesperson summary list for {selectedYear} in millions of IDR
+              </DialogDescription>
+            </DialogHeader>
+            <div className='w-full'>
+              {limitedSalespersons.length > 0 ? (
+                <SalesPersonSummaryList
+                  salespersons={limitedSalespersons.map((name) => ({ name }))}
+                  year={selectedYear}
+                />
+              ) : (
+                <p className='text-gray-500 dark:text-gray-400 text-center'>
+                  No salesperson selected. Please select at least one
+                  salesperson.
+                </p>
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
+
       <div className='flex-1 min-h-0 w-full'>
         {isLoading || isFetching ? (
           <div className='flex items-center justify-center h-full'>
@@ -407,7 +514,7 @@ const MonthlySalesPersonInvoiceFilteredChart: React.FC<
         ) : isDataReady ? (
           <Bar
             ref={chartRef}
-            height={isFullScreen ? undefined : isCompact ? 300 : height}
+            height={isFullScreen ? undefined : isCompact ? 250 : height}
             data={chartData}
             options={{
               responsive: true,
