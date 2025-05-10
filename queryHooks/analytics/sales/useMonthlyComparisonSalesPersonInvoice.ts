@@ -8,38 +8,39 @@ import {
 import { format } from 'date-fns';
 import { AxiosError } from 'axios';
 
-interface MonthlyData {
-  amount: number;
-  growthPercentage: number | null;
-}
-
-interface SalesPersonInvoiceComparisonData {
+interface SalesData {
   period: string;
   totalInvoice: number;
-  salesPersonName: string;
-  months: { [month: string]: MonthlyData };
+  months: {
+    month: string;
+    sales: {
+      salesPersonName: string;
+      amount: number;
+      growthPercentage: number | null;
+    }[];
+  }[];
 }
 
 interface SalesPeriodResponse {
   company_id: string;
   module_id: string;
   subModule_id: string;
-  data: SalesPersonInvoiceComparisonData[];
+  data: SalesData[];
 }
 
-interface UseMonthlyComparisonSalesPersonInvoiceFilteredProps {
+interface UseMonthlyComparisonSalesPersonInvoiceProps {
   context: 'salesPersonInvoice';
   salesPersonNames: string[];
   refetchOnWindowFocus?: boolean;
   refetchInterval?: number | false;
 }
 
-const useMonthlyComparisonSalesPersonInvoiceFiltered = ({
+const useMonthlyComparisonSalesPersonInvoice = ({
   context,
   salesPersonNames,
   refetchOnWindowFocus,
   refetchInterval,
-}: UseMonthlyComparisonSalesPersonInvoiceFilteredProps) => {
+}: UseMonthlyComparisonSalesPersonInvoiceProps) => {
   const user = useSessionStore((state) => state.user);
   const company_id = user?.company_id?.toUpperCase();
   const module_id = 'ANT';
@@ -50,13 +51,7 @@ const useMonthlyComparisonSalesPersonInvoiceFiltered = ({
 
   const { salesPersonName: storeSalesPersonName } = salesPersonInvoiceFilters;
 
-  const isValidRequest = Boolean(
-    company_id &&
-      module_id &&
-      subModule_id &&
-      salesPersonNames &&
-      salesPersonNames.length > 0
-  );
+  const isValidRequest = Boolean(company_id && module_id && subModule_id);
 
   const validSalesPersonNames = salesPersonNames.length
     ? salesPersonNames.filter((name) => typeof name === 'string' && name.trim())
@@ -81,10 +76,8 @@ const useMonthlyComparisonSalesPersonInvoiceFiltered = ({
       validSalesPersonNames,
     ],
     queryFn: async () => {
-      if (!isValidRequest || !validSalesPersonNames.length) {
-        throw new Error(
-          'Invalid request parameters: salesPersonNames is required'
-        );
+      if (!isValidRequest) {
+        throw new Error('Invalid request parameters');
       }
 
       const params = new URLSearchParams();
@@ -102,24 +95,21 @@ const useMonthlyComparisonSalesPersonInvoiceFiltered = ({
         );
       }
 
-      validSalesPersonNames.forEach((name) => {
-        params.append('salesPersonName', name);
-      });
+      // Only append salesPersonName if validSalesPersonNames is non-empty
+      if (validSalesPersonNames.length > 0) {
+        validSalesPersonNames.forEach((name) => {
+          params.append('salesPersonName', name);
+        });
+      }
 
       const url = `${process.env.NEXT_PUBLIC_API_URL}/${company_id}/${module_id}/${subModule_id}/get-analytics/getMonthlyComparisonSalesPersonInvoice`;
       const finalUrl = `${url}${params.toString() ? `?${params.toString()}` : ''}`;
 
-      console.log(
-        `[useMonthlyComparisonSalesPersonInvoiceFiltered:${context}] finalUrl:`,
-        finalUrl
-      );
-
       try {
         const response = await api.get<SalesPeriodResponse>(finalUrl);
-
         console.log(
-          `[useMonthlyComparisonSalesPersonInvoiceFiltered:${context}] response.data:`,
-          response.data
+          `[useMonthlyComparisonSalesPersonInvoice:${context}] response.data:`,
+          JSON.stringify(response.data, null, 2)
         );
         return response.data;
       } catch (err) {
@@ -129,10 +119,10 @@ const useMonthlyComparisonSalesPersonInvoiceFiltered = ({
         );
       }
     },
-    enabled: isValidRequest && validSalesPersonNames.length > 0,
-    staleTime: 5 * 60 * 1000, // 5 menit
-    refetchOnWindowFocus: false,
-    refetchInterval: false,
+    enabled: isValidRequest, // Allow query to run even if validSalesPersonNames is empty
+    staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: refetchOnWindowFocus ?? false,
+    refetchInterval: refetchInterval ?? false,
     retry: (failureCount, err) => {
       if (err instanceof AxiosError && err.response?.status === 400) {
         return false;
@@ -150,4 +140,4 @@ const useMonthlyComparisonSalesPersonInvoiceFiltered = ({
   };
 };
 
-export default useMonthlyComparisonSalesPersonInvoiceFiltered;
+export default useMonthlyComparisonSalesPersonInvoice;

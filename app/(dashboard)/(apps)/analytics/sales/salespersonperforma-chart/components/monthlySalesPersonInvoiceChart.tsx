@@ -19,7 +19,7 @@ import { useTheme } from 'next-themes';
 import { themes } from '@/config/thems';
 import gradientPlugin from 'chartjs-plugin-gradient';
 import { useToast } from '@/components/ui/use-toast';
-import useMonthlyComparisonSalesPersonInvoiceUnfiltered from '@/queryHooks/analytics/sales/useMonthlyComparisonSalesPersonInvoiceUnfiltered';
+import useMonthlyComparisonSalesPersonInvoice from '@/queryHooks/analytics/sales/useMonthlyComparisonSalesPersonInvoice';
 import {
   salesPersonColorMap,
   getFallbackColor,
@@ -41,7 +41,7 @@ ChartJS.register(
   gradientPlugin
 );
 
-interface SalesDataWithoutFilter {
+interface SalesData {
   period: string;
   totalInvoice: number;
   months: {
@@ -49,7 +49,7 @@ interface SalesDataWithoutFilter {
     sales: {
       salesPersonName: string;
       amount: number;
-      growthPercentage: number;
+      growthPercentage: number | null;
     }[];
   }[];
 }
@@ -87,36 +87,56 @@ const MonthlySalesPersonInvoiceChart: React.FC<
   })`;
   const hexBackground = hslToHex(hslBackground);
   const { toast } = useToast();
-  const { data, isLoading, isFetching, error } =
-    useMonthlyComparisonSalesPersonInvoiceUnfiltered({
-      context: 'salesPersonInvoice',
-    });
+
   const { salesPersonInvoiceFilters, setSalesPersonInvoiceFilters } =
     useSalesInvoiceHdFilterStore((state) => ({
       salesPersonInvoiceFilters: state.salesPersonInvoiceFilters,
       setSalesPersonInvoiceFilters: state.setSalesPersonInvoiceFilters,
     }));
+
+  // Use salesPersonNames from store, allow empty array for unfiltered data
+  const salesPersonNames = salesPersonInvoiceFilters.salesPersonName || [];
+
+  // Call the hook with context and salesPersonNames
+  const { data, isLoading, isFetching, error } =
+    useMonthlyComparisonSalesPersonInvoice({
+      context: 'salesPersonInvoice',
+      salesPersonNames,
+      refetchOnWindowFocus: false,
+      refetchInterval: false,
+    });
+
   const [isFullScreen, setIsFullScreen] = useState(false);
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<Chart<'bar', number[], string> | null>(null);
 
-  // Log filter awal
+  // Log filter, salesperson names, and hook state for debugging
   useEffect(() => {
-    console.log('Initial filters:', salesPersonInvoiceFilters);
-  }, [salesPersonInvoiceFilters]);
+    console.log(
+      'Initial filters:',
+      JSON.stringify(salesPersonInvoiceFilters, null, 2)
+    );
+    console.log('Salesperson Names:', salesPersonNames);
+    console.log('Hook Data:', JSON.stringify(data, null, 2));
+    console.log('Is Loading:', isLoading, 'Is Fetching:', isFetching);
+    if (error) {
+      console.error('Hook Error:', error);
+    }
+  }, [
+    salesPersonInvoiceFilters,
+    salesPersonNames,
+    data,
+    isLoading,
+    isFetching,
+    error,
+  ]);
 
-  // Invalidasi query saat mount untuk memastikan data segar
-  // useEffect(() => {
-  //   queryClient.invalidateQueries(['salesPersonInvoice']);
-  // }, [queryClient]);
-
-  // Atur query defaults
+  // Set query defaults
   useEffect(() => {
-    queryClient.setQueryDefaults(['salesPersonInvoice'], {
+    queryClient.setQueryDefaults(['monthlyComparisonSalesPersonInvoice'], {
       refetchOnWindowFocus: false,
       refetchInterval: false,
       staleTime: 5 * 60 * 1000,
-      // cacheTime: 10 * 60 * 1000,
     });
   }, [queryClient]);
 
@@ -130,14 +150,13 @@ const MonthlySalesPersonInvoiceChart: React.FC<
 
     const allSalesPersons = Array.from(
       new Set(
-        (data as SalesDataWithoutFilter[])
+        data
           .flatMap((d) => d.months)
           .flatMap((m) => m.sales.map((s) => s.salesPersonName))
       )
     );
 
     console.log('All Salespersons:', allSalesPersons);
-    console.log('Months:', months);
     console.log('Months:', months);
     console.log('Data:', data);
     console.log(
@@ -152,16 +171,13 @@ const MonthlySalesPersonInvoiceChart: React.FC<
 
       const growthPercentages = months.map((month) => {
         let growth: number = 0;
-        (data as SalesDataWithoutFilter[]).forEach((yearData) => {
+        data.forEach((yearData) => {
           const monthData = yearData.months.find((m) => m.month === month);
           if (monthData) {
             const salesPersonData = monthData.sales.find(
               (s) => s.salesPersonName === salesPersonName
             );
-            if (
-              salesPersonData &&
-              salesPersonData.growthPercentage !== undefined
-            ) {
+            if (salesPersonData && salesPersonData.growthPercentage !== null) {
               growth = salesPersonData.growthPercentage;
             }
           }
@@ -171,7 +187,7 @@ const MonthlySalesPersonInvoiceChart: React.FC<
 
       const monthlyData = months.map((month) => {
         let totalAmount = 0;
-        (data as SalesDataWithoutFilter[]).forEach((yearData) => {
+        data.forEach((yearData) => {
           const monthData = yearData.months.find((m) => m.month === month);
           console.log(`Month ${month} in ${yearData.period}:`, monthData);
           if (monthData && monthData.sales.length > 0) {
@@ -215,9 +231,9 @@ const MonthlySalesPersonInvoiceChart: React.FC<
         },
         borderColor: color.border,
         borderWidth: 1,
-        barThickness: isFullScreen ? 10 : 6, // Kurangi untuk alignment
+        barThickness: isFullScreen ? 10 : 6,
         maxBarThickness: 10,
-        minBarLength: 2, // Pastikan bar terlihat
+        minBarLength: 2,
         borderRadius: 15,
         period: data && data.length > 0 ? data[0].period : undefined,
         growthPercentages,
@@ -229,7 +245,6 @@ const MonthlySalesPersonInvoiceChart: React.FC<
     return result;
   }, [data, isFullScreen]);
 
-  // Log dimensi chart
   useEffect(() => {
     if (chartRef.current) {
       console.log(
@@ -248,8 +263,9 @@ const MonthlySalesPersonInvoiceChart: React.FC<
 
   useEffect(() => {
     if (error) {
+      console.error('Error fetching data:', error);
       toast({
-        description: 'Gagal memuat data penjualan. Coba lagi.',
+        description: 'Failed to fetch data for the chart.',
         variant: 'destructive',
       });
     }
@@ -264,9 +280,9 @@ const MonthlySalesPersonInvoiceChart: React.FC<
       (ds) => Array.isArray(ds.data) && ds.data.length > 0
     );
 
-  console.log('isDataReady', isDataReady);
-
+  console.log('isDataReady:', isDataReady);
   console.log('chartData datasets:', chartData?.datasets);
+
   const handleChartClick = (event: any, elements: any[]) => {
     if (isCompact || elements.length === 0) return;
 
@@ -359,7 +375,7 @@ const MonthlySalesPersonInvoiceChart: React.FC<
     >
       <div className='relative flex items-center justify-between mb-2'>
         <h2 className='text-sm text-muted-foreground font-semibold ml-2'>
-          Penjualan Bulanan di Atas 300 Juta IDR per Salesperson
+          Monthly Sales per Salesperson (Above 300M IDR)
         </h2>
         {!isCompact && (
           <Button
@@ -393,7 +409,7 @@ const MonthlySalesPersonInvoiceChart: React.FC<
                 padding: {
                   bottom: isCompact ? 10 : 20,
                   top: isCompact ? 5 : 10,
-                  left: isCompact ? 30 : 40, // Tambah padding
+                  left: isCompact ? 30 : 40,
                   right: isCompact ? 30 : 40,
                 },
               },
@@ -501,7 +517,7 @@ const MonthlySalesPersonInvoiceChart: React.FC<
                   barThickness: isFullScreen ? 10 : 6,
                   maxBarThickness: 10,
                   minBarLength: 2,
-                  categoryPercentage: 0.5, // Kurangi untuk alignment
+                  categoryPercentage: 0.5,
                   barPercentage: 0.6,
                 },
               },
