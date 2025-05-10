@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Bar } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -62,7 +62,7 @@ interface SalesPersonSelection {
   color?: string;
 }
 
-interface MonthlySalesPersonInvoiceProps {
+interface MonthlySalesPersonInvoiceFilteredChartProps {
   height?: number;
   isCompact?: boolean;
   isFullWidth?: boolean;
@@ -70,8 +70,8 @@ interface MonthlySalesPersonInvoiceProps {
   onSalesPersonSelect?: (selection: SalesPersonSelection | null) => void;
 }
 
-const MonthlySalesPersonInvoiceChart: React.FC<
-  MonthlySalesPersonInvoiceProps
+const MonthlySalesPersonInvoiceFilteredChart: React.FC<
+  MonthlySalesPersonInvoiceFilteredChartProps
 > = ({
   height = 400,
   isCompact = false,
@@ -267,8 +267,17 @@ const MonthlySalesPersonInvoiceChart: React.FC<
     }
   };
 
-  const toggleFullScreen = () => {
-    if (!chartContainerRef.current) return;
+  const toggleFullScreen = useCallback(() => {
+    if (!chartContainerRef.current) {
+      console.warn('Chart container ref is null');
+      return;
+    }
+
+    // Check if element is connected to the DOM
+    if (!chartContainerRef.current.isConnected) {
+      console.warn('Chart container is not connected to the DOM');
+      return;
+    }
 
     if (!isFullScreen) {
       const requestFullscreen =
@@ -278,9 +287,18 @@ const MonthlySalesPersonInvoiceChart: React.FC<
         (chartContainerRef.current as any).msRequestFullscreen;
 
       if (requestFullscreen) {
-        requestFullscreen.call(chartContainerRef.current);
+        requestFullscreen
+          .call(chartContainerRef.current)
+          .catch((err: Error) => {
+            console.error('Failed to enter fullscreen:', err);
+            toast({
+              description: 'Gagal masuk ke mode layar penuh.',
+              variant: 'destructive',
+            });
+          });
       } else {
         setIsFullScreen(true);
+        onModeChange?.(true);
       }
     } else {
       if (document.fullscreenElement) {
@@ -291,14 +309,20 @@ const MonthlySalesPersonInvoiceChart: React.FC<
           (document as any).msExitFullscreen;
 
         if (exitFullscreen) {
-          exitFullscreen.call(document);
+          exitFullscreen.call(document).catch((err: Error) => {
+            console.error('Failed to exit fullscreen:', err);
+            toast({
+              description: 'Gagal keluar dari mode layar penuh.',
+              variant: 'destructive',
+            });
+          });
         }
       } else {
         setIsFullScreen(false);
+        onModeChange?.(false);
       }
     }
-    onModeChange?.(!isFullScreen);
-  };
+  }, [isFullScreen, onModeChange, toast]);
 
   useEffect(() => {
     const handleFullscreenChange = () => {
@@ -329,6 +353,12 @@ const MonthlySalesPersonInvoiceChart: React.FC<
     };
   }, [onModeChange]);
 
+  useEffect(() => {
+    if (chartContainerRef.current) {
+      window.dispatchEvent(new Event('resize'));
+    }
+  }, [isFullScreen, isFullWidth]);
+
   const chartTitle =
     salesPersonNames.length === 1
       ? `Sales Performance by ${salesPersonNames[0]} (in Millions IDR)`
@@ -353,9 +383,7 @@ const MonthlySalesPersonInvoiceChart: React.FC<
       style={{ backgroundColor: hexBackground }}
     >
       <div className='relative flex items-center justify-between mb-2'>
-        <h2 className='text-md font-semibold'>
-          {isFullScreen ? 'Sales Performance' : chartTitle}
-        </h2>
+        <h2 className='text-md font-semibold'>{chartTitle}</h2>
         {!isCompact && (
           <Button
             variant='outline'
@@ -463,7 +491,7 @@ const MonthlySalesPersonInvoiceChart: React.FC<
                   borderWidth: 1,
                   padding: 8,
                   bodyFont: { size: isFullScreen ? 16 : 14 },
-                  // titleFont: { size: isFullScreen ? 14 : 12 },
+                  titleFont: { size: isFullScreen ? 14 : 12 },
                   callbacks: {
                     title: (tooltipItems) => {
                       const index = tooltipItems[0].dataIndex;
@@ -474,7 +502,7 @@ const MonthlySalesPersonInvoiceChart: React.FC<
                       const growth = (context.dataset as any).growthPercentages[
                         context.dataIndex
                       ];
-                      const icon = growth > 0 ? '🔼' : growth < 0 ? '🔻' : '➖';
+                      const icon = growth > 0 ? '🔼' : growth < 0 ? '🔻' : '⏺️'; // Updated icon for no change
                       const growthDisplay =
                         growth !== undefined ? growth.toFixed(2) : '0.00';
                       return [
@@ -487,11 +515,11 @@ const MonthlySalesPersonInvoiceChart: React.FC<
               },
               datasets: {
                 bar: {
-                  barThickness: isFullScreen ? 10 : 6,
-                  maxBarThickness: 10,
+                  barThickness: isFullScreen ? 14 : 10, // bar yang lebih tebal
+                  maxBarThickness: 14,
                   minBarLength: 2,
-                  categoryPercentage: 0.5,
-                  barPercentage: 0.6,
+                  categoryPercentage: 0.7, // lebar kategori diperbesar
+                  barPercentage: 0.8, // bar memenuhi sebagian besar kategori
                 },
               },
               onClick: !isCompact ? handleChartClick : undefined,
@@ -532,4 +560,4 @@ const MonthlySalesPersonInvoiceChart: React.FC<
   );
 };
 
-export default MonthlySalesPersonInvoiceChart;
+export default MonthlySalesPersonInvoiceFilteredChart;
