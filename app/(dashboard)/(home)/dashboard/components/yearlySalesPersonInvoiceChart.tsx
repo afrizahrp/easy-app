@@ -1,4 +1,5 @@
 'use client';
+
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { Bar } from 'react-chartjs-2';
 import {
@@ -10,6 +11,8 @@ import {
   Tooltip,
   Legend,
   ScriptableContext,
+  ChartData,
+  ChartDataset,
 } from 'chart.js';
 import { motion } from 'framer-motion';
 import { hslToHex } from '@/lib/utils';
@@ -20,7 +23,6 @@ import { themes } from '@/config/thems';
 import gradientPlugin from 'chartjs-plugin-gradient';
 import { useToast } from '@/components/ui/use-toast';
 import useYearlySalesPersonInvoice from '@/queryHooks/dashboard/sales/useYearlySalesPersonInvoice';
-import CustomTooltip from '@/components/ui/customTooltip';
 import { Button } from '@/components/ui/button';
 import { Maximize2, Minimize2 } from 'lucide-react';
 import { useMonthYearPeriodStore } from '@/store';
@@ -39,6 +41,12 @@ ChartJS.register(
   Legend,
   gradientPlugin
 );
+
+// Custom dataset type to include growthPercentages and quantities
+interface CustomBarDataset extends ChartDataset<'bar', number[]> {
+  growthPercentages: number[];
+  quantities: number[];
+}
 
 interface SalesPerson {
   salesPersonName: string;
@@ -84,31 +92,11 @@ const YearlySalesPersonInvoiceChart: React.FC<
   const router = useRouter();
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const [isFullScreen, setIsFullScreen] = useState(false);
-  const [tooltipState, setTooltipState] = useState<{
-    visible: boolean;
-    x: number;
-    y: number;
-    invoice: string;
-    growth: number;
-    year: string;
-    salesPersonName: string;
-    quantity: number;
-  }>({
-    visible: false,
-    x: 0,
-    y: 0,
-    invoice: '',
-    growth: 0,
-    year: '',
-    salesPersonName: '',
-    quantity: 0,
-  });
   const { setSalesPersonInvoicePeriod } = useMonthYearPeriodStore();
   const { setSalesPersonInvoiceFilters } = useSalesInvoiceHdFilterStore();
 
   useEffect(() => {
     const handleFullscreenChange = () => {
-      // console.log('Fullscreen change triggered');
       const isNowFullScreen = !!document.fullscreenElement;
       setIsFullScreen(isNowFullScreen);
       onModeChange?.(isNowFullScreen);
@@ -138,7 +126,6 @@ const YearlySalesPersonInvoiceChart: React.FC<
 
   useEffect(() => {
     if (error) {
-      console.log('Error detected:', error);
       toast({
         description: 'Failed to load sales data. Please try again.',
         variant: 'destructive',
@@ -147,26 +134,12 @@ const YearlySalesPersonInvoiceChart: React.FC<
   }, [error, toast]);
 
   useEffect(() => {
-    return () => {
-      const tooltipEl = document.getElementById('chartjs-tooltip');
-      if (tooltipEl) {
-        tooltipEl.remove();
-      }
-    };
-  }, []);
-
-  useEffect(() => {
     if (chartContainerRef.current) {
-      // console.log('Chart Container Dimensions:', {
-      //   width: chartContainerRef.current.offsetWidth,
-      //   height: chartContainerRef.current.offsetHeight,
-      // });
       window.dispatchEvent(new Event('resize'));
     }
   }, [isFullScreen, isFullWidth]);
 
   const toggleFullScreen = useCallback(() => {
-    // console.log('toggleFullScreen called');
     if (!chartContainerRef.current) return;
 
     if (!isFullScreen) {
@@ -201,7 +174,6 @@ const YearlySalesPersonInvoiceChart: React.FC<
 
   const chartData = React.useMemo(() => {
     if (!data || data.length === 0) {
-      console.log('No data available');
       return null;
     }
 
@@ -213,16 +185,7 @@ const YearlySalesPersonInvoiceChart: React.FC<
       new Set(sortedData.flatMap((d) => d.sales.map((s) => s.salesPersonName)))
     );
 
-    // console.log('Years:', years);
-    // console.log('SalesPersons:', allSalesPersons);
-
     const datasets = allSalesPersons.map((salesPersonName) => {
-      // const colorConfig = getSalesPersonColor(salesPersonName) || {
-      //   from: 'hsl(220, 70%, 50%)',
-      //   to: 'hsl(220, 70%, 70%)',
-      //   border: 'hsl(220, 70%, 50%)',
-      // };
-
       const colorConfig =
         salesPersonColorMap[salesPersonName.toLowerCase()] ||
         getFallbackColor(salesPersonName);
@@ -232,7 +195,23 @@ const YearlySalesPersonInvoiceChart: React.FC<
         const salesPersonData = yearData?.sales.find(
           (s) => s.salesPersonName === salesPersonName
         );
-        return salesPersonData ? salesPersonData.amount / 1_000_000 : 0;
+        return salesPersonData ? salesPersonData.amount / 1_000_000 : 0; // Convert to millions
+      });
+
+      const growthPercentages = years.map((year) => {
+        const yearData = sortedData.find((d) => d.period === year);
+        const salesPersonData = yearData?.sales.find(
+          (s) => s.salesPersonName === salesPersonName
+        );
+        return salesPersonData ? salesPersonData.growthPercentage : 0;
+      });
+
+      const quantities = years.map((year) => {
+        const yearData = sortedData.find((d) => d.period === year);
+        const salesPersonData = yearData?.sales.find(
+          (s) => s.salesPersonName === salesPersonName
+        );
+        return salesPersonData ? salesPersonData.quantity : 0;
       });
 
       return {
@@ -255,27 +234,21 @@ const YearlySalesPersonInvoiceChart: React.FC<
         borderWidth: 1,
         maxBarThickness: isFullScreen ? 30 : 25,
         borderRadius: 10,
-      };
+        growthPercentages,
+        quantities,
+      } as CustomBarDataset;
     });
 
-    // console.log('Datasets:', datasets);
-
-    const chartDataResult = {
+    return {
       labels: years.length > 0 ? years : [''],
       datasets,
-    };
-    return chartDataResult as import('chart.js').ChartData<
-      'bar',
-      number[],
-      string
-    >;
+    } as ChartData<'bar', number[], string>;
   }, [data, isFullScreen]);
 
   const maxValue = React.useMemo(() => {
     if (!chartData) return 0;
     const max = Math.max(...chartData.datasets.flatMap((ds) => ds.data));
-    // console.log('maxValue:', max);
-    return max;
+    return max * 1.2; // Add 20% buffer
   }, [chartData]);
 
   const handleChartClick = useCallback(
@@ -309,86 +282,14 @@ const YearlySalesPersonInvoiceChart: React.FC<
     ]
   );
 
-  const handleTooltip = useCallback(
-    (context: {
-      chart: import('chart.js').Chart;
-      tooltip: import('chart.js').TooltipModel<'bar'>;
-    }) => {
-      // console.log('handleTooltip called', {
-      //   isFullScreen,
-      //   tooltipOpacity: context.tooltip.opacity,
-      // });
-      const { chart, tooltip } = context;
-      if (!chartData || !chartData.labels) {
-        if (tooltipState.visible) {
-          setTooltipState((prev) => ({ ...prev, visible: false }));
-        }
-        return;
-      }
-
-      if (tooltip.opacity === 0) {
-        if (tooltipState.visible) {
-          setTooltipState((prev) => ({ ...prev, visible: false }));
-        }
-        return;
-      }
-
-      if (tooltip.body) {
-        const datasetIndex = tooltip.dataPoints[0].datasetIndex;
-        const dataIndex = tooltip.dataPoints[0].dataIndex;
-        const salesPersonName = chartData.datasets[datasetIndex].label ?? '';
-        const year = chartData.labels[dataIndex] ?? '';
-        const yearData = data?.find((d) => d.period === year);
-        const salesPersonData = yearData?.sales.find(
-          (s) => s.salesPersonName === salesPersonName
-        );
-        const invoice = (tooltip.dataPoints[0].raw as number).toLocaleString(
-          'id-ID'
-        );
-        const growth = salesPersonData?.growthPercentage ?? 0;
-        const quantity = salesPersonData?.quantity ?? 0;
-        const canvasRect = chart.canvas.getBoundingClientRect();
-        const x = canvasRect.left + tooltip.caretX + 10;
-        const y = canvasRect.top + tooltip.caretY - 3;
-
-        setTooltipState((prev) => {
-          if (
-            prev.visible === true &&
-            prev.year === year &&
-            prev.invoice === invoice &&
-            prev.growth === growth &&
-            prev.quantity === quantity &&
-            prev.salesPersonName === salesPersonName &&
-            prev.x === x &&
-            prev.y === y
-          ) {
-            return prev;
-          }
-          //   console.log('Updating tooltip state:', {
-          //     year,
-          //     invoice,
-          //     growth,
-          //     quantity,
-          //     salesPersonName,
-          //     x,
-          //     y,
-          //   }
-          // );
-          return {
-            visible: true,
-            x,
-            y,
-            invoice,
-            growth,
-            year,
-            salesPersonName,
-            quantity,
-          };
-        });
-      }
-    },
-    [chartData, data, tooltipState.visible, isFullScreen]
-  );
+  const isDataReady =
+    !!chartData &&
+    Array.isArray(chartData.labels) &&
+    chartData.labels.length > 0 &&
+    Array.isArray(chartData.datasets) &&
+    chartData.datasets.some(
+      (ds) => Array.isArray(ds.data) && ds.data.some((value) => value > 0)
+    );
 
   return (
     <motion.div
@@ -397,7 +298,7 @@ const YearlySalesPersonInvoiceChart: React.FC<
         isFullScreen && !document.fullscreenElement
           ? 'fixed inset-0 z-50 bg-white dark:bg-[#18181b] p-4 rounded-lg shadow-md'
           : 'relative bg-white dark:bg-[#18181b] p-4 rounded-lg shadow-sm'
-      } flex flex-col h-fit min-h-[250px] w-full`} // Hapus overflow-x-auto untuk konsistensi
+      } flex flex-col h-fit min-h-[250px] w-full`}
       style={{ backgroundColor: hexBackground }}
       animate={{
         opacity: isFullWidth ? 1 : 0.95,
@@ -411,8 +312,6 @@ const YearlySalesPersonInvoiceChart: React.FC<
     >
       <div className='relative flex items-center justify-between mb-2'>
         <h2 className='text-sm text-muted-foreground font-semibold ml-2'>
-          {' '}
-          {/* Sesuaikan dengan YearlySalesInvoiceChart */}
           Yearly Sales Above 3.6 Billion IDR by Salesperson
         </h2>
         {!isCompact && (
@@ -431,123 +330,141 @@ const YearlySalesPersonInvoiceChart: React.FC<
         )}
       </div>
       <div className='flex-1 min-h-0 w-full'>
-        {' '}
-        {/* Tambahkan w-full untuk konsistensi */}
         {isLoading || isFetching ? (
           <div className='flex items-center justify-center h-full'>
             <div className='w-3/4 h-1/2 rounded-lg shimmer' />
           </div>
-        ) : chartData ? (
-          <>
-            <Bar
-              key={isFullWidth ? 'full' : 'half'}
-              height={isFullScreen ? undefined : isCompact ? 400 : height} // Sesuaikan tinggi default
-              data={chartData}
-              options={{
-                responsive: true,
-                maintainAspectRatio: false,
-                layout: {
-                  padding: {
-                    bottom: isFullScreen ? 10 : isCompact ? 10 : 20,
-                    top: isFullScreen ? 10 : isCompact ? 5 : 10,
-                    left: 0,
-                    right: 0,
+        ) : isDataReady ? (
+          <Bar
+            key={isFullWidth ? 'full' : 'half'}
+            height={isFullScreen ? undefined : isCompact ? 400 : height}
+            data={chartData}
+            options={{
+              responsive: true,
+              maintainAspectRatio: false,
+              layout: {
+                padding: {
+                  bottom: isFullScreen ? 10 : isCompact ? 10 : 20,
+                  top: isFullScreen ? 10 : isCompact ? 5 : 10,
+                  left: 0,
+                  right: 0,
+                },
+              },
+              scales: {
+                x: {
+                  title: { display: false, text: 'Year' },
+                  grid: {
+                    drawTicks: false,
+                    color: `hsl(${
+                      theme?.cssVars[mode === 'dark' ? 'dark' : 'light']
+                        .chartGird
+                    })`,
+                    display: false,
+                  },
+                  ticks: {
+                    font: { size: isFullScreen ? 14 : 12 },
+                    autoSkip: false,
+                    padding: 5,
+                    callback: (value, index) =>
+                      chartData?.labels ? (chartData.labels[index] ?? '') : '',
                   },
                 },
-                scales: {
-                  x: {
-                    title: { display: false, text: 'Year' },
-                    grid: {
-                      drawTicks: false,
-                      color: `hsl(${theme?.cssVars[mode === 'dark' ? 'dark' : 'light'].chartGird})`, // Sesuaikan dengan YearlySalesInvoiceChart
-                      display: false,
-                    },
-                    ticks: {
-                      font: { size: isFullScreen ? 14 : 12 },
-                      autoSkip: false,
-                      padding: 5, // Tambahkan padding kecil untuk fine-tuning
-                      callback: (value, index) => {
-                        return chartData && chartData.labels
-                          ? (chartData.labels[index] ?? '')
-                          : '';
-                      },
-                    },
+                y: {
+                  beginAtZero: true,
+                  min: 0,
+                  max: maxValue > 0 ? maxValue : 1000,
+                  grid: {
+                    drawTicks: false,
+                    color: `hsl(${
+                      theme?.cssVars[mode === 'dark' ? 'dark' : 'light']
+                        .chartGird
+                    })`,
                   },
-                  y: {
-                    beginAtZero: true,
-                    min: 0,
-                    max: maxValue > 0 ? maxValue * 1.2 : 1000,
-                    grid: {
-                      drawTicks: false,
-                      color: `hsl(${theme?.cssVars[mode === 'dark' ? 'dark' : 'light'].chartGird})`,
+                  ticks: {
+                    callback: (value: unknown) => {
+                      const val = Number(value);
+                      return `${val.toLocaleString('id-ID')}`;
                     },
-                    ticks: {
-                      callback: (value: unknown) => {
-                        const val = Number(value);
-                        const rounded = Math.round(val / 1000) * 1000;
-                        return rounded.toLocaleString('id-ID');
-                      },
-                      font: { size: isFullScreen ? 14 : 12 },
+                    font: { size: isFullScreen ? 14 : 12 },
+                  },
+                },
+              },
+              plugins: {
+                legend: {
+                  display: !isCompact,
+                  position: 'top',
+                  labels: {
+                    color: `hsl(${
+                      theme?.cssVars[mode === 'dark' ? 'dark' : 'light']
+                        .chartLabel
+                    })`,
+                    boxWidth: 8,
+                    font: { size: isFullScreen ? 12 : 10 },
+                    usePointStyle: true,
+                    pointStyle: 'circle',
+                  },
+                  maxHeight: isFullScreen ? 80 : 60,
+                },
+                title: { display: false },
+                tooltip: {
+                  enabled: true,
+                  position: 'nearest',
+                  yAlign: 'top',
+                  xAlign: 'left',
+                  borderWidth: 1,
+                  padding: 8,
+                  bodyFont: { size: isFullScreen ? 16 : 14 },
+                  // titleFont: { size: isFullScreen ? 16 : 14 },
+                  callbacks: {
+                    title: (tooltipItems) => {
+                      const index = tooltipItems[0].dataIndex;
+                      // Ensure chartData and labels are defined
+                      if (chartData && chartData.labels) {
+                        return chartData.labels[index] ?? '';
+                      }
+                      return '';
+                    },
+                    label: (context) => {
+                      const amount = (context.raw as number) * 1_000_000; // Convert back to IDR
+                      const growth = (context.dataset as CustomBarDataset)
+                        .growthPercentages[context.dataIndex];
+                      // const quantity = (context.dataset as CustomBarDataset)
+                      //   .quantities[context.dataIndex];
+                      const icon = growth > 0 ? '🔼' : growth < 0 ? '🔻' : '➖';
+                      const growthDisplay =
+                        growth !== undefined ? growth.toFixed(2) : '0.00';
+                      return [
+                        `${context.dataset.label}`,
+                        `${amount.toLocaleString(
+                          'id-ID'
+                        )} ${icon} ${growthDisplay}%`,
+                        // `Quantity: ${quantity.toLocaleString('id-ID')}`,
+                      ];
                     },
                   },
                 },
-                plugins: {
-                  legend: {
-                    display: !isCompact,
-                    position: 'top',
-                    labels: {
-                      color: `hsl(${theme?.cssVars[mode === 'dark' ? 'dark' : 'light'].chartLabel})`,
-                      boxWidth: 8,
-                      font: { size: isFullScreen ? 12 : 10 },
-                      usePointStyle: true,
-                      pointStyle: 'circle',
-                    },
-                    maxHeight: isFullScreen ? 80 : 60,
-                  },
-                  title: { display: false },
-                  tooltip: {
-                    enabled: false,
-                    external: handleTooltip,
-                    callbacks: {
-                      label: (context) =>
-                        `${context.dataset.label}: ${(context.raw as number).toLocaleString('id-ID')}`,
-                    },
-                    titleFont: { size: isFullScreen ? 14 : 12 },
-                    bodyFont: { size: isFullScreen ? 12 : 10 },
-                  },
+              },
+              datasets: {
+                bar: {
+                  barThickness: isFullScreen ? 30 : 25,
+                  categoryPercentage: 0.65,
+                  barPercentage: 0.55,
                 },
-                datasets: {
-                  bar: {
-                    barThickness: isFullScreen ? 30 : 25,
-                    categoryPercentage: 0.65,
-                    barPercentage: 0.55,
-                  },
-                },
-                onClick: !isCompact ? handleChartClick : undefined,
-                onHover: (event, chartElements) => {
-                  if (event.native && (event.native.target as HTMLElement)) {
-                    if (!isCompact && chartElements.length > 0) {
-                      (event.native.target as HTMLElement).style.cursor =
-                        'pointer';
-                    } else {
-                      (event.native.target as HTMLElement).style.cursor =
-                        'default';
-                    }
+              },
+              onClick: !isCompact ? handleChartClick : undefined,
+              onHover: (event, chartElements) => {
+                if (event.native && (event.native.target as HTMLElement)) {
+                  if (!isCompact && chartElements.length > 0) {
+                    (event.native.target as HTMLElement).style.cursor =
+                      'pointer';
+                  } else {
+                    (event.native.target as HTMLElement).style.cursor =
+                      'default';
                   }
-                },
-              }}
-            />
-            <CustomTooltip
-              visible={tooltipState.visible}
-              x={tooltipState.x}
-              y={tooltipState.y}
-              invoice={tooltipState.invoice}
-              growth={tooltipState.growth}
-              isFullScreen={isFullScreen}
-              parentRef={isFullScreen ? chartContainerRef : undefined}
-              isCompact={isCompact}
-            />
-          </>
+                }
+              },
+            }}
+          />
         ) : (
           <div className='flex flex-col items-center justify-center h-full text-gray-400'>
             <svg
@@ -561,7 +478,7 @@ const YearlySalesPersonInvoiceChart: React.FC<
               <path
                 strokeLinecap='round'
                 strokeLinejoin='round'
-                d='M3 3v18h8m-8-4h8m-8-4h8'
+                d='M3 3v18h18V3H3zm5 14h8m-8-4h8m-8-4h8'
               />
             </svg>
             <p className='text-sm font-medium'>No data available</p>

@@ -329,6 +329,19 @@ const MonthlySalesPersonInvoiceChart: React.FC<
     };
   }, [onModeChange]);
 
+  const chartTitle =
+    salesPersonNames.length === 1
+      ? `Sales Performance by ${salesPersonNames[0]} (in Millions IDR)`
+      : salesPersonNames.length === 2
+        ? `Sales Performance by ${salesPersonNames.join(' and ')} (in Millions IDR)`
+        : salesPersonNames.length > 2
+          ? `Sales Performance by ${salesPersonNames
+              .slice(0, salesPersonNames.length - 1)
+              .join(
+                ', '
+              )} and ${salesPersonNames[salesPersonNames.length - 1]} (in Millions IDR)`
+          : 'Sales Performance (in Millions IDR)';
+
   return (
     <div
       ref={chartContainerRef}
@@ -340,8 +353,8 @@ const MonthlySalesPersonInvoiceChart: React.FC<
       style={{ backgroundColor: hexBackground }}
     >
       <div className='relative flex items-center justify-between mb-2'>
-        <h2 className='text-sm text-muted-foreground font-semibold ml-2'>
-          Penjualan Bulanan di Atas 300 Juta IDR per Salesperson
+        <h2 className='text-md font-semibold'>
+          {isFullScreen ? 'Sales Performance' : chartTitle}
         </h2>
         {!isCompact && (
           <Button
@@ -449,8 +462,8 @@ const MonthlySalesPersonInvoiceChart: React.FC<
                   xAlign: 'left',
                   borderWidth: 1,
                   padding: 8,
-                  bodyFont: { size: 12 },
-                  titleFont: { size: isFullScreen ? 14 : 12 },
+                  bodyFont: { size: isFullScreen ? 16 : 14 },
+                  // titleFont: { size: isFullScreen ? 14 : 12 },
                   callbacks: {
                     title: (tooltipItems) => {
                       const index = tooltipItems[0].dataIndex;
@@ -461,7 +474,7 @@ const MonthlySalesPersonInvoiceChart: React.FC<
                       const growth = (context.dataset as any).growthPercentages[
                         context.dataIndex
                       ];
-                      const icon = growth > 0 ? '🔼' : growth < 0 ? '🔻' : '➡️';
+                      const icon = growth > 0 ? '🔼' : growth < 0 ? '🔻' : '➖';
                       const growthDisplay =
                         growth !== undefined ? growth.toFixed(2) : '0.00';
                       return [
@@ -482,6 +495,17 @@ const MonthlySalesPersonInvoiceChart: React.FC<
                 },
               },
               onClick: !isCompact ? handleChartClick : undefined,
+              onHover: (event, chartElements) => {
+                if (event.native && (event.native.target as HTMLElement)) {
+                  if (!isCompact && chartElements.length > 0) {
+                    (event.native.target as HTMLElement).style.cursor =
+                      'pointer';
+                  } else {
+                    (event.native.target as HTMLElement).style.cursor =
+                      'default';
+                  }
+                }
+              },
             }}
           />
         ) : (

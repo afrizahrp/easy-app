@@ -10,6 +10,8 @@ import {
   Title,
   Tooltip,
   Legend,
+  ChartData,
+  ChartDataset,
 } from 'chart.js';
 import { motion } from 'framer-motion';
 import { hslToHex, generateYearColorPalette } from '@/lib/utils';
@@ -20,7 +22,6 @@ import { themes } from '@/config/thems';
 import gradientPlugin from 'chartjs-plugin-gradient';
 import { useToast } from '@/components/ui/use-toast';
 import useYearlySalesInvoice from '@/queryHooks/dashboard/sales/useYearlySalesInvoice';
-import CustomTooltip from '@/components/ui/customTooltip';
 import { Button } from '@/components/ui/button';
 import { Maximize2, Minimize2 } from 'lucide-react';
 import { useMonthYearPeriodStore } from '@/store';
@@ -34,6 +35,11 @@ ChartJS.register(
   Legend,
   gradientPlugin
 );
+
+// Tipe kustom untuk dataset yang mendukung growthPercentages
+interface CustomBarDataset extends ChartDataset<'bar', number[]> {
+  growthPercentages: number[];
+}
 
 interface YearlySalesInvoiceChartProps {
   height?: number;
@@ -60,28 +66,12 @@ const YearlySalesInvoiceChart: React.FC<YearlySalesInvoiceChartProps> = ({
   const router = useRouter();
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const [isFullScreen, setIsFullScreen] = useState(false);
-  const [tooltipState, setTooltipState] = useState<{
-    visible: boolean;
-    x: number;
-    y: number;
-    invoice: string;
-    growth: number;
-    year: string;
-  }>({
-    visible: false,
-    x: 0,
-    y: 0,
-    invoice: '',
-    growth: 0,
-    year: '',
-  });
   const { setSalesInvoicePeriod, setSalesPersonInvoicePeriod } =
     useMonthYearPeriodStore();
 
-  // useEffect untuk menangani perubahan full-screen
+  // Handle fullscreen change
   useEffect(() => {
     const handleFullscreenChange = () => {
-      console.log('Fullscreen change triggered');
       const isNowFullScreen = !!document.fullscreenElement;
       setIsFullScreen(isNowFullScreen);
       onModeChange?.(isNowFullScreen);
@@ -109,10 +99,9 @@ const YearlySalesInvoiceChart: React.FC<YearlySalesInvoiceChartProps> = ({
     };
   }, [onModeChange]);
 
-  // useEffect untuk menangani error toast
+  // Handle error toast
   useEffect(() => {
     if (error) {
-      console.log('Error detected:', error);
       toast({
         description: 'Failed to load sales data. Please try again.',
         variant: 'destructive',
@@ -120,16 +109,7 @@ const YearlySalesInvoiceChart: React.FC<YearlySalesInvoiceChartProps> = ({
     }
   }, [error, toast]);
 
-  // useEffect untuk pembersihan tooltip saat unmount
-  useEffect(() => {
-    return () => {
-      const tooltipEl = document.getElementById('chartjs-tooltip');
-      if (tooltipEl) {
-        tooltipEl.remove();
-      }
-    };
-  }, []);
-
+  // Trigger resize on fullscreen change
   useEffect(() => {
     if (chartContainerRef.current) {
       window.dispatchEvent(new Event('resize'));
@@ -137,7 +117,6 @@ const YearlySalesInvoiceChart: React.FC<YearlySalesInvoiceChartProps> = ({
   }, [isFullScreen]);
 
   const toggleFullScreen = useCallback(() => {
-    console.log('toggleFullScreen called');
     if (!chartContainerRef.current) return;
 
     if (!isFullScreen) {
@@ -183,10 +162,10 @@ const YearlySalesInvoiceChart: React.FC<YearlySalesInvoiceChartProps> = ({
       labels: years,
       datasets: [
         {
-          label: '',
+          label: 'Yearly Sales',
           data: years.map((year) => {
             const yearData = sortedData.find((d) => d.period === year);
-            return yearData ? yearData.totalInvoice / 1_000_000 : 0;
+            return yearData ? yearData.totalInvoice / 1_000_000_000 : 0; // Convert to billions
           }),
           backgroundColor: (
             ctx: import('chart.js').ScriptableContext<'bar'>
@@ -217,15 +196,16 @@ const YearlySalesInvoiceChart: React.FC<YearlySalesInvoiceChartProps> = ({
           borderWidth: 1,
           barThickness: isFullScreen ? 30 : 25,
           borderRadius: 10,
+          categoryPercentage: 0.8,
+          barPercentage: 0.8,
+          growthPercentages: years.map((year) => {
+            const yearData = sortedData.find((d) => d.period === year);
+            return yearData ? yearData.growthPercentage : 0;
+          }),
         },
-      ],
-    } as import('chart.js').ChartData<'bar', number[], string>;
+      ] as CustomBarDataset[], // Gunakan tipe kustom
+    } as ChartData<'bar', number[], string>;
   }, [data, isFullScreen]);
-
-  const maxValue = React.useMemo(() => {
-    if (!chartData) return 0;
-    return Math.max(...chartData.datasets.flatMap((ds) => ds.data));
-  }, [chartData]);
 
   const handleChartClick = useCallback(
     (
@@ -233,7 +213,7 @@ const YearlySalesInvoiceChart: React.FC<YearlySalesInvoiceChartProps> = ({
       elements: import('chart.js').ActiveElement[],
       chart: import('chart.js').Chart
     ) => {
-      if (elements.length === 0) return; // Hanya cek apakah ada elemen yang diklik
+      if (elements.length === 0) return;
 
       const element = elements[0];
       const dataIndex = element.index;
@@ -255,66 +235,15 @@ const YearlySalesInvoiceChart: React.FC<YearlySalesInvoiceChartProps> = ({
     [chartData, router, setSalesInvoicePeriod]
   );
 
-  // Logika tooltip dengan pembatasan pembaruan state
-  const handleTooltip = useCallback(
-    (context: {
-      chart: import('chart.js').Chart;
-      tooltip: import('chart.js').TooltipModel<'bar'>;
-    }) => {
-      console.log('handleTooltip called', {
-        isFullScreen,
-        tooltipOpacity: context.tooltip.opacity,
-      });
-      const { chart, tooltip } = context;
-      if (!chartData || !chartData.labels) {
-        if (tooltipState.visible) {
-          setTooltipState((prev) => ({ ...prev, visible: false }));
-        }
-        return;
-      }
+  const isDataReady =
+    !!chartData &&
+    Array.isArray(chartData.labels) &&
+    chartData.labels.length > 0 &&
+    Array.isArray(chartData.datasets) &&
+    chartData.datasets.some(
+      (ds) => Array.isArray(ds.data) && ds.data.some((value) => value > 0)
+    );
 
-      if (tooltip.opacity === 0) {
-        if (tooltipState.visible) {
-          setTooltipState((prev) => ({ ...prev, visible: false }));
-        }
-        return;
-      }
-
-      if (tooltip.body) {
-        const year = chartData.labels[tooltip.dataPoints[0].dataIndex] ?? '';
-        const yearData = data?.find((d) => d.period === year);
-        const invoice = (tooltip.dataPoints[0].raw as number).toLocaleString(
-          'id-ID'
-        );
-        const growth = yearData?.growthPercentage ?? 0;
-        const canvasRect = chart.canvas.getBoundingClientRect();
-        const x = canvasRect.left + tooltip.caretX + 10;
-        const y = canvasRect.top + tooltip.caretY - 3;
-
-        setTooltipState((prev) => {
-          if (
-            prev.visible === true &&
-            prev.year === year &&
-            prev.invoice === invoice &&
-            prev.growth === growth &&
-            prev.x === x &&
-            prev.y === y
-          ) {
-            return prev;
-          }
-          console.log('Updating tooltip state:', {
-            year,
-            invoice,
-            growth,
-            x,
-            y,
-          });
-          return { visible: true, x, y, invoice, growth, year };
-        });
-      }
-    },
-    [chartData, data, tooltipState.visible, isFullScreen]
-  );
   return (
     <motion.div
       ref={chartContainerRef}
@@ -359,93 +288,104 @@ const YearlySalesInvoiceChart: React.FC<YearlySalesInvoiceChartProps> = ({
           <div className='flex items-center justify-center h-full'>
             <div className='w-3/4 h-1/2 rounded-lg shimmer' />
           </div>
-        ) : chartData ? (
-          <>
-            <Bar
-              key={isFullWidth ? 'full' : 'half'}
-              height={isFullScreen ? undefined : isCompact ? 400 : height}
-              data={chartData}
-              options={{
-                responsive: true,
-                maintainAspectRatio: false,
-                layout: {
-                  padding: {
-                    bottom: isFullScreen ? 10 : isCompact ? 10 : 20,
-                    top: isFullScreen ? 10 : isCompact ? 5 : 10,
-                  },
+        ) : isDataReady ? (
+          <Bar
+            key={isFullWidth ? 'full' : 'half'}
+            height={isFullScreen ? undefined : isCompact ? 400 : height}
+            data={chartData}
+            options={{
+              responsive: true,
+              maintainAspectRatio: false,
+              layout: {
+                padding: {
+                  bottom: isFullScreen ? 10 : isCompact ? 10 : 20,
+                  top: isFullScreen ? 10 : isCompact ? 5 : 10,
                 },
-                scales: {
-                  y: {
-                    beginAtZero: true,
-                    grid: {
-                      drawTicks: false,
-                      color: `hsl(${theme?.cssVars[mode === 'dark' ? 'dark' : 'light'].chartGird})`,
-                    },
-                    ticks: {
-                      callback: (value: unknown) => {
-                        const val = Number(value);
-                        return `${val.toLocaleString('id-ID')}`;
-                      },
-                      font: {
-                        size: isFullScreen ? 14 : 12,
-                      },
-                    },
+              },
+              scales: {
+                y: {
+                  beginAtZero: true,
+                  grid: {
+                    drawTicks: false,
+                    color: `hsl(${
+                      theme?.cssVars[mode === 'dark' ? 'dark' : 'light']
+                        .chartGird
+                    })`,
                   },
-                  x: {
-                    title: { display: false, text: 'Year' },
-                    ticks: {
-                      callback: (_: unknown, index: number) =>
-                        Array.isArray(chartData?.labels)
-                          ? chartData.labels[index]
-                          : '',
-                      font: {
-                        size: isFullScreen ? 14 : 12,
-                      },
+                  ticks: {
+                    callback: (value: unknown) => {
+                      const val = Number(value);
+                      return `${val.toLocaleString('id-ID')}`;
                     },
-                    grid: {
-                      drawTicks: false,
-                      color: `hsl(${theme?.cssVars[mode === 'dark' ? 'dark' : 'light'].chartGird})`,
-                      display: false,
+                    font: {
+                      size: isFullScreen ? 14 : 12,
                     },
                   },
                 },
-                plugins: {
-                  legend: {
+                x: {
+                  title: { display: false, text: 'Year' },
+                  ticks: {
+                    callback: (_: unknown, index: number) =>
+                      Array.isArray(chartData?.labels)
+                        ? chartData.labels[index]
+                        : '',
+                    font: {
+                      size: isFullScreen ? 14 : 12,
+                    },
+                  },
+                  grid: {
+                    drawTicks: false,
+                    color: `hsl(${
+                      theme?.cssVars[mode === 'dark' ? 'dark' : 'light']
+                        .chartGird
+                    })`,
                     display: false,
                   },
-                  title: {
-                    display: false,
-                  },
-                  tooltip: {
-                    enabled: false,
-                    external: handleTooltip,
+                },
+              },
+              plugins: {
+                legend: {
+                  display: false,
+                },
+                title: {
+                  display: false,
+                },
+                tooltip: {
+                  enabled: true,
+                  position: 'nearest',
+                  yAlign: 'top',
+                  xAlign: 'left',
+                  borderWidth: 1,
+                  padding: 8,
+                  bodyFont: { size: isFullScreen ? 16 : 14 },
+                  callbacks: {
+                    label: (context) => {
+                      const amount = (context.raw as number) * 1_000_000_000; // Convert back to IDR
+                      const growth = (context.dataset as CustomBarDataset)
+                        .growthPercentages[context.dataIndex];
+                      const icon = growth > 0 ? '🔼' : growth < 0 ? '🔻' : '➖';
+
+                      return [
+                        `${amount.toLocaleString('id-ID')} ${icon} ${growth}%`,
+                      ];
+                    },
                   },
                 },
-                onClick: !isCompact ? handleChartClick : undefined,
-                onHover: (event, chartElements) => {
-                  if (event.native && (event.native.target as HTMLElement)) {
-                    if (!isCompact && chartElements.length > 0) {
-                      (event.native.target as HTMLElement).style.cursor =
-                        'pointer';
-                    } else {
-                      (event.native.target as HTMLElement).style.cursor =
-                        'default';
-                    }
+              },
+              onClick: !isCompact ? handleChartClick : undefined,
+              onHover: (event, chartElements) => {
+                if (event.native && (event.native.target as HTMLElement)) {
+                  if (!isCompact && chartElements.length > 0) {
+                    (event.native.target as HTMLElement).style.cursor =
+                      'pointer';
+                  } else {
+                    (event.native.target as HTMLElement).style.cursor =
+                      'default';
                   }
-                },
-              }}
-            />
-            <CustomTooltip
-              visible={tooltipState.visible}
-              x={tooltipState.x}
-              y={tooltipState.y}
-              invoice={tooltipState.invoice}
-              growth={tooltipState.growth}
-              isFullScreen={isFullScreen}
-              parentRef={isFullScreen ? chartContainerRef : undefined}
-              isCompact={isCompact} // Tambahkan prop isCompact
-            />
-          </>
+                }
+              },
+            }}
+          />
         ) : (
           <div className='flex flex-col items-center justify-center h-full text-gray-400'>
             <svg

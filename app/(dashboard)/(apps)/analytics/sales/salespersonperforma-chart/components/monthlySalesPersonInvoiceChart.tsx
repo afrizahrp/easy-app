@@ -483,8 +483,8 @@ const MonthlySalesPersonInvoiceChart: React.FC<
                   xAlign: 'left',
                   borderWidth: 1,
                   padding: 8,
-                  bodyFont: { size: 12 },
-                  titleFont: { size: isFullScreen ? 14 : 12 },
+                  bodyFont: { size: isFullScreen ? 16 : 14 },
+                  // titleFont: { size: isFullScreen ? 14 : 12 },
                   callbacks: {
                     title: (tooltipItems) => {
                       const index = tooltipItems[0].dataIndex;
@@ -501,7 +501,7 @@ const MonthlySalesPersonInvoiceChart: React.FC<
                       const growth = (context.dataset as any).growthPercentages[
                         context.dataIndex
                       ];
-                      const icon = growth > 0 ? '🔼' : growth < 0 ? '🔻' : '➡️';
+                      const icon = growth > 0 ? '🔼' : growth < 0 ? '🔻' : '➖';
                       const growthDisplay =
                         growth !== undefined ? growth.toFixed(2) : '0.00';
                       return [
@@ -522,6 +522,17 @@ const MonthlySalesPersonInvoiceChart: React.FC<
                 },
               },
               onClick: !isCompact ? handleChartClick : undefined,
+              onHover: (event, chartElements) => {
+                if (event.native && (event.native.target as HTMLElement)) {
+                  if (!isCompact && chartElements.length > 0) {
+                    (event.native.target as HTMLElement).style.cursor =
+                      'pointer';
+                  } else {
+                    (event.native.target as HTMLElement).style.cursor =
+                      'default';
+                  }
+                }
+              },
             }}
           />
         ) : (
