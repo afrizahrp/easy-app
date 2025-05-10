@@ -257,7 +257,7 @@ export const useSearchParamsStore = create<SearchParamsState>()(
           }
           const updated = { ...state.searchParams[context] };
           delete updated[key];
-          console.log(`Removing ${context}.${key}`, updated);
+          // console.log(`Removing ${context}.${key}`, updated);
           return {
             searchParams: {
               ...state.searchParams,
@@ -268,10 +268,10 @@ export const useSearchParamsStore = create<SearchParamsState>()(
       resetSearchParams: (context) =>
         set((state) => {
           if (!SEARCH_CONTEXTS.includes(context)) {
-            console.warn(`Invalid context: ${context}`);
+            // console.warn(`Invalid context: ${context}`);
             return state;
           }
-          console.log(`Resetting ${context} search params`);
+          // console.log(`Resetting ${context} search params`);
           return {
             searchParams: {
               ...state.searchParams,

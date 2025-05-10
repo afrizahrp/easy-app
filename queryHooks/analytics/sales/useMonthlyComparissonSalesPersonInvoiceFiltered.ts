@@ -116,6 +116,11 @@ const useMonthlyComparisonSalesPersonInvoiceFiltered = ({
 
       try {
         const response = await api.get<SalesPeriodResponse>(finalUrl);
+
+        console.log(
+          `[useMonthlyComparisonSalesPersonInvoiceFiltered:${context}] response.data:`,
+          response.data
+        );
         return response.data;
       } catch (err) {
         const axiosError = err as AxiosError<{ message?: string }>;
