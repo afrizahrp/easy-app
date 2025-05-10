@@ -1,6 +1,6 @@
 'use client';
 import { useMonthYearPeriodStore, useSalesInvoiceHdFilterStore } from '@/store';
-import { FilterSummary } from '@/components/filterSummary';
+import { FilterSummary } from '@/components/ui/filterSummary';
 import { format } from 'date-fns';
 
 interface SalesInvoiceFilterSummaryProps {

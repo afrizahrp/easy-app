@@ -17,7 +17,7 @@ export function cn(...inputs: ClassValue[]) {
 
 export const getDefaultYears = (): string[] => {
   const currentYear = new Date().getFullYear();
-  return [`${currentYear - 1}`, `${currentYear}`]; // Misalnya, ["2024", "2025"]
+  return [`${currentYear - 2}`, `${currentYear}`]; // Misalnya, ["2023","2024", "2025"]
 };
 
 export const isLocationMatch = (href: string, locationName: string) => {

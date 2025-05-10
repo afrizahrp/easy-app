@@ -1,6 +1,7 @@
 'use client';
 import { useYearlyPeriodStore } from '@/store';
-import { FilterSummary } from '@/components/filterSummary';
+import { DashboardFilterSummary } from '@/components/dashboardFilterSummary';
+import { getDefaultYears } from '@/lib/utils';
 import clsx from 'clsx';
 
 interface ChartYearFilterSummaryProps {
@@ -11,11 +12,6 @@ export default function ChartYearFilterSummary({
   className = '',
 }: ChartYearFilterSummaryProps) {
   const { selectedYears, setYears, resetYears } = useYearlyPeriodStore();
-
-  const getDefaultYears = (): string[] => {
-    const currentYear = new Date().getFullYear();
-    return [`${currentYear - 1}`, `${currentYear}`]; // Misalnya, ["2024", "2025"]
-  };
 
   const defaultYears = getDefaultYears();
   const defaultYear = defaultYears.join(', ');
@@ -60,7 +56,7 @@ export default function ChartYearFilterSummary({
       )}
     >
       <div className='w-full flex justify-center'>
-        <FilterSummary
+        <DashboardFilterSummary
           layout='inline'
           filters={filtersList}
           className='text-slate-700 dark:text-slate-400 text-lg'

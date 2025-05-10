@@ -5,7 +5,7 @@ import React from 'react';
 
 type FilterValue = string | number | null | undefined | string[];
 
-interface FilterSummaryProps {
+interface DashboardFilterSummaryProps {
   filters: {
     label: string;
     value: FilterValue;
@@ -18,11 +18,11 @@ interface FilterSummaryProps {
   className?: string;
 }
 
-export const FilterSummary = React.memo(
-  ({ filters, layout = 'inline', className }: FilterSummaryProps) => {
-    console.log('FilterSummary filters:', filters); // Debugging
+export const DashboardFilterSummary = React.memo(
+  ({ filters, layout = 'inline', className }: DashboardFilterSummaryProps) => {
+    console.log('DashboardFilterSummary filters:', filters); // Debugging
 
-    const renderValue = (filter: FilterSummaryProps['filters'][0]) => {
+    const renderValue = (filter: DashboardFilterSummaryProps['filters'][0]) => {
       const { value, individualYears, onClearIndividual, label } = filter;
 
       if (Array.isArray(value)) {
