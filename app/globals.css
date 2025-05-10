@@ -719,6 +719,13 @@ html[dir='rtl'] .react-select .select__loading-indicator {
   border-radius: 4px;
 }
 
+.tooltip-content {
+  background-color: #1f2937; /* gray-800 */
+  color: #f3f4f6; /* gray-100 */
+  padding: 8px;
+  border-radius: 6px;
+}
+
 .custom-drag {
   cursor: url('/path/to/your/custom-cursor.png'), move;
 }

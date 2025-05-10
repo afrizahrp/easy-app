@@ -28,7 +28,7 @@ import { useSalesInvoiceHdFilterStore } from '@/store';
 import { months } from '@/utils/monthNameMap';
 import { getSalesPersonColor } from '@/utils/getSalesPersonColor';
 import { Button } from '@/components/ui/button';
-import { BarChart2, Maximize2, Minimize2 } from 'lucide-react';
+import { BarChart2, FileBarChart2, Maximize2, Minimize2 } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -37,7 +37,6 @@ import {
   DialogDescription,
   DialogTrigger,
 } from '@/components/ui/dialog';
-
 import {
   Tooltip as UiTooltip,
   TooltipContent,
@@ -224,8 +223,8 @@ const MonthlySalesPersonInvoiceFilteredChart: React.FC<
         },
         borderColor: color.border,
         borderWidth: 1,
-        barThickness: isFullScreen ? 10 : 6,
-        maxBarThickness: 10,
+        barThickness: isFullScreen ? 14 : 10,
+        maxBarThickness: 14,
         minBarLength: 2,
         borderRadius: 15,
         period: data[0]?.period,
@@ -289,6 +288,7 @@ const MonthlySalesPersonInvoiceFilteredChart: React.FC<
       setSalesPersonInvoiceFilters({ salesPersonName: [salesPersonName] });
       const colorObj = getSalesPersonColor(salesPersonName);
       const color = typeof colorObj === 'string' ? colorObj : colorObj?.to;
+      setSelectedYear(year || yearString);
       onSalesPersonSelect?.({ salesPersonName, year, month, color });
     }
   };
@@ -296,16 +296,15 @@ const MonthlySalesPersonInvoiceFilteredChart: React.FC<
   const toggleFullScreen = useCallback(() => {
     if (!chartContainerRef.current) {
       console.warn('Chart container ref is null');
-      return;
-    }
-
-    // Check if element is connected to the DOM
-    if (!chartContainerRef.current.isConnected) {
-      console.warn('Chart container is not connected to the DOM');
+      toast({
+        description: 'Gagal mengakses kontainer chart.',
+        variant: 'destructive',
+      });
       return;
     }
 
     if (!isFullScreen) {
+      // Coba masuk ke mode fullscreen browser
       const requestFullscreen =
         chartContainerRef.current.requestFullscreen ||
         (chartContainerRef.current as any).webkitRequestFullscreen ||
@@ -317,16 +316,27 @@ const MonthlySalesPersonInvoiceFilteredChart: React.FC<
           .call(chartContainerRef.current)
           .catch((err: Error) => {
             console.error('Failed to enter fullscreen:', err);
+            // Fallback ke mode CSS fullscreen
+            setIsFullScreen(true);
+            onModeChange?.(true);
             toast({
-              description: 'Gagal masuk ke mode layar penuh.',
-              variant: 'destructive',
+              description:
+                'Mode layar penuh browser gagal, beralih ke mode layar penuh lokal.',
+              variant: 'default',
             });
           });
       } else {
+        // Jika API fullscreen tidak didukung, langsung ke mode CSS
         setIsFullScreen(true);
         onModeChange?.(true);
+        toast({
+          description:
+            'Mode layar penuh browser tidak didukung, menggunakan mode layar penuh lokal.',
+          variant: 'default',
+        });
       }
     } else {
+      // Coba keluar dari mode fullscreen browser
       if (document.fullscreenElement) {
         const exitFullscreen =
           document.exitFullscreen ||
@@ -337,18 +347,23 @@ const MonthlySalesPersonInvoiceFilteredChart: React.FC<
         if (exitFullscreen) {
           exitFullscreen.call(document).catch((err: Error) => {
             console.error('Failed to exit fullscreen:', err);
+            // Fallback ke keluar dari mode CSS
+            setIsFullScreen(false);
+            onModeChange?.(false);
             toast({
-              description: 'Gagal keluar dari mode layar penuh.',
-              variant: 'destructive',
+              description:
+                'Gagal keluar dari mode layar penuh browser, beralih ke mode normal.',
+              variant: 'default',
             });
           });
         }
       } else {
+        // Keluar dari mode CSS fullscreen
         setIsFullScreen(false);
         onModeChange?.(false);
       }
     }
-  }, [isFullScreen, onModeChange, toast]);
+  }, [isFullScreen, toast, onModeChange]);
 
   useEffect(() => {
     const handleFullscreenChange = () => {
@@ -380,7 +395,7 @@ const MonthlySalesPersonInvoiceFilteredChart: React.FC<
   }, [onModeChange]);
 
   useEffect(() => {
-    if (chartContainerRef.current) {
+    if (chartContainerRef.current && isFullScreen) {
       window.dispatchEvent(new Event('resize'));
     }
   }, [isFullScreen, isFullWidth]);
@@ -423,87 +438,98 @@ const MonthlySalesPersonInvoiceFilteredChart: React.FC<
   return (
     <div
       ref={chartContainerRef}
-      className={`chart-container ${isCompact ? 'compact' : ''} ${
+      className={cn(
+        `chart-container ${isCompact ? 'compact' : ''}`,
         isFullScreen && !document.fullscreenElement
           ? 'fixed inset-0 z-50 bg-white dark:bg-[#18181b] p-4 rounded-lg shadow-md'
-          : 'relative bg-white dark:bg-[#18181b] p-4 rounded-lg shadow-sm'
-      } flex flex-col h-fit min-h-250 w-full box-border`}
+          : 'relative bg-white dark:bg-[#18181b] p-4 rounded-lg shadow-sm h-96',
+        'flex flex-col h-fit min-h-[250px] w-full box-border'
+      )}
       style={{ backgroundColor: hexBackground }}
     >
-      <div className='relative flex items-center justify-between mb-2'>
+      <div className='relative flex items-start justify-between mb-2'>
         <h2 className='text-md font-semibold'>{chartTitle}</h2>
-
-        {!isCompact && (
-          <Button
-            variant='outline'
-            size='sm'
-            onClick={toggleFullScreen}
-            className='mr-2'
-          >
-            {isFullScreen ? (
-              <Minimize2 className='h-4 w-4' />
-            ) : (
-              <Maximize2 className='h-4 w-4' />
-            )}
-          </Button>
-        )}
-
-        <Dialog open={isSummaryOpen} onOpenChange={setIsSummaryOpen}>
-          <TooltipProvider>
-            <UiTooltip>
-              <TooltipTrigger asChild>
-                <div>
-                  <DialogTrigger asChild>
-                    <Button
-                      variant='outline'
-                      className='px-4 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 text-xs transition flex items-center'
-                      onClick={handleSummaryOpen}
-                      disabled={limitedSalespersons.length > 3}
-                      aria-label='Open salesperson summary'
-                    >
-                      <BarChart2 className='mr-2 h-4 w-4' />
-                      Summary
-                    </Button>
-                  </DialogTrigger>
-                </div>
-              </TooltipTrigger>
-              {limitedSalespersons.length > 3 && (
-                <TooltipContent>
-                  <p>
-                    Cannot open summary: Maximum 3 salespersons allowed, but you
-                    selected {limitedSalespersons.length}.
-                  </p>
-                </TooltipContent>
-              )}
-            </UiTooltip>
-          </TooltipProvider>
-          <DialogContent
-            size={dialogSize()}
-            className='w-full bg-white dark:bg-gray-800'
-          >
-            <DialogHeader>
-              <DialogTitle className='text-gray-800 dark:text-gray-100'>
-                Salesperson Summary
-              </DialogTitle>
-              <DialogDescription className='text-gray-500 dark:text-gray-400 text-xs'>
-                Salesperson summary list for {selectedYear} in millions of IDR
-              </DialogDescription>
-            </DialogHeader>
-            <div className='w-full'>
-              {limitedSalespersons.length > 0 ? (
-                <SalesPersonSummaryList
-                  salespersons={limitedSalespersons.map((name) => ({ name }))}
-                  year={selectedYear}
-                />
+        <div className='flex flex-col items-end space-y-2'>
+          {!isCompact && (
+            <Button
+              variant='outline'
+              size='sm'
+              onClick={toggleFullScreen}
+              className='w-10 h-10 p-0 flex items-center justify-center'
+              aria-label={
+                isFullScreen
+                  ? 'Keluar dari mode layar penuh'
+                  : 'Masuk ke mode layar penuh'
+              }
+            >
+              {isFullScreen ? (
+                <Minimize2 className='h-4 w-4' />
               ) : (
-                <p className='text-gray-500 dark:text-gray-400 text-center'>
-                  No salesperson selected. Please select at least one
-                  salesperson.
-                </p>
+                <Maximize2 className='h-4 w-4' />
               )}
-            </div>
-          </DialogContent>
-        </Dialog>
+            </Button>
+          )}
+          <Dialog open={isSummaryOpen} onOpenChange={setIsSummaryOpen}>
+            <TooltipProvider>
+              <UiTooltip>
+                <TooltipTrigger asChild>
+                  <div>
+                    <DialogTrigger asChild>
+                      <Button
+                        variant='outline'
+                        className='px-4 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 text-xs transition flex items-center'
+                        onClick={handleSummaryOpen}
+                        disabled={salesPersonNames.length > 3}
+                        aria-label='Open salesperson summary'
+                      >
+                        <FileBarChart2 className='mr-2 h-4 w-4' />
+                        Summary
+                      </Button>
+                    </DialogTrigger>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent color='default'>
+                  {salesPersonNames.length > 3 ? (
+                    <p>
+                      Cannot open summary: Maximum 3 salespersons allowed, but
+                      you selected {salesPersonNames.length}.
+                    </p>
+                  ) : (
+                    <p>
+                      Buka ringkasan performa salesperson untuk {selectedYear}
+                    </p>
+                  )}
+                </TooltipContent>
+              </UiTooltip>
+            </TooltipProvider>
+            <DialogContent
+              size={dialogSize()}
+              className='w-full bg-white dark:bg-gray-800'
+            >
+              <DialogHeader>
+                <DialogTitle className='text-gray-800 dark:text-gray-100'>
+                  Salesperson Summary
+                </DialogTitle>
+                <DialogDescription className='text-gray-500 dark:text-gray-400 text-xs'>
+                  Salesperson summary list for {selectedYear} in millions of IDR
+                </DialogDescription>
+              </DialogHeader>
+              <div className='w-full'>
+                {limitedSalespersons.length > 0 ? (
+                  <SalesPersonSummaryList
+                    salespersons={limitedSalespersons.map((name) => ({ name }))}
+                    year={selectedYear}
+                  />
+                ) : (
+                  <p className='text-gray-500 dark:text-gray-400 text-center'>
+                    No salesperson selected. Please select at least one
+                    salesperson.
+                  </p>
+                )}
+              </div>
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
 
       <div className='flex-1 min-h-0 w-full'>
@@ -609,7 +635,7 @@ const MonthlySalesPersonInvoiceFilteredChart: React.FC<
                       const growth = (context.dataset as any).growthPercentages[
                         context.dataIndex
                       ];
-                      const icon = growth > 0 ? '🔼' : growth < 0 ? '🔻' : '⏺️'; // Updated icon for no change
+                      const icon = growth > 0 ? '🔼' : growth < 0 ? '🔻' : '⏺️';
                       const growthDisplay =
                         growth !== undefined ? growth.toFixed(2) : '0.00';
                       return [
@@ -622,11 +648,11 @@ const MonthlySalesPersonInvoiceFilteredChart: React.FC<
               },
               datasets: {
                 bar: {
-                  barThickness: isFullScreen ? 14 : 10, // bar yang lebih tebal
+                  barThickness: isFullScreen ? 14 : 10,
                   maxBarThickness: 14,
                   minBarLength: 2,
-                  categoryPercentage: 0.7, // lebar kategori diperbesar
-                  barPercentage: 0.8, // bar memenuhi sebagian besar kategori
+                  categoryPercentage: 0.7,
+                  barPercentage: 0.8,
                 },
               },
               onClick: !isCompact ? handleChartClick : undefined,
