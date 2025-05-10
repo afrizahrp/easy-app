@@ -25,7 +25,10 @@ import { Button } from '@/components/ui/button';
 import { Maximize2, Minimize2 } from 'lucide-react';
 import { useMonthYearPeriodStore } from '@/store';
 import { useSalesInvoiceHdFilterStore } from '@/store';
-import { getSalesPersonColor } from '@/utils/getSalesPersonColor';
+import {
+  salesPersonColorMap,
+  getFallbackColor,
+} from '@/utils/salesPersonColorMap';
 
 ChartJS.register(
   CategoryScale,
@@ -214,11 +217,15 @@ const YearlySalesPersonInvoiceChart: React.FC<
     // console.log('SalesPersons:', allSalesPersons);
 
     const datasets = allSalesPersons.map((salesPersonName) => {
-      const colorConfig = getSalesPersonColor(salesPersonName) || {
-        from: 'hsl(220, 70%, 50%)',
-        to: 'hsl(220, 70%, 70%)',
-        border: 'hsl(220, 70%, 50%)',
-      };
+      // const colorConfig = getSalesPersonColor(salesPersonName) || {
+      //   from: 'hsl(220, 70%, 50%)',
+      //   to: 'hsl(220, 70%, 70%)',
+      //   border: 'hsl(220, 70%, 50%)',
+      // };
+
+      const colorConfig =
+        salesPersonColorMap[salesPersonName.toLowerCase()] ||
+        getFallbackColor(salesPersonName);
 
       const dataValues = years.map((year) => {
         const yearData = sortedData.find((d) => d.period === year);

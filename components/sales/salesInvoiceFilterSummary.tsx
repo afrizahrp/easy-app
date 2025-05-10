@@ -1,4 +1,4 @@
-'use client';
+// SalesInvoiceFilterSummary.tsx
 import { useMonthYearPeriodStore, useSalesInvoiceHdFilterStore } from '@/store';
 import { FilterSummary } from '@/components/ui/filterSummary';
 import { format } from 'date-fns';
@@ -42,6 +42,27 @@ export default function SalesInvoiceFilterSummary({
 
   const { paidStatus, poType, salesPersonName } = filters;
 
+  // Fungsi untuk clear salesperson individual
+  const handleClearIndividualSalesPerson = (salesPerson: string) => {
+    setFilters({
+      salesPersonName: salesPersonName.filter((name) => name !== salesPerson),
+    });
+  };
+
+  // Fungsi untuk clear paidStatus individual
+  const handleClearIndividualPaidStatus = (status: string) => {
+    setFilters({
+      paidStatus: paidStatus.filter((name) => name !== status),
+    });
+  };
+
+  // Fungsi untuk clear poType individual
+  const handleClearIndividualPoType = (type: string) => {
+    setFilters({
+      poType: poType.filter((name) => name !== type),
+    });
+  };
+
   const handleClear = (filterName: string) => {
     switch (filterName) {
       case 'startPeriod':
@@ -69,7 +90,7 @@ export default function SalesInvoiceFilterSummary({
 
   const filtersList = [
     {
-      label: 'Invoice Period',
+      label: 'Period', // Ubah label menjadi 'Period' agar sesuai dengan contoh
       value:
         period.startPeriod && period.endPeriod
           ? `${format(period.startPeriod, 'MMM yyyy')} - ${format(period.endPeriod, 'MMM yyyy')}`
@@ -88,6 +109,8 @@ export default function SalesInvoiceFilterSummary({
             value: salesPersonName,
             isClearable: true,
             onClear: () => handleClear('salesPersonName'),
+            individualValues: salesPersonName,
+            onClearIndividual: handleClearIndividualSalesPerson,
           },
         ]
       : []),
@@ -98,16 +121,20 @@ export default function SalesInvoiceFilterSummary({
             value: paidStatus,
             isClearable: true,
             onClear: () => handleClear('paidStatus'),
+            individualValues: paidStatus,
+            onClearIndividual: handleClearIndividualPaidStatus,
           },
         ]
       : []),
     ...(context === 'salesInvoice' && poType.length > 0
       ? [
           {
-            label: 'PO Type',
+            label: 'Po Type', // Sesuaikan kapitalisasi agar konsisten dengan contoh
             value: poType,
             isClearable: true,
             onClear: () => handleClear('poType'),
+            individualValues: poType,
+            onClearIndividual: handleClearIndividualPoType,
           },
         ]
       : []),
@@ -119,7 +146,7 @@ export default function SalesInvoiceFilterSummary({
     >
       <div className='w-full flex justify-center font-semibold text-md'>
         <FilterSummary
-          layout='inline'
+          layout='grid' // Ubah ke 'grid' untuk tampilan vertikal
           filters={filtersList}
           className='text-slate-700 dark:text-slate-400 text-lg'
         />
