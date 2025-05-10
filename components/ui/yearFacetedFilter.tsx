@@ -19,6 +19,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
+import { getDefaultYears } from '@/lib/utils';
 import { Separator } from '@/components/ui/separator';
 import { FilterIcon, Loader2 } from 'lucide-react';
 
@@ -41,10 +42,10 @@ export function YearFacetedFilter({
   onSelect,
   ariaLabel,
 }: YearFacetedFilterProps) {
-  const getDefaultYears = (): string[] => {
-    const currentYear = new Date().getFullYear();
-    return [`${currentYear - 1}`, `${currentYear}`]; // Misalnya, ["2024", "2025"]
-  };
+  // const getDefaultYears = (): string[] => {
+  //   const currentYear = new Date().getFullYear();
+  //   return [`${currentYear - 1}`, `${currentYear}`]; // Misalnya, ["2024", "2025"]
+  // };
 
   const defaultYears = getDefaultYears();
 
@@ -89,24 +90,29 @@ export function YearFacetedFilter({
           ) : (
             options
               ?.filter((option) => selectedValues.has(option.value))
-              .map((option) => (
-                <Badge
-                  variant='outline'
-                  key={option.value}
-                  className='rounded-sm px-1 text-xs text-slate-600'
-                >
-                  {option.label}
-                  <Cross2Icon
-                    className='ml-1 h-3 w-3 cursor-pointer text-red-500'
-                    onClick={() => {
-                      onSelect(option.value);
-                      console.log('Cross2Icon Clicked:', {
-                        value: option.value,
-                      });
-                    }}
-                  />
-                </Badge>
-              ))
+              .map((option) => {
+                const isDefaultYear = defaultYears.includes(option.value);
+                return (
+                  <Badge
+                    variant='outline'
+                    key={option.value}
+                    className='rounded-sm px-1 text-xs text-slate-600'
+                  >
+                    {option.label}
+                    {!isDefaultYear && (
+                      <Cross2Icon
+                        className='ml-1 h-3 w-3 cursor-pointer text-red-500'
+                        onClick={() => {
+                          onSelect(option.value);
+                          console.log('Cross2Icon Clicked:', {
+                            value: option.value,
+                          });
+                        }}
+                      />
+                    )}
+                  </Badge>
+                );
+              })
           )}
         </div>
       )}

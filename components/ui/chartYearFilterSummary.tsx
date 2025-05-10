@@ -31,28 +31,18 @@ export default function ChartYearFilterSummary({
     (year) => !defaultYears.includes(year)
   );
 
-  // Filter hanya menampilkan Selected Years, kecuali ada tahun non-default
+  // Satu entri untuk Selected Years, dengan array tahun sebagai value
   const filtersList = [
     {
       label: 'Selected Years',
-      value:
-        selectedYears.length > 0
-          ? selectedYears.sort().join(', ')
-          : defaultYear,
+      value: selectedYears.length > 0 ? selectedYears.sort() : defaultYears,
       isClearable: selectedYears.length > 0 && hasNonDefaultYears,
       onClear: () => resetYears(),
+      individualYears: hasNonDefaultYears
+        ? selectedYears.filter((year) => !defaultYears.includes(year))
+        : [],
+      onClearIndividual: handleClear,
     },
-    // Hanya tambah entri per tahun kalau ada tahun non-default
-    ...(hasNonDefaultYears
-      ? selectedYears
-          .filter((year) => !defaultYears.includes(year))
-          .map((year) => ({
-            label: 'Year',
-            value: year,
-            isClearable: true,
-            onClear: () => handleClear(year),
-          }))
-      : []),
   ];
 
   // Log untuk debugging
@@ -69,7 +59,7 @@ export default function ChartYearFilterSummary({
         className
       )}
     >
-      <div className='w-full flex justify-center font-semibold text-md'>
+      <div className='w-full flex justify-center'>
         <FilterSummary
           layout='inline'
           filters={filtersList}

@@ -15,6 +15,11 @@ export function cn(...inputs: ClassValue[]) {
 //   );
 // };
 
+export const getDefaultYears = (): string[] => {
+  const currentYear = new Date().getFullYear();
+  return [`${currentYear - 1}`, `${currentYear}`]; // Misalnya, ["2024", "2025"]
+};
+
 export const isLocationMatch = (href: string, locationName: string) => {
   const normalizePath = (path: string) => path.replace(/\/$/, '');
   return normalizePath(href) === normalizePath(locationName);
@@ -125,11 +130,6 @@ export const Years = [
   '2024',
   '2025',
 ];
-
-export const getDefaultYears = (): string[] => {
-  const currentYear = new Date().getFullYear();
-  return [`${currentYear - 1}`, `${currentYear}`];
-};
 
 export const CURRENCY = 'IDR';
 

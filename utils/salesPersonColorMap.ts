@@ -75,7 +75,6 @@ export const getFallbackColor = (
   if (!salesPersonName) {
     salesPersonName = 'default';
   }
-  console.log(`[getFallbackColor] salesPersonName:`, salesPersonName);
   const hash = salesPersonName
     .split('')
     .reduce((acc, char) => acc + char.charCodeAt(0), 0);

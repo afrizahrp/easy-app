@@ -336,7 +336,7 @@ const YearlySalesInvoiceChart: React.FC<YearlySalesInvoiceChartProps> = ({
     >
       <div className='relative flex items-center justify-between mb-2'>
         <h2 className='text-sm text-muted-foreground font-semibold ml-2'>
-          Yearly Sales (in Millions of IDR)
+          Yearly Sales Performance (in IDR Billion)
         </h2>
         {!isCompact && (
           <Button

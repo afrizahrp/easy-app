@@ -39,6 +39,48 @@ export function ChartYearFilter({
     useYearlyPeriodStore() as YearlyPeriodStore;
   const { toast } = useToast();
 
+  // const yearOptions = React.useMemo<YearOption[]>(
+  //   () =>
+  //     Years.sort((a, b) => Number(b) - Number(a)).map((year) => ({
+  //       value: year,
+  //       label: year,
+  //     })),
+  //   []
+  // );
+
+  const handleSelect = (value: string) => {
+    const updatedYears = new Set(selectedYears);
+    if (value) {
+      updatedYears.has(value)
+        ? updatedYears.delete(value)
+        : updatedYears.add(value);
+      setYears(Array.from(updatedYears));
+    } else {
+      resetYears();
+    }
+    console.log('handleSelect:', {
+      value,
+      selectedYears: Array.from(updatedYears),
+    });
+  };
+
+  const handleReset = React.useCallback(() => {
+    try {
+      resetYears();
+      toast({
+        description: 'Year filter has been reset.',
+        variant: 'default',
+      });
+    } catch (error) {
+      toast({
+        description: `Reset failed: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+        variant: 'destructive',
+      });
+    }
+  }, [resetYears, toast]);
+
   const yearOptions = React.useMemo<YearOption[]>(
     () =>
       Years.sort((a, b) => Number(b) - Number(a)).map((year) => ({
@@ -46,6 +88,18 @@ export function ChartYearFilter({
         label: year,
       })),
     []
+  );
+  // Di komponen induk:
+  const filters = React.useMemo(
+    () => [
+      {
+        label: 'Year',
+        value: selectedYears,
+        isClearable: true,
+        onClear: handleReset,
+      },
+    ],
+    [selectedYears]
   );
 
   if (!yearOptions.length) {
@@ -61,39 +115,22 @@ export function ChartYearFilter({
     );
   }
 
-  const handleSelect = (value: string) => {
-    const updatedYears = new Set(selectedYears);
-    if (value) {
-      updatedYears.has(value)
-        ? updatedYears.delete(value)
-        : updatedYears.add(value);
-      setYears(Array.from(updatedYears));
-    } else {
-      resetYears();
-    }
-    // Log untuk debugging
-    console.log('handleSelect:', {
-      value,
-      selectedYears: Array.from(updatedYears),
-    });
-  };
-
-  const handleReset = () => {
-    try {
-      resetYears();
-      toast({
-        description: 'Year filter has been reset.',
-        variant: 'default',
-      });
-    } catch (error) {
-      toast({
-        description: `Reset failed: ${
-          error instanceof Error ? error.message : String(error)
-        }`,
-        variant: 'destructive',
-      });
-    }
-  };
+  // const handleReset = () => {
+  //   try {
+  //     resetYears();
+  //     toast({
+  //       description: 'Year filter has been reset.',
+  //       variant: 'default',
+  //     });
+  //   } catch (error) {
+  //     toast({
+  //       description: `Reset failed: ${
+  //         error instanceof Error ? error.message : String(error)
+  //       }`,
+  //       variant: 'destructive',
+  //     });
+  //   }
+  // };
 
   return (
     <motion.div

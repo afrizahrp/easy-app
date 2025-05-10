@@ -29,7 +29,7 @@ const CustomTooltip: React.FC<CustomTooltipProps> = ({
   parentRef,
   isCompact = false,
 }) => {
-  console.log('CustomTooltip rendering:', { visible, x, y, isFullScreen });
+  // console.log('CustomTooltip rendering:', { visible, x, y, isFullScreen });
   if (!visible) return null;
 
   const isUp = growth >= 0;

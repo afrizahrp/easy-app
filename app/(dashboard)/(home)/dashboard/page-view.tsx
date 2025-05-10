@@ -66,8 +66,8 @@ const DashboardPageView: React.FC<DashboardPageViewProps> = ({
     openChartYearFilter: 'Open chart year filter',
     showChartsByYear: 'Show Charts by Year',
     selectChartYear: 'Select chart year',
-    yearlySalesInvoice: 'Yearly Sales Invoice',
-    salesPersonInvoice: 'Sales Person Invoice',
+    // yearlySalesInvoice: 'Yearly Sales Invoice',
+    // salesPersonInvoice: 'Sales Person Invoice',
   };
 
   const t = { ...defaultTrans, ...trans };
@@ -115,7 +115,8 @@ const DashboardPageView: React.FC<DashboardPageViewProps> = ({
             </>
           ) : (
             <>
-              <Card title={t.yearlySalesInvoice} key='chart1'>
+              <Card>
+                {/* <Card title={t.yearlySalesInvoice} key='chart1'></Card> */}
                 <YearlySalesInvoiceChart
                   height={300}
                   isCompact={false}
@@ -125,7 +126,9 @@ const DashboardPageView: React.FC<DashboardPageViewProps> = ({
                   }
                 />
               </Card>
-              <Card title={t.salesPersonInvoice} key='chart2'>
+              <Card>
+                {/* <Card title={t.salesPersonInvoice} key='chart2'> */}
+
                 <YearlySalesPersonInvoiceChart
                   height={300}
                   isCompact={false}

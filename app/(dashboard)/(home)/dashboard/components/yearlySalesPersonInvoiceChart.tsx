@@ -103,11 +103,9 @@ const YearlySalesPersonInvoiceChart: React.FC<
   const { setSalesPersonInvoicePeriod } = useMonthYearPeriodStore();
   const { setSalesPersonInvoiceFilters } = useSalesInvoiceHdFilterStore();
 
-  console.log('Sales Person Invoice Data:', data);
-
   useEffect(() => {
     const handleFullscreenChange = () => {
-      console.log('Fullscreen change triggered');
+      // console.log('Fullscreen change triggered');
       const isNowFullScreen = !!document.fullscreenElement;
       setIsFullScreen(isNowFullScreen);
       onModeChange?.(isNowFullScreen);
@@ -156,16 +154,16 @@ const YearlySalesPersonInvoiceChart: React.FC<
 
   useEffect(() => {
     if (chartContainerRef.current) {
-      console.log('Chart Container Dimensions:', {
-        width: chartContainerRef.current.offsetWidth,
-        height: chartContainerRef.current.offsetHeight,
-      });
+      // console.log('Chart Container Dimensions:', {
+      //   width: chartContainerRef.current.offsetWidth,
+      //   height: chartContainerRef.current.offsetHeight,
+      // });
       window.dispatchEvent(new Event('resize'));
     }
   }, [isFullScreen, isFullWidth]);
 
   const toggleFullScreen = useCallback(() => {
-    console.log('toggleFullScreen called');
+    // console.log('toggleFullScreen called');
     if (!chartContainerRef.current) return;
 
     if (!isFullScreen) {
@@ -212,8 +210,8 @@ const YearlySalesPersonInvoiceChart: React.FC<
       new Set(sortedData.flatMap((d) => d.sales.map((s) => s.salesPersonName)))
     );
 
-    console.log('Years:', years);
-    console.log('SalesPersons:', allSalesPersons);
+    // console.log('Years:', years);
+    // console.log('SalesPersons:', allSalesPersons);
 
     const datasets = allSalesPersons.map((salesPersonName) => {
       const colorConfig = getSalesPersonColor(salesPersonName) || {
@@ -253,7 +251,7 @@ const YearlySalesPersonInvoiceChart: React.FC<
       };
     });
 
-    console.log('Datasets:', datasets);
+    // console.log('Datasets:', datasets);
 
     const chartDataResult = {
       labels: years.length > 0 ? years : [''],
@@ -269,7 +267,7 @@ const YearlySalesPersonInvoiceChart: React.FC<
   const maxValue = React.useMemo(() => {
     if (!chartData) return 0;
     const max = Math.max(...chartData.datasets.flatMap((ds) => ds.data));
-    console.log('maxValue:', max);
+    // console.log('maxValue:', max);
     return max;
   }, [chartData]);
 
@@ -309,10 +307,10 @@ const YearlySalesPersonInvoiceChart: React.FC<
       chart: import('chart.js').Chart;
       tooltip: import('chart.js').TooltipModel<'bar'>;
     }) => {
-      console.log('handleTooltip called', {
-        isFullScreen,
-        tooltipOpacity: context.tooltip.opacity,
-      });
+      // console.log('handleTooltip called', {
+      //   isFullScreen,
+      //   tooltipOpacity: context.tooltip.opacity,
+      // });
       const { chart, tooltip } = context;
       if (!chartData || !chartData.labels) {
         if (tooltipState.visible) {
@@ -359,15 +357,16 @@ const YearlySalesPersonInvoiceChart: React.FC<
           ) {
             return prev;
           }
-          console.log('Updating tooltip state:', {
-            year,
-            invoice,
-            growth,
-            quantity,
-            salesPersonName,
-            x,
-            y,
-          });
+          //   console.log('Updating tooltip state:', {
+          //     year,
+          //     invoice,
+          //     growth,
+          //     quantity,
+          //     salesPersonName,
+          //     x,
+          //     y,
+          //   }
+          // );
           return {
             visible: true,
             x,
