@@ -110,7 +110,7 @@ const SalesPersonPerformaOverview: React.FC<
             isFullWidth={isFullWidth}
             onModeChange={onModeChange}
             onSalesPersonSelect={handleSalesPersonSelect}
-            height={300}
+            height={250}
           />
         ) : (
           <MonthlySalesPersonInvoiceChart

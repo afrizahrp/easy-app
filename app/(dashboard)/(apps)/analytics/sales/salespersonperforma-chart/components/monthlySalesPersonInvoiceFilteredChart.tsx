@@ -153,7 +153,7 @@ const MonthlySalesPersonInvoiceFilteredChart: React.FC<
       return null;
     }
 
-    console.log('Raw data:', JSON.stringify(data, null, 2));
+    // console.log('Raw data:', JSON.stringify(data, null, 2));
 
     const allSalesPersons = Array.from(
       new Set(
@@ -163,7 +163,7 @@ const MonthlySalesPersonInvoiceFilteredChart: React.FC<
       )
     );
 
-    console.log('All Salespersons:', allSalesPersons);
+    // console.log('All Salespersons:', allSalesPersons);
 
     const datasets = allSalesPersons.map((salesPersonName) => {
       const color =
@@ -202,8 +202,8 @@ const MonthlySalesPersonInvoiceFilteredChart: React.FC<
         return totalAmount / 1_000_000;
       });
 
-      console.log(`Data for ${salesPersonName}:`, monthlyData);
-      console.log(`Growth for ${salesPersonName}:`, growthPercentages);
+      // console.log(`Data for ${salesPersonName}:`, monthlyData);
+      // console.log(`Growth for ${salesPersonName}:`, growthPercentages);
 
       return {
         label: salesPersonName,
@@ -443,7 +443,7 @@ const MonthlySalesPersonInvoiceFilteredChart: React.FC<
         isFullScreen && !document.fullscreenElement
           ? 'fixed inset-0 z-50 bg-white dark:bg-[#18181b] p-4 rounded-lg shadow-md'
           : 'relative bg-white dark:bg-[#18181b] p-4 rounded-lg shadow-sm h-96',
-        'flex flex-col h-fit min-h-[250px] w-full box-border'
+        'flex flex-col h-96 w-full box-border'
       )}
       style={{ backgroundColor: hexBackground }}
     >
@@ -477,13 +477,12 @@ const MonthlySalesPersonInvoiceFilteredChart: React.FC<
                     <DialogTrigger asChild>
                       <Button
                         variant='outline'
-                        className='px-4 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 text-xs transition flex items-center'
+                        className='px-4 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 hover:text-slate-200 text-xs transition flex items-center'
                         onClick={handleSummaryOpen}
                         disabled={salesPersonNames.length > 3}
                         aria-label='Open salesperson summary'
                       >
                         <FileBarChart2 className='mr-2 h-4 w-4' />
-                        Summary
                       </Button>
                     </DialogTrigger>
                   </div>
@@ -495,9 +494,7 @@ const MonthlySalesPersonInvoiceFilteredChart: React.FC<
                       you selected {salesPersonNames.length}.
                     </p>
                   ) : (
-                    <p>
-                      Buka ringkasan performa salesperson untuk {selectedYear}
-                    </p>
+                    <p>Open summary for {selectedYear}</p>
                   )}
                 </TooltipContent>
               </UiTooltip>
@@ -532,7 +529,7 @@ const MonthlySalesPersonInvoiceFilteredChart: React.FC<
         </div>
       </div>
 
-      <div className='flex-1 min-h-0 w-full'>
+      <div className='flex-1 min-h-80 w-full '>
         {isLoading || isFetching ? (
           <div className='flex items-center justify-center h-full'>
             <div className='w-3/4 h-1/2 rounded-lg shimmer' />
@@ -545,14 +542,14 @@ const MonthlySalesPersonInvoiceFilteredChart: React.FC<
             options={{
               responsive: true,
               maintainAspectRatio: false,
-              layout: {
-                padding: {
-                  bottom: isCompact ? 10 : 20,
-                  top: isCompact ? 5 : 10,
-                  left: isCompact ? 30 : 40,
-                  right: isCompact ? 30 : 40,
-                },
-              },
+              // layout: {
+              //   padding: {
+              //     bottom: isCompact ? 10 : 20,
+              //     top: isCompact ? 5 : 10,
+              //     left: isCompact ? 30 : 40,
+              //     right: isCompact ? 30 : 40,
+              //   },
+              // },
               scales: {
                 y: {
                   beginAtZero: true,
@@ -635,7 +632,7 @@ const MonthlySalesPersonInvoiceFilteredChart: React.FC<
                       const growth = (context.dataset as any).growthPercentages[
                         context.dataIndex
                       ];
-                      const icon = growth > 0 ? '🔼' : growth < 0 ? '🔻' : '⏺️';
+                      const icon = growth > 0 ? '🔼' : growth < 0 ? '🔻' : '➖';
                       const growthDisplay =
                         growth !== undefined ? growth.toFixed(2) : '0.00';
                       return [
@@ -685,7 +682,7 @@ const MonthlySalesPersonInvoiceFilteredChart: React.FC<
                 d='M3 3v18h18V3H3zm5 14h8m-8-4h8m-8-4h8'
               />
             </svg>
-            <p className='text-sm font-medium'>Data tidak tersedia</p>
+            <p className='text-sm font-medium'>Data not available</p>
           </div>
         )}
       </div>
