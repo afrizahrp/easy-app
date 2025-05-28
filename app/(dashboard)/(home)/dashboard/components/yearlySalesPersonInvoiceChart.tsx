@@ -425,20 +425,13 @@ const YearlySalesPersonInvoiceChart: React.FC<
                       return '';
                     },
                     label: (context) => {
-                      const amount = (context.raw as number) * 1_000_000; // Convert back to IDR
+                      const amount = (context.raw as number) * 1_000_000_000; // Convert back to IDR
                       const growth = (context.dataset as CustomBarDataset)
                         .growthPercentages[context.dataIndex];
-                      // const quantity = (context.dataset as CustomBarDataset)
-                      //   .quantities[context.dataIndex];
                       const icon = growth > 0 ? '🔼' : growth < 0 ? '🔻' : '➖';
-                      const growthDisplay =
-                        growth !== undefined ? growth.toFixed(2) : '0.00';
+
                       return [
-                        `${context.dataset.label}`,
-                        `${amount.toLocaleString(
-                          'id-ID'
-                        )} ${icon} ${growthDisplay}%`,
-                        // `Quantity: ${quantity.toLocaleString('id-ID')}`,
+                        `${amount.toLocaleString('id-ID')} ${icon} ${growth}%`,
                       ];
                     },
                   },
