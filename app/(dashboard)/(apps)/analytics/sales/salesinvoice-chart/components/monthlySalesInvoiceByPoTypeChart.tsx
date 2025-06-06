@@ -67,6 +67,15 @@ const MonthlySalesInvoiceByPoTypeChart: React.FC<
     string,
     { borderColor: string; backgroundColor: string }
   > = {
+    Regular_2022: {
+      borderColor: '#22C55E',
+      backgroundColor: 'rgba(34, 197, 94, 0.2)',
+    },
+    eCatalog_2022: {
+      borderColor: '#3B82F6',
+      backgroundColor: 'rgba(59, 130, 246, 0.2)',
+    },
+
     Regular_2023: {
       borderColor: '#22C55E',
       backgroundColor: 'rgba(34, 197, 94, 0.2)',

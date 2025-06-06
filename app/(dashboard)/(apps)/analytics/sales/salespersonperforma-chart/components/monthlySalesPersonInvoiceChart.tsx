@@ -166,7 +166,7 @@ const MonthlySalesPersonInvoiceChart: React.FC<
 
     const datasets = allSalesPersons.map((salesPersonName) => {
       const color =
-        salesPersonColorMap[salesPersonName.toLowerCase()] ||
+        salesPersonColorMap[salesPersonName.trim().toLowerCase()] ||
         getFallbackColor(salesPersonName);
 
       const growthPercentages = months.map((month) => {

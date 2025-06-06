@@ -187,7 +187,7 @@ const YearlySalesPersonInvoiceChart: React.FC<
 
     const datasets = allSalesPersons.map((salesPersonName) => {
       const colorConfig =
-        salesPersonColorMap[salesPersonName.toLowerCase()] ||
+        salesPersonColorMap[salesPersonName.trim().toLowerCase()] ||
         getFallbackColor(salesPersonName);
 
       const dataValues = years.map((year) => {
