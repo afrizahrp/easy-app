@@ -1,11 +1,12 @@
 'use client';
 import * as React from 'react';
 import { Years } from '@/lib/utils';
-import { useYearlyPeriodStore } from '@/store';
+import { useYearlyPeriodStore, useMonthlyPeriodStore } from '@/store';
 import { Button } from '@/components/ui/button';
 import { Cross2Icon } from '@radix-ui/react-icons';
 import { useToast } from '@/components/ui/use-toast';
 import { YearFacetedFilter } from '@/components/ui/yearFacetedFilter';
+import { MonthFacetedFilter } from './monthFacetedFilter';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 

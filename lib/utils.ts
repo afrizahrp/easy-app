@@ -24,6 +24,7 @@ export const getDefaultYears = (): string[] => {
     `${currentYear}`,
   ];
 };
+
 export const isLocationMatch = (href: string, locationName: string) => {
   const normalizePath = (path: string) => path.replace(/\/$/, '');
   return normalizePath(href) === normalizePath(locationName);

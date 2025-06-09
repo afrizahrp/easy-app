@@ -343,6 +343,19 @@ export const useYearlyPeriodStore = create<YearlyPeriodStore>()(
     }
   )
 );
+
+interface MonthlyPeriodStore {
+  selectedMonths: string[];
+  setMonths: (months: string[]) => void;
+  resetMonths: () => void;
+}
+
+export const useMonthlyPeriodStore = create<MonthlyPeriodStore>((set) => ({
+  selectedMonths: [],
+  setMonths: (months) => set({ selectedMonths: months }),
+  resetMonths: () => set({ selectedMonths: [] }),
+}));
+
 interface PeriodState {
   startPeriod: Date | null;
   endPeriod: Date | null;

@@ -19,11 +19,11 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { getDefaultYears } from '@/lib/utils';
 import { Separator } from '@/components/ui/separator';
 import { FilterIcon, Loader2 } from 'lucide-react';
+import { months } from '@/utils/monthNameMap';
 
-interface YearFacetedFilterProps {
+interface MonthFacetedFilterProps {
   title?: string;
   options: { value: string; label: string; count?: number }[];
   isLoading?: boolean;
@@ -33,16 +33,19 @@ interface YearFacetedFilterProps {
   ariaLabel?: string;
 }
 
-export function YearFacetedFilter({
-  title = 'Filter',
-  options,
+export function MonthFacetedFilter({
+  title = 'Filter by Month',
+  options = [
+    { value: 'all', label: 'All Months' },
+    ...months.map((month) => ({ value: month.toLowerCase(), label: month })),
+  ],
   isLoading,
   disabled,
   selectedValues,
   onSelect,
   ariaLabel,
-}: YearFacetedFilterProps) {
-  const defaultYears = getDefaultYears();
+}: MonthFacetedFilterProps) {
+  const defaultMonths = months.map((month) => month.toLowerCase());
 
   return (
     <Popover>
@@ -56,7 +59,7 @@ export function YearFacetedFilter({
         >
           {isLoading && <Loader2 className='mr-2 h-4 w-4 animate-spin' />}
           <FilterIcon className='mr-2 h-4 w-4 text-sm' />
-          Filter by {title}
+          {title}
           {selectedValues.size > 0 && (
             <>
               <Separator
@@ -80,13 +83,15 @@ export function YearFacetedFilter({
               variant='outline'
               className='rounded-sm px-1 font-normal text-slate dark:text-slate-400'
             >
-              {selectedValues.size} years selected
+              {selectedValues.size} months selected
             </Badge>
           ) : (
             options
               ?.filter((option) => selectedValues.has(option.value))
               .map((option) => {
-                const isDefaultYear = defaultYears.includes(option.value);
+                const isDefaultMonth =
+                  defaultMonths.includes(option.value) ||
+                  option.value === 'all';
                 return (
                   <Badge
                     variant='outline'
@@ -94,7 +99,7 @@ export function YearFacetedFilter({
                     className='rounded-sm px-1 text-xs text-slate-600'
                   >
                     {option.label}
-                    {!isDefaultYear && (
+                    {!isDefaultMonth && (
                       <Cross2Icon
                         className='ml-1 h-3 w-3 cursor-pointer text-red-500'
                         onClick={() => {
@@ -116,7 +121,7 @@ export function YearFacetedFilter({
         <Command>
           <CommandInput placeholder={title} />
           <CommandList>
-            <CommandEmpty>No years found</CommandEmpty>
+            <CommandEmpty>No months found</CommandEmpty>
             <CommandGroup>
               {options?.map((option) => {
                 const isSelected = selectedValues.has(option.value);
@@ -151,7 +156,8 @@ export function YearFacetedFilter({
               })}
             </CommandGroup>
             {selectedValues.size > 0 &&
-              !defaultYears.every((year) => selectedValues.has(year)) && (
+              !defaultMonths.every((month) => selectedValues.has(month)) &&
+              !selectedValues.has('all') && (
                 <>
                   <CommandSeparator />
                   <CommandGroup>
