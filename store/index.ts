@@ -350,11 +350,25 @@ interface MonthlyPeriodStore {
   resetMonths: () => void;
 }
 
-export const useMonthlyPeriodStore = create<MonthlyPeriodStore>((set) => ({
-  selectedMonths: [],
-  setMonths: (months) => set({ selectedMonths: months }),
-  resetMonths: () => set({ selectedMonths: [] }),
-}));
+interface MonthlyPeriodStore {
+  selectedMonths: string[];
+  setMonths: (months: string[]) => void;
+  resetMonths: () => void;
+}
+
+export const useMonthlyPeriodStore = create<MonthlyPeriodStore>()(
+  persist(
+    (set) => ({
+      selectedMonths: [],
+      setMonths: (months) => set({ selectedMonths: months }),
+      resetMonths: () => set({ selectedMonths: [] }),
+    }),
+    {
+      name: 'monthly-period-store',
+      storage: createJSONStorage(() => localStorage),
+    }
+  )
+);
 
 interface PeriodState {
   startPeriod: Date | null;
