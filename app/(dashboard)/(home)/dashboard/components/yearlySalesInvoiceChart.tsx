@@ -15,7 +15,7 @@ import {
 } from 'chart.js';
 import { motion } from 'framer-motion';
 import { hslToHex, generateYearColorPalette } from '@/lib/utils';
-import { useThemeStore } from '@/store';
+import { useMonthlyPeriodStore, useThemeStore } from '@/store';
 import { useTheme } from 'next-themes';
 import { useRouter } from 'next/navigation';
 import { themes } from '@/config/thems';
@@ -68,6 +68,13 @@ const YearlySalesInvoiceChart: React.FC<YearlySalesInvoiceChartProps> = ({
   const [isFullScreen, setIsFullScreen] = useState(false);
   const { setSalesInvoicePeriod, setSalesPersonInvoicePeriod } =
     useMonthYearPeriodStore();
+
+  const { selectedMonths } = useMonthlyPeriodStore();
+
+  const title =
+    selectedMonths.length > 0
+      ? `Yearly Sales Performance for ${selectedMonths.join(', ')} (in IDR Billion)`
+      : 'Yearly Sales Performance (in IDR Billion)';
 
   // Handle fullscreen change
   useEffect(() => {
@@ -265,7 +272,7 @@ const YearlySalesInvoiceChart: React.FC<YearlySalesInvoiceChartProps> = ({
     >
       <div className='relative flex items-center justify-between mb-2'>
         <h2 className='text-sm text-muted-foreground font-semibold ml-2'>
-          Yearly Sales Performance (in IDR Billion)
+          {title}
         </h2>
         {!isCompact && (
           <Button

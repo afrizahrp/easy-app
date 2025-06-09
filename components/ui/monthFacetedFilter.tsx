@@ -36,7 +36,6 @@ interface MonthFacetedFilterProps {
 export function MonthFacetedFilter({
   title = 'Filter by Month',
   options = [
-    { value: 'all', label: 'All Months' },
     ...months.map((month) => ({ value: month.toLowerCase(), label: month })),
   ],
   isLoading,

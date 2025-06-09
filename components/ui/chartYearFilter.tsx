@@ -6,9 +6,10 @@ import { Button } from '@/components/ui/button';
 import { Cross2Icon } from '@radix-ui/react-icons';
 import { useToast } from '@/components/ui/use-toast';
 import { YearFacetedFilter } from '@/components/ui/yearFacetedFilter';
-import { MonthFacetedFilter } from './monthFacetedFilter';
+import { MonthFacetedFilter } from '@/components/ui/monthFacetedFilter';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
+import { months } from '@/utils/monthNameMap'; // Import months array
 
 interface ChartYearFilterProps {
   title?: string;
@@ -23,33 +24,41 @@ interface YearOption {
   label: string;
 }
 
-interface YearlyPeriodStore {
+interface YearPeriodStore {
   selectedYears: string[];
   setYears: (years: string[]) => void;
   resetYears: () => void;
 }
 
+interface MonthPeriodStore {
+  selectedMonths: string[];
+  setMonths: (months: string[]) => void;
+  resetMonths: () => void;
+}
+
 export function ChartYearFilter({
-  title = 'Filter by Year',
+  title = 'Show Charts by Year',
   isLoading,
   disabled,
   className,
-  'aria-label': ariaLabel = 'Filter by year',
+  'aria-label': ariaLabel = 'Filter by year or month',
 }: ChartYearFilterProps) {
   const { selectedYears, setYears, resetYears } =
-    useYearlyPeriodStore() as YearlyPeriodStore;
+    useYearlyPeriodStore() as YearPeriodStore;
+  const { selectedMonths, setMonths, resetMonths } =
+    useMonthlyPeriodStore() as MonthPeriodStore;
   const { toast } = useToast();
 
-  // const yearOptions = React.useMemo<YearOption[]>(
-  //   () =>
-  //     Years.sort((a, b) => Number(b) - Number(a)).map((year) => ({
-  //       value: year,
-  //       label: year,
-  //     })),
-  //   []
-  // );
+  const yearOptions = React.useMemo<YearOption[]>(
+    () =>
+      Years.sort((a, b) => Number(b) - Number(a)).map((year) => ({
+        value: year,
+        label: year,
+      })),
+    []
+  );
 
-  const handleSelect = (value: string) => {
+  const handleYearSelect = (value: string) => {
     const updatedYears = new Set(selectedYears);
     if (value) {
       updatedYears.has(value)
@@ -59,17 +68,43 @@ export function ChartYearFilter({
     } else {
       resetYears();
     }
-    console.log('handleSelect:', {
+    console.log('handleYearSelect:', {
       value,
       selectedYears: Array.from(updatedYears),
+    });
+  };
+
+  const handleMonthSelect = (value: string) => {
+    const updatedMonths = new Set(selectedMonths);
+    if (value === 'all') {
+      if (!updatedMonths.has('all')) {
+        setMonths(['all']);
+      } else {
+        resetMonths();
+      }
+    } else if (value) {
+      if (updatedMonths.has('all')) {
+        updatedMonths.delete('all');
+      }
+      updatedMonths.has(value)
+        ? updatedMonths.delete(value)
+        : updatedMonths.add(value);
+      setMonths(Array.from(updatedMonths));
+    } else {
+      resetMonths();
+    }
+    console.log('handleMonthSelect:', {
+      value,
+      selectedMonths: Array.from(updatedMonths),
     });
   };
 
   const handleReset = React.useCallback(() => {
     try {
       resetYears();
+      resetMonths();
       toast({
-        description: 'Year filter has been reset.',
+        description: 'Year and month filters have been reset.',
         variant: 'default',
       });
     } catch (error) {
@@ -80,28 +115,10 @@ export function ChartYearFilter({
         variant: 'destructive',
       });
     }
-  }, [resetYears, toast]);
+  }, [resetYears, resetMonths, toast]);
 
-  const yearOptions = React.useMemo<YearOption[]>(
-    () =>
-      Years.sort((a, b) => Number(b) - Number(a)).map((year) => ({
-        value: year,
-        label: year,
-      })),
-    []
-  );
-  // Di komponen induk:
-  const filters = React.useMemo(
-    () => [
-      {
-        label: 'Year',
-        value: selectedYears,
-        isClearable: true,
-        onClear: handleReset,
-      },
-    ],
-    [selectedYears]
-  );
+  const hasActiveFilters =
+    selectedYears.length > 0 || selectedMonths.length > 0;
 
   if (!yearOptions.length) {
     return (
@@ -115,23 +132,6 @@ export function ChartYearFilter({
       </motion.div>
     );
   }
-
-  // const handleReset = () => {
-  //   try {
-  //     resetYears();
-  //     toast({
-  //       description: 'Year filter has been reset.',
-  //       variant: 'default',
-  //     });
-  //   } catch (error) {
-  //     toast({
-  //       description: `Reset failed: ${
-  //         error instanceof Error ? error.message : String(error)
-  //       }`,
-  //       variant: 'destructive',
-  //     });
-  //   }
-  // };
 
   return (
     <motion.div
@@ -150,30 +150,47 @@ export function ChartYearFilter({
           isLoading={isLoading}
           disabled={disabled}
           selectedValues={new Set(selectedYears)}
-          onSelect={handleSelect}
-          ariaLabel={ariaLabel}
+          onSelect={handleYearSelect}
+          ariaLabel={`${ariaLabel} - Year`}
+        />
+        <MonthFacetedFilter
+          title='Month'
+          options={[
+            { value: 'all', label: 'All Months' },
+            ...months.map((month) => ({
+              value: month.toLowerCase(),
+              label: month,
+            })),
+          ]}
+          isLoading={isLoading}
+          disabled={disabled}
+          selectedValues={new Set(selectedMonths)}
+          onSelect={handleMonthSelect}
+          ariaLabel={`${ariaLabel} - Month`}
         />
       </div>
 
-      <motion.div
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
-        transition={{ duration: 0.2 }}
-      >
-        <Button
-          variant='outline'
-          onClick={handleReset}
-          className={cn(
-            'h-10 px-2 w-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200',
-            disabled && 'opacity-50 cursor-not-allowed'
-          )}
-          aria-label='Reset year filter'
-          disabled={disabled}
+      {hasActiveFilters && (
+        <motion.div
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          transition={{ duration: 0.2 }}
         >
-          <Cross2Icon className='ml-2 h-4 w-4' />
-          Reset Year
-        </Button>
-      </motion.div>
+          <Button
+            variant='outline'
+            onClick={handleReset}
+            className={cn(
+              'h-10 px-2 w-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200',
+              disabled && 'opacity-50 cursor-not-allowed'
+            )}
+            aria-label='Reset year and month filter'
+            disabled={disabled}
+          >
+            <Cross2Icon className='ml-2 h-4 w-4' />
+            Reset Year
+          </Button>
+        </motion.div>
+      )}
     </motion.div>
   );
 }

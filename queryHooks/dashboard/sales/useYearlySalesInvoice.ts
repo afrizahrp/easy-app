@@ -1,7 +1,10 @@
-// src/hooks/useYearlySalesInvoice.ts
 import { api } from '@/config/axios.config';
 import { useQuery } from '@tanstack/react-query';
-import { useSessionStore, useYearlyPeriodStore } from '@/store';
+import {
+  useSessionStore,
+  useYearlyPeriodStore,
+  useMonthlyPeriodStore,
+} from '@/store';
 import { getDefaultYears } from '@/lib/utils';
 import axios from 'axios';
 
@@ -25,12 +28,18 @@ const useYearlySalesInvoice = (
   const user = useSessionStore((state) => state.user);
   const resolvedCompanyId = company_id || user?.company_id?.toUpperCase();
   const { selectedYears } = useYearlyPeriodStore();
+  const { selectedMonths } = useMonthlyPeriodStore();
 
   // Gunakan selectedYears jika ada, fallback ke getDefaultYears jika kosong
   const years = selectedYears.length > 0 ? selectedYears : getDefaultYears();
+  // Gunakan selectedMonths jika ada, kosongkan jika tidak ada
+  const months = selectedMonths.length > 0 ? selectedMonths : [];
 
   const isValidRequest = Boolean(
-    resolvedCompanyId && module_id && subModule_id && years && years.length > 0
+    resolvedCompanyId &&
+      module_id &&
+      subModule_id &&
+      (years.length > 0 || months.length > 0)
   );
 
   const { data, isLoading, isFetching, error, ...rest } = useQuery<
@@ -43,6 +52,7 @@ const useYearlySalesInvoice = (
       module_id,
       subModule_id,
       years,
+      months,
     ],
     queryFn: async () => {
       if (!process.env.NEXT_PUBLIC_API_URL) {
@@ -51,12 +61,19 @@ const useYearlySalesInvoice = (
       const url = `${process.env.NEXT_PUBLIC_API_URL}/${resolvedCompanyId}/${module_id}/${subModule_id}/get-dashboard/getYearlySalesInvoice`;
       try {
         const response = await api.get<YearlySalesInvoiceResponse>(url, {
-          params: { years },
+          params: { years, months },
           paramsSerializer: (params) => {
-            // Serialisasi array years menjadi years=2022&years=2023&years=2024
-            return years
-              .map((year) => `years=${encodeURIComponent(year)}`)
-              .join('&');
+            const yearParams = params.years
+              ? params.years
+                  .map((year: string) => `years=${encodeURIComponent(year)}`)
+                  .join('&')
+              : '';
+            const monthParams = params.months
+              ? params.months
+                  .map((month: string) => `months=${encodeURIComponent(month)}`)
+                  .join('&')
+              : '';
+            return [yearParams, monthParams].filter(Boolean).join('&');
           },
         });
         return response.data;
