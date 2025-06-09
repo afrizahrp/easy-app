@@ -15,7 +15,11 @@ import {
 } from 'chart.js';
 import { motion } from 'framer-motion';
 import { hslToHex, generateYearColorPalette } from '@/lib/utils';
-import { useMonthlyPeriodStore, useThemeStore } from '@/store';
+import {
+  useMonthlyPeriodStore,
+  useThemeStore,
+  useYearlyPeriodStore,
+} from '@/store';
 import { useTheme } from 'next-themes';
 import { useRouter } from 'next/navigation';
 import { themes } from '@/config/thems';
@@ -70,11 +74,10 @@ const YearlySalesInvoiceChart: React.FC<YearlySalesInvoiceChartProps> = ({
     useMonthYearPeriodStore();
 
   const { selectedMonths } = useMonthlyPeriodStore();
+  const { selectedYears } = useYearlyPeriodStore();
 
-  const title =
-    selectedMonths.length > 0
-      ? `Yearly Sales Performance for ${selectedMonths.join(', ')} (in IDR Billion)`
-      : 'Yearly Sales Performance (in IDR Billion)';
+  // console.log('Selected Months:', selectedMonths);
+  // console.log('Selected Years:', selectedYears);
 
   // Handle fullscreen change
   useEffect(() => {
@@ -162,15 +165,31 @@ const YearlySalesInvoiceChart: React.FC<YearlySalesInvoiceChartProps> = ({
     const sortedData = [...data].sort(
       (a, b) => Number(a.period) - Number(b.period)
     );
-    const years = sortedData.map((d) => d.period);
+    const years =
+      selectedYears.length > 0
+        ? selectedYears
+        : sortedData.map((d) => d.period);
     const colorPalette = generateYearColorPalette(years);
 
+    // Generate labels berdasarkan selectedMonths dengan huruf pertama kapital
+    const labels =
+      selectedMonths.length > 0
+        ? years.map((year) => {
+            const month =
+              selectedMonths[0].charAt(0).toUpperCase() +
+              selectedMonths[0].slice(1);
+            return `${month} ${year}`; // Ambil bulan pertama dan kapitalisasi huruf pertama
+          })
+        : years;
+
     return {
-      labels: years,
+      labels,
       datasets: [
         {
           label: 'Yearly Sales',
-          data: years.map((year) => {
+          data: labels.map((label) => {
+            const year =
+              selectedMonths.length > 0 ? label.split(' ')[1] : label;
             const yearData = sortedData.find((d) => d.period === year);
             return yearData ? yearData.totalInvoice / 1_000_000_000 : 0; // Convert to billions
           }),
@@ -180,8 +199,11 @@ const YearlySalesInvoiceChart: React.FC<YearlySalesInvoiceChartProps> = ({
             const chart = ctx.chart;
             const { ctx: canvasCtx, chartArea } = chart;
 
-            const year = years[ctx.dataIndex];
-            const [from, to] = colorPalette[years.indexOf(year)] || [
+            const label = labels[ctx.dataIndex];
+            const year =
+              selectedMonths.length > 0 ? label.split(' ')[1] : label;
+            const yearIndex = years.indexOf(year);
+            const [from, to] = colorPalette[yearIndex] || [
               'hsl(220, 70%, 40%)',
               'hsl(220, 70%, 60%)',
             ];
@@ -205,14 +227,16 @@ const YearlySalesInvoiceChart: React.FC<YearlySalesInvoiceChartProps> = ({
           borderRadius: 10,
           categoryPercentage: 0.8,
           barPercentage: 0.8,
-          growthPercentages: years.map((year) => {
+          growthPercentages: labels.map((label) => {
+            const year =
+              selectedMonths.length > 0 ? label.split(' ')[1] : label;
             const yearData = sortedData.find((d) => d.period === year);
             return yearData ? yearData.growthPercentage : 0;
           }),
         },
       ] as CustomBarDataset[], // Gunakan tipe kustom
     } as ChartData<'bar', number[], string>;
-  }, [data, isFullScreen]);
+  }, [data, isFullScreen, selectedMonths, selectedYears]);
 
   const handleChartClick = useCallback(
     (
@@ -224,14 +248,15 @@ const YearlySalesInvoiceChart: React.FC<YearlySalesInvoiceChartProps> = ({
 
       const element = elements[0];
       const dataIndex = element.index;
-      const year =
+      const label =
         chartData &&
         Array.isArray(chartData.labels) &&
         chartData.labels[dataIndex]
           ? chartData.labels[dataIndex]
           : undefined;
 
-      if (year) {
+      if (label) {
+        const year = selectedMonths.length > 0 ? label.split(' ')[1] : label; // Ambil tahun dari label
         const yearNum = parseInt(year, 10);
         const startPeriod = new Date(yearNum, 0, 1); // 1 Januari
         const endPeriod = new Date(yearNum, 11, 31, 23, 59, 59, 999); // 31 Desember
@@ -239,7 +264,7 @@ const YearlySalesInvoiceChart: React.FC<YearlySalesInvoiceChartProps> = ({
         router.push('/analytics/sales/salesinvoice-chart');
       }
     },
-    [chartData, router, setSalesInvoicePeriod]
+    [chartData, router, setSalesInvoicePeriod, selectedMonths]
   );
 
   const isDataReady =
@@ -250,6 +275,12 @@ const YearlySalesInvoiceChart: React.FC<YearlySalesInvoiceChartProps> = ({
     chartData.datasets.some(
       (ds) => Array.isArray(ds.data) && ds.data.some((value) => value > 0)
     );
+
+  // Dynamic title based on selectedMonths
+  const title =
+    selectedMonths.length > 0
+      ? `Yearly Sales Performance for ${selectedMonths.join(', ')} (in IDR Billion)`
+      : 'Yearly Sales Performance (in IDR Billion)';
 
   return (
     <motion.div
