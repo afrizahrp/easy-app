@@ -22,6 +22,7 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { FilterIcon, Loader2 } from 'lucide-react';
 import { months } from '@/utils/monthNameMap';
+import { useToast } from '@/components/ui/use-toast';
 
 interface MonthFacetedFilterProps {
   title?: string;
@@ -44,7 +45,19 @@ export function MonthFacetedFilter({
   onSelect,
   ariaLabel,
 }: MonthFacetedFilterProps) {
+  const { toast } = useToast();
   const defaultMonths = months.map((month) => month.toLowerCase());
+
+  const handleSelect = (value: string) => {
+    if (selectedValues.size >= 3 && !selectedValues.has(value)) {
+      toast({
+        description: 'Maximum 3 months can be selected.',
+        variant: 'destructive',
+      });
+      return;
+    }
+    onSelect(value);
+  };
 
   return (
     <Popover>
@@ -87,31 +100,24 @@ export function MonthFacetedFilter({
           ) : (
             options
               ?.filter((option) => selectedValues.has(option.value))
-              .map((option) => {
-                const isDefaultMonth =
-                  defaultMonths.includes(option.value) ||
-                  option.value === 'all';
-                return (
-                  <Badge
-                    variant='outline'
-                    key={option.value}
-                    className='rounded-sm px-1 text-xs text-slate-600'
-                  >
-                    {option.label}
-                    {!isDefaultMonth && (
-                      <Cross2Icon
-                        className='ml-1 h-3 w-3 cursor-pointer text-red-500'
-                        onClick={() => {
-                          onSelect(option.value);
-                          console.log('Cross2Icon Clicked:', {
-                            value: option.value,
-                          });
-                        }}
-                      />
-                    )}
-                  </Badge>
-                );
-              })
+              .map((option) => (
+                <Badge
+                  variant='outline'
+                  key={option.value}
+                  className='rounded-sm px-1 text-xs text-slate-600'
+                >
+                  {option.label}
+                  <Cross2Icon
+                    className='ml-1 h-3 w-3 cursor-pointer text-red-500'
+                    onClick={() => {
+                      onSelect(option.value);
+                      console.log('Cross2Icon Clicked:', {
+                        value: option.value,
+                      });
+                    }}
+                  />
+                </Badge>
+              ))
           )}
         </div>
       )}
@@ -122,41 +128,42 @@ export function MonthFacetedFilter({
           <CommandList>
             <CommandEmpty>No months found</CommandEmpty>
             <CommandGroup>
-              {options?.map((option) => {
-                const isSelected = selectedValues.has(option.value);
-                return (
-                  <CommandItem
-                    key={option.value}
-                    onSelect={() => !disabled && onSelect(option.value)}
-                  >
-                    <div
-                      className={cn(
-                        'mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary',
-                        isSelected
-                          ? 'bg-primary text-slate-700 dark:text-slate-400'
-                          : 'opacity-50'
-                      )}
+              {options
+                ?.filter((option) => option.value !== 'all') // Hapus opsi "all"
+                .map((option) => {
+                  const isSelected = selectedValues.has(option.value);
+                  return (
+                    <CommandItem
+                      key={option.value}
+                      onSelect={() => !disabled && handleSelect(option.value)}
                     >
-                      <CheckIcon
+                      <div
                         className={cn(
-                          'h-4 w-4 text-slate-400 bg-primary dark:bg-secondary',
-                          isSelected ? '' : 'invisible'
+                          'mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary',
+                          isSelected
+                            ? 'bg-primary text-slate-700 dark:text-slate-400'
+                            : 'opacity-50'
                         )}
-                      />
-                    </div>
-                    <span>{option.label}</span>
-                    {option.count !== undefined && (
-                      <span className='ml-auto text-xs text-slate-700 dark:text-slate-400'>
-                        {option.count.toLocaleString('id-ID')}
-                      </span>
-                    )}
-                  </CommandItem>
-                );
-              })}
+                      >
+                        <CheckIcon
+                          className={cn(
+                            'h-4 w-4 text-slate-400 bg-primary dark:bg-secondary',
+                            isSelected ? '' : 'invisible'
+                          )}
+                        />
+                      </div>
+                      <span>{option.label}</span>
+                      {option.count !== undefined && (
+                        <span className='ml-auto text-xs text-slate-700 dark:text-slate-400'>
+                          {option.count.toLocaleString('id-ID')}
+                        </span>
+                      )}
+                    </CommandItem>
+                  );
+                })}
             </CommandGroup>
             {selectedValues.size > 0 &&
-              !defaultMonths.every((month) => selectedValues.has(month)) &&
-              !selectedValues.has('all') && (
+              !defaultMonths.every((month) => selectedValues.has(month)) && (
                 <>
                   <CommandSeparator />
                   <CommandGroup>
