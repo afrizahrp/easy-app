@@ -89,7 +89,7 @@ export default function SalesInvoiceDtPage({
         title='Invoice Detail List'
         breadcrumb={[
           { name: 'Sales' },
-          { name: 'Invoice List', href: '/dsb/sls/invoice-hd/list' },
+          { name: 'Invoice List', href: '/analytics/sales/salesinvoice-chart' },
         ]}
       />
       <div className='grid grid-cols-12 gap-6 mt-6'>
@@ -192,7 +192,7 @@ export default function SalesInvoiceDtPage({
                           {item.label}:
                         </span>
                         <span className='text-sm font-medium text-default-600'>
-                          Rp {item.amount.toLocaleString()}
+                          {item.amount.toLocaleString()}
                         </span>
                       </div>
                     ))}
