@@ -49,9 +49,9 @@ export function MonthFacetedFilter({
   const defaultMonths = months.map((month) => month.toLowerCase());
 
   const handleSelect = (value: string) => {
-    if (selectedValues.size >= 3 && !selectedValues.has(value)) {
+    if (selectedValues.size > 6 && !selectedValues.has(value)) {
       toast({
-        description: 'Maximum 3 months can be selected.',
+        description: 'Maximum 6 months can be selected.',
         variant: 'destructive',
       });
       return;

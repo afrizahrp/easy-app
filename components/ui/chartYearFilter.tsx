@@ -187,7 +187,7 @@ export function ChartYearFilter({
             disabled={disabled}
           >
             <Cross2Icon className='ml-2 h-4 w-4' />
-            Reset Year
+            Reset Filter
           </Button>
         </motion.div>
       )}
