@@ -29,6 +29,8 @@ const useSalesInvoiceDt = ({ invoiceId }: UseSalesInvoiceDtParams) => {
       const encodedInvoiceId = encodeURIComponent(invoiceId);
       const url = `${process.env.NEXT_PUBLIC_API_URL}/${company_id}/${module_id}/get-invoiceHd/detail/${encodedInvoiceId}`;
 
+      // http://localhost:8000/BIS/SLS/get-invoiceDt/BISN%2F2024%2F07%2F100023
+
       const response = await api.get<SalesInvoiceDetailResponse>(url);
       return response.data;
     },

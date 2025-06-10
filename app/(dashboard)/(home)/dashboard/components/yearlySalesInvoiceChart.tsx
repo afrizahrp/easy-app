@@ -279,13 +279,77 @@ const YearlySalesInvoiceChart: React.FC<YearlySalesInvoiceChartProps> = ({
       (ds) => Array.isArray(ds.data) && ds.data.some((value) => value > 0)
     );
 
+  // Check if selectedMonths are consecutive
+  const isConsecutiveMonths = React.useMemo(() => {
+    if (selectedMonths.length <= 1) return false;
+    const monthOrder = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
+    const sortedMonths = [...selectedMonths].sort(
+      (a, b) =>
+        monthOrder.indexOf(
+          a.charAt(0).toUpperCase() + a.slice(1).toLowerCase()
+        ) -
+        monthOrder.indexOf(b.charAt(0).toUpperCase() + b.slice(1).toLowerCase())
+    );
+    for (let i = 0; i < sortedMonths.length - 1; i++) {
+      const currentIndex = monthOrder.indexOf(
+        sortedMonths[i].charAt(0).toUpperCase() +
+          sortedMonths[i].slice(1).toLowerCase()
+      );
+      const nextIndex = monthOrder.indexOf(
+        sortedMonths[i + 1].charAt(0).toUpperCase() +
+          sortedMonths[i + 1].slice(1).toLowerCase()
+      );
+      if (nextIndex !== currentIndex + 1) {
+        return false;
+      }
+    }
+    return true;
+  }, [selectedMonths]);
+
   // Dynamic title based on selectedMonths
-  const title =
-    selectedMonths.length > 0
-      ? `Yearly Sales Performance for ${selectedMonths
-          .map((m) => m.charAt(0).toUpperCase() + m.slice(1))
-          .join(', ')} (in IDR Billion)`
-      : 'Yearly Sales Performance (in IDR Billion)';
+  const title = React.useMemo(() => {
+    if (selectedMonths.length > 1) {
+      if (isConsecutiveMonths) {
+        // Use the last month for consecutive months
+        const lastMonth = selectedMonths[selectedMonths.length - 1];
+        const capitalizedMonth =
+          lastMonth.charAt(0).toUpperCase() + lastMonth.slice(1);
+        return `Yearly Sales Performance as at ${capitalizedMonth} (in IDR Billion)`;
+      } else {
+        // List all months with "and" for non-consecutive
+        const capitalizedMonths = selectedMonths.map(
+          (m) => m.charAt(0).toUpperCase() + m.slice(1)
+        );
+        const lastMonth = capitalizedMonths.pop();
+        const formattedMonths =
+          capitalizedMonths.length > 0
+            ? `${capitalizedMonths.join(', ')} and ${lastMonth}`
+            : lastMonth;
+        return `Yearly Sales Performance for ${formattedMonths} (in IDR Billion)`;
+      }
+    } else if (selectedMonths.length === 1) {
+      // Single month
+      const month = selectedMonths[0];
+      const capitalizedMonth = month.charAt(0).toUpperCase() + month.slice(1);
+      return `Yearly Sales Performance for ${capitalizedMonth} (in IDR Billion)`;
+    } else {
+      // No months selected
+      return 'Yearly Sales Performance (in IDR Billion)';
+    }
+  }, [selectedMonths, isConsecutiveMonths]);
 
   return (
     <motion.div

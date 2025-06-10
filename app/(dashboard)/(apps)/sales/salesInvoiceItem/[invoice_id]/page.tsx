@@ -63,10 +63,25 @@ export default function SalesInvoiceDtPage({
     details,
   } = invoice;
 
-  const formattedInvoiceDate =
-    invoiceDate instanceof Date
-      ? format(invoiceDate, 'dd/MM/yyyy')
-      : format(new Date(invoiceDate as string | number), 'dd/MM/yyyy');
+  // Validasi format tanggal ISO
+  const isValidDateString = (dateStr: string) =>
+    /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z$/.test(dateStr);
+
+  const formattedInvoiceDate = invoiceDate
+    ? typeof invoiceDate === 'string' && isValidDateString(invoiceDate)
+      ? format(new Date(invoiceDate), 'dd/MM/yyyy')
+      : invoiceDate instanceof Date
+        ? format(invoiceDate, 'dd/MM/yyyy')
+        : '-'
+    : '-';
+
+  const formattedDueDate = dueDate
+    ? typeof dueDate === 'string' && isValidDateString(dueDate)
+      ? format(new Date(dueDate), 'dd/MM/yyyy')
+      : dueDate instanceof Date
+        ? format(dueDate, 'dd/MM/yyyy')
+        : '-'
+    : '-';
 
   return (
     <div>
@@ -105,7 +120,6 @@ export default function SalesInvoiceDtPage({
                         Invoice Date:
                       </span>
                       <span className='ml-4 text-base text-default-600'>
-                        {/* {invoiceDate.toISOString().slice(0, 10)} */}
                         {formattedInvoiceDate}
                       </span>
                     </div>
@@ -114,7 +128,7 @@ export default function SalesInvoiceDtPage({
                         Due Date:
                       </span>
                       <span className='ml-4 text-base text-default-600'>
-                        {dueDate ? dueDate.toISOString().slice(0, 10) : '-'}
+                        {formattedDueDate}
                       </span>
                     </div>
                   </div>
@@ -130,7 +144,6 @@ export default function SalesInvoiceDtPage({
                       <TableHead>Price</TableHead>
                       <TableHead>Discount</TableHead>
                       <TableHead>Shipping</TableHead>
-
                       <TableHead className='text-right'>Total</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -140,9 +153,13 @@ export default function SalesInvoiceDtPage({
                         <TableCell>{item.productName}</TableCell>
                         <TableCell>{item.qty} pcs</TableCell>
                         <TableCell>
-                          {(
-                            Number(item.total_amount) / Number(item.qty)
-                          ).toLocaleString()}
+                          {Number(item.sellingPrice).toLocaleString()}
+                        </TableCell>
+                        <TableCell>
+                          {Number(item.discount_amount).toLocaleString()}
+                        </TableCell>
+                        <TableCell>
+                          {Number(item.delivery_amount).toLocaleString()}
                         </TableCell>
                         <TableCell className='text-right'>
                           {Number(item.total_amount).toLocaleString()}
@@ -182,17 +199,6 @@ export default function SalesInvoiceDtPage({
                   </div>
                 </div>
               </div>
-
-              {/* <div className='text-base font-medium text-default-600 mt-6'>
-                Note:
-              </div>
-              <div className='text-sm text-default-800'>
-                Thank you for your business!
-              </div>
-
-              <div className='mt-8 text-xs text-default-800'>
-                © 2025 Your Company Name
-              </div> */}
             </CardContent>
           </Card>
 
@@ -207,7 +213,7 @@ export default function SalesInvoiceDtPage({
                 <span>Invoice PDF</span>
               </Link>
             </Button>
-            <Button className='text-xs font-semibold '>
+            <Button className='text-xs font-semibold'>
               <Icon icon='heroicons:printer' className='w-5 h-5 ltr:mr-1' />
               <span>Print</span>
             </Button>
