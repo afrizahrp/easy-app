@@ -40,7 +40,7 @@ ChartJS.register(
   gradientPlugin
 );
 
-// Tipe kustom untuk dataset yang mendukung growthPercentages
+// Custom dataset type to include growthPercentages
 interface CustomBarDataset extends ChartDataset<'bar', number[]> {
   growthPercentages: number[];
 }
@@ -72,12 +72,8 @@ const YearlySalesInvoiceChart: React.FC<YearlySalesInvoiceChartProps> = ({
   const [isFullScreen, setIsFullScreen] = useState(false);
   const { setSalesInvoicePeriod, setSalesPersonInvoicePeriod } =
     useMonthYearPeriodStore();
-
   const { selectedMonths } = useMonthlyPeriodStore();
   const { selectedYears } = useYearlyPeriodStore();
-
-  // console.log('Selected Months:', selectedMonths);
-  // console.log('Selected Years:', selectedYears);
 
   // Handle fullscreen change
   useEffect(() => {
@@ -171,16 +167,24 @@ const YearlySalesInvoiceChart: React.FC<YearlySalesInvoiceChartProps> = ({
         : sortedData.map((d) => d.period);
     const colorPalette = generateYearColorPalette(years);
 
-    // Generate labels berdasarkan selectedMonths dengan huruf pertama kapital
-    const labels =
-      selectedMonths.length > 0
-        ? years.map((year) => {
-            const month =
-              selectedMonths[0].charAt(0).toUpperCase() +
-              selectedMonths[0].slice(1);
-            return `${month} ${year}`; // Ambil bulan pertama dan kapitalisasi huruf pertama
-          })
-        : years;
+    // Generate labels based on selectedMonths with proper capitalization
+    const labels = years.map((year) => {
+      if (selectedMonths.length > 1) {
+        // Use the last selected month for "As-at" label
+        const lastMonth = selectedMonths[selectedMonths.length - 1];
+        const capitalizedMonth =
+          lastMonth.charAt(0).toUpperCase() + lastMonth.slice(1);
+        return `As-at ${capitalizedMonth} ${year}`;
+      } else if (selectedMonths.length === 1) {
+        // Use the single selected month
+        const month = selectedMonths[0];
+        const capitalizedMonth = month.charAt(0).toUpperCase() + month.slice(1);
+        return `${capitalizedMonth} ${year}`;
+      } else {
+        // Fallback to year only if no months are selected
+        return `${year}`;
+      }
+    });
 
     return {
       labels,
@@ -188,8 +192,7 @@ const YearlySalesInvoiceChart: React.FC<YearlySalesInvoiceChartProps> = ({
         {
           label: 'Yearly Sales',
           data: labels.map((label) => {
-            const year =
-              selectedMonths.length > 0 ? label.split(' ')[1] : label;
+            const year = label.match(/\d{4}/)?.[0]; // Extract year from label
             const yearData = sortedData.find((d) => d.period === year);
             return yearData ? yearData.totalInvoice / 1_000_000_000 : 0; // Convert to billions
           }),
@@ -200,9 +203,8 @@ const YearlySalesInvoiceChart: React.FC<YearlySalesInvoiceChartProps> = ({
             const { ctx: canvasCtx, chartArea } = chart;
 
             const label = labels[ctx.dataIndex];
-            const year =
-              selectedMonths.length > 0 ? label.split(' ')[1] : label;
-            const yearIndex = years.indexOf(year);
+            const year = label.match(/\d{4}/)?.[0];
+            const yearIndex = years.indexOf(year ?? '');
             const [from, to] = colorPalette[yearIndex] || [
               'hsl(220, 70%, 40%)',
               'hsl(220, 70%, 60%)',
@@ -228,13 +230,12 @@ const YearlySalesInvoiceChart: React.FC<YearlySalesInvoiceChartProps> = ({
           categoryPercentage: 0.8,
           barPercentage: 0.8,
           growthPercentages: labels.map((label) => {
-            const year =
-              selectedMonths.length > 0 ? label.split(' ')[1] : label;
+            const year = label.match(/\d{4}/)?.[0];
             const yearData = sortedData.find((d) => d.period === year);
             return yearData ? yearData.growthPercentage : 0;
           }),
         },
-      ] as CustomBarDataset[], // Gunakan tipe kustom
+      ] as CustomBarDataset[],
     } as ChartData<'bar', number[], string>;
   }, [data, isFullScreen, selectedMonths, selectedYears]);
 
@@ -256,15 +257,17 @@ const YearlySalesInvoiceChart: React.FC<YearlySalesInvoiceChartProps> = ({
           : undefined;
 
       if (label) {
-        const year = selectedMonths.length > 0 ? label.split(' ')[1] : label; // Ambil tahun dari label
-        const yearNum = parseInt(year, 10);
-        const startPeriod = new Date(yearNum, 0, 1); // 1 Januari
-        const endPeriod = new Date(yearNum, 11, 31, 23, 59, 59, 999); // 31 Desember
-        setSalesInvoicePeriod({ startPeriod, endPeriod });
-        router.push('/analytics/sales/salesinvoice-chart');
+        const year = label.match(/\d{4}/)?.[0]; // Extract year from label
+        if (year) {
+          const yearNum = parseInt(year, 10);
+          const startPeriod = new Date(yearNum, 0, 1); // 1 Januari
+          const endPeriod = new Date(yearNum, 11, 31, 23, 59, 59, 999); // 31 Desember
+          setSalesInvoicePeriod({ startPeriod, endPeriod });
+          router.push('/analytics/sales/salesinvoice-chart');
+        }
       }
     },
-    [chartData, router, setSalesInvoicePeriod, selectedMonths]
+    [chartData, router, setSalesInvoicePeriod]
   );
 
   const isDataReady =
@@ -279,7 +282,9 @@ const YearlySalesInvoiceChart: React.FC<YearlySalesInvoiceChartProps> = ({
   // Dynamic title based on selectedMonths
   const title =
     selectedMonths.length > 0
-      ? `Yearly Sales Performance for ${selectedMonths.join(', ')} (in IDR Billion)`
+      ? `Yearly Sales Performance for ${selectedMonths
+          .map((m) => m.charAt(0).toUpperCase() + m.slice(1))
+          .join(', ')} (in IDR Billion)`
       : 'Yearly Sales Performance (in IDR Billion)';
 
   return (
@@ -402,7 +407,6 @@ const YearlySalesInvoiceChart: React.FC<YearlySalesInvoiceChartProps> = ({
                       const growth = (context.dataset as CustomBarDataset)
                         .growthPercentages[context.dataIndex];
                       const icon = growth > 0 ? '🔼' : growth < 0 ? '🔻' : '➖';
-
                       return [
                         `${amount.toLocaleString('id-ID')} ${icon} ${growth}%`,
                       ];
