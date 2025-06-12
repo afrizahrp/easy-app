@@ -16,7 +16,7 @@ interface SalesByPoTypeResponse {
     period: string;
     poType: string;
     totalInvoice: number;
-    months: Record<string, number>;
+    months: Record<string, { amount: number; growthPercentage?: number }>;
   }[];
 }
 
@@ -27,11 +27,11 @@ interface UseMonthlySalesInvoiceByPoTypeProps {
 
 const useMonthlySalesInvoiceByPoType = ({
   context,
-  poTypes,
+  poTypes = ['Regular', 'eCatalog'], // Default ke Regular dan eCatalog
 }: UseMonthlySalesInvoiceByPoTypeProps) => {
   const user = useSessionStore((state) => state.user);
   const company_id = user?.company_id?.toUpperCase();
-  const module_id = 'SLS'; // Sesuaikan dengan SalesInvoiceList
+  const module_id = 'SLS';
   const subModule_id = 'sls';
 
   const { salesInvoicePeriod, salesPersonInvoicePeriod } =
@@ -39,8 +39,6 @@ const useMonthlySalesInvoiceByPoType = ({
   const { salesInvoiceFilters } = useSalesInvoiceHdFilterStore();
 
   const { poType: storePoType } = salesInvoiceFilters;
-
-  // const isValidRequest = Boolean(company_id && module_id && subModule_id);
 
   const period =
     context === 'salesInvoice' ? salesInvoicePeriod : salesPersonInvoicePeriod;
@@ -60,7 +58,7 @@ const useMonthlySalesInvoiceByPoType = ({
         ? storePoType.filter(
             (poType) => typeof poType === 'string' && poType.trim()
           )
-        : [];
+        : ['Regular', 'eCatalog']; // Fallback ke Regular dan eCatalog
 
   const { data, isLoading, isFetching, error, ...rest } = useQuery<
     SalesByPoTypeResponse,

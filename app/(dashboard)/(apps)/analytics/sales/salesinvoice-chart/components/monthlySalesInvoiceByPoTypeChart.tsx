@@ -1,5 +1,6 @@
 'use client';
-import React from 'react';
+
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Line } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -19,8 +20,8 @@ import { themes } from '@/config/thems';
 import gradientPlugin from 'chartjs-plugin-gradient';
 import { useToast } from '@/components/ui/use-toast';
 import useMonthlySalesInvoiceByPoType from '@/queryHooks/analytics/sales/useMonthlySalesInvoiceByPoType';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
+import { Button } from '@/components/ui/button';
+import { Maximize2, Minimize2 } from 'lucide-react';
 import { months } from '@/utils/monthNameMap';
 
 ChartJS.register(
@@ -37,7 +38,7 @@ ChartJS.register(
 interface MonthlySalesInvoiceByPoTypeChartProps {
   height?: number;
   isCompact?: boolean;
-  isFullWidth?: boolean;
+  isFullScreen?: boolean;
   onModeChange?: (isFull: boolean) => void;
 }
 
@@ -46,7 +47,7 @@ const MonthlySalesInvoiceByPoTypeChart: React.FC<
 > = ({
   height = 400,
   isCompact = false,
-  isFullWidth = false,
+  isFullScreen = false,
   onModeChange,
 }) => {
   const { theme: config } = useThemeStore();
@@ -57,11 +58,99 @@ const MonthlySalesInvoiceByPoTypeChart: React.FC<
   })`;
   const hexBackground = hslToHex(hslBackground);
   const { toast } = useToast();
+
   const { data, isLoading, isFetching, error } = useMonthlySalesInvoiceByPoType(
     {
       context: 'salesInvoice',
     }
   );
+
+  const chartContainerRef = useRef<HTMLDivElement>(null);
+  const [isChartFullScreen, setIsChartFullScreen] = useState(isFullScreen);
+
+  const toggleFullScreen = useCallback(() => {
+    if (!chartContainerRef.current) return;
+
+    if (!isChartFullScreen) {
+      const requestFullscreen =
+        chartContainerRef.current.requestFullscreen ||
+        (chartContainerRef.current as any).webkitRequestFullscreen ||
+        (chartContainerRef.current as any).mozRequestFullScreen ||
+        (chartContainerRef.current as any).msRequestFullscreen;
+
+      if (requestFullscreen) {
+        requestFullscreen.call(chartContainerRef.current).catch((err: any) => {
+          console.error('Failed to enter fullscreen:', err);
+          setIsChartFullScreen(true); // Fallback to state-based fullscreen
+        });
+      } else {
+        setIsChartFullScreen(true);
+      }
+    } else {
+      if (document.fullscreenElement) {
+        const exitFullscreen =
+          document.exitFullscreen ||
+          (document as any).webkitExitFullscreen ||
+          (document as any).mozCancelFullScreen ||
+          (document as any).msExitFullscreen;
+
+        if (exitFullscreen) {
+          exitFullscreen.call(document).catch((err: any) => {
+            console.error('Failed to exit fullscreen:', err);
+          });
+        }
+      } else {
+        setIsChartFullScreen(false);
+      }
+    }
+    onModeChange?.(!isChartFullScreen);
+  }, [isChartFullScreen, onModeChange]);
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      const isNowFullScreen = !!document.fullscreenElement;
+      setIsChartFullScreen(isNowFullScreen);
+      onModeChange?.(isNowFullScreen);
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+    document.addEventListener('mozfullscreenchange', handleFullscreenChange);
+    document.addEventListener('MSFullscreenChange', handleFullscreenChange);
+
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      document.removeEventListener(
+        'webkitfullscreenchange',
+        handleFullscreenChange
+      );
+      document.removeEventListener(
+        'mozfullscreenchange',
+        handleFullscreenChange
+      );
+      document.removeEventListener(
+        'MSFullscreenChange',
+        handleFullscreenChange
+      );
+    };
+  }, [onModeChange]);
+
+  useEffect(() => {
+    if (error) {
+      toast({
+        description:
+          error.message ||
+          'Failed to load sales by PO type data. Please try again.',
+        variant: 'destructive',
+      });
+    }
+  }, [error, toast]);
+
+  useEffect(() => {
+    if (chartContainerRef.current) {
+      window.dispatchEvent(new Event('resize'));
+    }
+  }, [isChartFullScreen]);
 
   const colorMap: Record<
     string,
@@ -75,7 +164,6 @@ const MonthlySalesInvoiceByPoTypeChart: React.FC<
       borderColor: '#3B82F6',
       backgroundColor: 'rgba(59, 130, 246, 0.2)',
     },
-
     Regular_2023: {
       borderColor: '#22C55E',
       backgroundColor: 'rgba(34, 197, 94, 0.2)',
@@ -107,29 +195,26 @@ const MonthlySalesInvoiceByPoTypeChart: React.FC<
 
     return {
       labels: months,
-      datasets: data.map(
-        (poTypeData: {
-          poType: string;
-          period: string;
-          months: Record<string, number>;
-        }) => {
-          const colorKey = `${poTypeData.poType}_${poTypeData.period}`;
-          const { borderColor, backgroundColor } = colorMap[colorKey] || {
-            borderColor: '#6B7280',
-            backgroundColor: 'rgba(107, 114, 128, 0.2)',
-          };
+      datasets: data.map((poTypeData) => {
+        const colorKey = `${poTypeData.poType}_${poTypeData.period}`;
+        const { borderColor, backgroundColor } = colorMap[colorKey] || {
+          borderColor: '#6B7280',
+          backgroundColor: 'rgba(107, 114, 128, 0.2)',
+        };
 
-          return {
-            label: `${poTypeData.poType} (${poTypeData.period})`,
-            data: months.map(
-              (month) => (poTypeData.months[month] || 0) / 1_000_000
-            ),
-            borderColor,
-            backgroundColor,
-            tension: 0.4,
-          };
-        }
-      ),
+        return {
+          label: `${poTypeData.poType} (${poTypeData.period})`,
+          data: months.map(
+            (month) => (poTypeData.months[month]?.amount || 0) / 1_000_000
+          ),
+          growthPercentages: months.map(
+            (month) => poTypeData.months[month]?.growthPercentage || 0
+          ),
+          borderColor,
+          backgroundColor,
+          tension: 0.4,
+        };
+      }),
     };
   }, [data]);
 
@@ -138,47 +223,42 @@ const MonthlySalesInvoiceByPoTypeChart: React.FC<
     return Math.max(...chartData.datasets.flatMap((ds) => ds.data));
   }, [chartData]);
 
-  React.useEffect(() => {
-    if (error) {
-      toast({
-        description:
-          error.message ||
-          'Failed to load sales by PO type data. Please try again.',
-        variant: 'destructive',
-      });
-    }
-  }, [error, toast]);
-
   return (
     <motion.div
-      className={`chart-container ${isCompact ? 'compact' : ''} bg-white dark:bg-[#18181b] p-4 rounded-lg shadow-sm flex flex-col w-full min-h-[250px] box-border`}
+      ref={chartContainerRef}
+      className={`chart-container ${isCompact ? 'compact' : ''} ${
+        isChartFullScreen && !document.fullscreenElement
+          ? 'fixed inset-0 z-50 bg-white dark:bg-[#18181b] p-4 rounded-lg shadow-md'
+          : 'relative bg-white dark:bg-[#18181b] p-4 rounded-lg shadow-sm'
+      } flex flex-col h-fit min-h-[250px] w-full box-border`}
       style={{ backgroundColor: hexBackground }}
       animate={{
-        opacity: isFullWidth ? 1 : 0.95,
-        scale: isFullWidth ? 1 : 0.98,
+        opacity: isChartFullScreen ? 1 : 0.95,
+        scale: isChartFullScreen ? 1 : 0.98,
       }}
       initial={{
-        opacity: isFullWidth ? 1 : 0.95,
-        scale: isFullWidth ? 1 : 0.98,
+        opacity: isChartFullScreen ? 1 : 0.95,
+        scale: isChartFullScreen ? 1 : 0.98,
       }}
       transition={{ duration: 0.3, ease: 'easeInOut' }}
     >
-      <div className='relative flex items-center'>
+      <div className='relative flex items-center justify-between mb-2'>
         <h2 className='text-sm text-muted-foreground font-semibold ml-2'>
           Monthly Sales by PO Type (in Millions of IDR)
         </h2>
         {!isCompact && (
-          <div className='absolute right-0 top-0 flex items-center text-muted-foreground text-xs space-x-2'>
-            <Label htmlFor='chart-mode-potype'>
-              {isFullWidth ? 'Full Width' : 'Half Width'}
-            </Label>
-            <Switch
-              id='chart-mode-potype'
-              checked={isFullWidth}
-              onCheckedChange={(checked) => onModeChange?.(checked)}
-              aria-label='Toggle full width chart'
-            />
-          </div>
+          <Button
+            variant='outline'
+            size='sm'
+            onClick={toggleFullScreen}
+            className='mr-2'
+          >
+            {isChartFullScreen ? (
+              <Minimize2 className='h-4 w-4' />
+            ) : (
+              <Maximize2 className='h-4 w-4' />
+            )}
+          </Button>
         )}
       </div>
       <div className='flex-1 h-full w-full min-h-0'>
@@ -188,8 +268,8 @@ const MonthlySalesInvoiceByPoTypeChart: React.FC<
           </div>
         ) : chartData ? (
           <Line
-            key={isFullWidth ? 'full' : 'half'}
-            height={isCompact ? 250 : height}
+            key={isChartFullScreen ? 'full' : 'half'}
+            height={isChartFullScreen ? undefined : isCompact ? 250 : height}
             data={chartData}
             options={{
               responsive: true,
@@ -203,20 +283,35 @@ const MonthlySalesInvoiceByPoTypeChart: React.FC<
                     boxWidth: 15,
                     padding: 4,
                     font: {
-                      size: isFullWidth ? 12 : 10,
+                      size: isChartFullScreen ? 12 : 10,
                     },
                   },
                 },
                 tooltip: {
+                  enabled: true,
+                  position: 'nearest',
+                  yAlign: 'top',
+                  xAlign: 'left',
+                  borderWidth: 1,
+                  padding: 8,
+                  bodyFont: { size: 12 },
                   callbacks: {
-                    label: (context) =>
-                      `${context.dataset.label}: ${(context.raw as number).toLocaleString('id-ID')} IDR`,
+                    label: (context) => {
+                      const amount = context.raw as number; // Sudah dalam juta IDR
+                      const growth = (context.dataset as any).growthPercentages[
+                        context.dataIndex
+                      ];
+                      const icon = growth > 0 ? '🔼' : growth < 0 ? '🔻' : '➡️';
+                      return [
+                        `${amount.toLocaleString('id-ID')} ${icon} ${growth.toFixed(2)}%`,
+                      ];
+                    },
                   },
                 },
               },
               scales: {
                 x: {
-                  title: { display: false, text: 'Months' },
+                  title: { display: false, text: 'Month' },
                   grid: {
                     display: true,
                     color: 'rgba(200,200,200,0.2)',
@@ -224,7 +319,7 @@ const MonthlySalesInvoiceByPoTypeChart: React.FC<
                   ticks: {
                     callback: (value, index) => chartData.labels[index] ?? '',
                     font: {
-                      size: isFullWidth ? 14 : 12,
+                      size: isChartFullScreen ? 14 : 12,
                     },
                     align: 'center',
                     crossAlign: 'center',
@@ -243,7 +338,7 @@ const MonthlySalesInvoiceByPoTypeChart: React.FC<
                       return `${val.toLocaleString('id-ID')}`;
                     },
                     font: {
-                      size: isFullWidth ? 14 : 12,
+                      size: isChartFullScreen ? 14 : 12,
                     },
                   },
                   grid: {

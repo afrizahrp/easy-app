@@ -5,11 +5,6 @@ import SalesInvoiceFilterSummary from '@/components/sales/salesInvoiceFilterSumm
 import SalesInvoiceOverview from '../salesinvoice-chart/components/salesInvoiceOverview';
 import { PageHeaderWrapper } from '@/components/page-header-wrapper';
 
-// interface SalesInvoiceAnalyticsProps {
-//   showList?: boolean;
-//   showHeader?: boolean;
-// }
-
 interface SalesInvoiceAnalyticsProps {
   showList?: boolean;
   showHeader?: boolean;

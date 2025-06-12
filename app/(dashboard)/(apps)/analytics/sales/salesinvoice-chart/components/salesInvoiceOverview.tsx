@@ -105,7 +105,7 @@ const SalesInvoiceOverview: React.FC<SalesInvoiceOverviewProps> = ({
                 transition={{ duration: 0.3, ease: 'easeInOut' }}
               >
                 <MonthlySalesInvoiceByPoTypeChart
-                  isFullWidth={fullChart === 'poType'}
+                  isFullScreen={fullChart === 'poType'}
                   onModeChange={handlePoTypeModeChange}
                   height={400}
                   isCompact={false}
