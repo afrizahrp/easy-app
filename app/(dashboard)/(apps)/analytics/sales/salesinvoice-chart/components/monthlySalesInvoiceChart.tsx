@@ -327,10 +327,10 @@ const MonthlySalesInvoiceChart: React.FC<MonthlySalesInvoiceChartProps> = ({
                       const growth = (context.dataset as any).growthPercentages[
                         context.dataIndex
                       ];
-                      const icon = growth > 0 ? '🔼' : growth < 0 ? '🔻' : '➡️'; // Emoji baru
+                      const icon = growth > 0 ? '🔼' : growth < 0 ? '🔻' : '➖';
 
                       return [
-                        `${amount.toLocaleString('id-ID')} ${icon} ${growth}`,
+                        `${amount.toLocaleString('id-ID')} ${icon} ${growth.toFixed(2)}%`,
                       ];
                     },
                   },

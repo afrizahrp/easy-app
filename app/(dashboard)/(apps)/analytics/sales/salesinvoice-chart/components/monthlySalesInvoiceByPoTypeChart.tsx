@@ -218,7 +218,8 @@ const MonthlySalesInvoiceByPoTypeChart: React.FC<
                       const growth = (context.dataset as any).growthPercentages[
                         context.dataIndex
                       ];
-                      const icon = growth > 0 ? '🔼' : growth < 0 ? '🔻' : '➡️';
+                      const icon = growth > 0 ? '🔼' : growth < 0 ? '🔻' : '➖';
+
                       return [
                         `${amount.toLocaleString('id-ID')} ${icon} ${growth.toFixed(2)}%`,
                       ];
