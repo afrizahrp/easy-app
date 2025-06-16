@@ -16,7 +16,11 @@ import {
 } from 'chart.js';
 import { motion } from 'framer-motion';
 import { hslToHex } from '@/lib/utils';
-import { useThemeStore } from '@/store';
+import {
+  useThemeStore,
+  useMonthlyPeriodStore,
+  useYearlyPeriodStore,
+} from '@/store';
 import { useTheme } from 'next-themes';
 import { useRouter } from 'next/navigation';
 import { themes } from '@/config/thems';
@@ -25,8 +29,7 @@ import { useToast } from '@/components/ui/use-toast';
 import useYearlySalesPersonInvoice from '@/queryHooks/dashboard/sales/useYearlySalesPersonInvoice';
 import { Button } from '@/components/ui/button';
 import { Maximize2, Minimize2 } from 'lucide-react';
-import { useMonthYearPeriodStore } from '@/store';
-import { useSalesInvoiceHdFilterStore } from '@/store';
+import { useMonthYearPeriodStore, useSalesInvoiceHdFilterStore } from '@/store';
 import {
   salesPersonColorMap,
   getFallbackColor,
@@ -94,7 +97,10 @@ const YearlySalesPersonInvoiceChart: React.FC<
   const [isFullScreen, setIsFullScreen] = useState(false);
   const { setSalesPersonInvoicePeriod } = useMonthYearPeriodStore();
   const { setSalesPersonInvoiceFilters } = useSalesInvoiceHdFilterStore();
+  const { selectedMonths } = useMonthlyPeriodStore();
+  const { selectedYears } = useYearlyPeriodStore();
 
+  // Handle fullscreen change
   useEffect(() => {
     const handleFullscreenChange = () => {
       const isNowFullScreen = !!document.fullscreenElement;
@@ -124,6 +130,7 @@ const YearlySalesPersonInvoiceChart: React.FC<
     };
   }, [onModeChange]);
 
+  // Handle error toast
   useEffect(() => {
     if (error) {
       toast({
@@ -133,6 +140,7 @@ const YearlySalesPersonInvoiceChart: React.FC<
     }
   }, [error, toast]);
 
+  // Trigger resize on fullscreen or width change
   useEffect(() => {
     if (chartContainerRef.current) {
       window.dispatchEvent(new Event('resize'));
@@ -172,6 +180,78 @@ const YearlySalesPersonInvoiceChart: React.FC<
     onModeChange?.(!isFullScreen);
   }, [isFullScreen, onModeChange]);
 
+  // Check if selectedMonths are consecutive
+  const isConsecutiveMonths = React.useMemo(() => {
+    if (selectedMonths.length <= 1) return false;
+    const monthOrder = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
+    const sortedMonths = [...selectedMonths].sort(
+      (a, b) =>
+        monthOrder.indexOf(
+          a.charAt(0).toUpperCase() + a.slice(1).toLowerCase()
+        ) -
+        monthOrder.indexOf(b.charAt(0).toUpperCase() + b.slice(1).toLowerCase())
+    );
+    for (let i = 0; i < sortedMonths.length - 1; i++) {
+      const currentIndex = monthOrder.indexOf(
+        sortedMonths[i].charAt(0).toUpperCase() +
+          sortedMonths[i].slice(1).toLowerCase()
+      );
+      const nextIndex = monthOrder.indexOf(
+        sortedMonths[i + 1].charAt(0).toUpperCase() +
+          sortedMonths[i + 1].slice(1).toLowerCase()
+      );
+      if (nextIndex !== currentIndex + 1) {
+        return false;
+      }
+    }
+    return true;
+  }, [selectedMonths]);
+
+  // Dynamic title based on selectedMonths
+  const title = React.useMemo(() => {
+    if (selectedMonths.length > 1) {
+      if (isConsecutiveMonths) {
+        // Use the last month for consecutive months
+        const lastMonth = selectedMonths[selectedMonths.length - 1];
+        const capitalizedMonth =
+          lastMonth.charAt(0).toUpperCase() + lastMonth.slice(1);
+        return `Yearly Sales Above 3.6 Billion IDR by Salesperson as at ${capitalizedMonth} (in IDR Million)`;
+      } else {
+        // List all months with "and" for non-consecutive
+        const capitalizedMonths = selectedMonths.map(
+          (m) => m.charAt(0).toUpperCase() + m.slice(1)
+        );
+        const lastMonth = capitalizedMonths.pop();
+        const formattedMonths =
+          capitalizedMonths.length > 0
+            ? `${capitalizedMonths.join(', ')} and ${lastMonth}`
+            : lastMonth;
+        return `Yearly Sales Above 3.6 Billion IDR by Salesperson for ${formattedMonths} (in IDR Million)`;
+      }
+    } else if (selectedMonths.length === 1) {
+      // Single month
+      const month = selectedMonths[0];
+      const capitalizedMonth = month.charAt(0).toUpperCase() + month.slice(1);
+      return `Yearly Sales Above 3.6 Billion IDR by Salesperson for ${capitalizedMonth} (in IDR Million)`;
+    } else {
+      // No months selected
+      return 'Yearly Sales Above 3.6 Billion IDR by Salesperson (in IDR Million)';
+    }
+  }, [selectedMonths, isConsecutiveMonths]);
+
   const chartData = React.useMemo(() => {
     if (!data || data.length === 0) {
       return null;
@@ -180,17 +260,39 @@ const YearlySalesPersonInvoiceChart: React.FC<
     const sortedData = [...data].sort(
       (a, b) => Number(a.period) - Number(b.period)
     );
-    const years = sortedData.map((d) => d.period);
+    const yearsData =
+      selectedYears.length > 0
+        ? selectedYears.map(String)
+        : sortedData.map((d) => d.period);
     const allSalesPersons = Array.from(
       new Set(sortedData.flatMap((d) => d.sales.map((s) => s.salesPersonName)))
     );
+
+    // Generate labels based on selectedMonths with proper capitalization
+    const labels = yearsData.map((year) => {
+      if (selectedMonths.length > 1) {
+        // Use the last selected month for "As-at" label
+        const lastMonth = selectedMonths[selectedMonths.length - 1];
+        const capitalizedMonth =
+          lastMonth.charAt(0).toUpperCase() + lastMonth.slice(1);
+        return `As-at ${capitalizedMonth} ${year}`;
+      } else if (selectedMonths.length === 1) {
+        // Use the single selected month
+        const month = selectedMonths[0];
+        const capitalizedMonth = month.charAt(0).toUpperCase() + month.slice(1);
+        return `${capitalizedMonth} ${year}`;
+      } else {
+        // Fallback to year only if no months are selected
+        return `${year}`;
+      }
+    });
 
     const datasets = allSalesPersons.map((salesPersonName) => {
       const colorConfig =
         salesPersonColorMap[salesPersonName.toLocaleUpperCase().trim()] ||
         getFallbackColor(salesPersonName);
 
-      const dataValues = years.map((year) => {
+      const dataValues = yearsData.map((year) => {
         const yearData = sortedData.find((d) => d.period === year);
         const salesPersonData = yearData?.sales.find(
           (s) => s.salesPersonName === salesPersonName
@@ -198,7 +300,7 @@ const YearlySalesPersonInvoiceChart: React.FC<
         return salesPersonData ? salesPersonData.amount / 1_000_000 : 0; // Convert to millions
       });
 
-      const growthPercentages = years.map((year) => {
+      const growthPercentages = yearsData.map((year) => {
         const yearData = sortedData.find((d) => d.period === year);
         const salesPersonData = yearData?.sales.find(
           (s) => s.salesPersonName === salesPersonName
@@ -206,7 +308,7 @@ const YearlySalesPersonInvoiceChart: React.FC<
         return salesPersonData ? salesPersonData.growthPercentage : 0;
       });
 
-      const quantities = years.map((year) => {
+      const quantities = yearsData.map((year) => {
         const yearData = sortedData.find((d) => d.period === year);
         const salesPersonData = yearData?.sales.find(
           (s) => s.salesPersonName === salesPersonName
@@ -240,10 +342,10 @@ const YearlySalesPersonInvoiceChart: React.FC<
     });
 
     return {
-      labels: years.length > 0 ? years : [''],
+      labels,
       datasets,
     } as ChartData<'bar', number[], string>;
-  }, [data, isFullScreen]);
+  }, [data, isFullScreen, selectedMonths, selectedYears]);
 
   const maxValue = React.useMemo(() => {
     if (!chartData) return 0;
@@ -263,15 +365,18 @@ const YearlySalesPersonInvoiceChart: React.FC<
       const datasetIndex = element.datasetIndex;
       const dataIndex = element.index;
       const salesPersonName = chartData.datasets[datasetIndex]?.label;
-      const year = chartData.labels[dataIndex];
+      const label = chartData.labels[dataIndex];
 
-      if (salesPersonName && year) {
-        const yearNum = parseInt(year, 10);
-        const startPeriod = new Date(yearNum, 0, 1);
-        const endPeriod = new Date(yearNum, 11, 31, 23, 59, 59, 999);
-        setSalesPersonInvoicePeriod({ startPeriod, endPeriod });
-        setSalesPersonInvoiceFilters({ salesPersonName: [salesPersonName] });
-        router.push('/analytics/sales/salespersonperforma-chart');
+      if (salesPersonName && label) {
+        const year = label.match(/\d{4}/)?.[0];
+        if (year) {
+          const yearNum = parseInt(year, 10);
+          const startPeriod = new Date(yearNum, 0, 1);
+          const endPeriod = new Date(yearNum, 11, 31, 23, 59, 59, 999);
+          setSalesPersonInvoicePeriod({ startPeriod, endPeriod });
+          setSalesPersonInvoiceFilters({ salesPersonName: [salesPersonName] });
+          router.push('/analytics/sales/salespersonperforma-chart');
+        }
       }
     },
     [
@@ -312,7 +417,7 @@ const YearlySalesPersonInvoiceChart: React.FC<
     >
       <div className='relative flex items-center justify-between mb-2'>
         <h2 className='text-sm text-muted-foreground font-semibold ml-2'>
-          Yearly Sales Above 3.6 Billion IDR by Salesperson
+          {title}
         </h2>
         {!isCompact && (
           <Button
@@ -352,7 +457,7 @@ const YearlySalesPersonInvoiceChart: React.FC<
               },
               scales: {
                 x: {
-                  title: { display: false, text: 'Year' },
+                  title: { display: false, text: 'Period' },
                   grid: {
                     drawTicks: false,
                     color: `hsl(${
@@ -414,24 +519,23 @@ const YearlySalesPersonInvoiceChart: React.FC<
                   borderWidth: 1,
                   padding: 8,
                   bodyFont: { size: isFullScreen ? 16 : 14 },
-                  // titleFont: { size: isFullScreen ? 16 : 14 },
                   callbacks: {
                     title: (tooltipItems) => {
                       const index = tooltipItems[0].dataIndex;
-                      // Ensure chartData and labels are defined
-                      if (chartData && chartData.labels) {
-                        return chartData.labels[index] ?? '';
-                      }
-                      return '';
+                      return chartData?.labels
+                        ? (chartData.labels[index] ?? '')
+                        : '';
                     },
                     label: (context) => {
-                      const amount = (context.raw as number) * 1_000_000_000; // Convert back to IDR
+                      const amount = (context.raw as number) * 1_000_000; // Convert back to IDR
                       const growth = (context.dataset as CustomBarDataset)
                         .growthPercentages[context.dataIndex];
+                      const quantity = (context.dataset as CustomBarDataset)
+                        .quantities[context.dataIndex];
                       const icon = growth > 0 ? '🔼' : growth < 0 ? '🔻' : '➖';
-
                       return [
                         `${amount.toLocaleString('id-ID')} ${icon} ${growth}%`,
+                        `Quantity: ${quantity.toLocaleString('id-ID')}`,
                       ];
                     },
                   },

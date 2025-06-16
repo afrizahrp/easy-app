@@ -1,6 +1,10 @@
 import { api } from '@/config/axios.config';
 import { useQuery } from '@tanstack/react-query';
-import { useSessionStore, useYearlyPeriodStore } from '@/store';
+import {
+  useSessionStore,
+  useYearlyPeriodStore,
+  useMonthlyPeriodStore,
+} from '@/store';
 import { getDefaultYears } from '@/lib/utils';
 import axios from 'axios';
 
@@ -41,12 +45,15 @@ const useYearlySalesPersonInvoice = ({
   const user = useSessionStore((state) => state.user);
   const resolvedCompanyId = company_id || user?.company_id?.toUpperCase();
   const { selectedYears } = useYearlyPeriodStore();
+  const { selectedMonths } = useMonthlyPeriodStore();
 
   // Gunakan selectedYears jika ada, fallback ke getDefaultYears
   const years = selectedYears.length > 0 ? selectedYears : getDefaultYears();
+  // Gunakan selectedMonths jika ada, kosongkan jika tidak ada
+  const months = selectedMonths.length > 0 ? selectedMonths : [];
 
   const isValidRequest = Boolean(
-    resolvedCompanyId && module_id && subModule_id && years && years.length > 0
+    resolvedCompanyId && module_id && subModule_id && years.length > 0
   );
 
   const { data, isLoading, isFetching, error, ...rest } = useQuery<
@@ -59,6 +66,7 @@ const useYearlySalesPersonInvoice = ({
       module_id,
       subModule_id,
       years,
+      months, // Tambahkan months ke queryKey
     ],
     queryFn: async () => {
       if (!process.env.NEXT_PUBLIC_API_URL) {
@@ -69,12 +77,19 @@ const useYearlySalesPersonInvoice = ({
 
       try {
         const response = await api.get<SalesPeriodResponse>(url, {
-          params: { years },
+          params: { years, months }, // Kirim years dan months
           paramsSerializer: (params) => {
-            // Serialisasi array years seperti useYearlySalesInvoice
-            return years
-              .map((year) => `years=${encodeURIComponent(year)}`)
-              .join('&');
+            const yearParams = params.years
+              ? params.years
+                  .map((year: string) => `years=${encodeURIComponent(year)}`)
+                  .join('&')
+              : '';
+            const monthParams = params.months
+              ? params.months
+                  .map((month: string) => `months=${encodeURIComponent(month)}`)
+                  .join('&')
+              : '';
+            return [yearParams, monthParams].filter(Boolean).join('&');
           },
         });
 
@@ -87,7 +102,7 @@ const useYearlySalesPersonInvoice = ({
             status: error.response?.status,
             message: error.response?.data?.message,
             url,
-            params: { years },
+            params: { years, months },
           });
           throw new Error(
             error.response?.data?.message ||
@@ -99,7 +114,7 @@ const useYearlySalesPersonInvoice = ({
       }
     },
     enabled: isValidRequest,
-    staleTime: 5 * 60 * 1000, // 5 menit, seperti useYearlySalesInvoice
+    staleTime: 5 * 60 * 1000, // 5 menit
     retry: (failureCount, error) => {
       if (axios.isAxiosError(error) && error.response?.status === 400) {
         return false;
