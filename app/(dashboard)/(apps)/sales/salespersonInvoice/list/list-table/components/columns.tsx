@@ -64,7 +64,7 @@ export const columns: ColumnDef<SalesPersonInvoiceListColumns>[] = [
     ),
     cell: ({ row }) => (
       <Link
-        href={`/sls/invoice-dt/${encodeURIComponent(row.getValue('invoice_id'))}`}
+        href={`/sales/salesInvoiceItem/${encodeURIComponent(row.getValue('invoice_id'))}`}
         className='text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-300 font-semibold'
       >
         {row.getValue('invoice_id')}

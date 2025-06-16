@@ -14,11 +14,25 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { Download } from 'lucide-react';
+import {
+  Download,
+  ArrowRight,
+  BarChart2,
+  FileText,
+  ArrowLeft,
+} from 'lucide-react';
+
 import { Icon } from '@iconify/react';
 import useCompanies from '@/queryHooks/use-companies';
 import useSalesInvoiceDt from '@/queryHooks/sales/useSalesInvoiceDt';
 import LayoutLoader from '@/components/layout-loader';
+import { useRouter } from 'next/navigation';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import PageHeader from '@/components/page-header';
 
 export default function SalesInvoiceDtPage({
@@ -27,6 +41,8 @@ export default function SalesInvoiceDtPage({
   params: { invoice_id: string };
 }) {
   const invoice_id = decodeURIComponent(params.invoice_id);
+  const router = useRouter();
+
   const { data, isLoading, error } = useSalesInvoiceDt({
     invoiceId: invoice_id,
   });
@@ -85,13 +101,33 @@ export default function SalesInvoiceDtPage({
 
   return (
     <div>
-      <PageHeader
+      {/* <PageHeader
         title='Invoice Detail List'
         breadcrumb={[
           { name: 'Sales' },
           { name: 'Invoice List', href: '/analytics/sales/salesinvoice-chart' },
         ]}
-      />
+      /> */}
+
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant='ghost'
+              size='sm'
+              onClick={() => router.back()}
+              className='text-blue-600 border-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:border-blue-400 dark:hover:bg-gray-700 w-fit mt-2'
+            >
+              <ArrowLeft className='w-4 h-4 mr-1' />
+              Back
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent className='max-w-xs whitespace-normal text-sm text-slate-300 dark:text-slate-100'>
+            <p>Back to Invoice List</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+
       <div className='grid grid-cols-12 gap-6 mt-6'>
         <div className='col-span-12'>
           <Card>

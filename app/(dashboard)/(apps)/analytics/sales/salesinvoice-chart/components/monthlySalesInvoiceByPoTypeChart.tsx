@@ -167,7 +167,7 @@ const MonthlySalesInvoiceByPoTypeChart: React.FC<
         {!isCompact && (
           <div className='absolute right-0 top-0 flex items-center text-muted-foreground text-xs space-x-2'>
             <Label htmlFor='chart-mode-potype'>
-              {isFullScreen ? 'Full Screen' : 'Half Screen'}
+              {isFullScreen ? 'Full Width' : 'Half Width'}
             </Label>
             <Switch
               id='chart-mode-potype'
