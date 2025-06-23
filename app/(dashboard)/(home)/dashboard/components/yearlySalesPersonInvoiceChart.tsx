@@ -535,7 +535,7 @@ const YearlySalesPersonInvoiceChart: React.FC<
                       const icon = growth > 0 ? '🔼' : growth < 0 ? '🔻' : '➖';
                       return [
                         `${amount.toLocaleString('id-ID')} ${icon} ${growth}%`,
-                        `Quantity: ${quantity.toLocaleString('id-ID')}`,
+                        // `Quantity: ${quantity.toLocaleString('id-ID')}`,
                       ];
                     },
                   },
