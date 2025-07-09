@@ -48,21 +48,21 @@ const LogInForm = () => {
     resolver: zodResolver(LoginSchema),
     mode: 'all',
     defaultValues: {
-      name: 'afriza',
+      email: 'afriza.hrp@gmail.com',
       password: '1234567',
       company_id: '',
     },
   });
 
   const onSubmit = (data: {
-    name: string;
+    email: string;
     password: string;
     company_id: string;
   }) => {
     startTransition(async () => {
       try {
         const response = await signIn(
-          data.name,
+          data.email,
           data.password,
           data.company_id.toLocaleUpperCase()
         );
@@ -104,15 +104,15 @@ const LogInForm = () => {
           <div className='space-y-4'>
             <FormField
               control={form.control}
-              name='name'
+              name='email'
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className='text-sm'>Name</FormLabel>
+                  <FormLabel className='text-sm'>Email</FormLabel>
                   <FormControl>
                     <Input
                       {...field}
                       disabled={isPending}
-                      placeholder='Please enter your user name'
+                      placeholder='Please enter your email'
                       className='border-gray-300 dark:border-gray-600 
                                  bg-white dark:bg-gray-800 
                                  text-gray-900 dark:text-gray-100 w-full'
