@@ -9,7 +9,7 @@ export type Session = {
   user: {
     id: string;
     name: string;
-    email: string;
+    email?: string;
     image: string;
     company_id: string;
     branch_id: string;

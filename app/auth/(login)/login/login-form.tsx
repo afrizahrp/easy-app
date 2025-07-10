@@ -92,8 +92,8 @@ const LogInForm = () => {
   return (
     <CardWrapper
       headerLabel='Login'
-      backButtonLabel=''
-      // backButtonLabel="Don't have an account ?"
+      // backButtonLabel=''
+      backButtonLabel="Don't have an account ?"
       backButtonHref='/auth/register'
       companyLogo={companyLogo}
       companyName={companyName}

@@ -56,7 +56,7 @@ export const RegisterForm = () => {
             password: values.password,
             email: values.email,
             role_id: 1,
-            company_id: 'BIS',
+            // company_id: 'BIS',
           }),
           headers: {
             'Content-Type': 'application/json',

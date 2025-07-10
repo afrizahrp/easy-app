@@ -8,6 +8,7 @@ import {
 } from '@/components/ui/card';
 import { Header } from '@/components/auth/header';
 import { BackButton } from '@/components/auth/back-button';
+import { Social } from '@/components/auth/social'; // Import the Social component
 import { useCompanyInfo } from '@/store';
 import { useEffect } from 'react';
 
@@ -26,6 +27,7 @@ export const CardWrapper = ({
   backButtonLabel,
   backButtonHref,
   headerLabel,
+  showSocial = false, // Default to false if not provided
   companyLogo,
   companyName,
 }: CardWrapperProps) => {
@@ -58,7 +60,11 @@ export const CardWrapper = ({
         />
       </CardHeader>
       <CardContent>{children}</CardContent>
-
+      {showSocial && (
+        <CardContent>
+          <Social />
+        </CardContent>
+      )}
       <CardFooter>
         <BackButton label={backButtonLabel} href={backButtonHref} />
       </CardFooter>

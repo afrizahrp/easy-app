@@ -9,7 +9,7 @@ export async function signUp(
   state: FormState,
   formData: FormData
 ): Promise<FormState> {
-  const response = await fetch(`${BACKEND_URL}/auth/signup`, {
+  const response = await fetch(`${BACKEND_URL}/auth/register`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -18,6 +18,7 @@ export async function signUp(
       name: formData.get('name'),
       email: formData.get('email'),
       password: formData.get('password'),
+      iStatus: 'Active',
     }),
   });
 
