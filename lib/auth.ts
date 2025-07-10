@@ -34,7 +34,7 @@ export async function signUp(
 }
 
 export async function signIn(
-  name: string,
+  email: string,
   password: string,
   company_id: string
 ): Promise<{
@@ -54,7 +54,7 @@ export async function signIn(
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      name,
+      email,
       password,
       company_id,
     }),
