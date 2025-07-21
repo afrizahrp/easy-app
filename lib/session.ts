@@ -13,7 +13,7 @@ export type Session = {
     image: string;
     company_id: string;
     branch_id: string;
-    role_id: number;
+    role_id: string;
     role_name: string;
   };
   accessToken: string;

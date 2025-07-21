@@ -24,12 +24,12 @@ export async function GET(req: NextRequest) {
       image: Image,
       company_id: '',
       branch_id: '',
-      role_id: parseInt(role, 10),
-      role_name: role as Role,
+      role_id: 'ADMIN',
+      role_name: 'ADMINISTRATOR',
     },
     accessToken,
     refreshToken,
   });
 
-  redirect('/');
+  redirect('/dashboard');
 }
