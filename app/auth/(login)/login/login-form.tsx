@@ -31,7 +31,11 @@ const LogInForm = () => {
   const [isPending, startTransition] = useTransition();
   const [passwordType, setPasswordType] = useState('password');
   const isDesktop2xl = useMediaQuery('(max-width: 1530px)');
-  const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
+  const [selectedCompany, setSelectedCompany] = useState<Company | null>({
+    value: 'BIS',
+    label: 'Bumi Indah Saranamedis',
+  }); // Inisialisasi dengan nilai default "BIS"
+  // const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
 
   const { setUser } = useSessionStore();
 
@@ -50,7 +54,7 @@ const LogInForm = () => {
     defaultValues: {
       email: 'afriza.hrp@gmail.com',
       password: '1234567',
-      company_id: '',
+      company_id: 'BIS',
     },
   });
 
