@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { siteConfig } from '@/config/site';
 import { persist, PersistOptions, createJSONStorage } from 'zustand/middleware';
 import { SortingState } from '@tanstack/react-table';
-
+import { getSession, deleteSession, Session } from '@/lib/session';
 import { SearchContext, SEARCH_CONTEXTS } from '@/constants/searchContexts';
 import { makeInitialSearchParams } from '@/utils/makeInitialSearchParams';
 import { startOfMonth, endOfMonth, set as setDate } from 'date-fns';
@@ -163,30 +163,34 @@ interface UserSession {
   email: string;
 }
 
-interface SessionStoreState {
-  user: UserSession | null;
-  setUser: (user: UserSession) => void;
-  updateCompanyId: (companyId: string) => void; // Tambahkan fungsi ini
-  logout: () => void;
+interface SessionState {
+  user: Session['user'] | null;
+  logout: () => Promise<void>;
+  updateCompanyId: (companyId: string) => void;
+  loadSession: () => Promise<void>;
 }
 
-export const useSessionStore = create<SessionStoreState>()(
-  persist(
-    (set) => ({
-      user: null,
-      setUser: (user) => set({ user }),
-      updateCompanyId: (companyId) =>
-        set((state) => ({
-          user: state.user ? { ...state.user, company_id: companyId } : null,
-        })),
-      logout: () => set({ user: null }),
-    }),
-    {
-      name: 'session-store',
-      storage: createJSONStorage(() => localStorage),
+export const useSessionStore = create<SessionState>((set) => ({
+  user: null,
+  logout: async () => {
+    await deleteSession();
+    set({ user: null });
+  },
+  updateCompanyId: (companyId: string) =>
+    set((state) => ({
+      user: state.user ? { ...state.user, company_id: companyId } : null,
+    })),
+  loadSession: async () => {
+    try {
+      const session = await getSession();
+      console.log('Loaded Session:', session); // Tambahkan log untuk debugging
+      set({ user: session ? session.user : null });
+    } catch (error) {
+      console.error('Failed to load session:', error);
+      set({ user: null });
     }
-  )
-);
+  },
+}));
 
 interface CompanyInfoState {
   companyName: string;

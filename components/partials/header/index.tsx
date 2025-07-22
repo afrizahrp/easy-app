@@ -1,5 +1,5 @@
 'use client';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import ThemeButton from './theme-button';
 import { useSidebar, useThemeStore } from '@/store';
@@ -12,6 +12,7 @@ import Language from './language';
 import { useMediaQuery } from '@/hooks/use-media-query';
 import MobileMenuHandler from './mobile-menu-handler';
 import ClassicHeader from './layout/classic-header';
+import { useSessionStore } from '@/store';
 import FullScreen from './full-screen';
 
 const NavTools = ({
@@ -23,6 +24,10 @@ const NavTools = ({
   isMobile: boolean;
   sidebarType: string;
 }) => {
+  const { loadSession } = useSessionStore();
+  useEffect(() => {
+    loadSession();
+  }, [loadSession]);
   return (
     <div className='nav-tools flex items-center  gap-2'>
       {/* {isDesktop && <Language />} */}

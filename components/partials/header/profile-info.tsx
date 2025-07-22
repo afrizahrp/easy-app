@@ -1,34 +1,29 @@
+// components/ProfileInfo.tsx
 'use client';
-import { useSessionStore, useCompanyInfo } from '@/store'; // Impor useCompanyInfo
+import { useSessionStore, useCompanyInfo } from '@/store';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuPortal,
   DropdownMenuSeparator,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Icon } from '@iconify/react';
 import Image from 'next/image';
 import Link from 'next/link';
-import CompanyCombobox from '@/components/ui/company-combobox'; // Impor CompanyCombobox
+import CompanyCombobox from '@/components/ui/company-combobox';
 
 const ProfileInfo = () => {
   const { user, logout, updateCompanyId } = useSessionStore();
-  const { setCompany } = useCompanyInfo(); // Ambil setCompany dari useCompanyInfo
+  const { setCompany } = useCompanyInfo();
 
   const handleSignOut = async () => {
     try {
-      await fetch('/api/auth/signout', {
-        method: 'POST',
-      });
+      await fetch('/api/auth/signout', { method: 'POST' });
       logout();
-      setCompany({ companyName: '', companyLogo: '' }); // Reset company information on logout
+      setCompany({ companyName: '', companyLogo: '' });
       window.location.href = '/auth/login';
     } catch (error) {
       console.error('Error signing out:', error);
@@ -36,7 +31,7 @@ const ProfileInfo = () => {
   };
 
   const handleCompanyChange = (companyId: string) => {
-    updateCompanyId(companyId); // Update company_id di useSessionStore
+    updateCompanyId(companyId);
     console.log('Selected company_id:', companyId);
   };
 
@@ -45,65 +40,74 @@ const ProfileInfo = () => {
     label: string;
     companyLogo?: string;
   }) => {
-    // Simpan informasi perusahaan ke useCompanyInfo
     setCompany({
       companyName: company.label,
       companyLogo: company.companyLogo || '',
     });
-    // console.log('Selected company:', company);
   };
+
+  if (!user) {
+    return <div>Loading user data...</div>; // Tampilan sementara saat user null
+  }
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild className='cursor-pointer'>
         <div className='flex items-center'>
-          {user?.image && (
+          {user.image ? (
             <Image
-              src={user?.image}
-              alt={user?.email ?? ''}
+              src={user.image}
+              alt={user.email || 'User'}
               width={36}
               height={36}
               className='rounded-full'
             />
+          ) : (
+            <div className='w-9 h-9 rounded-full bg-gray-200 flex items-center justify-center'>
+              <span>{user.name?.[0] || 'U'}</span>
+            </div>
           )}
         </div>
       </DropdownMenuTrigger>
       <DropdownMenuContent className='w-70 p-0' align='end'>
         <DropdownMenuLabel className='flex gap-2 items-center mb-1 p-3'>
-          {user?.image && (
+          {user.image ? (
             <Image
-              src={user?.image}
-              alt={user?.email ?? ''}
+              src={user.image}
+              alt={user.email || 'User'}
               width={36}
               height={36}
               className='rounded-full'
             />
+          ) : (
+            <div className='w-9 h-9 rounded-full bg-gray-200 flex items-center justify-center'>
+              <span>{user.name?.[0] || 'U'}</span>
+            </div>
           )}
           <div>
             <div className='text-sm font-medium text-default-800 capitalize'>
-              {user?.name ?? 'User'}
+              {user.name || 'User'}
             </div>
             <Link
               href='/dashboard'
               className='text-xs text-default-600 hover:text-primary'
             >
-              {user?.email}
+              {user.email || 'No email'}
             </Link>
             <div className='text-xs font-medium text-default-500 capitalize'>
-              Signed in as {user?.role_id ?? 'Role'}
+              Signed in as {user.role_id || 'Role'}
             </div>
           </div>
         </DropdownMenuLabel>
 
         <DropdownMenuSeparator className='mb-0 dark:bg-background' />
 
-        {/* Tambahkan CompanyCombobox */}
         <div className='px-3 py-2'>
           <CompanyCombobox
-            value={user?.company_id || ''} // Nilai awal dari user.company_id
-            onChange={handleCompanyChange} // Update company_id saat dipilih
-            onSelect={handleCompanySelect} // Simpan informasi perusahaan
-            disabled={!user} // Nonaktifkan jika user tidak ada
+            value={user.company_id || ''}
+            onChange={handleCompanyChange}
+            onSelect={handleCompanySelect}
+            disabled={!user}
             placeholder='Switch Company'
             className='w-full text-xs'
           />
