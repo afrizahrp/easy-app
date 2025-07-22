@@ -160,14 +160,15 @@ interface UserSession {
   company_id: string;
   role_id: string;
   image: string;
-  email: string;
+  email?: string;
 }
 
 interface SessionState {
-  user: Session['user'] | null;
+  user: UserSession | null; // Ganti Session['user'] dengan UserSession untuk konsistensi
   logout: () => Promise<void>;
   updateCompanyId: (companyId: string) => void;
   loadSession: () => Promise<void>;
+  setUser: (user: UserSession | null) => void; // Tambahkan setUser
 }
 
 export const useSessionStore = create<SessionState>((set) => ({
@@ -190,6 +191,7 @@ export const useSessionStore = create<SessionState>((set) => ({
       set({ user: null });
     }
   },
+  setUser: (user: UserSession | null) => set({ user }), // Implementasi setUser
 }));
 
 interface CompanyInfoState {
