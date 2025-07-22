@@ -36,15 +36,15 @@ export async function signUp(
 
 export async function signIn(
   email: string,
-  password: string,
-  company_id: string
+  password: string
+  // company_id: string
 ): Promise<{
   ok: boolean;
   error?: string;
   user?: {
     name: string;
     role_id: string;
-    company_id: string;
+    // company_id: string;
     image: string;
     email: string;
   };
@@ -57,7 +57,7 @@ export async function signIn(
     body: JSON.stringify({
       email,
       password,
-      company_id,
+      // company_id,
     }),
   });
 
@@ -83,7 +83,7 @@ export async function signIn(
       user: {
         name: result.user.name,
         role_id: result.user.company.role_id,
-        company_id: result.user.company.company_id,
+        // company_id: result.user.company.company_id,
         image: result.user.image,
         email: result.user.email,
       },
