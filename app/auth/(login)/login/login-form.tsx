@@ -161,7 +161,7 @@ const LogInForm = () => {
                 </FormItem>
               )}
             />
-            <FormField
+            {/* <FormField
               control={form.control}
               name='company_id'
               render={({ field }) => (
@@ -180,7 +180,7 @@ const LogInForm = () => {
                   <FormMessage />
                 </FormItem>
               )}
-            />
+            /> */}
           </div>
           <Button
             disabled={isPending}
