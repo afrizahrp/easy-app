@@ -48,7 +48,7 @@ export async function GET(req: NextRequest) {
       accessToken,
       refreshToken,
     };
-    console.log('Creating session with data:', sessionData); // Tambahkan log
+    // console.log('Creating session with data:', sessionData); // Tambahkan log
     await createSession(sessionData);
   } catch (error) {
     console.error('Create Session Error:', error);
