@@ -5,7 +5,7 @@ import { useYearlyPeriodStore, useMonthlyPeriodStore } from '@/store';
 import { Button } from '@/components/ui/button';
 import { Cross2Icon } from '@radix-ui/react-icons';
 import { useToast } from '@/components/ui/use-toast';
-import { YearFacetedFilter } from '@/components/ui/yearFacetedFilter';
+import { FacetedFilter } from '@/components/ui/facetedFilter';
 import { MonthFacetedFilter } from '@/components/ui/monthFacetedFilter';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
@@ -146,7 +146,7 @@ export function ChartYearFilter({
           {title}
         </h3>
         <CompanyFacetedFilter />
-        <YearFacetedFilter
+        <FacetedFilter
           title='Year'
           options={yearOptions}
           isLoading={isLoading}

@@ -1,5 +1,9 @@
 'use client';
-import { useYearlyPeriodStore } from '@/store';
+import {
+  useYearlyPeriodStore,
+  useCompanyFilterStore,
+  useMonthlyPeriodStore,
+} from '@/store';
 import { DashboardFilterSummary } from '@/components/dashboardFilterSummary';
 import { getDefaultYears } from '@/lib/utils';
 import clsx from 'clsx';
@@ -12,9 +16,10 @@ export default function ChartYearFilterSummary({
   className = '',
 }: ChartYearFilterSummaryProps) {
   const { selectedYears, setYears, resetYears } = useYearlyPeriodStore();
+  const { selectedCompanyIds } = useCompanyFilterStore();
+  const { selectedMonths } = useMonthlyPeriodStore();
 
   const defaultYears = getDefaultYears();
-  const defaultYear = defaultYears.join(', ');
 
   const handleClear = (year: string) => {
     const updatedYears = new Set(selectedYears);
@@ -29,6 +34,28 @@ export default function ChartYearFilterSummary({
 
   // Satu entri untuk Selected Years, dengan array tahun sebagai value
   const filtersList = [
+    {
+      label: 'Selected Companies',
+      value: selectedCompanyIds.length > 0 ? selectedCompanyIds : ['BIS'],
+      isClearable: selectedCompanyIds.length > 0,
+      onClear: () => useCompanyFilterStore.getState().setSelectedCompanyIds([]),
+      individualYears: selectedCompanyIds,
+      onClearIndividual: (id: string) =>
+        useCompanyFilterStore
+          .getState()
+          .setSelectedCompanyIds(selectedCompanyIds.filter((c) => c !== id)),
+    },
+    {
+      label: 'Selected Months',
+      value: selectedMonths.length > 0 ? selectedMonths : [],
+      isClearable: selectedMonths.length > 0,
+      onClear: () => useMonthlyPeriodStore.getState().resetMonths(),
+      individualYears: selectedMonths,
+      onClearIndividual: (month: string) =>
+        useMonthlyPeriodStore
+          .getState()
+          .setMonths(selectedMonths.filter((m) => m !== month)),
+    },
     {
       label: 'Selected Years',
       value: selectedYears.length > 0 ? selectedYears.sort() : defaultYears,
