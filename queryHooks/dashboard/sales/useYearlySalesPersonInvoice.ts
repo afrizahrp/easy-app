@@ -9,6 +9,7 @@ import { getDefaultYears } from '@/lib/utils';
 import axios from 'axios';
 
 interface SalesPerson {
+  company_id: string[];
   salesPersonName: string;
   amount: number;
   quantity: number;
@@ -22,14 +23,14 @@ interface SalesData {
 }
 
 interface SalesPeriodResponse {
-  company_id: string;
+  company_id: string[];
   module_id: string;
   subModule_id: string;
   data: SalesData[];
 }
 
 interface UseYearlySalesPersonInvoiceProps {
-  context?: 'salesPersonInvoice'; // Opsional, untuk fleksibilitas
+  context?: 'salesPersonInvoice';
 }
 
 const useYearlySalesPersonInvoice = ({
@@ -38,22 +39,40 @@ const useYearlySalesPersonInvoice = ({
   module_id = 'dsb',
   subModule_id = 'sls',
 }: UseYearlySalesPersonInvoiceProps & {
-  company_id?: string;
+  company_id?: string | string[];
   module_id?: string;
   subModule_id?: string;
 } = {}) => {
   const user = useSessionStore((state) => state.user);
-  const resolvedCompanyId = company_id || user?.company_id?.toUpperCase();
   const { selectedYears } = useYearlyPeriodStore();
   const { selectedMonths } = useMonthlyPeriodStore();
 
-  // Gunakan selectedYears jika ada, fallback ke getDefaultYears
-  const years = selectedYears.length > 0 ? selectedYears : getDefaultYears();
+  // Tentukan resolvedCompanyId sebagai array
+  const resolvedCompanyId = Array.isArray(company_id)
+    ? company_id.map((id) => id.toUpperCase())
+    : company_id
+      ? [company_id.toUpperCase()]
+      : user?.company_id
+        ? [user.company_id.toUpperCase()]
+        : ['BIS']; // Fallback ke BIS jika tidak ada company_id
+
+  // Pastikan years adalah string[]
+  const years = (
+    selectedYears.length > 0 ? selectedYears : getDefaultYears()
+  ).map(String);
   // Gunakan selectedMonths jika ada, kosongkan jika tidak ada
   const months = selectedMonths.length > 0 ? selectedMonths : [];
 
+  // Log untuk debugging
+  console.log('Resolved Company IDs:', resolvedCompanyId);
+  console.log('Years before request:', years);
+  console.log('Months before request:', months);
+
   const isValidRequest = Boolean(
-    resolvedCompanyId && module_id && subModule_id && years.length > 0
+    resolvedCompanyId.length > 0 &&
+      module_id &&
+      subModule_id &&
+      years.length > 0
   );
 
   const { data, isLoading, isFetching, error, ...rest } = useQuery<
@@ -66,19 +85,25 @@ const useYearlySalesPersonInvoice = ({
       module_id,
       subModule_id,
       years,
-      months, // Tambahkan months ke queryKey
+      months,
     ],
     queryFn: async () => {
       if (!process.env.NEXT_PUBLIC_API_URL) {
         throw new Error('NEXT_PUBLIC_API_URL is not defined');
       }
 
-      const url = `${process.env.NEXT_PUBLIC_API_URL}/${resolvedCompanyId}/${module_id}/${subModule_id}/get-dashboard/getYearlySalespersonInvoice`;
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/${module_id}/${subModule_id}/get-dashboard/getYearlySalespersonInvoice`;
+      console.log('Request URL:', url);
 
       try {
         const response = await api.get<SalesPeriodResponse>(url, {
-          params: { years, months }, // Kirim years dan months
+          params: { company_id: resolvedCompanyId, years, months },
           paramsSerializer: (params) => {
+            const companyIdParams = params.company_id
+              ? params.company_id
+                  .map((id: string) => `company_id=${encodeURIComponent(id)}`)
+                  .join('&')
+              : '';
             const yearParams = params.years
               ? params.years
                   .map((year: string) => `years=${encodeURIComponent(year)}`)
@@ -89,7 +114,11 @@ const useYearlySalesPersonInvoice = ({
                   .map((month: string) => `months=${encodeURIComponent(month)}`)
                   .join('&')
               : '';
-            return [yearParams, monthParams].filter(Boolean).join('&');
+            const queryString = [companyIdParams, yearParams, monthParams]
+              .filter(Boolean)
+              .join('&');
+            console.log('Serialized query string:', queryString);
+            return queryString;
           },
         });
 
@@ -102,7 +131,7 @@ const useYearlySalesPersonInvoice = ({
             status: error.response?.status,
             message: error.response?.data?.message,
             url,
-            params: { years, months },
+            params: { company_id: resolvedCompanyId, years, months },
           });
           throw new Error(
             error.response?.data?.message ||
@@ -119,7 +148,7 @@ const useYearlySalesPersonInvoice = ({
       if (axios.isAxiosError(error) && error.response?.status === 400) {
         return false;
       }
-      return failureCount < 3; // Konsisten dengan useYearlySalesInvoice
+      return failureCount < 3;
     },
   });
 

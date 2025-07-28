@@ -70,8 +70,7 @@ const YearlySalesInvoiceChart: React.FC<YearlySalesInvoiceChartProps> = ({
   const router = useRouter();
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const [isFullScreen, setIsFullScreen] = useState(false);
-  const { setSalesInvoicePeriod, setSalesPersonInvoicePeriod } =
-    useMonthYearPeriodStore();
+  const { setSalesInvoicePeriod } = useMonthYearPeriodStore();
   const { selectedMonths } = useMonthlyPeriodStore();
   const { selectedYears } = useYearlyPeriodStore();
 

@@ -1,15 +1,11 @@
 import { api } from '@/config/axios.config';
 import { useQuery } from '@tanstack/react-query';
-import {
-  useSessionStore,
-  useYearlyPeriodStore,
-  useMonthlyPeriodStore,
-} from '@/store';
+import { useYearlyPeriodStore, useMonthlyPeriodStore } from '@/store';
 import { getDefaultYears } from '@/lib/utils';
 import axios from 'axios';
 
 interface YearlySalesInvoiceResponse {
-  company_id: string;
+  company_id: string[];
   module_id: string;
   subModule_id: string;
   data: {
@@ -17,18 +13,24 @@ interface YearlySalesInvoiceResponse {
     totalInvoice: number;
     quantity: number;
     growthPercentage: number;
+
+    // sales: {
+    //   amount: number;
+    //   quantity: number;
+    //   growthPercentage: number;
+    // }[];
   }[];
 }
 
 const useYearlySalesInvoice = (
-  company_id?: string,
   module_id: string = 'dsb',
   subModule_id: string = 'sls'
 ) => {
-  const user = useSessionStore((state) => state.user);
-  const resolvedCompanyId = company_id || user?.company_id?.toUpperCase();
   const { selectedYears } = useYearlyPeriodStore();
   const { selectedMonths } = useMonthlyPeriodStore();
+
+  // Hardcode company_id ke BIS
+  const resolvedCompanyId = 'BIS';
 
   // Gunakan selectedYears jika ada, fallback ke getDefaultYears jika kosong
   const years = selectedYears.length > 0 ? selectedYears : getDefaultYears();
@@ -58,11 +60,13 @@ const useYearlySalesInvoice = (
       if (!process.env.NEXT_PUBLIC_API_URL) {
         throw new Error('NEXT_PUBLIC_API_URL is not defined');
       }
-      const url = `${process.env.NEXT_PUBLIC_API_URL}/${resolvedCompanyId}/${module_id}/${subModule_id}/get-dashboard/getYearlySalesInvoice`;
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/${module_id}/${subModule_id}/get-dashboard/getYearlySalesInvoice`;
       try {
         const response = await api.get<YearlySalesInvoiceResponse>(url, {
-          params: { years, months },
+          params: { company_id: resolvedCompanyId, years, months },
           paramsSerializer: (params) => {
+            // Serialize company_id, years, dan months ke query parameters
+            const companyIdParams = `company_id=${encodeURIComponent(params.company_id)}`;
             const yearParams = params.years
               ? params.years
                   .map((year: string) => `years=${encodeURIComponent(year)}`)
@@ -73,10 +77,17 @@ const useYearlySalesInvoice = (
                   .map((month: string) => `months=${encodeURIComponent(month)}`)
                   .join('&')
               : '';
-            return [yearParams, monthParams].filter(Boolean).join('&');
+            return [companyIdParams, yearParams, monthParams]
+              .filter(Boolean)
+              .join('&');
           },
         });
-        return response.data;
+        return {
+          ...response.data,
+          data: response.data.data.filter((item) =>
+            response.data.company_id.includes(resolvedCompanyId)
+          ),
+        };
       } catch (error) {
         if (axios.isAxiosError(error)) {
           throw new Error(

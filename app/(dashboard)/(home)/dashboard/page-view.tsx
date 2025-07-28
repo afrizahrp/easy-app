@@ -127,8 +127,6 @@ const DashboardPageView: React.FC<DashboardPageViewProps> = ({
                 />
               </Card>
               <Card>
-                {/* <Card title={t.salesPersonInvoice} key='chart2'> */}
-
                 <YearlySalesPersonInvoiceChart
                   height={300}
                   isCompact={false}
