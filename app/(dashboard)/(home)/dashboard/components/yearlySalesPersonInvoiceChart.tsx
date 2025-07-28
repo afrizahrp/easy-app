@@ -21,6 +21,8 @@ import {
   useMonthlyPeriodStore,
   useYearlyPeriodStore,
 } from '@/store';
+import { useCompanyFilterStore } from '@/store/companyFilter.store';
+
 import { useTheme } from 'next-themes';
 import { useRouter } from 'next/navigation';
 import { themes } from '@/config/thems';
@@ -99,6 +101,11 @@ const YearlySalesPersonInvoiceChart: React.FC<
   const { setSalesPersonInvoiceFilters } = useSalesInvoiceHdFilterStore();
   const { selectedMonths } = useMonthlyPeriodStore();
   const { selectedYears } = useYearlyPeriodStore();
+  const { selectedCompanyIds } = useCompanyFilterStore();
+  const chartTitle =
+    selectedCompanyIds.length > 1
+      ? 'Yearly Sales Above 10 Billion IDR by Salesperson (in IDR Million)'
+      : 'Yearly Sales Above 5 Billion IDR by Salesperson (in IDR Million)';
 
   // Handle fullscreen change
   useEffect(() => {
@@ -246,10 +253,9 @@ const YearlySalesPersonInvoiceChart: React.FC<
       const month = selectedMonths[0];
       const capitalizedMonth = month.charAt(0).toUpperCase() + month.slice(1);
       return `Yearly Sales Above 3.6 Billion IDR by Salesperson for ${capitalizedMonth} (in IDR Million)`;
-    } else {
-      // No months selected
-      return 'Yearly Sales Above 3.6 Billion IDR by Salesperson (in IDR Million)';
-    }
+    } else
+      // Tidak ada bulan yang dipilih, gunakan chartTitle default
+      return chartTitle;
   }, [selectedMonths, isConsecutiveMonths]);
 
   const chartData = React.useMemo(() => {
