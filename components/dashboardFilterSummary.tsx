@@ -19,35 +19,69 @@ interface DashboardFilterSummaryProps {
 }
 
 export const DashboardFilterSummary = React.memo(
-  ({ filters, layout = 'inline', className }: DashboardFilterSummaryProps) => {
+  ({ filters, layout = 'grid', className }: DashboardFilterSummaryProps) => {
     console.log('DashboardFilterSummary filters:', filters); // Debugging
 
     const renderValue = (filter: DashboardFilterSummaryProps['filters'][0]) => {
       const { value, individualYears, onClearIndividual, label } = filter;
 
       if (Array.isArray(value)) {
+        // Untuk Months, gunakan value langsung (misalnya, ["As At May"] atau ["Jan, Mar, and Apr"])
+        if (label === 'Months' && value.length === 1) {
+          return (
+            <div className='flex items-center justify-center gap-2 whitespace-nowrap'>
+              <span className='font-medium'>{`Selected ${label}:`}</span>
+              <div className='flex items-center gap-1'>
+                <Badge variant='secondary' className='flex items-center gap-1'>
+                  {value[0] || '-'}
+                </Badge>
+                {/* Tampilkan ikon X untuk setiap bulan di individualYears jika ada */}
+                {individualYears &&
+                  individualYears.length > 0 &&
+                  onClearIndividual && (
+                    <div className='flex items-center gap-1 ml-2'>
+                      {individualYears.map((item) => (
+                        <Badge
+                          key={item}
+                          variant='secondary'
+                          className='flex items-center gap-1'
+                        >
+                          {item}
+                          <button
+                            onClick={() => onClearIndividual(item)}
+                            className='ml-1 text-xs text-red-500 hover:text-red-700'
+                            aria-label={`Clear ${label.toLowerCase()} ${item}`}
+                          >
+                            <X size={12} />
+                          </button>
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
+              </div>
+            </div>
+          );
+        }
+
+        // Untuk Companies dan Years, atau Months tidak berurutan
         return (
-          <div className='flex items-center gap-2 whitespace-nowrap'>
-            {/* Tampilkan label sebagai teks */}
-            <span className='font-medium'>
-              {label === 'Invoice Period' ? '' : `${label}:`}
-            </span>
-            {/* Render badge untuk tahun */}
+          <div className='flex items-center justify-center gap-2 whitespace-nowrap'>
+            <span className='font-medium'>{`Selected ${label}:`}</span>
             <div className='flex items-center gap-1'>
               <Badge variant='secondary' className='flex items-center gap-1'>
                 {value.length === 0 && '-'}
-                {value.map((year, index) => {
-                  const isNonDefault = individualYears?.includes(year);
+                {value.map((item, index) => {
+                  const isNonDefault = individualYears?.includes(item);
                   const isLast = index === value.length - 1;
                   const isSecondToLast = index === value.length - 2;
                   return (
-                    <span key={year} className='flex items-center'>
-                      {year}
+                    <span key={item} className='flex items-center'>
+                      {item}
                       {isNonDefault && onClearIndividual && (
                         <button
-                          onClick={() => onClearIndividual(year)}
+                          onClick={() => onClearIndividual(item)}
                           className='ml-1 text-xs text-red-500 hover:text-red-700'
-                          aria-label={`Clear year ${year}`}
+                          aria-label={`Clear ${label.toLowerCase()} ${item}`}
                         >
                           <X size={12} />
                         </button>
@@ -56,8 +90,8 @@ export const DashboardFilterSummary = React.memo(
                         <span className='mx-1'>
                           {value.length > 2 || (value.length === 2 && !isLast)
                             ? isSecondToLast
-                              ? 'and'
-                              : ','
+                              ? ' and '
+                              : ', '
                             : ''}
                         </span>
                       )}
@@ -71,10 +105,12 @@ export const DashboardFilterSummary = React.memo(
       }
 
       // Logika default untuk value non-array
-      if (Array.isArray(value)) {
-        return value.length > 0 ? value.join(', ') : '-';
-      }
-      return value ?? '-';
+      return (
+        <div className='flex items-center justify-center gap-2 whitespace-nowrap'>
+          <span className='font-medium'>{`Selected ${label}:`}</span>
+          <Badge variant='secondary'>{value ?? '-'}</Badge>
+        </div>
+      );
     };
 
     if (layout === 'inline') {
@@ -88,7 +124,7 @@ export const DashboardFilterSummary = React.memo(
           {filters.map((f, i) => (
             <div key={i} className='flex items-center'>
               {renderValue(f)}
-              {f.isClearable && f.onClear && !f.individualYears && (
+              {f.isClearable && f.onClear && !f.individualYears?.length && (
                 <button
                   onClick={f.onClear}
                   className='ml-2 text-xs text-red-500 hover:text-red-700'
@@ -103,16 +139,15 @@ export const DashboardFilterSummary = React.memo(
       );
     }
 
-    // Layout lain (grid, badge) jika diperlukan
+    // Tata letak vertikal (grid atau badge)
     return (
-      <div className={clsx('text-sm space-y-1', className)}>
+      <div
+        className={clsx('text-sm flex flex-col gap-2 items-center', className)}
+      >
         {filters.map((f, i) => (
           <div key={i} className='flex items-center'>
-            <span>
-              {f.label === 'Invoice Period' ? '' : `Selected ${f.label}: `}
-              {renderValue(f)}
-            </span>
-            {f.isClearable && f.onClear && !f.individualYears && (
+            {renderValue(f)}
+            {f.isClearable && f.onClear && !f.individualYears?.length && (
               <button
                 onClick={f.onClear}
                 className='ml-2 text-xs text-red-500 hover:text-red-700'
