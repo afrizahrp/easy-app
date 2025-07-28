@@ -17,17 +17,17 @@ export async function GET(req: NextRequest) {
   const role_id = searchParams.get('role_id');
   const role_name = searchParams.get('role_name') || 'ADMINISTRATOR';
 
-  console.log('Query Params:', {
-    accessToken,
-    refreshToken,
-    userId,
-    company_id,
-    name,
-    email,
-    image,
-    role_id,
-    role_name,
-  });
+  // console.log('Query Params:', {
+  //   accessToken,
+  //   refreshToken,
+  //   userId,
+  //   company_id,
+  //   name,
+  //   email,
+  //   image,
+  //   role_id,
+  //   role_name,
+  // });
 
   if (!accessToken || !refreshToken || !userId || !name || !role_id) {
     throw new Error('Google Auth Failed! Missing required parameters');

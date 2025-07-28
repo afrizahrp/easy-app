@@ -10,6 +10,7 @@ import { MonthFacetedFilter } from '@/components/ui/monthFacetedFilter';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { months } from '@/utils/monthNameMap'; // Import months array
+import CompanyFacetedFilter from '@/components/ui/companyFacetedFilter';
 
 interface ChartYearFilterProps {
   title?: string;
@@ -144,6 +145,7 @@ export function ChartYearFilter({
         <h3 className='text-lg font-semibold mb-2 text-center text-gray-800 dark:text-gray-200'>
           {title}
         </h3>
+        <CompanyFacetedFilter />
         <YearFacetedFilter
           title='Year'
           options={yearOptions}

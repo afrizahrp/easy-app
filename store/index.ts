@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { siteConfig } from '@/config/site';
 import { persist, PersistOptions, createJSONStorage } from 'zustand/middleware';
 import { SortingState } from '@tanstack/react-table';
-import { getSession, deleteSession, Session } from '@/lib/session';
+import { getSession, deleteSession } from '@/lib/session';
 import { SearchContext, SEARCH_CONTEXTS } from '@/constants/searchContexts';
 import { makeInitialSearchParams } from '@/utils/makeInitialSearchParams';
 import { startOfMonth, endOfMonth, set as setDate } from 'date-fns';
@@ -619,3 +619,5 @@ export const useSalesInvoiceHdFilterStore = create<SalesInvoiceFilterState>()(
     }
   )
 );
+
+export * from './companyFilter.store';

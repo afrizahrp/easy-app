@@ -84,9 +84,7 @@ const useYearlySalesInvoice = (
         });
         return {
           ...response.data,
-          data: response.data.data.filter((item) =>
-            response.data.company_id.includes(resolvedCompanyId)
-          ),
+          data: response.data.data,
         };
       } catch (error) {
         if (axios.isAxiosError(error)) {

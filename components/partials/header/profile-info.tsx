@@ -4,7 +4,6 @@ import { useSessionStore, useCompanyInfo } from '@/store';
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,

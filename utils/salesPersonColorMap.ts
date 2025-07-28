@@ -4,8 +4,7 @@ export const salesPersonColorMap: Record<
   { from: string; to: string; border: string }
 > = {
   // BIS
-  'DIRECT BUYER': { from: '#15803d', to: '#4ade80', border: '#15803d' }, // Hijau
-  'DIRECT BIP': { from: '#15803d', to: '#4ade80', border: '#15803d' }, // Hijau
+  DIRECT: { from: '#15803d', to: '#4ade80', border: '#15803d' }, // Hijau
   MEDI: { from: '#10b981', to: '#6ee7b7', border: '#10b981' }, // Emerald
   YOGA: { from: '#e11d48', to: '#f472b6', border: '#e11d48' }, // Rose
   SUJUD: { from: '#c026d3', to: '#f0abfc', border: '#c026d3' }, // Magenta (diperbarui)
@@ -46,7 +45,6 @@ export const salesPersonColorMap: Record<
   SETA: { from: '#1e3a8a', to: '#3b82f6', border: '#1e3a8a' }, // Blue-200
 
   // NON BIS
-  'AJI NUGRAHA': { from: '#d97706', to: '#facc15', border: '#d97706' }, // Gold/Saffron
   AJI: { from: '#d97706', to: '#facc15', border: '#d97706' }, // Gold/Saffron
   ORIT: { from: '#f472b6', to: '#f9a8d4', border: '#f472b6' }, // Peach
   INDAH: { from: '#ec4899', to: '#f472b6', border: '#ec4899' }, // Pink
