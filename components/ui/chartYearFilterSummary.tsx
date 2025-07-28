@@ -33,53 +33,73 @@ export default function ChartYearFilterSummary({
   );
 
   // Fungsi untuk mengecek apakah bulan berurutan dan mengembalikan format teks
-  const getFormattedMonths = (months: string[]) => {
-    if (months.length === 0) return [];
-
-    // Urutkan bulan berdasarkan urutan kalender
+  // ...existing code...
+  const getFormattedMonths = (months: string[]): string => {
+    if (months.length === 0) return '';
     const monthOrder = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
+      'jan',
+      'feb',
+      'mar',
+      'apr',
+      'may',
+      'jun',
+      'jul',
+      'aug',
+      'sep',
+      'oct',
+      'nov',
+      'dec',
     ];
-    const sortedMonths = months.sort(
-      (a, b) => monthOrder.indexOf(a) - monthOrder.indexOf(b)
-    );
+    const monthNames: { [key: string]: string } = {
+      jan: 'January',
+      feb: 'February',
+      mar: 'March',
+      apr: 'April',
+      may: 'May',
+      jun: 'June',
+      jul: 'July',
+      aug: 'August',
+      sep: 'September',
+      oct: 'October',
+      nov: 'November',
+      dec: 'December',
+    };
 
-    // Cek apakah bulan berurutan
+    // Mengubah input menjadi huruf kecil untuk sorting
+    const lowerSorted = [...months]
+      .map((m) => m.slice(0, 3).toLowerCase())
+      .sort((a, b) => monthOrder.indexOf(a) - monthOrder.indexOf(b));
+
+    // Mapping ke nama lengkap
+    const sortedMonths = lowerSorted.map((m) => monthNames[m]);
+    // Cek apakah bulan berurutan berdasarkan versi lowercase
     let isConsecutive = true;
-    for (let i = 1; i < sortedMonths.length; i++) {
+    for (let i = 1; i < lowerSorted.length; i++) {
       if (
-        monthOrder.indexOf(sortedMonths[i]) !==
-        monthOrder.indexOf(sortedMonths[i - 1]) + 1
+        monthOrder.indexOf(lowerSorted[i]) !==
+        monthOrder.indexOf(lowerSorted[i - 1]) + 1
       ) {
         isConsecutive = false;
         break;
       }
     }
 
+    let formatted: string;
     if (isConsecutive && sortedMonths.length > 1) {
-      // Format untuk bulan berurutan: "As At [last month]"
-      return [`As At ${sortedMonths[sortedMonths.length - 1]}`];
+      // Contoh: "As At April"
+      formatted = `As At ${sortedMonths[sortedMonths.length - 1]}`;
     } else {
-      // Format untuk bulan tidak berurutan: "Jan, Mar, and Apr"
-      if (sortedMonths.length === 1) return sortedMonths;
-      if (sortedMonths.length === 2)
-        return [`${sortedMonths[0]} and ${sortedMonths[1]}`];
-      return [
-        `${sortedMonths.slice(0, -1).join(', ')}, and ${sortedMonths[sortedMonths.length - 1]}`,
-      ];
+      if (sortedMonths.length === 1) {
+        formatted = sortedMonths[0];
+      } else if (sortedMonths.length === 2) {
+        formatted = `${sortedMonths[0]} and ${sortedMonths[1]}`;
+      } else {
+        formatted = `${sortedMonths.slice(0, -1).join(', ')}, and ${sortedMonths[sortedMonths.length - 1]}`;
+      }
     }
+    return formatted;
   };
+  // ...existing code...
 
   // Definisikan filtersList dengan urutan: Company, Year, Month
   const filtersList = [

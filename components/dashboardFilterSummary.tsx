@@ -26,16 +26,16 @@ export const DashboardFilterSummary = React.memo(
       const { value, individualYears, onClearIndividual, label } = filter;
 
       if (Array.isArray(value)) {
-        // Untuk Months, gunakan value langsung (misalnya, ["As At May"] atau ["Jan, Mar, and Apr"])
-        if (label === 'Months' && value.length === 1) {
+        // Kasus untuk Months: Gunakan value langsung (misalnya, ["As At Mar"] atau ["Jan, Mar, and Apr"])
+        if (label === 'Months') {
           return (
             <div className='flex items-center justify-center gap-2 whitespace-nowrap'>
               <span className='font-medium'>{`Selected ${label}:`}</span>
               <div className='flex items-center gap-1'>
                 <Badge variant='secondary' className='flex items-center gap-1'>
-                  {value[0] || '-'}
+                  {value.length === 0 ? '-' : value[0]}
                 </Badge>
-                {/* Tampilkan ikon X untuk setiap bulan di individualYears jika ada */}
+                {/* Tampilkan ikon X untuk setiap bulan di individualYears */}
                 {individualYears &&
                   individualYears.length > 0 &&
                   onClearIndividual && (
@@ -63,7 +63,7 @@ export const DashboardFilterSummary = React.memo(
           );
         }
 
-        // Untuk Companies dan Years, atau Months tidak berurutan
+        // Kasus untuk Companies dan Years
         return (
           <div className='flex items-center justify-center gap-2 whitespace-nowrap'>
             <span className='font-medium'>{`Selected ${label}:`}</span>

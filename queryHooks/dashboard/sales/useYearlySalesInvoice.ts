@@ -2,6 +2,7 @@ import { api } from '@/config/axios.config';
 import { useQuery } from '@tanstack/react-query';
 import { useYearlyPeriodStore, useMonthlyPeriodStore } from '@/store';
 import { getDefaultYears } from '@/lib/utils';
+import { getShortMonth } from '@/utils/getShortmonths'; // Import the utility function
 import axios from 'axios';
 
 interface YearlySalesInvoiceResponse {
@@ -29,13 +30,22 @@ const useYearlySalesInvoice = (
   const { selectedYears } = useYearlyPeriodStore();
   const { selectedMonths } = useMonthlyPeriodStore();
 
+  // const getShortMonth = (month: string): string => {
+  //   return month.charAt(0).toUpperCase() + month.slice(1, 3).toLowerCase();
+  // };
+
+  // Contoh penggunaan:
+  const shortMonths = selectedMonths.map(getShortMonth);
+
   // Hardcode company_id ke BIS
   const resolvedCompanyId = 'BIS';
 
   // Gunakan selectedYears jika ada, fallback ke getDefaultYears jika kosong
   const years = selectedYears.length > 0 ? selectedYears : getDefaultYears();
   // Gunakan selectedMonths jika ada, kosongkan jika tidak ada
-  const months = selectedMonths.length > 0 ? selectedMonths : [];
+  // const months = selectedMonths.length > 0 ? selectedMonths : [];
+
+  const months = shortMonths.length > 0 ? shortMonths : [];
 
   const isValidRequest = Boolean(
     resolvedCompanyId &&

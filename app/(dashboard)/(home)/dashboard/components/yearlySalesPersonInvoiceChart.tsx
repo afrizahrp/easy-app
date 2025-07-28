@@ -563,10 +563,10 @@ const YearlySalesPersonInvoiceChart: React.FC<
             }}
           />
         ) : (
-          <div className='flex flex-col items-center justify-center h-full text-gray-400'>
+          <div className='flex flex-col items-center justify-center h-full text-gray-400 p-12'>
             <svg
               xmlns='http://www.w3.org/2000/svg'
-              className='w-24 h-24 mb-4 animate-bounce'
+              className='w-24 h-24 mb-6 animate-bounce'
               fill='none'
               viewBox='0 0 24 24'
               stroke='currentColor'
@@ -578,7 +578,7 @@ const YearlySalesPersonInvoiceChart: React.FC<
                 d='M3 3v18h18V3H3zm5 14h8m-8-4h8m-8-4h8'
               />
             </svg>
-            <p className='text-sm font-medium'>No data available</p>
+            <p className='text-sm font-medium mt-4'>No data available</p>
           </div>
         )}
       </div>

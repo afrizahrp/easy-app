@@ -6,6 +6,7 @@ import {
   useMonthlyPeriodStore,
 } from '@/store';
 import { getDefaultYears } from '@/lib/utils';
+import { getShortMonth } from '@/utils/getShortmonths'; // Import the utility function
 import axios from 'axios';
 
 interface SalesPerson {
@@ -61,12 +62,10 @@ const useYearlySalesPersonInvoice = ({
     selectedYears.length > 0 ? selectedYears : getDefaultYears()
   ).map(String);
   // Gunakan selectedMonths jika ada, kosongkan jika tidak ada
-  const months = selectedMonths.length > 0 ? selectedMonths : [];
 
-  // Log untuk debugging
-  console.log('Resolved Company IDs:', resolvedCompanyId);
-  console.log('Years before request:', years);
-  console.log('Months before request:', months);
+  const shortMonths = selectedMonths.map(getShortMonth);
+
+  const months = shortMonths.length > 0 ? shortMonths : [];
 
   const isValidRequest = Boolean(
     resolvedCompanyId.length > 0 &&
