@@ -1,7 +1,7 @@
 import { api } from '@/config/axios.config';
 import { useQuery } from '@tanstack/react-query';
 import {
-  useSessionStore,
+  useCompanyFilterStore,
   useYearlyPeriodStore,
   useMonthlyPeriodStore,
 } from '@/store';
@@ -35,32 +35,24 @@ interface UseYearlySalesPersonInvoiceProps {
 }
 
 const useYearlySalesPersonInvoice = ({
-  context,
-  company_id,
   module_id = 'dsb',
   subModule_id = 'sls',
 }: UseYearlySalesPersonInvoiceProps & {
-  company_id?: string | string[];
   module_id?: string;
   subModule_id?: string;
 } = {}) => {
-  const user = useSessionStore((state) => state.user);
   const { selectedYears } = useYearlyPeriodStore();
   const { selectedMonths } = useMonthlyPeriodStore();
 
-  // Tentukan resolvedCompanyId sebagai array
-  const resolvedCompanyId = Array.isArray(company_id)
-    ? company_id.map((id) => id.toUpperCase())
-    : company_id
-      ? [company_id.toUpperCase()]
-      : user?.company_id
-        ? [user.company_id.toUpperCase()]
-        : ['BIS']; // Fallback ke BIS jika tidak ada company_id
+  // Gunakan useCompanyFilterStore untuk mendapatkan selectedCompanyIds dengan cara reactive
+  const { selectedCompanyIds } = useCompanyFilterStore();
+  const resolvedCompanyId =
+    selectedCompanyIds.length > 0 ? selectedCompanyIds : ['BIS'];
 
-  // Pastikan years adalah string[]
-  const years = (
-    selectedYears.length > 0 ? selectedYears : getDefaultYears()
-  ).map(String);
+  console.log('salesPersonresolvedCompanyId', resolvedCompanyId);
+
+  // Gunakan selectedYears jika ada, fallback ke getDefaultYears jika kosong
+  const years = selectedYears.length > 0 ? selectedYears : getDefaultYears();
   // Gunakan selectedMonths jika ada, kosongkan jika tidak ada
 
   const shortMonths = selectedMonths.map(getShortMonth);
@@ -68,10 +60,10 @@ const useYearlySalesPersonInvoice = ({
   const months = shortMonths.length > 0 ? shortMonths : [];
 
   const isValidRequest = Boolean(
-    resolvedCompanyId.length > 0 &&
+    resolvedCompanyId &&
       module_id &&
       subModule_id &&
-      years.length > 0
+      (years.length > 0 || months.length > 0)
   );
 
   const { data, isLoading, isFetching, error, ...rest } = useQuery<
@@ -92,17 +84,18 @@ const useYearlySalesPersonInvoice = ({
       }
 
       const url = `${process.env.NEXT_PUBLIC_API_URL}/${module_id}/${subModule_id}/get-dashboard/getYearlySalespersonInvoice`;
-      console.log('Request URL:', url);
 
       try {
         const response = await api.get<SalesPeriodResponse>(url, {
           params: { company_id: resolvedCompanyId, years, months },
           paramsSerializer: (params) => {
-            const companyIdParams = params.company_id
+            // Serialize company_id, years, dan months ke query parameters
+            const companyIdParams = Array.isArray(params.company_id)
               ? params.company_id
                   .map((id: string) => `company_id=${encodeURIComponent(id)}`)
                   .join('&')
-              : '';
+              : `company_id=${encodeURIComponent(params.company_id)}`;
+
             const yearParams = params.years
               ? params.years
                   .map((year: string) => `years=${encodeURIComponent(year)}`)
@@ -113,42 +106,29 @@ const useYearlySalesPersonInvoice = ({
                   .map((month: string) => `months=${encodeURIComponent(month)}`)
                   .join('&')
               : '';
-            const queryString = [companyIdParams, yearParams, monthParams]
+            return [companyIdParams, yearParams, monthParams]
               .filter(Boolean)
               .join('&');
-            console.log('Serialized query string:', queryString);
-            return queryString;
           },
         });
 
-        console.log('Sales Person Invoice Response:', response.data);
-
-        return response.data;
+        return {
+          ...response.data,
+          data: response.data.data,
+        };
       } catch (error) {
         if (axios.isAxiosError(error)) {
-          console.error('Axios Error:', {
-            status: error.response?.status,
-            message: error.response?.data?.message,
-            url,
-            params: { company_id: resolvedCompanyId, years, months },
-          });
           throw new Error(
             error.response?.data?.message ||
               'Failed to fetch yearly salesperson invoice data'
           );
         }
-        console.error('Unexpected Error:', error);
         throw error;
       }
     },
     enabled: isValidRequest,
     staleTime: 5 * 60 * 1000, // 5 menit
-    retry: (failureCount, error) => {
-      if (axios.isAxiosError(error) && error.response?.status === 400) {
-        return false;
-      }
-      return failureCount < 3;
-    },
+    retry: 3,
   });
 
   return {

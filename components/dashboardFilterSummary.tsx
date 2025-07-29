@@ -20,7 +20,7 @@ interface DashboardFilterSummaryProps {
 
 export const DashboardFilterSummary = React.memo(
   ({ filters, layout = 'grid', className }: DashboardFilterSummaryProps) => {
-    console.log('DashboardFilterSummary filters:', filters); // Debugging
+    // console.log('DashboardFilterSummary filters:', filters); // Debugging
 
     const renderValue = (filter: DashboardFilterSummaryProps['filters'][0]) => {
       const { value, individualYears, onClearIndividual, label } = filter;

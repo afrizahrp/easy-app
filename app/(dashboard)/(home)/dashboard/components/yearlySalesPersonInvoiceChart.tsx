@@ -34,6 +34,7 @@ import {
   salesPersonColorMap,
   getFallbackColor,
 } from '@/utils/salesPersonColorMap';
+import { months as monthOrder } from '@/utils/monthNameMap';
 
 ChartJS.register(
   CategoryScale,
@@ -183,20 +184,7 @@ const YearlySalesPersonInvoiceChart: React.FC<
   // Check if selectedMonths are consecutive
   const isConsecutiveMonths = React.useMemo(() => {
     if (selectedMonths.length <= 1) return false;
-    const monthOrder = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
-    ];
+
     const sortedMonths = [...selectedMonths].sort(
       (a, b) =>
         monthOrder.indexOf(
@@ -228,7 +216,7 @@ const YearlySalesPersonInvoiceChart: React.FC<
         const lastMonth = selectedMonths[selectedMonths.length - 1];
         const capitalizedMonth =
           lastMonth.charAt(0).toUpperCase() + lastMonth.slice(1);
-        return `Yearly Sales Above 3.6 Billion IDR by Salesperson as at ${capitalizedMonth} (in IDR Million)`;
+        return `Yearly Sales Above 5 Billion IDR by Salesperson as at ${capitalizedMonth} (in IDR Million)`;
       } else {
         // List all months with "and" for non-consecutive
         const capitalizedMonths = selectedMonths.map(
@@ -239,16 +227,16 @@ const YearlySalesPersonInvoiceChart: React.FC<
           capitalizedMonths.length > 0
             ? `${capitalizedMonths.join(', ')} and ${lastMonth}`
             : lastMonth;
-        return `Yearly Sales Above 3.6 Billion IDR by Salesperson for ${formattedMonths} (in IDR Million)`;
+        return `Yearly Sales Above 5 Billion IDR by Salesperson for ${formattedMonths} (in IDR Million)`;
       }
     } else if (selectedMonths.length === 1) {
       // Single month
       const month = selectedMonths[0];
       const capitalizedMonth = month.charAt(0).toUpperCase() + month.slice(1);
-      return `Yearly Sales Above 3.6 Billion IDR by Salesperson for ${capitalizedMonth} (in IDR Million)`;
+      return `Yearly Sales Above 5 Billion IDR by Salesperson for ${capitalizedMonth} (in IDR Million)`;
     } else {
       // No months selected
-      return 'Yearly Sales Above 3.6 Billion IDR by Salesperson (in IDR Million)';
+      return 'Yearly Sales Above 10 Billion IDR by Salesperson (in IDR Million)';
     }
   }, [selectedMonths, isConsecutiveMonths]);
 
