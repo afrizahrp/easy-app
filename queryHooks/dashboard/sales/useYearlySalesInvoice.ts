@@ -1,6 +1,11 @@
 import { api } from '@/config/axios.config';
 import { useQuery } from '@tanstack/react-query';
-import { useYearlyPeriodStore, useMonthlyPeriodStore } from '@/store';
+import {
+  useCompanyFilterStore,
+  useYearlyPeriodStore,
+  useMonthlyPeriodStore,
+} from '@/store';
+// import { useCompanyFilterStore } from '@/store';
 import { getDefaultYears } from '@/lib/utils';
 import { getShortMonth } from '@/utils/getShortmonths'; // Import the utility function
 import axios from 'axios';
@@ -30,11 +35,17 @@ const useYearlySalesInvoice = (
   const { selectedYears } = useYearlyPeriodStore();
   const { selectedMonths } = useMonthlyPeriodStore();
 
+  // const getShortMonth = (month: string): string => {
+  //   return month.charAt(0).toUpperCase() + month.slice(1, 3).toLowerCase();
+  // };
+
   // Contoh penggunaan:
   const shortMonths = selectedMonths.map(getShortMonth);
 
-  // Hardcode company_id ke BIS
-  const resolvedCompanyId = 'BIS';
+  // Gunakan useCompanyFilterStore untuk mendapatkan selectedCompanyIds dengan cara reactive
+  const { selectedCompanyIds } = useCompanyFilterStore();
+  const resolvedCompanyId =
+    selectedCompanyIds.length > 0 ? selectedCompanyIds : ['BIS'];
 
   // Gunakan selectedYears jika ada, fallback ke getDefaultYears jika kosong
   const years = selectedYears.length > 0 ? selectedYears : getDefaultYears();
@@ -44,8 +55,7 @@ const useYearlySalesInvoice = (
   const months = shortMonths.length > 0 ? shortMonths : [];
 
   const isValidRequest = Boolean(
-    // Ambil company_id dari useCompanyFilterStore
-    resolvedCompanyIds.length > 0 &&
+    resolvedCompanyId &&
       module_id &&
       subModule_id &&
       (years.length > 0 || months.length > 0)
@@ -57,7 +67,7 @@ const useYearlySalesInvoice = (
   >({
     queryKey: [
       'yearlySalesInvoice',
-      resolvedCompanyIds,
+      resolvedCompanyId,
       module_id,
       subModule_id,
       years,
@@ -70,10 +80,15 @@ const useYearlySalesInvoice = (
       const url = `${process.env.NEXT_PUBLIC_API_URL}/${module_id}/${subModule_id}/get-dashboard/getYearlySalesInvoice`;
       try {
         const response = await api.get<YearlySalesInvoiceResponse>(url, {
-          params: { company_id: resolvedCompanyIds, years, months },
+          params: { company_id: resolvedCompanyId, years, months },
           paramsSerializer: (params) => {
             // Serialize company_id, years, dan months ke query parameters
-            const companyIdParams = `company_id=${encodeURIComponent(params.company_id)}`;
+            const companyIdParams = Array.isArray(params.company_id)
+              ? params.company_id
+                  .map((id: string) => `company_id=${encodeURIComponent(id)}`)
+                  .join('&')
+              : `company_id=${encodeURIComponent(params.company_id)}`;
+
             const yearParams = params.years
               ? params.years
                   .map((year: string) => `years=${encodeURIComponent(year)}`)

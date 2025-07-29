@@ -1,10 +1,9 @@
 import { api } from '@/config/axios.config';
 import { useQuery } from '@tanstack/react-query';
 import {
-  useSessionStore,
+  useCompanyFilterStore,
   useYearlyPeriodStore,
   useMonthlyPeriodStore,
-  useCompanyFilterStore,
 } from '@/store';
 import { getDefaultYears } from '@/lib/utils';
 import { getShortMonth } from '@/utils/getShortmonths'; // Import the utility function
@@ -42,30 +41,24 @@ const useYearlySalesPersonInvoice = ({
   module_id?: string;
   subModule_id?: string;
 } = {}) => {
-  const user = useSessionStore((state) => state.user);
   const { selectedYears } = useYearlyPeriodStore();
   const { selectedMonths } = useMonthlyPeriodStore();
 
-  // Tentukan resolvedCompanyId sebagai array
-  const resolvedCompanyId = Array.isArray(company_id)
-    ? company_id.map((id) => id.toUpperCase())
-    : company_id
-      ? [company_id.toUpperCase()]
-      : user?.company_id
-        ? [user.company_id.toUpperCase()]
-        : ['BIS']; // Fallback ke BIS jika tidak ada company_id
+  // Gunakan useCompanyFilterStore untuk mendapatkan selectedCompanyIds dengan cara reactive
+  const { selectedCompanyIds } = useCompanyFilterStore();
+  const resolvedCompanyId =
+    selectedCompanyIds.length > 0 ? selectedCompanyIds : ['BIS'];
 
-  // Pastikan years adalah string[]
-  const years = (
-    selectedYears.length > 0 ? selectedYears : getDefaultYears()
-  ).map(String);
+  // Gunakan selectedYears jika ada, fallback ke getDefaultYears jika kosong
+  const years = selectedYears.length > 0 ? selectedYears : getDefaultYears();
   // Gunakan selectedMonths jika ada, kosongkan jika tidak ada
 
   const shortMonths = selectedMonths.map(getShortMonth);
+
   const months = shortMonths.length > 0 ? shortMonths : [];
 
   const isValidRequest = Boolean(
-    resolvedCompanyId.length > 0 &&
+    resolvedCompanyId &&
       module_id &&
       subModule_id &&
       (years.length > 0 || months.length > 0)
@@ -77,7 +70,7 @@ const useYearlySalesPersonInvoice = ({
   >({
     queryKey: [
       'yearlySalesPersonInvoice',
-      resolvedCompanyIds,
+      resolvedCompanyId,
       module_id,
       subModule_id,
       years,
@@ -87,18 +80,20 @@ const useYearlySalesPersonInvoice = ({
       if (!process.env.NEXT_PUBLIC_API_URL) {
         throw new Error('NEXT_PUBLIC_API_URL is not defined');
       }
+
       const url = `${process.env.NEXT_PUBLIC_API_URL}/${module_id}/${subModule_id}/get-dashboard/getYearlySalespersonInvoice`;
-      console.log('Request URL:', url);
 
       try {
         const response = await api.get<SalesPeriodResponse>(url, {
-          params: { company_id: resolvedCompanyIds, years, months },
+          params: { company_id: resolvedCompanyId, years, months },
           paramsSerializer: (params) => {
-            const companyIdParams = params.company_id
+            // Serialize company_id, years, dan months ke query parameters
+            const companyIdParams = Array.isArray(params.company_id)
               ? params.company_id
                   .map((id: string) => `company_id=${encodeURIComponent(id)}`)
                   .join('&')
-              : '';
+              : `company_id=${encodeURIComponent(params.company_id)}`;
+
             const yearParams = params.years
               ? params.years
                   .map((year: string) => `years=${encodeURIComponent(year)}`)
@@ -115,9 +110,10 @@ const useYearlySalesPersonInvoice = ({
           },
         });
 
-        console.log('Sales Person Invoice Response:', response.data);
-
-        return response.data;
+        return {
+          ...response.data,
+          data: response.data.data,
+        };
       } catch (error) {
         if (axios.isAxiosError(error)) {
           throw new Error(
