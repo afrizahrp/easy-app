@@ -158,7 +158,7 @@ export function ChartYearFilter({
         <MonthFacetedFilter
           title='Month'
           options={[
-            { value: 'all', label: 'All Months' },
+            // { value: 'all', label: 'All Months' },
             ...months.map((month) => ({
               value: month.toLowerCase(),
               label: month,

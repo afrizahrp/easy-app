@@ -6,6 +6,7 @@ import {
 } from '@/store';
 import { DashboardFilterSummary } from '@/components/dashboardFilterSummary';
 import { getDefaultYears } from '@/lib/utils';
+import { months } from '@/utils/monthNameMap';
 import clsx from 'clsx';
 
 interface ChartYearFilterSummaryProps {
@@ -34,8 +35,8 @@ export default function ChartYearFilterSummary({
 
   // Fungsi untuk mengecek apakah bulan berurutan dan mengembalikan format teks
   // ...existing code...
-  const getFormattedMonths = (months: string[]): string => {
-    if (months.length === 0) return '';
+  const getFormattedMonths = (selectedMonths: string[]): string => {
+    if (selectedMonths.length === 0) return '';
     const monthOrder = [
       'jan',
       'feb',
@@ -51,22 +52,22 @@ export default function ChartYearFilterSummary({
       'dec',
     ];
     const monthNames: { [key: string]: string } = {
-      jan: 'January',
-      feb: 'February',
-      mar: 'March',
-      apr: 'April',
-      may: 'May',
-      jun: 'June',
-      jul: 'July',
-      aug: 'August',
-      sep: 'September',
-      oct: 'October',
-      nov: 'November',
-      dec: 'December',
+      jan: months[0],
+      feb: months[1],
+      mar: months[2],
+      apr: months[3],
+      may: months[4],
+      jun: months[5],
+      jul: months[6],
+      aug: months[7],
+      sep: months[8],
+      oct: months[9],
+      nov: months[10],
+      dec: months[11],
     };
 
     // Mengubah input menjadi huruf kecil untuk sorting
-    const lowerSorted = [...months]
+    const lowerSorted = [...selectedMonths]
       .map((m) => m.slice(0, 3).toLowerCase())
       .sort((a, b) => monthOrder.indexOf(a) - monthOrder.indexOf(b));
 
@@ -142,13 +143,13 @@ export default function ChartYearFilterSummary({
   ];
 
   // Log untuk debugging
-  console.log('ChartYearFilterSummary Render:', {
-    selectedYears,
-    hasNonDefaultYears,
-    selectedMonths,
-    formattedMonths: getFormattedMonths(selectedMonths),
-    filtersList,
-  });
+  // console.log('ChartYearFilterSummary Render:', {
+  //   selectedYears,
+  //   hasNonDefaultYears,
+  //   selectedMonths,
+  //   formattedMonths: getFormattedMonths(selectedMonths),
+  //   filtersList,
+  // });
 
   return (
     <div
