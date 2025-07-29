@@ -13,7 +13,7 @@ export const Social = () => {
     const redirectUrl = `${BACKEND_URL}/auth/google/login${
       callbackUrl ? `?callbackUrl=${encodeURIComponent(callbackUrl)}` : ''
     }`;
-    console.log('Redirecting to Google login:', redirectUrl);
+    // console.log('Redirecting to Google login:', redirectUrl);
     window.location.href = redirectUrl;
   };
 
