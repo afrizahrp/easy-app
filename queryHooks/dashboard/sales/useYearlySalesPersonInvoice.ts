@@ -49,8 +49,6 @@ const useYearlySalesPersonInvoice = ({
   const resolvedCompanyId =
     selectedCompanyIds.length > 0 ? selectedCompanyIds : ['BIS'];
 
-  console.log('salesPersonresolvedCompanyId', resolvedCompanyId);
-
   // Gunakan selectedYears jika ada, fallback ke getDefaultYears jika kosong
   const years = selectedYears.length > 0 ? selectedYears : getDefaultYears();
   // Gunakan selectedMonths jika ada, kosongkan jika tidak ada

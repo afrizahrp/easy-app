@@ -1,9 +1,9 @@
 import { api } from '@/config/axios.config';
 import { useQuery } from '@tanstack/react-query';
-import { useCompanyFilterStore, useMonthlyPeriodStore } from '@/store';
-import { getShortMonth } from '@/utils/getShortmonths';
+import { useCompanyFilterStore, useMonthYearPeriodStore } from '@/store';
 import axios from 'axios';
 import { useMemo } from 'react';
+import { format } from 'date-fns';
 
 interface MonthlyData {
   amount: number;
@@ -25,58 +25,133 @@ interface SalesPeriodResponse {
 
 interface UseMonthlyComparisonSalesInvoiceParams {
   context: 'salesInvoice' | 'salesPersonInvoice';
+  module_id?: string;
+  subModule_id?: string;
+}
+
+// Add axios interceptor for debugging (optional)
+if (process.env.NODE_ENV === 'development') {
+  api.interceptors.request.use(
+    (config) => {
+      console.log('🚀 [AXIOS DEBUG] Request:', {
+        method: config.method?.toUpperCase(),
+        url: config.url,
+        params: config.params,
+        data: config.data,
+      });
+      return config;
+    },
+    (error) => {
+      console.error('❌ [AXIOS DEBUG] Request Error:', error);
+      return Promise.reject(error);
+    }
+  );
+
+  api.interceptors.response.use(
+    (response) => {
+      console.log('✅ [AXIOS DEBUG] Response:', {
+        status: response.status,
+        url: response.config.url,
+        data: response.data,
+      });
+      return response;
+    },
+    (error) => {
+      console.error('❌ [AXIOS DEBUG] Response Error:', {
+        status: error.response?.status,
+        url: error.config?.url,
+        data: error.response?.data,
+      });
+      return Promise.reject(error);
+    }
+  );
 }
 
 const useMonthlyComparisonSalesInvoice = ({
   context,
+  module_id = 'ANT',
+  subModule_id = 'sls',
 }: UseMonthlyComparisonSalesInvoiceParams) => {
   const { selectedCompanyIds } = useCompanyFilterStore();
-  const { selectedMonths } = useMonthlyPeriodStore();
+  const { salesInvoicePeriod, salesPersonInvoicePeriod } =
+    useMonthYearPeriodStore();
 
-  const module_id = 'ANT';
-  const subModule_id = 'sls';
-
-  // Memoize resolvedCompanyId and months for stability
+  // Memoize resolvedCompanyId untuk stabilitas
   const resolvedCompanyId = useMemo(
     () => (selectedCompanyIds.length > 0 ? selectedCompanyIds : ['BIS']),
     [selectedCompanyIds]
   );
 
-  const months = useMemo(
-    () => (selectedMonths?.length > 0 ? selectedMonths.map(getShortMonth) : []),
-    [selectedMonths]
-  );
+  // Get period based on context
+  const period = useMemo(() => {
+    return context === 'salesInvoice'
+      ? salesInvoicePeriod
+      : salesPersonInvoicePeriod;
+  }, [context, salesInvoicePeriod, salesPersonInvoicePeriod]);
+
+  // Format startPeriod and endPeriod as MMMYYYY
+  const { startPeriod, endPeriod } = useMemo(() => {
+    const formatPeriod = (date: Date | null): string | null => {
+      if (!date) return null;
+      return format(date, 'MMMyyyy');
+    };
+
+    return {
+      startPeriod: formatPeriod(period.startPeriod),
+      endPeriod: formatPeriod(period.endPeriod),
+    };
+  }, [period.startPeriod, period.endPeriod]);
 
   // Validate request parameters
-  const isValidRequest = Boolean(
-    resolvedCompanyId && module_id && subModule_id && months.length > 0
+  const isValidRequest = useMemo(
+    () =>
+      Boolean(
+        resolvedCompanyId &&
+          module_id &&
+          subModule_id &&
+          startPeriod &&
+          endPeriod
+      ),
+    [resolvedCompanyId, module_id, subModule_id, startPeriod, endPeriod]
+  );
+
+  // Memoize query key untuk stabilitas
+  const queryKey = useMemo(
+    () => [
+      'monthlyComparisonSalesInvoice',
+      context,
+      resolvedCompanyId,
+      module_id,
+      subModule_id,
+      startPeriod,
+      endPeriod,
+    ],
+    [
+      context,
+      resolvedCompanyId,
+      module_id,
+      subModule_id,
+      startPeriod,
+      endPeriod,
+    ]
   );
 
   console.log(
     '[useMonthlyComparisonSalesInvoice] isValidRequest:',
     isValidRequest
   );
-  console.log('[useMonthlyComparisonSalesInvoice] queryKey:', [
-    'monthlyComparisonSalesInvoice',
+  console.log('[useMonthlyComparisonSalesInvoice] queryKey:', queryKey);
+  console.log('[useMonthlyComparisonSalesInvoice] Period:', {
+    startPeriod,
+    endPeriod,
     context,
-    resolvedCompanyId,
-    module_id,
-    subModule_id,
-    months,
-  ]);
+  });
 
   const { data, isLoading, isFetching, error, ...rest } = useQuery<
     SalesPeriodResponse,
     Error
   >({
-    queryKey: [
-      'monthlyComparisonSalesInvoice',
-      context,
-      resolvedCompanyId,
-      module_id,
-      subModule_id,
-      months,
-    ],
+    queryKey,
     queryFn: async () => {
       if (!process.env.NEXT_PUBLIC_API_URL) {
         throw new Error('NEXT_PUBLIC_API_URL is not defined');
@@ -88,7 +163,11 @@ const useMonthlyComparisonSalesInvoice = ({
 
       try {
         const response = await api.get<SalesPeriodResponse>(url, {
-          params: { company_id: resolvedCompanyId, months },
+          params: {
+            company_id: resolvedCompanyId,
+            startPeriod,
+            endPeriod,
+          },
           paramsSerializer: (params) => {
             const companyIdParams = Array.isArray(params.company_id)
               ? params.company_id
@@ -96,27 +175,67 @@ const useMonthlyComparisonSalesInvoice = ({
                   .join('&')
               : `company_id=${encodeURIComponent(params.company_id)}`;
 
-            const monthParams = params.months
-              ? params.months
-                  .map((month: string) => `months=${encodeURIComponent(month)}`)
-                  .join('&')
+            const startPeriodParam = params.startPeriod
+              ? `startPeriod=${encodeURIComponent(params.startPeriod)}`
               : '';
 
-            return [companyIdParams, monthParams].filter(Boolean).join('&');
+            const endPeriodParam = params.endPeriod
+              ? `endPeriod=${encodeURIComponent(params.endPeriod)}`
+              : '';
+
+            return [companyIdParams, startPeriodParam, endPeriodParam]
+              .filter(Boolean)
+              .join('&');
           },
         });
 
-        console.log(
-          `[useMonthlyComparisonSalesInvoice:${context}] response:`,
-          response.data
-        );
+        // Debug: Log the complete URL with parameters
+        const queryParams = [
+          ...resolvedCompanyId.map(
+            (id) => `company_id=${encodeURIComponent(id)}`
+          ),
+          startPeriod ? `startPeriod=${encodeURIComponent(startPeriod)}` : '',
+          endPeriod ? `endPeriod=${encodeURIComponent(endPeriod)}` : '',
+        ]
+          .filter(Boolean)
+          .join('&');
+
+        const fullUrl = `${url}?${queryParams}`;
+
+        console.log('🔍 [DEBUG] Full URL called:', fullUrl);
+        console.log('🔍 [DEBUG] Base URL:', url);
+        console.log('🔍 [DEBUG] Parameters:', {
+          company_id: resolvedCompanyId,
+          startPeriod,
+          endPeriod,
+        });
+        console.log('🔍 [DEBUG] Response status:', response.status);
+        console.log('🔍 [DEBUG] Response data:', response.data);
 
         return {
           ...response.data,
           data: response.data.data,
         };
       } catch (error) {
+        // Debug: Log error details
+        console.error('❌ [DEBUG] Request failed:', {
+          url,
+          params: {
+            company_id: resolvedCompanyId,
+            startPeriod,
+            endPeriod,
+          },
+          error: error instanceof Error ? error.message : error,
+        });
+
         if (axios.isAxiosError(error)) {
+          console.error('❌ [DEBUG] Axios error details:', {
+            status: error.response?.status,
+            statusText: error.response?.statusText,
+            data: error.response?.data,
+            config: error.config,
+          });
+
           throw new Error(
             error.response?.data?.message ||
               'Failed to fetch monthly comparison sales invoice data'

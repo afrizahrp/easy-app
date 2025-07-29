@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { Bar } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -21,7 +21,6 @@ import { useToast } from '@/components/ui/use-toast';
 import useMonthlyComparisonSalesInvoice from '@/queryHooks/analytics/sales/useMonthlyComparisonSalesInvoice';
 import { Button } from '@/components/ui/button';
 import { Maximize2, Minimize2 } from 'lucide-react';
-import { months } from '@/utils/monthNameMap';
 
 ChartJS.register(
   CategoryScale,
@@ -32,6 +31,22 @@ ChartJS.register(
   Legend,
   gradientPlugin
 );
+
+// Use 3-letter month names to match backend data format
+const months = [
+  'Jan',
+  'Feb',
+  'Mar',
+  'Apr',
+  'May',
+  'Jun',
+  'Jul',
+  'Aug',
+  'Sep',
+  'Oct',
+  'Nov',
+  'Dec',
+];
 
 interface MonthlySalesInvoiceChartProps {
   height?: number;
@@ -147,11 +162,24 @@ const MonthlySalesInvoiceChart: React.FC<MonthlySalesInvoiceChartProps> = ({
     const allYears = data.map((d) => d.period);
     const colorPalette = generateYearColorPalette(allYears);
 
+    // Debug: Log the data structure
+    console.log('🔍 [CHART DEBUG] Data:', data);
+    console.log('🔍 [CHART DEBUG] Months array:', months);
+    console.log('🔍 [CHART DEBUG] First year data months:', data[0]?.months);
+
     const datasets = data.map((yearData, idx) => ({
       label: `Sales ${yearData.period}`,
-      data: months.map(
-        (month) => (yearData.months[month]?.amount || 0) / 1_000_000
-      ),
+      data: months.map((month) => {
+        const monthData = yearData.months[month];
+        const amount = monthData?.amount || 0;
+        console.log(
+          `🔍 [CHART DEBUG] Month ${month}:`,
+          monthData,
+          'Amount:',
+          amount
+        );
+        return amount / 1_000_000;
+      }),
       backgroundColor: (ctx: import('chart.js').ScriptableContext<'bar'>) => {
         const chart = ctx.chart;
         const { ctx: canvasCtx, chartArea } = chart;
@@ -182,6 +210,8 @@ const MonthlySalesInvoiceChart: React.FC<MonthlySalesInvoiceChartProps> = ({
         (month) => yearData.months[month]?.growthPercentage || 0
       ),
     }));
+
+    console.log('🔍 [CHART DEBUG] Final datasets:', datasets);
 
     return {
       labels: months,
