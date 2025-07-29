@@ -162,22 +162,22 @@ const MonthlySalesInvoiceChart: React.FC<MonthlySalesInvoiceChartProps> = ({
     const allYears = data.map((d) => d.period);
     const colorPalette = generateYearColorPalette(allYears);
 
-    // Debug: Log the data structure
-    console.log('🔍 [CHART DEBUG] Data:', data);
-    console.log('🔍 [CHART DEBUG] Months array:', months);
-    console.log('🔍 [CHART DEBUG] First year data months:', data[0]?.months);
+    // // Debug: Log the data structure
+    // console.log('🔍 [CHART DEBUG] Data:', data);
+    // console.log('🔍 [CHART DEBUG] Months array:', months);
+    // console.log('🔍 [CHART DEBUG] First year data months:', data[0]?.months);
 
     const datasets = data.map((yearData, idx) => ({
       label: `Sales ${yearData.period}`,
       data: months.map((month) => {
         const monthData = yearData.months[month];
         const amount = monthData?.amount || 0;
-        console.log(
-          `🔍 [CHART DEBUG] Month ${month}:`,
-          monthData,
-          'Amount:',
-          amount
-        );
+        // console.log(
+        //   `🔍 [CHART DEBUG] Month ${month}:`,
+        //   monthData,
+        //   'Amount:',
+        //   amount
+        // );
         return amount / 1_000_000;
       }),
       backgroundColor: (ctx: import('chart.js').ScriptableContext<'bar'>) => {
@@ -211,7 +211,7 @@ const MonthlySalesInvoiceChart: React.FC<MonthlySalesInvoiceChartProps> = ({
       ),
     }));
 
-    console.log('🔍 [CHART DEBUG] Final datasets:', datasets);
+    // console.log('🔍 [CHART DEBUG] Final datasets:', datasets);
 
     return {
       labels: months,

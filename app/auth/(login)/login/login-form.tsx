@@ -51,11 +51,11 @@ const LogInForm = () => {
   const form = useForm({
     resolver: zodResolver(LoginSchema),
     mode: 'all',
-    defaultValues: {
-      email: 'afriza.hrp@gmail.com',
-      password: '1234567',
-      company_id: 'BIS',
-    },
+    // defaultValues: {
+    //   email: 'afriza.hrp@gmail.com',
+    //   password: '1234567',
+    //   company_id: 'BIS',
+    // },
   });
 
   const onSubmit = (data: {

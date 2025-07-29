@@ -190,27 +190,27 @@ const useMonthlyComparisonSalesInvoice = ({
         });
 
         // Debug: Log the complete URL with parameters
-        const queryParams = [
-          ...resolvedCompanyId.map(
-            (id) => `company_id=${encodeURIComponent(id)}`
-          ),
-          startPeriod ? `startPeriod=${encodeURIComponent(startPeriod)}` : '',
-          endPeriod ? `endPeriod=${encodeURIComponent(endPeriod)}` : '',
-        ]
-          .filter(Boolean)
-          .join('&');
+        // const queryParams = [
+        //   ...resolvedCompanyId.map(
+        //     (id) => `company_id=${encodeURIComponent(id)}`
+        //   ),
+        //   startPeriod ? `startPeriod=${encodeURIComponent(startPeriod)}` : '',
+        //   endPeriod ? `endPeriod=${encodeURIComponent(endPeriod)}` : '',
+        // ]
+        //   .filter(Boolean)
+        //   .join('&');
 
-        const fullUrl = `${url}?${queryParams}`;
+        // const fullUrl = `${url}?${queryParams}`;
 
-        console.log('🔍 [DEBUG] Full URL called:', fullUrl);
-        console.log('🔍 [DEBUG] Base URL:', url);
-        console.log('🔍 [DEBUG] Parameters:', {
-          company_id: resolvedCompanyId,
-          startPeriod,
-          endPeriod,
-        });
-        console.log('🔍 [DEBUG] Response status:', response.status);
-        console.log('🔍 [DEBUG] Response data:', response.data);
+        // console.log('🔍 [DEBUG] Full URL called:', fullUrl);
+        // console.log('🔍 [DEBUG] Base URL:', url);
+        // console.log('🔍 [DEBUG] Parameters:', {
+        //   company_id: resolvedCompanyId,
+        //   startPeriod,
+        //   endPeriod,
+        // });
+        // console.log('🔍 [DEBUG] Response status:', response.status);
+        // console.log('🔍 [DEBUG] Response data:', response.data);
 
         return {
           ...response.data,
