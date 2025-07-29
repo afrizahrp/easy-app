@@ -1,8 +1,9 @@
 import { api } from '@/config/axios.config';
 import { useQuery } from '@tanstack/react-query';
-import { useSessionStore, useMonthYearPeriodStore } from '@/store';
-import { format } from 'date-fns';
-import { AxiosError } from 'axios';
+import { useCompanyFilterStore, useMonthlyPeriodStore } from '@/store';
+import { getShortMonth } from '@/utils/getShortmonths';
+import axios from 'axios';
+import { useMemo } from 'react';
 
 interface MonthlyData {
   amount: number;
@@ -16,7 +17,7 @@ interface SalesInvoiceComparisonData {
 }
 
 interface SalesPeriodResponse {
-  company_id: string;
+  company_id: string[];
   module_id: string;
   subModule_id: string;
   data: SalesInvoiceComparisonData[];
@@ -29,79 +30,104 @@ interface UseMonthlyComparisonSalesInvoiceParams {
 const useMonthlyComparisonSalesInvoice = ({
   context,
 }: UseMonthlyComparisonSalesInvoiceParams) => {
-  const user = useSessionStore((state) => state.user);
-  const company_id = user?.company_id?.toUpperCase();
+  const { selectedCompanyIds } = useCompanyFilterStore();
+  const { selectedMonths } = useMonthlyPeriodStore();
+
   const module_id = 'ANT';
   const subModule_id = 'sls';
 
-  const { salesInvoicePeriod, salesPersonInvoicePeriod } =
-    useMonthYearPeriodStore();
-  const period =
-    context === 'salesInvoice' ? salesInvoicePeriod : salesPersonInvoicePeriod;
-
-  const isValidRequest = Boolean(
-    company_id &&
-      module_id &&
-      subModule_id &&
-      period.startPeriod &&
-      period.endPeriod
+  // Memoize resolvedCompanyId and months for stability
+  const resolvedCompanyId = useMemo(
+    () => (selectedCompanyIds.length > 0 ? selectedCompanyIds : ['BIS']),
+    [selectedCompanyIds]
   );
+
+  const months = useMemo(
+    () => (selectedMonths?.length > 0 ? selectedMonths.map(getShortMonth) : []),
+    [selectedMonths]
+  );
+
+  // Validate request parameters
+  const isValidRequest = Boolean(
+    resolvedCompanyId && module_id && subModule_id && months.length > 0
+  );
+
+  console.log(
+    '[useMonthlyComparisonSalesInvoice] isValidRequest:',
+    isValidRequest
+  );
+  console.log('[useMonthlyComparisonSalesInvoice] queryKey:', [
+    'monthlyComparisonSalesInvoice',
+    context,
+    resolvedCompanyId,
+    module_id,
+    subModule_id,
+    months,
+  ]);
 
   const { data, isLoading, isFetching, error, ...rest } = useQuery<
     SalesPeriodResponse,
-    AxiosError<{ message?: string }>
+    Error
   >({
     queryKey: [
       'monthlyComparisonSalesInvoice',
       context,
-      company_id,
+      resolvedCompanyId,
       module_id,
       subModule_id,
-      period.startPeriod,
-      period.endPeriod,
+      months,
     ],
     queryFn: async () => {
-      if (!isValidRequest) {
-        throw new Error(
-          'Invalid request parameters: company_id, module_id, subModule_id, startPeriod, and endPeriod are required'
-        );
+      if (!process.env.NEXT_PUBLIC_API_URL) {
+        throw new Error('NEXT_PUBLIC_API_URL is not defined');
       }
 
-      const params = new URLSearchParams();
+      console.log('resolvedCompanyId:', resolvedCompanyId);
 
-      if (period.startPeriod) {
-        params.append('startPeriod', format(period.startPeriod, 'MMMyyyy'));
-      }
-      if (period.endPeriod) {
-        params.append('endPeriod', format(period.endPeriod, 'MMMyyyy'));
-      }
-
-      const url = `${process.env.NEXT_PUBLIC_API_URL}/${company_id}/${module_id}/${subModule_id}/get-analytics/getMonthlyComparisonSalesInvoice`;
-      const finalUrl = `${url}${params.toString() ? `?${params.toString()}` : ''}`;
-
-      console.log(`[useMonthlySalesInvoice:${context}] finalUrl:`, finalUrl);
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/${module_id}/${subModule_id}/get-analytics/getMonthlyComparisonSalesInvoice`;
 
       try {
-        const response = await api.get<SalesPeriodResponse>(finalUrl);
+        const response = await api.get<SalesPeriodResponse>(url, {
+          params: { company_id: resolvedCompanyId, months },
+          paramsSerializer: (params) => {
+            const companyIdParams = Array.isArray(params.company_id)
+              ? params.company_id
+                  .map((id: string) => `company_id=${encodeURIComponent(id)}`)
+                  .join('&')
+              : `company_id=${encodeURIComponent(params.company_id)}`;
 
-        console.log('response:', response.data);
+            const monthParams = params.months
+              ? params.months
+                  .map((month: string) => `months=${encodeURIComponent(month)}`)
+                  .join('&')
+              : '';
 
-        return response.data;
-      } catch (err) {
-        const axiosError = err as AxiosError<{ message?: string }>;
-        throw new Error(
-          axiosError.response?.data?.message || 'Failed to fetch sales data'
+            return [companyIdParams, monthParams].filter(Boolean).join('&');
+          },
+        });
+
+        console.log(
+          `[useMonthlyComparisonSalesInvoice:${context}] response:`,
+          response.data
         );
+
+        return {
+          ...response.data,
+          data: response.data.data,
+        };
+      } catch (error) {
+        if (axios.isAxiosError(error)) {
+          throw new Error(
+            error.response?.data?.message ||
+              'Failed to fetch monthly comparison sales invoice data'
+          );
+        }
+        throw error;
       }
     },
     enabled: isValidRequest,
-    staleTime: 60 * 1000,
-    retry: (failureCount, err) => {
-      if (err instanceof AxiosError && err.response?.status === 400) {
-        return false;
-      }
-      return failureCount < 2;
-    },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    retry: 3,
   });
 
   return {
