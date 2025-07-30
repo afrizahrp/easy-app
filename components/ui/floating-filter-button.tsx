@@ -96,7 +96,7 @@ export function FloatingFilterButton({
       >
         <div
           ref={draggableRef}
-          className={cn('fixed bottom-6 right-6 z-50 cursor-move', className)}
+          className={cn('fixed bottom-16 right-6 z-50 cursor-move', className)}
           aria-label={ariaLabel}
         >
           <TooltipProvider>
