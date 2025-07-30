@@ -113,10 +113,14 @@ export function PeriodFilter({ context, onChange, value }: PeriodFilterProps) {
   ]);
 
   return (
-    <div className='w-full flex justify-center items-center'>
-      <div className='w-full flex flex-col sm:flex-row justify-evenly items-center gap-4 py-3'>
-        <div className='flex flex-col items-center flex-1 max-w-[150px]'>
-          <label className='text-sm font-medium mb-1 block'>Start Period</label>
+    <div className='w-full space-y-2'>
+      {/* Date Picker Container */}
+      <div className='flex flex-col sm:flex-row gap-2'>
+        {/* Start Period */}
+        <div className='flex-1 min-w-0 max-w-[120px]'>
+          <label className='text-xs font-medium text-foreground block mb-0.5'>
+            Start Period
+          </label>
           <DatePicker
             selected={normalizedPeriod.startPeriod}
             onChange={(date: Date | null) => {
@@ -140,7 +144,7 @@ export function PeriodFilter({ context, onChange, value }: PeriodFilterProps) {
                 toast({
                   description:
                     'End Period was reset because it was earlier than the new Start Period.',
-                  variant: 'destructive', // Ganti color dengan variant
+                  variant: 'destructive',
                 });
               }
             }}
@@ -152,12 +156,15 @@ export function PeriodFilter({ context, onChange, value }: PeriodFilterProps) {
             yearDropdownItemNumber={15}
             scrollableYearDropdown
             maxDate={computedMaxDate}
-            className='w-[120px] h-10 px-3 border rounded-md bg-white text-gray-900 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-600 custom-datepicker'
+            className='w-full h-7 px-1 text-xs border border-border rounded bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring focus:border-transparent transition-colors'
           />
         </div>
 
-        <div className='flex flex-col items-center flex-1 max-w-[150px]'>
-          <label className='text-sm font-medium mb-1 block'>End Period</label>
+        {/* End Period */}
+        <div className='flex-1 min-w-0 max-w-[120px]'>
+          <label className='text-xs font-medium text-foreground block mb-0.5'>
+            End Period
+          </label>
           <DatePicker
             selected={normalizedPeriod.endPeriod ?? computedMaxDate}
             onChange={(date: Date | null) => {
@@ -188,10 +195,30 @@ export function PeriodFilter({ context, onChange, value }: PeriodFilterProps) {
             yearDropdownItemNumber={15}
             scrollableYearDropdown
             maxDate={computedMaxDate}
-            className='w-full h-10 px-3 border rounded-md bg-white text-gray-900 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-600 custom-datepicker'
+            className='w-full h-7 px-1 text-xs border border-border rounded bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring focus:border-transparent transition-colors'
           />
         </div>
       </div>
+
+      {/* Selected Range Display */}
+      {/* {(normalizedPeriod.startPeriod || normalizedPeriod.endPeriod) && (
+        <div className='text-center'>
+          <div className='inline-flex items-center gap-1 px-2 py-1 bg-muted rounded text-xs text-muted-foreground'>
+            <span>Selected:</span>
+            <span className='font-medium'>
+              {normalizedPeriod.startPeriod
+                ? format(normalizedPeriod.startPeriod, 'MMM yyyy')
+                : 'Any'}
+            </span>
+            <span>to</span>
+            <span className='font-medium'>
+              {normalizedPeriod.endPeriod
+                ? format(normalizedPeriod.endPeriod, 'MMM yyyy')
+                : 'Any'}
+            </span>
+          </div>
+        </div>
+      )} */}
     </div>
   );
 }

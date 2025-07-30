@@ -12,6 +12,8 @@ import { PeriodFilter } from '@/components/period-filter';
 import { useResetSalesInvoiceFilter } from '@/utils/reset-filter-state/sls/resetSalesInvoiceFilterStore';
 import { Button } from '@/components/ui/button';
 import { DataTableFacetedFilter } from '@/components/ui/data-table-faceted-filter';
+import CompanyFacetedFilter from '@/components/ui/companyFacetedFilter';
+
 import { useMonthYearPeriodStore, useSalesInvoiceHdFilterStore } from '@/store';
 import { SearchContext } from '@/constants/searchContexts';
 import { useToast } from '@/components/ui/use-toast';
@@ -163,54 +165,60 @@ export function SalesInvoiceFilterSidebar<TData>({
     poType.length > 0;
 
   return (
-    <div className='flex flex-col space-y-4 w-full py-2'>
+    <div className='flex flex-col space-y-3 w-full py-1'>
       <PeriodFilter context='salesInvoice' />
 
-      <div className='w-full py-3'>
-        <DataTableFacetedFilter
-          column={table?.getColumn('paidStatus')}
-          title='Paid Status'
-          options={paidStatusOptions}
-          isLoading={isPaidStatusLoading}
-          disabled={salesPersonName.length > 1}
-          selectedValues={new Set(paidStatus)}
-          onSelect={(value) => {
-            const updatedValues = new Set(paidStatus);
-            value
-              ? updatedValues.has(value)
-                ? updatedValues.delete(value)
-                : updatedValues.add(value)
-              : updatedValues.clear();
-            setSalesInvoiceFilters({
-              paidStatus: Array.from(updatedValues),
-            });
-          }}
-        />
-      </div>
+      <CompanyFacetedFilter />
 
-      <div className='w-full py-3'>
-        <DataTableFacetedFilter
-          column={table?.getColumn('poType')}
-          title='PO Type'
-          options={poTypeOptionList}
-          isLoading={isPoTypeLoading}
-          disabled={salesPersonName.length > 1}
-          selectedValues={new Set(poType)}
-          onSelect={(value) => {
-            const updatedValues = new Set(poType);
-            value
-              ? updatedValues.has(value)
-                ? updatedValues.delete(value)
-                : updatedValues.add(value)
-              : updatedValues.clear();
-            setSalesInvoiceFilters({
-              poType: Array.from(updatedValues),
-            });
-          }}
-        />
-      </div>
+      <DataTableFacetedFilter
+        column={table?.getColumn('paidStatus')}
+        title='Paid Status'
+        options={paidStatusOptions}
+        isLoading={isPaidStatusLoading}
+        disabled={salesPersonName.length > 1}
+        selectedValues={new Set(paidStatus)}
+        onSelect={(value) => {
+          const updatedValues = new Set(paidStatus);
+          if (value) {
+            if (updatedValues.has(value)) {
+              updatedValues.delete(value);
+            } else {
+              updatedValues.add(value);
+            }
+          } else {
+            updatedValues.clear();
+          }
+          setSalesInvoiceFilters({
+            paidStatus: Array.from(updatedValues),
+          });
+        }}
+      />
 
-      <div className='w-full py-3 dark:text-slate-400'>
+      <DataTableFacetedFilter
+        column={table?.getColumn('poType')}
+        title='PO Type'
+        options={poTypeOptionList}
+        isLoading={isPoTypeLoading}
+        disabled={salesPersonName.length > 1}
+        selectedValues={new Set(poType)}
+        onSelect={(value) => {
+          const updatedValues = new Set(poType);
+          if (value) {
+            if (updatedValues.has(value)) {
+              updatedValues.delete(value);
+            } else {
+              updatedValues.add(value);
+            }
+          } else {
+            updatedValues.clear();
+          }
+          setSalesInvoiceFilters({
+            poType: Array.from(updatedValues),
+          });
+        }}
+      />
+
+      <div className='dark:text-slate-400'>
         <DataTableFacetedFilter
           column={table?.getColumn('salesPersonName')}
           title='Sales Person'
@@ -220,9 +228,11 @@ export function SalesInvoiceFilterSidebar<TData>({
           onSelect={(value) => {
             const updatedValues = new Set(salesPersonName);
             if (value) {
-              updatedValues.has(value)
-                ? updatedValues.delete(value)
-                : updatedValues.add(value);
+              if (updatedValues.has(value)) {
+                updatedValues.delete(value);
+              } else {
+                updatedValues.add(value);
+              }
             } else {
               updatedValues.clear();
             }
@@ -237,9 +247,9 @@ export function SalesInvoiceFilterSidebar<TData>({
         <Button
           variant='outline'
           onClick={handleReset}
-          className='h-10 px-2 w-full mb-5 bg-secondary text-slate hover:bg-secondary-dark dark:bg-secondary dark:text-slate-400 dark:hover:bg-secondary dark:hover:text-slate-400'
+          className='h-9 px-2 w-full bg-secondary text-slate hover:bg-secondary-dark dark:bg-secondary dark:text-slate-400 dark:hover:bg-secondary dark:hover:text-slate-400'
         >
-          <Cross2Icon className='ml-2 h-4 w-4' />
+          <Cross2Icon className='mr-2 h-4 w-4' />
           Reset Filter
         </Button>
       )}
