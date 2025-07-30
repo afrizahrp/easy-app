@@ -63,7 +63,7 @@ const SalesInvoiceOverview: React.FC<SalesInvoiceOverviewProps> = ({
           <FloatingFilterButton
             modalPosition='above'
             title='Filter Data'
-            description='Filter sales invoice by po type.'
+            description='Filter sales by parameters.'
           >
             <SalesInvoiceFilterSidebar
               table={dummyTable}

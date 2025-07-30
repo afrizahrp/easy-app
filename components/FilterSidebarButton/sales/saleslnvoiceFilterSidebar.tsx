@@ -218,7 +218,7 @@ export function SalesInvoiceFilterSidebar<TData>({
         }}
       />
 
-      <div className='dark:text-slate-400'>
+      {/* <div className='dark:text-slate-400'>
         <DataTableFacetedFilter
           column={table?.getColumn('salesPersonName')}
           title='Sales Person'
@@ -241,7 +241,7 @@ export function SalesInvoiceFilterSidebar<TData>({
             });
           }}
         />
-      </div>
+      </div> */}
 
       {hasActiveFilters && (
         <Button

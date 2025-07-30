@@ -1,6 +1,10 @@
 import { api } from '@/config/axios.config';
 import { useQuery } from '@tanstack/react-query';
-import { useCompanyFilterStore, useMonthYearPeriodStore } from '@/store';
+import {
+  useCompanyFilterStore,
+  useMonthYearPeriodStore,
+  useSalesInvoiceHdFilterStore,
+} from '@/store';
 import axios from 'axios';
 import { useMemo } from 'react';
 import { format } from 'date-fns';
@@ -75,6 +79,17 @@ const useMonthlyComparisonSalesInvoice = ({
   const { selectedCompanyIds } = useCompanyFilterStore();
   const { salesInvoicePeriod, salesPersonInvoicePeriod } =
     useMonthYearPeriodStore();
+  const { salesInvoiceFilters, salesPersonInvoiceFilters } =
+    useSalesInvoiceHdFilterStore();
+
+  // Get filters based on context
+  const filters = useMemo(() => {
+    return context === 'salesInvoice'
+      ? salesInvoiceFilters
+      : salesPersonInvoiceFilters;
+  }, [context, salesInvoiceFilters, salesPersonInvoiceFilters]);
+
+  const { salesPersonName, paidStatus, poType } = filters;
 
   // Memoize resolvedCompanyId untuk stabilitas
   const resolvedCompanyId = useMemo(
@@ -125,6 +140,9 @@ const useMonthlyComparisonSalesInvoice = ({
       subModule_id,
       startPeriod,
       endPeriod,
+      salesPersonName,
+      paidStatus,
+      poType,
     ],
     [
       context,
@@ -133,19 +151,22 @@ const useMonthlyComparisonSalesInvoice = ({
       subModule_id,
       startPeriod,
       endPeriod,
+      salesPersonName,
+      paidStatus,
+      poType,
     ]
   );
 
-  console.log(
-    '[useMonthlyComparisonSalesInvoice] isValidRequest:',
-    isValidRequest
-  );
-  console.log('[useMonthlyComparisonSalesInvoice] queryKey:', queryKey);
-  console.log('[useMonthlyComparisonSalesInvoice] Period:', {
-    startPeriod,
-    endPeriod,
-    context,
-  });
+  // console.log(
+  //   '[useMonthlyComparisonSalesInvoice] isValidRequest:',
+  //   isValidRequest
+  // );
+  // console.log('[useMonthlyComparisonSalesInvoice] queryKey:', queryKey);
+  // console.log('[useMonthlyComparisonSalesInvoice] Period:', {
+  //   startPeriod,
+  //   endPeriod,
+  //   context,
+  // });
 
   const { data, isLoading, isFetching, error, ...rest } = useQuery<
     SalesPeriodResponse,
@@ -157,8 +178,6 @@ const useMonthlyComparisonSalesInvoice = ({
         throw new Error('NEXT_PUBLIC_API_URL is not defined');
       }
 
-      console.log('resolvedCompanyId:', resolvedCompanyId);
-
       const url = `${process.env.NEXT_PUBLIC_API_URL}/${module_id}/${subModule_id}/get-analytics/getMonthlyComparisonSalesInvoice`;
 
       try {
@@ -167,6 +186,11 @@ const useMonthlyComparisonSalesInvoice = ({
             company_id: resolvedCompanyId,
             startPeriod,
             endPeriod,
+            salesPersonName: salesPersonName?.length
+              ? salesPersonName
+              : undefined,
+            paidStatus: paidStatus?.length ? paidStatus : undefined,
+            poType: poType?.length ? poType : undefined,
           },
           paramsSerializer: (params) => {
             const companyIdParams = Array.isArray(params.company_id)
@@ -183,34 +207,48 @@ const useMonthlyComparisonSalesInvoice = ({
               ? `endPeriod=${encodeURIComponent(params.endPeriod)}`
               : '';
 
-            return [companyIdParams, startPeriodParam, endPeriodParam]
+            const salesPersonNameParams = Array.isArray(params.salesPersonName)
+              ? params.salesPersonName
+                  .map(
+                    (name: string) =>
+                      `salesPersonName=${encodeURIComponent(name)}`
+                  )
+                  .join('&')
+              : params.salesPersonName
+                ? `salesPersonName=${encodeURIComponent(params.salesPersonName)}`
+                : '';
+
+            const paidStatusParams = Array.isArray(params.paidStatus)
+              ? params.paidStatus
+                  .map(
+                    (status: string) =>
+                      `paidStatus=${encodeURIComponent(status)}`
+                  )
+                  .join('&')
+              : params.paidStatus
+                ? `paidStatus=${encodeURIComponent(params.paidStatus)}`
+                : '';
+
+            const poTypeParams = Array.isArray(params.poType)
+              ? params.poType
+                  .map((type: string) => `poType=${encodeURIComponent(type)}`)
+                  .join('&')
+              : params.poType
+                ? `poType=${encodeURIComponent(params.poType)}`
+                : '';
+
+            return [
+              companyIdParams,
+              startPeriodParam,
+              endPeriodParam,
+              salesPersonNameParams,
+              paidStatusParams,
+              poTypeParams,
+            ]
               .filter(Boolean)
               .join('&');
           },
         });
-
-        // Debug: Log the complete URL with parameters
-        // const queryParams = [
-        //   ...resolvedCompanyId.map(
-        //     (id) => `company_id=${encodeURIComponent(id)}`
-        //   ),
-        //   startPeriod ? `startPeriod=${encodeURIComponent(startPeriod)}` : '',
-        //   endPeriod ? `endPeriod=${encodeURIComponent(endPeriod)}` : '',
-        // ]
-        //   .filter(Boolean)
-        //   .join('&');
-
-        // const fullUrl = `${url}?${queryParams}`;
-
-        // console.log('🔍 [DEBUG] Full URL called:', fullUrl);
-        // console.log('🔍 [DEBUG] Base URL:', url);
-        // console.log('🔍 [DEBUG] Parameters:', {
-        //   company_id: resolvedCompanyId,
-        //   startPeriod,
-        //   endPeriod,
-        // });
-        // console.log('🔍 [DEBUG] Response status:', response.status);
-        // console.log('🔍 [DEBUG] Response data:', response.data);
 
         return {
           ...response.data,
@@ -224,6 +262,9 @@ const useMonthlyComparisonSalesInvoice = ({
             company_id: resolvedCompanyId,
             startPeriod,
             endPeriod,
+            salesPersonName,
+            paidStatus,
+            poType,
           },
           error: error instanceof Error ? error.message : error,
         });

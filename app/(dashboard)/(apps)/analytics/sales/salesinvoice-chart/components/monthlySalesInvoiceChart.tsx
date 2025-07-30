@@ -157,59 +157,80 @@ const MonthlySalesInvoiceChart: React.FC<MonthlySalesInvoiceChartProps> = ({
   }, [isFullScreen]);
 
   const chartData = React.useMemo(() => {
-    if (!data || data.length === 0) return null;
+    if (!data || data.length === 0) {
+      console.log('🔍 [CHART DEBUG] No data available');
+      return null;
+    }
+
+    // console.log('🔍 [CHART DEBUG] Raw data:', data);
+    // console.log('🔍 [CHART DEBUG] Data length:', data.length);
 
     const allYears = data.map((d) => d.period);
     const colorPalette = generateYearColorPalette(allYears);
 
-    // // Debug: Log the data structure
-    // console.log('🔍 [CHART DEBUG] Data:', data);
-    // console.log('🔍 [CHART DEBUG] Months array:', months);
-    // console.log('🔍 [CHART DEBUG] First year data months:', data[0]?.months);
+    // console.log('🔍 [CHART DEBUG] All years:', allYears);
+    // console.log('🔍 [CHART DEBUG] First year data:', data[0]);
+    // console.log('🔍 [CHART DEBUG] First year months:', data[0]?.months);
 
-    const datasets = data.map((yearData, idx) => ({
-      label: `Sales ${yearData.period}`,
-      data: months.map((month) => {
-        const monthData = yearData.months[month];
-        const amount = monthData?.amount || 0;
+    const datasets = data.map((yearData, idx) => {
+      // console.log(
+      //   `🔍 [CHART DEBUG] Processing year ${yearData.period}:`,
+      //   yearData
+      // );
+
+      const monthData = months.map((month) => {
+        const monthValue = yearData.months[month];
+        // Handle both direct number values and object with amount property
+        const amount =
+          typeof monthValue === 'number' ? monthValue : monthValue?.amount || 0;
         // console.log(
         //   `🔍 [CHART DEBUG] Month ${month}:`,
-        //   monthData,
+        //   monthValue,
         //   'Amount:',
         //   amount
         // );
         return amount / 1_000_000;
-      }),
-      backgroundColor: (ctx: import('chart.js').ScriptableContext<'bar'>) => {
-        const chart = ctx.chart;
-        const { ctx: canvasCtx, chartArea } = chart;
+      });
 
-        const [from, to] = colorPalette[idx % colorPalette.length] || [
-          'hsl(220, 70%, 40%)',
-          'hsl(220, 70%, 60%)',
-        ];
+      // console.log(
+      //   `🔍 [CHART DEBUG] Processed data for ${yearData.period}:`,
+      //   monthData
+      // );
 
-        if (!chartArea) return to;
+      return {
+        label: `Sales ${yearData.period}`,
+        data: monthData,
+        backgroundColor: (ctx: import('chart.js').ScriptableContext<'bar'>) => {
+          const chart = ctx.chart;
+          const { ctx: canvasCtx, chartArea } = chart;
 
-        const gradient = canvasCtx.createLinearGradient(
-          0,
-          chartArea.bottom,
-          0,
-          chartArea.top
-        );
-        gradient.addColorStop(0, from);
-        gradient.addColorStop(1, to);
+          const [from, to] = colorPalette[idx % colorPalette.length] || [
+            'hsl(220, 70%, 40%)',
+            'hsl(220, 70%, 60%)',
+          ];
 
-        return gradient;
-      },
-      borderColor: colorPalette[idx % colorPalette.length][0],
-      borderWidth: 1,
-      barThickness: isFullScreen ? 30 : 25,
-      borderRadius: 15,
-      growthPercentages: months.map(
-        (month) => yearData.months[month]?.growthPercentage || 0
-      ),
-    }));
+          if (!chartArea) return to;
+
+          const gradient = canvasCtx.createLinearGradient(
+            0,
+            chartArea.bottom,
+            0,
+            chartArea.top
+          );
+          gradient.addColorStop(0, from);
+          gradient.addColorStop(1, to);
+
+          return gradient;
+        },
+        borderColor: colorPalette[idx % colorPalette.length][0],
+        borderWidth: 1,
+        barThickness: isFullScreen ? 30 : 25,
+        borderRadius: 15,
+        growthPercentages: months.map(
+          (month) => yearData.months[month]?.growthPercentage || 0
+        ),
+      };
+    });
 
     // console.log('🔍 [CHART DEBUG] Final datasets:', datasets);
 
@@ -227,6 +248,11 @@ const MonthlySalesInvoiceChart: React.FC<MonthlySalesInvoiceChartProps> = ({
     chartData.datasets.some(
       (ds) => Array.isArray(ds.data) && ds.data.some((value) => value > 0)
     );
+
+  // console.log('🔍 [CHART DEBUG] isDataReady:', isDataReady);
+  // console.log('🔍 [CHART DEBUG] chartData:', chartData);
+  // console.log('🔍 [CHART DEBUG] chartData?.labels:', chartData?.labels);
+  // console.log('🔍 [CHART DEBUG] chartData?.datasets:', chartData?.datasets);
 
   return (
     <motion.div

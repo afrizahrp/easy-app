@@ -1,11 +1,13 @@
 import { api } from '@/config/axios.config';
 import { useQuery } from '@tanstack/react-query';
 import {
-  useSessionStore,
+  useCompanyFilterStore,
   useMonthYearPeriodStore,
   useSalesInvoiceHdFilterStore,
 } from '@/store';
 import { format } from 'date-fns';
+import { useMemo } from 'react';
+import axios from 'axios';
 
 interface SalesInvoiceHdSalesPerson {
   id: string;
@@ -24,8 +26,7 @@ interface UseSalesInvoiceHdSalesPersonParams {
 export const useSalesInvoiceHdSalesPerson = ({
   context,
 }: UseSalesInvoiceHdSalesPersonParams) => {
-  const user = useSessionStore((state) => state.user);
-  const company_id = user?.company_id?.toUpperCase();
+  const { selectedCompanyIds } = useCompanyFilterStore();
   const module_id = 'SLS';
 
   const { salesInvoicePeriod, salesPersonInvoicePeriod } =
@@ -42,53 +43,131 @@ export const useSalesInvoiceHdSalesPerson = ({
 
   const { paidStatus, poType } = filters;
 
-  const isEnabled = !!company_id && !!module_id;
+  const resolvedCompanyIds = useMemo(
+    () => (selectedCompanyIds.length > 0 ? selectedCompanyIds : ['BIS']),
+    [selectedCompanyIds]
+  );
+
+  const { startPeriod, endPeriod } = useMemo(() => {
+    const formatPeriod = (date: Date | null): string | null => {
+      if (!date) return null;
+      return format(date, 'MMMyyyy');
+    };
+    return {
+      startPeriod: formatPeriod(period.startPeriod),
+      endPeriod: formatPeriod(period.endPeriod),
+    };
+  }, [period.startPeriod, period.endPeriod]);
+
+  const isValidRequest = useMemo(
+    () => Boolean(resolvedCompanyIds && startPeriod && endPeriod),
+    [resolvedCompanyIds, startPeriod, endPeriod]
+  );
+
+  const queryKey = useMemo(
+    () => [
+      'salesPersonName',
+      context,
+      resolvedCompanyIds,
+      module_id,
+      startPeriod,
+      endPeriod,
+      paidStatus,
+      poType,
+    ],
+    [
+      context,
+      resolvedCompanyIds,
+      module_id,
+      startPeriod,
+      endPeriod,
+      paidStatus,
+      poType,
+    ]
+  );
 
   const { data, isLoading, error, isFetching, ...rest } = useQuery<
     SalesInvoiceHdSalesPersonResponse,
     Error
   >({
-    queryKey: [
-      'salesPersonName',
-      context,
-      company_id,
-      module_id,
-      period.startPeriod,
-      period.endPeriod,
-      paidStatus,
-      poType,
-    ],
+    queryKey,
     queryFn: async () => {
-      const params = new URLSearchParams();
-
-      if (period.startPeriod) {
-        params.append('startPeriod', format(period.startPeriod, 'MMMyyyy'));
+      if (!process.env.NEXT_PUBLIC_API_URL) {
+        throw new Error('NEXT_PUBLIC_API_URL is not defined');
       }
 
-      if (period.endPeriod) {
-        params.append('endPeriod', format(period.endPeriod, 'MMMyyyy'));
-      }
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/SLS/get-invoiceHd/getSalesPerson`;
 
-      if (poType?.length) {
-        poType.forEach((name) => {
-          params.append('poType', name);
+      try {
+        const response = await api.get<SalesInvoiceHdSalesPersonResponse>(url, {
+          params: {
+            company_id: resolvedCompanyIds,
+            startPeriod,
+            endPeriod,
+            poType: poType?.length ? poType : undefined,
+            paidStatus: paidStatus?.length ? paidStatus : undefined,
+          },
+          paramsSerializer: (params) => {
+            const companyIdParams = Array.isArray(params.company_id)
+              ? params.company_id
+                  .map((id: string) => `company_id=${encodeURIComponent(id)}`)
+                  .join('&')
+              : `company_id=${encodeURIComponent(params.company_id)}`;
+
+            const startPeriodParam = params.startPeriod
+              ? `startPeriod=${encodeURIComponent(params.startPeriod)}`
+              : '';
+
+            const endPeriodParam = params.endPeriod
+              ? `endPeriod=${encodeURIComponent(params.endPeriod)}`
+              : '';
+
+            const poTypeParams = Array.isArray(params.poType)
+              ? params.poType
+                  .map((type: string) => `poType=${encodeURIComponent(type)}`)
+                  .join('&')
+              : params.poType
+                ? `poType=${encodeURIComponent(params.poType)}`
+                : '';
+
+            const paidStatusParams = Array.isArray(params.paidStatus)
+              ? params.paidStatus
+                  .map(
+                    (status: string) =>
+                      `paidStatus=${encodeURIComponent(status)}`
+                  )
+                  .join('&')
+              : params.paidStatus
+                ? `paidStatus=${encodeURIComponent(params.paidStatus)}`
+                : '';
+
+            return [
+              companyIdParams,
+              startPeriodParam,
+              endPeriodParam,
+              poTypeParams,
+              paidStatusParams,
+            ]
+              .filter(Boolean)
+              .join('&');
+          },
         });
+
+        console.log(
+          `[useSalesInvoiceHdSalesPerson:${context}] URL: ${url}, Response: ${JSON.stringify(response.data)}`
+        );
+
+        return response.data;
+      } catch (error) {
+        if (axios.isAxiosError(error)) {
+          throw new Error(
+            error.response?.data?.message || 'Failed to fetch sales person data'
+          );
+        }
+        throw error;
       }
-
-      if (paidStatus?.length) {
-        paidStatus.forEach((name) => {
-          params.append('paidStatus', name);
-        });
-      }
-
-      const url = `${process.env.NEXT_PUBLIC_API_URL}/${company_id}/${module_id}/get-invoiceHd/getSalesPerson${
-        params.toString() ? `?${params.toString()}` : ''
-      }`;
-
-      const response = await api.get<SalesInvoiceHdSalesPersonResponse>(url);
-      return response.data;
     },
-    enabled: isEnabled,
+    enabled: isValidRequest,
     staleTime: 60 * 1000,
     retry: 3,
   });
