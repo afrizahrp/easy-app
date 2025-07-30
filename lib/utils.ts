@@ -154,7 +154,7 @@ export const generateYearColorPalette = (years: string[]) => {
   const yearColorMap: { [key: string]: [string, string] } = {
     '2025': ['hsl(120, 70%, 30%)', 'hsl(120, 70%, 50%)'], // Hijau
     '2024': ['hsl(220, 70%, 40%)', 'hsl(220, 70%, 60%)'], // Biru
-    '2023': ['hsl(30, 70%, 40%)', 'hsl(30, 70%, 60%)'], // Oranye
+    '2023': ['hsl(30, 70%, 40%)', 'hsl(7, 100%, 60%)'], // Oranye
     '2022': ['hsl(60, 70%, 50%)', 'hsl(60, 70%, 70%)'], // Kuning
     '2021': ['hsl(300, 70%, 40%)', 'hsl(300, 70%, 60%)'], // Ungu
     '2020': ['hsl(180, 70%, 40%)', 'hsl(180, 70%, 60%)'], // Cyan

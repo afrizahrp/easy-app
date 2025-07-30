@@ -21,6 +21,8 @@ import { useToast } from '@/components/ui/use-toast';
 import useMonthlySalesInvoiceByPoType from '@/queryHooks/analytics/sales/useMonthlySalesInvoiceByPoType';
 import { Button } from '@/components/ui/button';
 import { Maximize2, Minimize2 } from 'lucide-react';
+import { months as monthName } from '@/utils/monthNameMap';
+import { getShortMonth } from '@/utils/getShortmonths';
 
 ChartJS.register(
   CategoryScale,
@@ -32,22 +34,6 @@ ChartJS.register(
   Legend,
   gradientPlugin
 );
-
-// Use 3-letter month names to match backend data format
-const months = [
-  'Jan',
-  'Feb',
-  'Mar',
-  'Apr',
-  'May',
-  'Jun',
-  'Jul',
-  'Aug',
-  'Sep',
-  'Oct',
-  'Nov',
-  'Dec',
-];
 
 interface MonthlySalesInvoiceByPoTypeChartProps {
   height?: number;
@@ -72,6 +58,7 @@ const MonthlySalesInvoiceByPoTypeChart: React.FC<
     }
   );
 
+  const months = monthName.map((month) => getShortMonth(month));
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const [isFullScreen, setIsFullScreen] = useState(false);
 

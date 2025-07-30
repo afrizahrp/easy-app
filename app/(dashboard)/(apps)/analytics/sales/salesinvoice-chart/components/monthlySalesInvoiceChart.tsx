@@ -21,6 +21,8 @@ import { useToast } from '@/components/ui/use-toast';
 import useMonthlyComparisonSalesInvoice from '@/queryHooks/analytics/sales/useMonthlyComparisonSalesInvoice';
 import { Button } from '@/components/ui/button';
 import { Maximize2, Minimize2 } from 'lucide-react';
+import { months as monthName } from '@/utils/monthNameMap';
+import { getShortMonth } from '@/utils/getShortmonths';
 
 ChartJS.register(
   CategoryScale,
@@ -33,20 +35,20 @@ ChartJS.register(
 );
 
 // Use 3-letter month names to match backend data format
-const months = [
-  'Jan',
-  'Feb',
-  'Mar',
-  'Apr',
-  'May',
-  'Jun',
-  'Jul',
-  'Aug',
-  'Sep',
-  'Oct',
-  'Nov',
-  'Dec',
-];
+// const months = [
+//   'Jan',
+//   'Feb',
+//   'Mar',
+//   'Apr',
+//   'May',
+//   'Jun',
+//   'Jul',
+//   'Aug',
+//   'Sep',
+//   'Oct',
+//   'Nov',
+//   'Dec',
+// ];
 
 interface MonthlySalesInvoiceChartProps {
   height?: number;
@@ -74,7 +76,7 @@ const MonthlySalesInvoiceChart: React.FC<MonthlySalesInvoiceChartProps> = ({
     useMonthlyComparisonSalesInvoice({
       context: 'salesInvoice',
     });
-
+  const months = monthName.map((month) => getShortMonth(month));
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const [isFullScreen, setIsFullScreen] = useState(false);
 
