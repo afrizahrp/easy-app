@@ -94,7 +94,7 @@ const SalesInvoiceOverview: React.FC<SalesInvoiceOverviewProps> = ({
               </motion.div>
             )}
           </AnimatePresence>
-          {/* <AnimatePresence>
+          <AnimatePresence>
             {(fullChart === null || fullChart === 'poType') && (
               <motion.div
                 key='poTypeChart'
@@ -105,14 +105,13 @@ const SalesInvoiceOverview: React.FC<SalesInvoiceOverviewProps> = ({
                 transition={{ duration: 0.3, ease: 'easeInOut' }}
               >
                 <MonthlySalesInvoiceByPoTypeChart
-                  isFullScreen={fullChart === 'poType'}
-                  onModeChange={handlePoTypeModeChange}
+                  isFullWidth={fullChart === 'poType'}
                   height={400}
                   isCompact={false}
                 />
               </motion.div>
             )}
-          </AnimatePresence> */}
+          </AnimatePresence>
         </div>
       ) : (
         <div className='w-full h-fit min-h-0'>
@@ -125,12 +124,12 @@ const SalesInvoiceOverview: React.FC<SalesInvoiceOverviewProps> = ({
         </div>
       )}
 
-      {/* {showList && (
+      {showList && (
         <div className='w-full flex-1'>
           <PageHeaderWrapper title='Invoice List' />
           <SalesInvoiceHdList showFilterButton={false} />
         </div>
-      )} */}
+      )}
     </div>
   );
 };

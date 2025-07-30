@@ -108,14 +108,13 @@ const MonthlySalesInvoiceChart: React.FC<MonthlySalesInvoiceChartProps> = ({
         setIsFullScreen(false);
       }
     }
-    onModeChange?.(!isFullScreen);
-  }, [isFullScreen, onModeChange]);
+    // Don't call onModeChange here since we're using internal fullscreen state
+  }, [isFullScreen]);
 
   useEffect(() => {
     const handleFullscreenChange = () => {
       const isNowFullScreen = !!document.fullscreenElement;
       setIsFullScreen(isNowFullScreen);
-      onModeChange?.(isNowFullScreen);
     };
 
     document.addEventListener('fullscreenchange', handleFullscreenChange);
@@ -138,7 +137,7 @@ const MonthlySalesInvoiceChart: React.FC<MonthlySalesInvoiceChartProps> = ({
         handleFullscreenChange
       );
     };
-  }, [onModeChange]);
+  }, []);
 
   useEffect(() => {
     if (error) {
@@ -379,7 +378,7 @@ const MonthlySalesInvoiceChart: React.FC<MonthlySalesInvoiceChartProps> = ({
                   bodyFont: { size: 12 },
                   callbacks: {
                     label: (context) => {
-                      const amount = (context.raw as number) * 1_000_000;
+                      const amount = context.raw as number;
                       const growth = (context.dataset as any).growthPercentages[
                         context.dataIndex
                       ];

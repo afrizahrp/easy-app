@@ -1,5 +1,5 @@
 'use client';
-import React from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { Line } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -19,9 +19,8 @@ import { themes } from '@/config/thems';
 import gradientPlugin from 'chartjs-plugin-gradient';
 import { useToast } from '@/components/ui/use-toast';
 import useMonthlySalesInvoiceByPoType from '@/queryHooks/analytics/sales/useMonthlySalesInvoiceByPoType';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
-import { months } from '@/utils/monthNameMap';
+import { Button } from '@/components/ui/button';
+import { Maximize2, Minimize2 } from 'lucide-react';
 
 ChartJS.register(
   CategoryScale,
@@ -34,21 +33,31 @@ ChartJS.register(
   gradientPlugin
 );
 
+// Use 3-letter month names to match backend data format
+const months = [
+  'Jan',
+  'Feb',
+  'Mar',
+  'Apr',
+  'May',
+  'Jun',
+  'Jul',
+  'Aug',
+  'Sep',
+  'Oct',
+  'Nov',
+  'Dec',
+];
+
 interface MonthlySalesInvoiceByPoTypeChartProps {
   height?: number;
   isCompact?: boolean;
-  isFullScreen?: boolean;
-  onModeChange?: (isFull: boolean) => void;
+  isFullWidth?: boolean;
 }
 
 const MonthlySalesInvoiceByPoTypeChart: React.FC<
   MonthlySalesInvoiceByPoTypeChartProps
-> = ({
-  height = 400,
-  isCompact = false,
-  isFullScreen = false,
-  onModeChange,
-}) => {
+> = ({ height = 400, isCompact = false, isFullWidth = false }) => {
   const { theme: config } = useThemeStore();
   const { theme: mode } = useTheme();
   const theme = themes.find((theme) => theme.name === config);
@@ -62,6 +71,85 @@ const MonthlySalesInvoiceByPoTypeChart: React.FC<
       context: 'salesInvoice',
     }
   );
+
+  const chartContainerRef = useRef<HTMLDivElement>(null);
+  const [isFullScreen, setIsFullScreen] = useState(false);
+
+  const toggleFullScreen = useCallback(() => {
+    if (!chartContainerRef.current) return;
+
+    if (!isFullScreen) {
+      const requestFullscreen =
+        chartContainerRef.current.requestFullscreen ||
+        (
+          chartContainerRef.current as HTMLElement & {
+            webkitRequestFullscreen?: () => void;
+          }
+        ).webkitRequestFullscreen ||
+        (
+          chartContainerRef.current as HTMLElement & {
+            mozRequestFullScreen?: () => void;
+          }
+        ).mozRequestFullScreen ||
+        (
+          chartContainerRef.current as HTMLElement & {
+            msRequestFullscreen?: () => void;
+          }
+        ).msRequestFullscreen;
+
+      if (requestFullscreen) {
+        requestFullscreen.call(chartContainerRef.current);
+      } else {
+        setIsFullScreen(true);
+      }
+    } else {
+      if (document.fullscreenElement) {
+        const exitFullscreen =
+          document.exitFullscreen ||
+          (document as Document & { webkitExitFullscreen?: () => void })
+            .webkitExitFullscreen ||
+          (document as Document & { mozCancelFullScreen?: () => void })
+            .mozCancelFullScreen ||
+          (document as Document & { msExitFullscreen?: () => void })
+            .msExitFullscreen;
+
+        if (exitFullscreen) {
+          exitFullscreen.call(document);
+        }
+      } else {
+        setIsFullScreen(false);
+      }
+    }
+    // Don't call onModeChange here since we're using internal fullscreen state
+  }, [isFullScreen]);
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      const isNowFullScreen = !!document.fullscreenElement;
+      setIsFullScreen(isNowFullScreen);
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+    document.addEventListener('mozfullscreenchange', handleFullscreenChange);
+    document.addEventListener('MSFullscreenChange', handleFullscreenChange);
+
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      document.removeEventListener(
+        'webkitfullscreenchange',
+        handleFullscreenChange
+      );
+      document.removeEventListener(
+        'mozfullscreenchange',
+        handleFullscreenChange
+      );
+      document.removeEventListener(
+        'MSFullscreenChange',
+        handleFullscreenChange
+      );
+    };
+  }, []);
 
   const colorMap: Record<
     string,
@@ -130,11 +218,6 @@ const MonthlySalesInvoiceByPoTypeChart: React.FC<
     };
   }, [data]);
 
-  const maxValue = React.useMemo(() => {
-    if (!chartData) return 0;
-    return Math.max(...chartData.datasets.flatMap((ds) => ds.data));
-  }, [chartData]);
-
   React.useEffect(() => {
     if (error) {
       toast({
@@ -146,47 +229,59 @@ const MonthlySalesInvoiceByPoTypeChart: React.FC<
     }
   }, [error, toast]);
 
+  useEffect(() => {
+    if (chartContainerRef.current) {
+      window.dispatchEvent(new Event('resize'));
+    }
+  }, [isFullScreen]);
+
   return (
     <motion.div
-      className={`chart-container ${isCompact ? 'compact' : ''} bg-white dark:bg-[#18181b] p-4 rounded-lg shadow-sm flex flex-col w-full min-h-[250px] box-border`}
+      ref={chartContainerRef}
+      className={`chart-container ${isCompact ? 'compact' : ''} ${
+        isFullScreen && !document.fullscreenElement
+          ? 'fixed inset-0 z-50 bg-white dark:bg-[#18181b] p-4 rounded-lg shadow-md'
+          : 'relative bg-white dark:bg-[#18181b] p-4 rounded-lg shadow-sm'
+      } flex flex-col h-fit min-h-[250px] w-full box-border`}
       style={{ backgroundColor: hexBackground }}
       animate={{
-        opacity: isFullScreen ? 1 : 0.95,
-        scale: isFullScreen ? 1 : 0.98,
+        opacity: isFullWidth ? 1 : 0.95,
+        scale: isFullWidth ? 1 : 0.98,
       }}
       initial={{
-        opacity: isFullScreen ? 1 : 0.95,
-        scale: isFullScreen ? 1 : 0.98,
+        opacity: isFullWidth ? 1 : 0.95,
+        scale: isFullWidth ? 1 : 0.98,
       }}
       transition={{ duration: 0.3, ease: 'easeInOut' }}
     >
-      <div className='relative flex items-center'>
+      <div className='relative flex items-center justify-between mb-2'>
         <h2 className='text-sm text-muted-foreground font-semibold ml-2'>
           Monthly Sales by PO Type (in Millions of IDR)
         </h2>
         {!isCompact && (
-          <div className='absolute right-0 top-0 flex items-center text-muted-foreground text-xs space-x-2'>
-            <Label htmlFor='chart-mode-potype'>
-              {isFullScreen ? 'Full Width' : 'Half Width'}
-            </Label>
-            <Switch
-              id='chart-mode-potype'
-              checked={isFullScreen}
-              onCheckedChange={(checked) => onModeChange?.(checked)}
-              aria-label='Toggle full screen chart'
-            />
-          </div>
+          <Button
+            variant='outline'
+            size='sm'
+            onClick={toggleFullScreen}
+            className='mr-2'
+          >
+            {isFullScreen ? (
+              <Minimize2 className='h-4 w-4' />
+            ) : (
+              <Maximize2 className='h-4 w-4' />
+            )}
+          </Button>
         )}
       </div>
-      <div className='flex-1 h-full w-full min-h-0'>
+      <div className='flex-1 min-h-0 w-full'>
         {isLoading || isFetching ? (
           <div className='flex items-center justify-center h-full'>
             <div className='w-3/4 h-1/2 rounded-lg shimmer' />
           </div>
         ) : chartData ? (
           <Line
-            key={isFullScreen ? 'full' : 'half'}
-            height={isCompact ? 250 : height}
+            key={isFullWidth ? 'full' : 'half'}
+            height={isFullScreen ? undefined : isCompact ? 250 : height}
             data={chartData}
             options={{
               responsive: true,

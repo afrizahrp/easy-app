@@ -2,7 +2,7 @@
 import { api } from '@/config/axios.config';
 import { useQuery } from '@tanstack/react-query';
 import {
-  useSessionStore,
+  useCompanyFilterStore,
   useMonthYearPeriodStore,
   useSalesInvoiceHdFilterStore,
   useSearchParamsStore, // Tambahkan kembali
@@ -10,6 +10,8 @@ import {
 import { SalesInvoiceHd } from '@/types';
 import { format } from 'date-fns';
 import { SEARCH_CONTEXTS } from '@/constants/searchContexts';
+import { useMemo } from 'react';
+import axios from 'axios';
 
 interface SalesInvoiceHdResponse {
   data: SalesInvoiceHd[];
@@ -33,6 +35,7 @@ interface UseSalesInvoiceHdParams {
   endPeriod?: Date | null;
   context: 'salesInvoice' | 'salesPersonInvoice';
 }
+
 const useSalesInvoiceHd = ({
   page,
   limit,
@@ -48,8 +51,7 @@ const useSalesInvoiceHd = ({
     throw new Error(`Invalid search context: ${context}`);
   }
 
-  const user = useSessionStore((state) => state.user);
-  const company_id = user?.company_id?.toUpperCase();
+  const { selectedCompanyIds } = useCompanyFilterStore();
   const module_id = 'SLS';
 
   const { salesInvoicePeriod, salesPersonInvoicePeriod } =
@@ -64,6 +66,11 @@ const useSalesInvoiceHd = ({
   };
   const { searchBy, searchTerm } = contextSearchParams;
 
+  const resolvedCompanyIds = useMemo(
+    () => (selectedCompanyIds.length > 0 ? selectedCompanyIds : ['BIS']),
+    [selectedCompanyIds]
+  );
+
   const period =
     context === 'salesInvoice' ? salesInvoicePeriod : salesPersonInvoicePeriod;
   const storeFilters =
@@ -71,10 +78,10 @@ const useSalesInvoiceHd = ({
       ? salesInvoiceFilters
       : salesPersonInvoiceFilters;
 
-  const isValidRequest = Boolean(company_id && module_id);
+  const isValidRequest = Boolean(resolvedCompanyIds && module_id);
 
   const buildFilteredParams = (
-    base: Record<string, any>,
+    base: Record<string, string | number | undefined>,
     extra: {
       startPeriod?: Date | null;
       endPeriod?: Date | null;
@@ -84,9 +91,9 @@ const useSalesInvoiceHd = ({
       searchBy?: string;
       searchTerm?: string;
     }
-  ): Record<string, any> => {
-    const result = Object.fromEntries(
-      Object.entries(base).filter(([_, value]) => {
+  ): Record<string, unknown> => {
+    const result: Record<string, unknown> = Object.fromEntries(
+      Object.entries(base).filter(([, value]) => {
         if (typeof value === 'string') return value.trim() !== '';
         if (Array.isArray(value)) return value.length > 0;
         return value !== null && value !== undefined;
@@ -134,13 +141,10 @@ const useSalesInvoiceHd = ({
     salesPersonName: filters.salesPersonName ?? storeFilters.salesPersonName,
   };
 
-  const { data, isLoading, error, isFetching, ...rest } = useQuery<
-    SalesInvoiceHdResponse,
-    Error
-  >({
-    queryKey: [
+  const queryKey = useMemo(
+    () => [
       'salesInvoiceHd',
-      company_id,
+      resolvedCompanyIds,
       module_id,
       page,
       limit,
@@ -152,9 +156,33 @@ const useSalesInvoiceHd = ({
       startPeriod || period.startPeriod,
       endPeriod || period.endPeriod,
     ],
+    [
+      resolvedCompanyIds,
+      module_id,
+      page,
+      limit,
+      searchBy,
+      searchTerm,
+      orderBy,
+      orderDir,
+      mergedFilters,
+      startPeriod || period.startPeriod,
+      endPeriod || period.endPeriod,
+    ]
+  );
+
+  const { data, isLoading, error, isFetching, ...rest } = useQuery<
+    SalesInvoiceHdResponse,
+    Error
+  >({
+    queryKey,
     queryFn: async () => {
       if (!isValidRequest) {
         throw new Error('Invalid request: company_id or module_id missing');
+      }
+
+      if (!process.env.NEXT_PUBLIC_API_URL) {
+        throw new Error('NEXT_PUBLIC_API_URL is not defined');
       }
 
       const filteredParams = buildFilteredParams(
@@ -170,24 +198,45 @@ const useSalesInvoiceHd = ({
         }
       );
 
-      const url = `${process.env.NEXT_PUBLIC_API_URL}/${company_id}/${module_id}/get-invoiceHd`;
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/${module_id}/get-invoiceHd`;
 
-      const response = await api.get<SalesInvoiceHdResponse>(url, {
-        params: filteredParams,
-        paramsSerializer: (params) => {
-          const queryString = new URLSearchParams(
-            Object.entries(params).flatMap(([key, value]) => {
-              if (Array.isArray(value)) {
-                return value.map((v) => [key, v]);
-              }
-              return [[key, value]];
-            })
-          ).toString();
-          return queryString;
-        },
-      });
+      try {
+        const response = await api.get<SalesInvoiceHdResponse>(url, {
+          params: {
+            company_id: resolvedCompanyIds,
+            ...filteredParams,
+          },
+          paramsSerializer: (params) => {
+            const companyIdParams = Array.isArray(params.company_id)
+              ? params.company_id
+                  .map((id: string) => `company_id=${encodeURIComponent(id)}`)
+                  .join('&')
+              : `company_id=${encodeURIComponent(params.company_id)}`;
 
-      return response.data;
+            const otherParams = Object.entries(params)
+              .filter(([key]) => key !== 'company_id')
+              .flatMap(([key, value]) => {
+                if (Array.isArray(value)) {
+                  return value.map((v) => `${key}=${encodeURIComponent(v)}`);
+                }
+                return [`${key}=${encodeURIComponent(value)}`];
+              })
+              .join('&');
+
+            return [companyIdParams, otherParams].filter(Boolean).join('&');
+          },
+        });
+
+        return response.data;
+      } catch (error) {
+        if (axios.isAxiosError(error)) {
+          throw new Error(
+            error.response?.data?.message ||
+              'Failed to fetch sales invoice data'
+          );
+        }
+        throw error;
+      }
     },
     enabled: isValidRequest && page >= 1 && limit > 0,
     staleTime: 60 * 1000,
