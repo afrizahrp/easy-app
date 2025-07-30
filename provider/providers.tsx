@@ -13,15 +13,19 @@ const Providers = ({ children }: { children: React.ReactNode }) => {
   const { theme, radius } = useThemeStore();
   const location = usePathname();
 
+  // Add null checks to prevent errors
+  const safeTheme = theme || 'light';
+  const safeRadius = radius || 0.5;
+
   return (
     <ThemeProvider attribute='class' enableSystem={false} defaultTheme='light'>
       <div
         className={cn(
           'h-full',
           inter.className,
-          location !== '/' && `theme-${theme}`
+          location !== '/' && `theme-${safeTheme}`
         )}
-        style={{ '--radius': `${radius}rem` } as React.CSSProperties}
+        style={{ '--radius': `${safeRadius}rem` } as React.CSSProperties}
       >
         {children}
         <ReactToaster />

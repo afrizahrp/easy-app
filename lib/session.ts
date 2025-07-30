@@ -2,8 +2,8 @@
 
 import { jwtVerify, SignJWT } from 'jose';
 import { cookies } from 'next/headers';
-import { redirect } from 'next/navigation';
-import { Role } from './type';
+// import { redirect } from 'next/navigation';
+// import { Role } from './type';
 
 export type Session = {
   user: {
@@ -20,7 +20,8 @@ export type Session = {
   refreshToken: string;
 };
 
-const secretKey = process.env.SESSION_SECRET_KEY!;
+const secretKey =
+  process.env.SESSION_SECRET_KEY || 'fallback-secret-key-for-development-only';
 const encodedKey = new TextEncoder().encode(secretKey);
 
 export async function createSession(payload: Session) {
@@ -53,7 +54,9 @@ export async function getSession() {
     return payload as Session;
   } catch (err) {
     console.error('Failed to verify the session', err);
-    redirect('/auth/login');
+    // Remove redirect to avoid client-side errors
+    // redirect('/auth/login');
+    return null;
   }
 }
 

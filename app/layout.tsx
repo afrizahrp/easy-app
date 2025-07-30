@@ -6,6 +6,7 @@ import TanstackProvider from '@/provider/providers.client';
 import { AuthProvider } from '@/provider/auth.provider';
 import 'flatpickr/dist/themes/light.css';
 import Providers from '@/provider/providers';
+import ErrorBoundary from '@/components/error-boundary';
 // import ModalProvider from '@/provider/modal-provider';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -20,14 +21,16 @@ export default function RootLayout({
       <body className={inter.className}>
         {/* <body className="easyApp" suppressHydrationWarning>{children}</body> */}
 
-        <AuthProvider>
-          <TanstackProvider>
-            <Providers>
-              {/* <ModalProvider /> */}
-              {children}
-            </Providers>
-          </TanstackProvider>
-        </AuthProvider>
+        <ErrorBoundary>
+          <AuthProvider>
+            <TanstackProvider>
+              <Providers>
+                {/* <ModalProvider /> */}
+                {children}
+              </Providers>
+            </TanstackProvider>
+          </AuthProvider>
+        </ErrorBoundary>
       </body>
     </html>
   );
