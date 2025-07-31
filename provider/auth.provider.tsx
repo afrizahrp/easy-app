@@ -8,6 +8,7 @@ import React, {
   ReactNode,
 } from 'react';
 import { Session } from '@/lib/session';
+import Loading from '@/components/ui/loading';
 
 const AuthContext = createContext<{
   session: Session | null;
@@ -21,14 +22,9 @@ interface AuthProviderProps {
   children: ReactNode;
 }
 
-// Loading component
+// Loading component with attractive animation
 const AuthLoading = () => (
-  <div className='flex min-h-screen items-center justify-center'>
-    <div className='text-center'>
-      <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4'></div>
-      <p className='text-gray-600'>Loading...</p>
-    </div>
-  </div>
+  <Loading size='lg' text='Preparing your dashboard...' fullScreen={true} />
 );
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {

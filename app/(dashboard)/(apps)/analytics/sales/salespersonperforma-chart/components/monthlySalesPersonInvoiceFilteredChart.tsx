@@ -19,16 +19,18 @@ import { useTheme } from 'next-themes';
 import { themes } from '@/config/thems';
 import gradientPlugin from 'chartjs-plugin-gradient';
 import { useToast } from '@/components/ui/use-toast';
-import useMonthlyComparisonSalesPersonInvoiceFiltered from '@/queryHooks/analytics/sales/useMonthlyComparisonSalesPersonInvoice';
+import useMonthlyComparisonSalesPersonInvoice from '@/queryHooks/analytics/sales/useMonthlyComparisonSalesPersonInvoice';
 import {
   salesPersonColorMap,
   getFallbackColor,
 } from '@/utils/salesPersonColorMap';
 import { useSalesInvoiceHdFilterStore } from '@/store';
-import { months } from '@/utils/monthNameMap';
+import Loading from '@/components/ui/loading';
 import { getSalesPersonColor } from '@/utils/getSalesPersonColor';
+import { getShortMonth } from '@/utils/getShortmonths';
+import { months as monthName } from '@/utils/monthNameMap';
 import { Button } from '@/components/ui/button';
-import { BarChart2, FileBarChart2, Maximize2, Minimize2 } from 'lucide-react';
+import { FileBarChart2, Maximize2, Minimize2 } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -45,6 +47,28 @@ import {
 } from '@/components/ui/tooltip';
 import { useQueryClient } from '@tanstack/react-query';
 import SalesPersonSummaryList from './salesPersonSummaryList';
+
+// Function to normalize month format
+const normalizeMonth = (month: string): string => {
+  const monthMap: { [key: string]: string } = {
+    January: 'Jan',
+    February: 'Feb',
+    March: 'Mar',
+    April: 'Apr',
+    May: 'May',
+    June: 'Jun',
+    July: 'Jul',
+    August: 'Aug',
+    September: 'Sep',
+    October: 'Oct',
+    November: 'Nov',
+    December: 'Dec',
+  };
+  return monthMap[month] || month;
+};
+
+// Get short month names
+const months = monthName.map((month) => getShortMonth(month));
 
 ChartJS.register(
   CategoryScale,
@@ -113,7 +137,7 @@ const MonthlySalesPersonInvoiceFilteredChart: React.FC<
   const salesPersonNames = salesPersonInvoiceFilters.salesPersonName || [];
 
   const { data, isLoading, isFetching, error } =
-    useMonthlyComparisonSalesPersonInvoiceFiltered({
+    useMonthlyComparisonSalesPersonInvoice({
       context: 'salesPersonInvoice',
       salesPersonNames,
       refetchOnWindowFocus: false,
@@ -153,17 +177,35 @@ const MonthlySalesPersonInvoiceFilteredChart: React.FC<
       return null;
     }
 
-    // console.log('Raw data:', JSON.stringify(data, null, 2));
+    // Debug: Log raw data to see month format from API
+    console.log('Raw data from API:', JSON.stringify(data, null, 2));
+    console.log(
+      'Available months in API data:',
+      data[0]?.months.map((m) => m.month)
+    );
 
     const allSalesPersons = Array.from(
       new Set(
         data
-          .flatMap((d: SalesData) => d.months)
+          .flatMap((d) => d.months)
           .flatMap((m) => m.sales.map((s) => s.salesPersonName))
       )
     );
 
-    // console.log('All Salespersons:', allSalesPersons);
+    console.log('Months from component:', months);
+    console.log('Data:', data);
+
+    // Debug: Check if months match between component and API data
+    const apiMonths = data[0]?.months.map((m) => m.month) || [];
+    console.log('API months:', apiMonths);
+    console.log('Component months:', months);
+    console.log('Month matching test:');
+    months.forEach((month) => {
+      const found = apiMonths.find(
+        (apiMonth) => normalizeMonth(apiMonth) === month
+      );
+      console.log(`${month}: ${found ? 'MATCH' : 'NO MATCH'}`);
+    });
 
     const datasets = allSalesPersons.map((salesPersonName) => {
       const color =
@@ -172,8 +214,10 @@ const MonthlySalesPersonInvoiceFilteredChart: React.FC<
 
       const growthPercentages = months.map((month) => {
         let growth: number = 0;
-        data.forEach((yearData: SalesData) => {
-          const monthData = yearData.months.find((m) => m.month === month);
+        data.forEach((yearData) => {
+          const monthData = yearData.months.find(
+            (m) => normalizeMonth(m.month) === month
+          );
           if (monthData) {
             const salesPersonData = monthData.sales.find(
               (s) => s.salesPersonName === salesPersonName
@@ -188,22 +232,23 @@ const MonthlySalesPersonInvoiceFilteredChart: React.FC<
 
       const monthlyData = months.map((month) => {
         let totalAmount = 0;
-        data.forEach((yearData: SalesData) => {
-          const monthData = yearData.months.find((m) => m.month === month);
+        data.forEach((yearData) => {
+          const monthData = yearData.months.find(
+            (m) => normalizeMonth(m.month) === month
+          );
           if (monthData && monthData.sales.length > 0) {
             const salesPersonData = monthData.sales.find(
               (s) => s.salesPersonName === salesPersonName
             );
+
             if (salesPersonData) {
               totalAmount += salesPersonData.amount;
             }
           }
         });
+
         return totalAmount / 1_000_000;
       });
-
-      // console.log(`Data for ${salesPersonName}:`, monthlyData);
-      // console.log(`Growth for ${salesPersonName}:`, growthPercentages);
 
       return {
         label: salesPersonName,
@@ -223,17 +268,17 @@ const MonthlySalesPersonInvoiceFilteredChart: React.FC<
         },
         borderColor: color.border,
         borderWidth: 1,
-        barThickness: isFullScreen ? 14 : 10,
-        maxBarThickness: 14,
+        barThickness: isFullScreen ? 15 : 8,
+        maxBarThickness: 15,
         minBarLength: 2,
         borderRadius: 15,
-        period: data[0]?.period,
+        period: data && data.length > 0 ? data[0].period : undefined,
         growthPercentages,
       };
     });
 
     const result = { labels: months, datasets };
-    console.log('chartData:', result);
+    console.log('Final chartData:', result);
     return result;
   }, [data, isFullScreen]);
 
@@ -532,7 +577,7 @@ const MonthlySalesPersonInvoiceFilteredChart: React.FC<
       <div className='flex-1 min-h-80 w-full '>
         {isLoading || isFetching ? (
           <div className='flex items-center justify-center h-full'>
-            <div className='w-3/4 h-1/2 rounded-lg shimmer' />
+            <Loading size='md' text='Loading chart data...' />
           </div>
         ) : isDataReady ? (
           <Bar
