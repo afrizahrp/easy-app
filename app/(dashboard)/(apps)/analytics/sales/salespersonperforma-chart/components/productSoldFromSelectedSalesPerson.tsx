@@ -11,7 +11,7 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
-import { hslToHex } from '@/lib/utils';
+import { hslToHex, cn } from '@/lib/utils';
 import { useThemeStore } from '@/store';
 import { useTheme } from 'next-themes';
 import { themes } from '@/config/thems';
@@ -21,7 +21,7 @@ import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/components/ui/use-toast';
 import useMonthlyProductSoldFromSalesPersonFiltered from '@/queryHooks/analytics/sales/useMonthlyProductSoldFromSalesPersonFiltered';
-import { getGridConfig, getLabel } from '@/lib/appex-chart-options';
+import { getGridConfig } from '@/lib/appex-chart-options';
 
 const Chart = dynamic(() => import('react-apexcharts'), { ssr: false });
 
@@ -36,7 +36,6 @@ ChartJS.register(
 );
 
 interface MonthlyProductSoldFromSalesPersonFilteredProps {
-  height?: number;
   salesPersonName: string;
   year?: string;
   month?: string;
@@ -45,7 +44,7 @@ interface MonthlyProductSoldFromSalesPersonFilteredProps {
 
 const MonthlyProductSoldFromSalesPersonFiltered: React.FC<
   MonthlyProductSoldFromSalesPersonFilteredProps
-> = ({ salesPersonName, year, month, onClose, height = 300 }) => {
+> = ({ salesPersonName, year, month, onClose }) => {
   const { toast } = useToast();
   const { theme: config } = useThemeStore();
   const { theme: mode } = useTheme();
@@ -110,24 +109,16 @@ const MonthlyProductSoldFromSalesPersonFiltered: React.FC<
     [productData, chartMode]
   );
 
-  const options: any = {
+  const options: Record<string, unknown> = {
     chart: {
       toolbar: { show: false },
     },
     legend: {
       position: 'top',
       horizontalAlign: 'left',
-      // offsetY: 10, // Atur nilai offsetY sesuai kebutuhan
-
       labels: {
-        colors: mode === 'dark' ? '#e2e8f0' : '#000000', // warna legend
+        colors: mode === 'dark' ? '#e2e8f0' : '#000000',
       },
-      // offsetX: 5,
-      // offsetY: 5,
-      // itemMargin: {
-      //   horizontal: 10,
-      //   vertical: 5,
-      // },
     },
     plotOptions: {
       bar: {
@@ -159,8 +150,8 @@ const MonthlyProductSoldFromSalesPersonFiltered: React.FC<
       style: {
         colors: [mode === 'dark' ? '#e2e8f0' : '#000000'],
       },
-      formatter: function (val: number, opt: any) {
-        return `${opt.w.globals.labels[opt.dataPointIndex]}: ${val.toLocaleString('id-ID')}`;
+      formatter: function (val: number, opt: Record<string, unknown>) {
+        return `${(opt.w as Record<string, unknown>).globals?.labels?.[opt.dataPointIndex as number]}: ${val.toLocaleString('id-ID')}`;
       },
       offsetX: 0,
       dropShadow: { enabled: false },
@@ -179,13 +170,13 @@ const MonthlyProductSoldFromSalesPersonFiltered: React.FC<
     tooltip: {
       theme: mode === 'dark' ? 'dark' : 'light',
       y: {
-        formatter: function (val: number, opt: any) {
-          const productName = opt.w.globals.labels[opt.dataPointIndex];
+        formatter: function (val: number, opt: Record<string, unknown>) {
+          const productName = (opt.w as Record<string, unknown>).globals
+            ?.labels?.[opt.dataPointIndex as number];
           return `${productName}: ${val.toLocaleString('id-ID')}`;
         },
       },
     },
-
     grid: getGridConfig(
       `hsl(${theme?.cssVars[mode === 'dark' ? 'dark' : 'light'].chartGird})`
     ),
@@ -235,19 +226,20 @@ const MonthlyProductSoldFromSalesPersonFiltered: React.FC<
     );
   }
 
+  const chartTitle = `Top Products Sold by ${salesPersonName}`;
+
   return (
     <div
       ref={containerRef}
-      className={`bg-white dark:bg-[#18181b] p-4 rounded-lg shadow-sm h-96 w-full relative mt-6`}
+      className={cn(
+        'chart-container',
+        'relative bg-white dark:bg-[#18181b] p-4 rounded-lg shadow-sm h-96 w-full',
+        'flex flex-col h-96 w-full box-border'
+      )}
       style={{ backgroundColor: hexBackground }}
     >
-      <div className='flex items-center justify-between mb-2'>
-        <h3 className='text-sm text-muted-foreground'>
-          Top Products (Max 3) Sold
-          <span className='block text-sm text-muted-foreground font-normal mt-1'>
-            by {salesPersonName} in {normalizedMonth || 'N/A'} {year || 'N/A'}
-          </span>
-        </h3>
+      <div className='relative flex items-start justify-between mb-2'>
+        <h2 className='text-md font-semibold'>{chartTitle}</h2>
         <div className='flex items-center gap-2'>
           <Label
             htmlFor='chart-mode-product'
@@ -266,39 +258,41 @@ const MonthlyProductSoldFromSalesPersonFiltered: React.FC<
         </div>
       </div>
 
-      {isLoading ? (
-        <div className='flex items-center justify-center h-64'>
-          <Skeleton className='w-3/4 h-1/2 rounded-lg' />
-        </div>
-      ) : isDataReady ? (
-        <div className='h-64 w-full'>
-          <Chart
-            options={options}
-            series={series}
-            type='bar'
-            height='100%'
-            width='100%'
-          />
-        </div>
-      ) : (
-        <div className='flex flex-col items-center justify-center h-full text-gray-400'>
-          <svg
-            xmlns='http://www.w3.org/2000/svg'
-            className='w-24 h-24 mb-4 animate-bounce'
-            fill='none'
-            viewBox='0 0 24 24'
-            stroke='currentColor'
-            strokeWidth={1.5}
-          >
-            <path
-              strokeLinecap='round'
-              strokeLinejoin='round'
-              d='M3 3v18h18V3H3zm5 14h8m-8-4h8m-8-4h8'
+      <div className='flex-1 min-h-80 w-full'>
+        {isLoading ? (
+          <div className='flex items-center justify-center h-full'>
+            <Skeleton className='w-3/4 h-1/2 rounded-lg' />
+          </div>
+        ) : isDataReady ? (
+          <div className='h-full w-full'>
+            <Chart
+              options={options}
+              series={series}
+              type='bar'
+              height='100%'
+              width='100%'
             />
-          </svg>
-          <p className='text-sm font-medium'>No data available</p>
-        </div>
-      )}
+          </div>
+        ) : (
+          <div className='flex flex-col items-center justify-center h-full text-gray-400'>
+            <svg
+              xmlns='http://www.w3.org/2000/svg'
+              className='w-24 h-24 mb-4 animate-bounce'
+              fill='none'
+              viewBox='0 0 24 24'
+              stroke='currentColor'
+              strokeWidth={1.5}
+            >
+              <path
+                strokeLinecap='round'
+                strokeLinejoin='round'
+                d='M3 3v18h18V3H3zm5 14h8m-8-4h8m-8-4h8'
+              />
+            </svg>
+            <p className='text-sm font-medium'>No data available</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

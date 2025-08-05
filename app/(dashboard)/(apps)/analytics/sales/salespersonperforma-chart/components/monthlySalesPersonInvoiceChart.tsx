@@ -44,19 +44,6 @@ ChartJS.register(
   gradientPlugin
 );
 
-interface SalesData {
-  period: string;
-  totalInvoice: number;
-  months: {
-    month: string;
-    sales: {
-      salesPersonName: string;
-      amount: number;
-      growthPercentage: number | null;
-    }[];
-  }[];
-}
-
 interface SalesPersonSelection {
   salesPersonName: string;
   year?: string;
@@ -568,7 +555,7 @@ const MonthlySalesPersonInvoiceChart: React.FC<
                 d='M3 3v18h18V3H3zm5 14h8m-8-4h8m-8-4h8'
               />
             </svg>
-            <p className='text-sm font-medium'>Data tidak tersedia</p>
+            <p className='text-sm font-medium'>No data available</p>
           </div>
         )}
       </div>

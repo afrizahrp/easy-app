@@ -120,7 +120,7 @@ const SalesPersonPerformaAnalytics: React.FC<
 
   return (
     <div
-      className={`relative flex flex-col w-full p-1 gap-4 ${
+      className={`relative flex flex-col w-full p-2 gap-4 ${
         showList ? 'h-screen' : 'h-fit min-h-0'
       }`}
     >
@@ -139,15 +139,15 @@ const SalesPersonPerformaAnalytics: React.FC<
           },
         ]}
       />
-      <div className='flex flex-col gap-2 w-full'>
+      <div className='flex flex-col gap-4 w-full'>
         <div className='min-w-[200px]'>
           <SalesInvoiceFilterSummary context='salesPersonInvoice' />
         </div>
         <div
-          className={`w-full gap-4 ${
+          className={`w-full ${
             selectedSalesPerson && selectedMonth && fullChart !== 'period'
-              ? 'grid grid-cols-1 md:grid-cols-2'
-              : 'flex flex-col'
+              ? 'grid grid-cols-1 md:grid-cols-2 items-start content-start'
+              : 'flex flex-col gap-4'
           }`}
         >
           <motion.div
@@ -158,15 +158,19 @@ const SalesPersonPerformaAnalytics: React.FC<
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-            className='w-full rounded-lg'
+            className='w-full h-fit min-h-0'
           >
-            <SalesPersonPerformaOverview
-              showFloatingButton={showList}
-              showList={showList}
-              isFullWidth={fullChart === 'period'}
-              onModeChange={handleModeChange}
-              onSalesPersonSelect={handleSalesPersonSelect}
-            />
+            <div className='flex flex-col w-full p-2 gap-4 h-fit min-h-0'>
+              <div className='w-full h-fit min-h-0'>
+                <SalesPersonPerformaOverview
+                  showFloatingButton={showList}
+                  showList={showList}
+                  isFullWidth={fullChart === 'period'}
+                  onModeChange={handleModeChange}
+                  onSalesPersonSelect={handleSalesPersonSelect}
+                />
+              </div>
+            </div>
           </motion.div>
           {selectedSalesPerson && selectedMonth && fullChart !== 'period' && (
             <motion.div
@@ -174,23 +178,26 @@ const SalesPersonPerformaAnalytics: React.FC<
               layout
               layoutId='top-product'
               transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-              className='min-w-0 w-full'
-              initial={{ opacity: 0, x: 50 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 50 }}
+              className='w-full h-fit min-h-0'
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 20 }}
             >
-              <ProductSoldFromSelectedSalesPerson
-                height={300}
-                salesPersonName={selectedSalesPerson}
-                year={selectedYear ?? undefined}
-                month={selectedMonth ?? undefined}
-                onClose={() => {
-                  setSelectedSalesPerson(null);
-                  setSelectedYear(null);
-                  setSelectedMonth(null);
-                  setFullChart('period');
-                }}
-              />
+              <div className='flex flex-col w-full p-2 gap-4 h-fit min-h-0'>
+                <div className='w-full h-fit min-h-0'>
+                  <ProductSoldFromSelectedSalesPerson
+                    salesPersonName={selectedSalesPerson}
+                    year={selectedYear ?? undefined}
+                    month={selectedMonth ?? undefined}
+                    onClose={() => {
+                      setSelectedSalesPerson(null);
+                      setSelectedYear(null);
+                      setSelectedMonth(null);
+                      setFullChart('period');
+                    }}
+                  />
+                </div>
+              </div>
             </motion.div>
           )}
         </div>

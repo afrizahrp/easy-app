@@ -81,18 +81,6 @@ ChartJS.register(
 );
 
 // Interface for the data returned by the hook
-interface SalesData {
-  period: string;
-  totalInvoice: number;
-  months: {
-    month: string;
-    sales: {
-      salesPersonName: string;
-      amount: number;
-      growthPercentage: number | null;
-    }[];
-  }[];
-}
 
 interface SalesPersonSelection {
   salesPersonName: string;
@@ -192,8 +180,6 @@ const MonthlySalesPersonInvoiceFilteredChart: React.FC<
       )
     );
 
-    console.log('Months from component:', months);
-    console.log('Data:', data);
 
     // Debug: Check if months match between component and API data
     const apiMonths = data[0]?.months.map((m) => m.month) || [];

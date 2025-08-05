@@ -1,12 +1,13 @@
 import { api } from '@/config/axios.config';
 import { useQuery } from '@tanstack/react-query';
 import {
-  useSessionStore,
   useSalesInvoiceHdFilterStore,
   useMonthYearPeriodStore,
+  useCompanyFilterStore,
 } from '@/store';
 import { format } from 'date-fns';
 import { AxiosError } from 'axios';
+import { useMemo } from 'react';
 
 interface ProductSoldItem {
   productName: string;
@@ -15,16 +16,16 @@ interface ProductSoldItem {
 }
 
 interface ProductSoldCountResponse {
-  company_id: string;
+  company_id: string[];
   module_id: string;
   subModule_id: string;
-  salesPersonName: string;
+  salesPersonName: string[];
   data: ProductSoldItem[];
 }
 
 interface UseMonthlyProductSoldFromSalesPersonFilteredProps {
   context: 'salesPersonInvoice';
-  salesPersonName?: string;
+  salesPersonName?: string | string[];
   year?: string;
   month?: string;
   sortBy?: string;
@@ -39,9 +40,8 @@ const useMonthlyProductSoldFromSalesPersonFiltered = ({
   sortBy,
   enabled = true,
 }: UseMonthlyProductSoldFromSalesPersonFilteredProps) => {
-  const user = useSessionStore((state) => state.user);
-  const company_id = user?.company_id?.toUpperCase();
-  const module_id = 'SLS';
+  const { selectedCompanyIds } = useCompanyFilterStore();
+  const module_id = 'ANT';
   const subModule_id = 'sls';
 
   const { salesPersonInvoicePeriod } = useMonthYearPeriodStore();
@@ -49,9 +49,28 @@ const useMonthlyProductSoldFromSalesPersonFiltered = ({
 
   const { salesPersonName: storeSalesPersonName } = salesPersonInvoiceFilters;
 
-  const finalSalesPersonName =
-    propSalesPersonName?.trim() ||
-    (storeSalesPersonName.length > 0 ? storeSalesPersonName[0]?.trim() : '');
+  // Memoize resolvedCompanyId untuk stabilitas
+  const resolvedCompanyId = useMemo(
+    () => (selectedCompanyIds.length > 0 ? selectedCompanyIds : ['BIS']),
+    [selectedCompanyIds]
+  );
+
+  // Handle salesPersonName dari berbagai sumber
+  const resolvedSalesPersonName = useMemo(() => {
+    // Prioritaskan prop salesPersonName
+    if (propSalesPersonName) {
+      return Array.isArray(propSalesPersonName)
+        ? propSalesPersonName
+        : [propSalesPersonName];
+    }
+
+    // Fallback ke store salesPersonName
+    if (storeSalesPersonName.length > 0) {
+      return storeSalesPersonName.map((name) => name?.trim()).filter(Boolean);
+    }
+
+    return [];
+  }, [propSalesPersonName, storeSalesPersonName]);
 
   // Prioritaskan prop year dan month, fallback ke salesPersonInvoicePeriod
   const yearPeriod =
@@ -75,15 +94,16 @@ const useMonthlyProductSoldFromSalesPersonFiltered = ({
       sortBy,
       yearPeriod,
       monthPeriod,
-      finalSalesPersonName,
+      resolvedSalesPersonName,
+      resolvedCompanyId,
     }
   );
 
   const isValidRequest = Boolean(
-    company_id &&
+    resolvedCompanyId.length > 0 &&
       module_id &&
       subModule_id &&
-      finalSalesPersonName &&
+      resolvedSalesPersonName.length > 0 &&
       yearPeriod &&
       monthPeriod
   );
@@ -95,10 +115,10 @@ const useMonthlyProductSoldFromSalesPersonFiltered = ({
     queryKey: [
       'MonthlyProductSoldFromSalesPersonFiltered',
       context,
-      company_id || 'unknown',
+      resolvedCompanyId,
       module_id || 'unknown',
       subModule_id || 'unknown',
-      finalSalesPersonName || 'unknown',
+      resolvedSalesPersonName,
       yearPeriod,
       monthPeriod,
       sortBy || 'qty',
@@ -110,24 +130,59 @@ const useMonthlyProductSoldFromSalesPersonFiltered = ({
         );
       }
 
-      const params = new URLSearchParams();
-      params.append('salesPersonName', finalSalesPersonName);
-      params.append('yearPeriod', yearPeriod);
-      params.append('monthPeriod', monthPeriod);
-      if (sortBy) {
-        params.append('sortBy', sortBy);
-      }
-
-      const url = `${process.env.NEXT_PUBLIC_API_URL}/${company_id}/${module_id}/${subModule_id}/get-analytics/getMonthlyProductSoldFromSalesPersonFiltered`;
-      const finalUrl = `${url}?${params.toString()}`;
-
-      console.log(
-        `[useMonthlyProductSoldFromSalesPersonFiltered:${context}] finalUrl:`,
-        finalUrl
-      );
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/${module_id}/${subModule_id}/get-analytics/getMonthlyProductSoldFromSalesPersonFiltered`;
 
       try {
-        const response = await api.get<ProductSoldCountResponse>(finalUrl);
+        const response = await api.get<ProductSoldCountResponse>(url, {
+          params: {
+            company_id: resolvedCompanyId,
+            salesPersonName: resolvedSalesPersonName,
+            yearPeriod,
+            monthPeriod,
+            sortBy: sortBy || 'qty',
+          },
+          paramsSerializer: (params) => {
+            const companyIdParams = Array.isArray(params.company_id)
+              ? params.company_id
+                  .map((id: string) => `company_id=${encodeURIComponent(id)}`)
+                  .join('&')
+              : `company_id=${encodeURIComponent(params.company_id)}`;
+
+            const salesPersonNameParams = Array.isArray(params.salesPersonName)
+              ? params.salesPersonName
+                  .map(
+                    (name: string) =>
+                      `salesPersonName=${encodeURIComponent(name)}`
+                  )
+                  .join('&')
+              : params.salesPersonName
+                ? `salesPersonName=${encodeURIComponent(params.salesPersonName)}`
+                : '';
+
+            const yearPeriodParam = params.yearPeriod
+              ? `yearPeriod=${encodeURIComponent(params.yearPeriod)}`
+              : '';
+
+            const monthPeriodParam = params.monthPeriod
+              ? `monthPeriod=${encodeURIComponent(params.monthPeriod)}`
+              : '';
+
+            const sortByParam = params.sortBy
+              ? `sortBy=${encodeURIComponent(params.sortBy)}`
+              : '';
+
+            return [
+              companyIdParams,
+              salesPersonNameParams,
+              yearPeriodParam,
+              monthPeriodParam,
+              sortByParam,
+            ]
+              .filter(Boolean)
+              .join('&');
+          },
+        });
+
         return response.data;
       } catch (err) {
         const axiosError = err as AxiosError<{ message?: string }>;
