@@ -409,7 +409,7 @@ const MonthlySalesPersonInvoiceChart: React.FC<
         ) : isDataReady ? (
           <Bar
             ref={chartRef}
-            height={isFullScreen ? undefined : isCompact ? 300 : height}
+            height={isFullScreen ? undefined : isCompact ? 250 : height}
             data={chartData}
             options={{
               responsive: true,
