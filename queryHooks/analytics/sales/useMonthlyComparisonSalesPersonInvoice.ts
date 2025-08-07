@@ -190,42 +190,18 @@ const useMonthlyComparisonSalesPersonInvoice = ({
               .filter(Boolean)
               .join('&');
 
-            console.log('🔍 [HOOK DEBUG] Final URL params:', finalParams);
-            console.log('🔍 [HOOK DEBUG] startPeriod:', params.startPeriod);
-            console.log('🔍 [HOOK DEBUG] endPeriod:', params.endPeriod);
+            // Removed console.log for performance
 
             return finalParams;
           },
         });
 
-        console.log(
-          `[useMonthlyComparisonSalesPersonInvoice:${context}] response.data:`,
-          JSON.stringify(response.data, null, 2)
-        );
+        // Removed console.log for performance
         return response.data;
       } catch (err) {
         const axiosError = err as AxiosError<{ message?: string }>;
 
-        // Debug: Log error details
-        console.error('❌ [DEBUG] Request failed:', {
-          url,
-          params: {
-            company_id: resolvedCompanyId,
-            startPeriod,
-            endPeriod,
-            salesPersonName: validSalesPersonNames,
-          },
-          error: axiosError.message,
-        });
-
-        if (axios.isAxiosError(axiosError)) {
-          console.error('❌ [DEBUG] Axios error details:', {
-            status: axiosError.response?.status,
-            statusText: axiosError.response?.statusText,
-            data: axiosError.response?.data,
-            config: axiosError.config,
-          });
-        }
+        // Removed debug logging for performance
 
         throw new Error(
           axiosError.response?.data?.message || 'Failed to fetch sales data'

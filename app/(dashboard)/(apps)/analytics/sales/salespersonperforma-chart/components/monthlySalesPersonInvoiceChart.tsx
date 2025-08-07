@@ -84,7 +84,10 @@ const MonthlySalesPersonInvoiceChart: React.FC<
     }));
 
   // Use salesPersonNames from store, allow empty array for unfiltered data
-  const salesPersonNames = salesPersonInvoiceFilters.salesPersonName || [];
+  const salesPersonNames = React.useMemo(
+    () => salesPersonInvoiceFilters.salesPersonName || [],
+    [salesPersonInvoiceFilters.salesPersonName]
+  );
 
   // Call the hook with context and salesPersonNames
   const { data, isLoading, isFetching, error } =
@@ -132,27 +135,30 @@ const MonthlySalesPersonInvoiceChart: React.FC<
 
   const chartData = React.useMemo(() => {
     if (!data || !data.length) {
-      console.log('No data available');
       return null;
     }
 
-    // console.log('Raw data:', JSON.stringify(data, null, 2));
+    // Optimize data processing by creating lookup maps
+    const monthDataMap = new Map();
+    const salesPersonSet = new Set<string>();
 
-    const allSalesPersons = Array.from(
-      new Set(
-        data
-          .flatMap((d) => d.months)
-          .flatMap((m) => m.sales.map((s) => s.salesPersonName))
-      )
-    );
+    // Pre-process data to create efficient lookups
+    data.forEach((yearData) => {
+      yearData.months.forEach((monthData) => {
+        const monthKey = monthData.month;
+        if (!monthDataMap.has(monthKey)) {
+          monthDataMap.set(monthKey, new Map());
+        }
 
-    // console.log('All Salespersons:', allSalesPersons);
-    // console.log('Months:', months);
-    // console.log('Data:', data);
-    // console.log(
-    //   'February data:',
-    //   data[0]?.months.find((m) => m.month === 'Feb')
-    // );
+        monthData.sales.forEach((salesData) => {
+          salesPersonSet.add(salesData.salesPersonName);
+          const salesPersonMap = monthDataMap.get(monthKey);
+          salesPersonMap.set(salesData.salesPersonName, salesData);
+        });
+      });
+    });
+
+    const allSalesPersons = Array.from(salesPersonSet);
 
     const datasets = allSalesPersons.map((salesPersonName) => {
       const color =
@@ -160,37 +166,19 @@ const MonthlySalesPersonInvoiceChart: React.FC<
         getFallbackColor(salesPersonName);
 
       const growthPercentages = months.map((month) => {
-        let growth: number = 0;
-        data.forEach((yearData) => {
-          const monthData = yearData.months.find((m) => m.month === month);
-          if (monthData) {
-            const salesPersonData = monthData.sales.find(
-              (s) => s.salesPersonName === salesPersonName
-            );
-            if (salesPersonData && salesPersonData.growthPercentage !== null) {
-              growth = salesPersonData.growthPercentage;
-            }
-          }
-        });
-        return growth;
+        const monthData = monthDataMap.get(month);
+        if (!monthData) return 0;
+
+        const salesPersonData = monthData.get(salesPersonName);
+        return salesPersonData?.growthPercentage ?? 0;
       });
 
       const monthlyData = months.map((month) => {
-        let totalAmount = 0;
-        data.forEach((yearData) => {
-          const monthData = yearData.months.find((m) => m.month === month);
-          if (monthData && monthData.sales.length > 0) {
-            const salesPersonData = monthData.sales.find(
-              (s) => s.salesPersonName === salesPersonName
-            );
+        const monthData = monthDataMap.get(month);
+        if (!monthData) return 0;
 
-            if (salesPersonData) {
-              totalAmount += salesPersonData.amount;
-            }
-          }
-        });
-
-        return totalAmount / 1_000_000;
+        const salesPersonData = monthData.get(salesPersonName);
+        return (salesPersonData?.amount ?? 0) / 1_000_000;
       });
 
       return {
@@ -220,8 +208,7 @@ const MonthlySalesPersonInvoiceChart: React.FC<
       };
     });
 
-    const result = { labels: months, datasets };
-    return result;
+    return { labels: months, datasets };
   }, [data, isFullScreen]);
 
   useEffect(() => {
