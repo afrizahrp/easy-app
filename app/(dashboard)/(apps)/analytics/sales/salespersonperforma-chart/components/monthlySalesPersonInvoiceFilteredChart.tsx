@@ -25,7 +25,7 @@ import {
   getFallbackColor,
 } from '@/utils/salesPersonColorMap';
 import { useSalesInvoiceHdFilterStore } from '@/store';
-import { months } from '@/utils/monthNameMap';
+
 import { getSalesPersonColor } from '@/utils/getSalesPersonColor';
 import { Button } from '@/components/ui/button';
 import { FileBarChart2, Maximize2, Minimize2 } from 'lucide-react';
@@ -45,6 +45,9 @@ import {
 } from '@/components/ui/tooltip';
 import { useQueryClient } from '@tanstack/react-query';
 import SalesPersonSummaryList from './salesPersonSummaryList';
+
+import { months as monthName } from '@/utils/monthNameMap';
+import { getShortMonth } from '@/utils/getShortmonths';
 
 ChartJS.register(
   CategoryScale,
