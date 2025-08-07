@@ -25,11 +25,13 @@ import {
   getFallbackColor,
 } from '@/utils/salesPersonColorMap';
 import { useSalesInvoiceHdFilterStore } from '@/store';
-import { months } from '@/utils/monthNameMap';
+
 import { getSalesPersonColor } from '@/utils/getSalesPersonColor';
 import { Button } from '@/components/ui/button';
 import { Maximize2, Minimize2 } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
+import { months as monthName } from '@/utils/monthNameMap';
+import { getShortMonth } from '@/utils/getShortmonths';
 
 ChartJS.register(
   CategoryScale,
@@ -40,19 +42,6 @@ ChartJS.register(
   Legend,
   gradientPlugin
 );
-
-interface SalesData {
-  period: string;
-  totalInvoice: number;
-  months: {
-    month: string;
-    sales: {
-      salesPersonName: string;
-      amount: number;
-      growthPercentage: number | null;
-    }[];
-  }[];
-}
 
 interface SalesPersonSelection {
   salesPersonName: string;
@@ -107,6 +96,7 @@ const MonthlySalesPersonInvoiceChart: React.FC<
     });
 
   const [isFullScreen, setIsFullScreen] = useState(false);
+  const months = monthName.map((month) => getShortMonth(month));
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<Chart<'bar', number[], string> | null>(null);
 
@@ -355,7 +345,7 @@ const MonthlySalesPersonInvoiceChart: React.FC<
     >
       <div className='relative flex items-center justify-between mb-2'>
         <h2 className='text-sm text-muted-foreground font-semibold ml-2'>
-          Monthly Sales per Salesperson (Above 300M IDR)
+          Monthly Sales per Salesperson (Above 300Mxx IDR)
         </h2>
         {!isCompact && (
           <Button

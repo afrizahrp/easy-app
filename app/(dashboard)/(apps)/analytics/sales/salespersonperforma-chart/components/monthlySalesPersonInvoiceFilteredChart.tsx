@@ -28,7 +28,7 @@ import { useSalesInvoiceHdFilterStore } from '@/store';
 import { months } from '@/utils/monthNameMap';
 import { getSalesPersonColor } from '@/utils/getSalesPersonColor';
 import { Button } from '@/components/ui/button';
-import { BarChart2, FileBarChart2, Maximize2, Minimize2 } from 'lucide-react';
+import { FileBarChart2, Maximize2, Minimize2 } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -130,7 +130,7 @@ const MonthlySalesPersonInvoiceFilteredChart: React.FC<
     : new Date().getFullYear().toString();
 
   const [selectedYear, setSelectedYear] = useState<string>(yearString);
-
+  const months = monthName.map((month) => getShortMonth(month));
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<Chart<'bar', number[], string> | null>(null);
 
