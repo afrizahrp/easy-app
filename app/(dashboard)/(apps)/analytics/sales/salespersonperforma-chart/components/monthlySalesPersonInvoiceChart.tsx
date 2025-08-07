@@ -25,10 +25,7 @@ import {
   getFallbackColor,
 } from '@/utils/salesPersonColorMap';
 import { useSalesInvoiceHdFilterStore } from '@/store';
-import Loading from '@/components/ui/loading';
-
-import { months as monthName } from '@/utils/monthNameMap';
-import { getShortMonth } from '@/utils/getShortmonths';
+import { months } from '@/utils/monthNameMap';
 import { getSalesPersonColor } from '@/utils/getSalesPersonColor';
 import { Button } from '@/components/ui/button';
 import { Maximize2, Minimize2 } from 'lucide-react';
@@ -43,6 +40,19 @@ ChartJS.register(
   Legend,
   gradientPlugin
 );
+
+interface SalesData {
+  period: string;
+  totalInvoice: number;
+  months: {
+    month: string;
+    sales: {
+      salesPersonName: string;
+      amount: number;
+      growthPercentage: number | null;
+    }[];
+  }[];
+}
 
 interface SalesPersonSelection {
   salesPersonName: string;
@@ -75,28 +85,6 @@ const MonthlySalesPersonInvoiceChart: React.FC<
   const hslBackground = `hsla(${
     theme?.cssVars[mode === 'dark' ? 'dark' : 'light'].background
   })`;
-
-  const months = monthName.map((month) => getShortMonth(month));
-
-  // Function to normalize month format
-  const normalizeMonth = (month: string): string => {
-    const monthMap: { [key: string]: string } = {
-      January: 'Jan',
-      February: 'Feb',
-      March: 'Mar',
-      April: 'Apr',
-      May: 'May',
-      June: 'Jun',
-      July: 'Jul',
-      August: 'Aug',
-      September: 'Sep',
-      October: 'Oct',
-      November: 'Nov',
-      December: 'Dec',
-    };
-    return monthMap[month] || month;
-  };
-
   const hexBackground = hslToHex(hslBackground);
   const { toast } = useToast();
 
@@ -158,12 +146,7 @@ const MonthlySalesPersonInvoiceChart: React.FC<
       return null;
     }
 
-    // Debug: Log raw data to see month format from API
-    console.log('Raw data from API:', JSON.stringify(data, null, 2));
-    console.log(
-      'Available months in API data:',
-      data[0]?.months.map((m) => m.month)
-    );
+    // console.log('Raw data:', JSON.stringify(data, null, 2));
 
     const allSalesPersons = Array.from(
       new Set(
@@ -173,20 +156,13 @@ const MonthlySalesPersonInvoiceChart: React.FC<
       )
     );
 
-    console.log('Months from component:', months);
-    console.log('Data:', data);
-
-    // Debug: Check if months match between component and API data
-    const apiMonths = data[0]?.months.map((m) => m.month) || [];
-    console.log('API months:', apiMonths);
-    console.log('Component months:', months);
-    console.log('Month matching test:');
-    months.forEach((month) => {
-      const found = apiMonths.find(
-        (apiMonth) => normalizeMonth(apiMonth) === month
-      );
-      console.log(`${month}: ${found ? 'MATCH' : 'NO MATCH'}`);
-    });
+    // console.log('All Salespersons:', allSalesPersons);
+    // console.log('Months:', months);
+    // console.log('Data:', data);
+    // console.log(
+    //   'February data:',
+    //   data[0]?.months.find((m) => m.month === 'Feb')
+    // );
 
     const datasets = allSalesPersons.map((salesPersonName) => {
       const color =
@@ -196,9 +172,7 @@ const MonthlySalesPersonInvoiceChart: React.FC<
       const growthPercentages = months.map((month) => {
         let growth: number = 0;
         data.forEach((yearData) => {
-          const monthData = yearData.months.find(
-            (m) => normalizeMonth(m.month) === month
-          );
+          const monthData = yearData.months.find((m) => m.month === month);
           if (monthData) {
             const salesPersonData = monthData.sales.find(
               (s) => s.salesPersonName === salesPersonName
@@ -214,9 +188,7 @@ const MonthlySalesPersonInvoiceChart: React.FC<
       const monthlyData = months.map((month) => {
         let totalAmount = 0;
         data.forEach((yearData) => {
-          const monthData = yearData.months.find(
-            (m) => normalizeMonth(m.month) === month
-          );
+          const monthData = yearData.months.find((m) => m.month === month);
           if (monthData && monthData.sales.length > 0) {
             const salesPersonData = monthData.sales.find(
               (s) => s.salesPersonName === salesPersonName
@@ -259,7 +231,6 @@ const MonthlySalesPersonInvoiceChart: React.FC<
     });
 
     const result = { labels: months, datasets };
-    console.log('Final chartData:', result);
     return result;
   }, [data, isFullScreen]);
 
@@ -404,12 +375,12 @@ const MonthlySalesPersonInvoiceChart: React.FC<
       <div className='flex-1 min-h-0 w-full'>
         {isLoading || isFetching ? (
           <div className='flex items-center justify-center h-full'>
-            <Loading size='md' text='Loading chart data...' />
+            <div className='w-3/4 h-1/2 rounded-lg shimmer' />
           </div>
         ) : isDataReady ? (
           <Bar
             ref={chartRef}
-            height={isFullScreen ? undefined : isCompact ? 250 : height}
+            height={isFullScreen ? undefined : isCompact ? 300 : height}
             data={chartData}
             options={{
               responsive: true,
@@ -555,7 +526,7 @@ const MonthlySalesPersonInvoiceChart: React.FC<
                 d='M3 3v18h18V3H3zm5 14h8m-8-4h8m-8-4h8'
               />
             </svg>
-            <p className='text-sm font-medium'>No data available</p>
+            <p className='text-sm font-medium'>Data tidak tersedia</p>
           </div>
         )}
       </div>

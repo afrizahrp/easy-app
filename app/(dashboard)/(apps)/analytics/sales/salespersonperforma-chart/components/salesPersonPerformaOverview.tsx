@@ -87,7 +87,7 @@ const SalesPersonPerformaOverview: React.FC<
 
   return (
     <div
-      className={`flex flex-col w-full p-2 gap-4 ${showList ? 'h-screen' : 'h-fit min-h-0'}`}
+      className={`flex flex-col w-full p-2 gap-4 ${showList ? 'h-fit' : 'h-fit min-h-0'}`}
     >
       {showFloatingButton && (
         <div className='flex-none w-full md:w-1/2'>
@@ -103,27 +103,23 @@ const SalesPersonPerformaOverview: React.FC<
           </FloatingFilterButton>
         </div>
       )}
-      <div className='flex flex-col md:flex-row w-full gap-4 items-stretch min-w-0'>
+      <div className='w-full h-fit min-h-0'>
         {validSalesPersonNames.length > 0 ? (
-          <div className='flex-1 min-w-0 box-border'>
-            <MonthlySalesPersonInvoiceFilteredChart
-              key={`filtered-${validSalesPersonNames.join('-')}`}
-              isFullWidth={isFullWidth}
-              onModeChange={onModeChange}
-              onSalesPersonSelect={handleSalesPersonSelect}
-              height={250}
-            />
-          </div>
+          <MonthlySalesPersonInvoiceFilteredChart
+            key={`filtered-${validSalesPersonNames.join('-')}`}
+            isFullWidth={isFullWidth}
+            onModeChange={onModeChange}
+            onSalesPersonSelect={handleSalesPersonSelect}
+            height={250}
+          />
         ) : (
-          <div className='flex-1 min-w-0 box-border'>
-            <MonthlySalesPersonInvoiceChart
-              isFullWidth={isFullWidth}
-              height={showList ? 400 : 300}
-              isCompact={!showList}
-              onModeChange={onModeChange}
-              onSalesPersonSelect={handleSalesPersonSelect}
-            />
-          </div>
+          <MonthlySalesPersonInvoiceChart
+            isFullWidth={isFullWidth}
+            height={showList ? 400 : 300}
+            isCompact={!showList}
+            onModeChange={onModeChange}
+            onSalesPersonSelect={handleSalesPersonSelect}
+          />
         )}
       </div>
     </div>
