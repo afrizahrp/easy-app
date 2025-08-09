@@ -21,13 +21,8 @@ const Loading: React.FC<LoadingProps> = ({
 
   const content = (
     <div className={`flex flex-col items-center justify-center ${className}`}>
-      {/* Loading text */}
-      <h2 className='text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4'>
-        {text}
-      </h2>
-
       {/* 3 dots animation */}
-      <div className='flex space-x-2'>
+      <div className='flex space-x-2 mb-4'>
         {[0, 1, 2].map((i) => (
           <div
             key={i}
@@ -36,6 +31,11 @@ const Loading: React.FC<LoadingProps> = ({
           ></div>
         ))}
       </div>
+
+      {/* Loading text */}
+      <h2 className='text-lg font-semibold text-gray-800 dark:text-gray-200 text-center'>
+        {text}
+      </h2>
     </div>
   );
 

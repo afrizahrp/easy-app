@@ -2,6 +2,7 @@
 import { useMonthYearPeriodStore } from '@/store';
 import { SearchContext } from '@/constants/searchContexts';
 import { PeriodFilter } from '@/components/period-filter';
+import CompanyFacetedFilter from './companyFacetedFilter';
 import { Button } from '@/components/ui/button';
 import { Cross2Icon } from '@radix-ui/react-icons';
 import { useToast } from '@/components/ui/use-toast';
@@ -31,7 +32,7 @@ interface MonthYearPeriodStore {
 }
 
 export function ChartPeriodFilter({
-  title = 'Filter Chart by Period',
+  title = '',
   filterContext = 'salesInvoice',
   onPeriodChange,
   onReset,
@@ -88,6 +89,11 @@ export function ChartPeriodFilter({
 
   return (
     <div className={`flex flex-col space-y-4 w-full py-2 ${className || ''}`}>
+      <div>
+        <h3 className='text-lg font-semibold mb-2 text-center'>{title}</h3>
+        <CompanyFacetedFilter />
+      </div>
+
       <div>
         <h3 className='text-lg font-semibold mb-2 text-center'>{title}</h3>
         <PeriodFilter

@@ -207,12 +207,16 @@ export function SalesPersonInvoiceFilterSidebar<TData>({
     paidStatus.length > 0;
 
   return (
-    <div className='flex flex-col space-y-4 w-full py-2'>
-      <PeriodFilter context='salesPersonInvoice' />
+    <div className='flex flex-col space-y-3 w-full py-2'>
+      <div className='mb-3'>
+        <PeriodFilter context='salesPersonInvoice' />
+      </div>
 
-      <CompanyFacetedFilter />
+      <div className='mb-3'>
+        <CompanyFacetedFilter />
+      </div>
 
-      <div className='w-full py-3 dark:text-slate-400'>
+      <div className='mb-3'>
         <DataTableFacetedFilter
           column={table?.getColumn('salesPersonName')}
           title='Sales Person'
@@ -222,9 +226,11 @@ export function SalesPersonInvoiceFilterSidebar<TData>({
           onSelect={(value) => {
             const updatedValues = new Set(salesPersonName);
             if (value) {
-              updatedValues.has(value)
-                ? updatedValues.delete(value)
-                : updatedValues.add(value);
+              if (updatedValues.has(value)) {
+                updatedValues.delete(value);
+              } else {
+                updatedValues.add(value);
+              }
             } else {
               updatedValues.clear();
             }
@@ -235,8 +241,7 @@ export function SalesPersonInvoiceFilterSidebar<TData>({
         />
       </div>
 
-      <div className='w-full py-3'>
-        {/* {table?.getColumn('paidStatus') && ( */}
+      <div className='mb-3'>
         <DataTableFacetedFilter
           column={table.getColumn('paidStatus')}
           title='Paid Status'
@@ -247,9 +252,11 @@ export function SalesPersonInvoiceFilterSidebar<TData>({
           onSelect={(value) => {
             const updatedValues = new Set(paidStatus);
             if (value) {
-              updatedValues.has(value)
-                ? updatedValues.delete(value)
-                : updatedValues.add(value);
+              if (updatedValues.has(value)) {
+                updatedValues.delete(value);
+              } else {
+                updatedValues.add(value);
+              }
             } else {
               updatedValues.clear();
             }
@@ -259,18 +266,19 @@ export function SalesPersonInvoiceFilterSidebar<TData>({
           }}
           aria-label='paidStatus sales person invoice filter'
         />
-        {/* )} */}
       </div>
 
       {hasActiveFilters && (
-        <Button
-          variant='outline'
-          onClick={handleReset}
-          className='h-10 px-2 w-full mb-5 bg-secondary text-slate hover:bg-secondary-dark dark:bg-secondary dark:text-slate-400 dark:hover:bg-secondary dark:hover:text-slate-400'
-        >
-          <Cross2Icon className='ml-2 h-4 w-4' />
-          Reset Filter
-        </Button>
+        <div className='mb-3'>
+          <Button
+            variant='outline'
+            onClick={handleReset}
+            className='h-10 px-2 w-full bg-secondary text-slate hover:bg-secondary-dark dark:bg-secondary dark:text-slate-400 dark:hover:bg-secondary dark:hover:text-slate-400'
+          >
+            <Cross2Icon className='mr-2 h-4 w-4' />
+            Reset Filter
+          </Button>
+        </div>
       )}
     </div>
   );

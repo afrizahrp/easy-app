@@ -1,37 +1,11 @@
 'use client';
 
 import * as React from 'react';
-import { CheckIcon, Cross2Icon } from '@radix-ui/react-icons';
-import { cn } from '@/lib/utils';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-  CommandSeparator,
-} from '@/components/ui/command';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
-import { Separator } from '@/components/ui/separator';
-import { FilterIcon, Loader2 } from 'lucide-react';
+import { FacetedFilter } from './facetedFilter';
 import { useCompanyFilterStore } from '@/store';
-
-const companyOptions = [
-  { value: 'BIS', label: 'BIS' },
-  { value: 'BIP', label: 'BIP' },
-  { value: 'KBIP', label: 'KBIP' },
-];
 
 interface CompanyFacetedFilterProps {
   title?: string;
-  options?: { value: string; label: string; count?: number }[];
   isLoading?: boolean;
   disabled?: boolean;
   ariaLabel?: string;
@@ -39,143 +13,39 @@ interface CompanyFacetedFilterProps {
 
 export default function CompanyFacetedFilter({
   title = 'Company',
-  options = companyOptions,
   isLoading,
   disabled,
   ariaLabel = 'Filter by company',
 }: CompanyFacetedFilterProps) {
-  const selected = useCompanyFilterStore((s) => s.selectedCompanyIds);
-  const setSelected = useCompanyFilterStore((s) => s.setSelectedCompanyIds);
+  const { companies, selectedCompanyIds, setSelectedCompanyIds } =
+    useCompanyFilterStore();
 
-  const handleSelect = (value: string) => {
-    const updated = new Set(selected);
+  // Convert companies to options format yang dibutuhkan FacetedFilter
+  const companyOptions = companies.map((company) => ({
+    value: company.id,
+    label: `${company.id} - ${company.name}`,
+    displayValue: company.id, // Untuk badge display
+  }));
+
+  const handleCompanySelect = (value: string) => {
+    const updated = new Set(selectedCompanyIds);
     if (updated.has(value)) {
       updated.delete(value);
     } else {
       updated.add(value);
     }
-    setSelected(Array.from(updated));
+    setSelectedCompanyIds(Array.from(updated));
   };
 
-  const selectedValues = new Set(selected);
-
   return (
-    <Popover>
-      <PopoverTrigger asChild>
-        <Button
-          disabled={isLoading || disabled}
-          variant='outline'
-          size='sm'
-          className='h-10 text-sm bg-secondary text-slate w-full dark:text-slate-400 dark:bg-secondary'
-          aria-label={ariaLabel}
-        >
-          {isLoading && <Loader2 className='mr-2 h-4 w-4 animate-spin' />}
-          <FilterIcon className='mr-2 h-4 w-4 text-sm' />
-          Filter by {title}
-          {selectedValues.size > 0 && (
-            <>
-              <Separator
-                orientation='vertical'
-                className='mx-2 h-4 text-slate dark:text-slate-400'
-              />
-              <Badge
-                variant='outline'
-                className='rounded-sm px-1 font-normal text-slate dark:text-slate-400'
-              >
-                {selectedValues.size}
-              </Badge>
-            </>
-          )}
-        </Button>
-      </PopoverTrigger>
-      {selectedValues.size > 0 && (
-        <div className='hidden space-x-1 py-3 lg:flex'>
-          {selectedValues.size > 3 ? (
-            <Badge
-              variant='outline'
-              className='rounded-sm px-1 font-normal text-slate dark:text-slate-400'
-            >
-              {selectedValues.size} companies selected
-            </Badge>
-          ) : (
-            options
-              ?.filter((option) => selectedValues.has(option.value))
-              .map((option) => (
-                <Badge
-                  variant='outline'
-                  key={option.value}
-                  className='rounded-sm px-1 text-xs text-slate-600'
-                >
-                  {option.label}
-                  <Cross2Icon
-                    className='ml-1 h-3 w-3 cursor-pointer text-red-500'
-                    onClick={() => {
-                      handleSelect(option.value);
-                      console.log('Cross2Icon Clicked:', {
-                        value: option.value,
-                      });
-                    }}
-                  />
-                </Badge>
-              ))
-          )}
-        </div>
-      )}
-
-      <PopoverContent className='w-full p-0' align='start'>
-        <Command>
-          <CommandInput placeholder={title} />
-          <CommandList>
-            <CommandEmpty>No companies found</CommandEmpty>
-            <CommandGroup>
-              {options?.map((option) => {
-                const isSelected = selectedValues.has(option.value);
-                return (
-                  <CommandItem
-                    key={option.value}
-                    onSelect={() => !disabled && handleSelect(option.value)}
-                  >
-                    <div
-                      className={cn(
-                        'mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary',
-                        isSelected
-                          ? 'bg-primary text-slate-700 dark:text-slate-400'
-                          : 'opacity-50'
-                      )}
-                    >
-                      <CheckIcon
-                        className={cn(
-                          'h-4 w-4 text-slate-400 bg-primary dark:bg-secondary',
-                          isSelected ? '' : 'invisible'
-                        )}
-                      />
-                    </div>
-                    <span>{option.label}</span>
-                    {option.count !== undefined && (
-                      <span className='ml-auto text-xs text-slate-700 dark:text-slate-400'>
-                        {option.count.toLocaleString('id-ID')}
-                      </span>
-                    )}
-                  </CommandItem>
-                );
-              })}
-            </CommandGroup>
-            {selectedValues.size > 0 && (
-              <>
-                <CommandSeparator />
-                <CommandGroup>
-                  <CommandItem
-                    onSelect={() => !disabled && setSelected([])}
-                    className='justify-center text-center'
-                  >
-                    Clear filter
-                  </CommandItem>
-                </CommandGroup>
-              </>
-            )}
-          </CommandList>
-        </Command>
-      </PopoverContent>
-    </Popover>
+    <FacetedFilter
+      title={title}
+      options={companyOptions}
+      isLoading={isLoading}
+      disabled={disabled}
+      selectedValues={new Set(selectedCompanyIds)}
+      onSelect={handleCompanySelect}
+      ariaLabel={`${ariaLabel} - Company`}
+    />
   );
 }

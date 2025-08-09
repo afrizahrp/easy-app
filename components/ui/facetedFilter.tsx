@@ -22,7 +22,12 @@ import { FilterIcon, Loader2 } from 'lucide-react';
 
 type FacetedFilterProps = {
   title?: string;
-  options: { value: string; label: string; count?: number }[];
+  options: {
+    value: string;
+    label: string;
+    count?: number;
+    displayValue?: string;
+  }[];
   isLoading?: boolean;
   disabled?: boolean;
   selectedValues: Set<string>;
@@ -86,7 +91,7 @@ export function FacetedFilter({
                   key={option.value}
                   className='rounded-sm px-1 text-xs text-slate-600'
                 >
-                  {option.label}
+                  {option.displayValue || option.label}
                   <Cross2Icon
                     className='ml-1 h-3 w-3 cursor-pointer text-red-500'
                     onClick={() => {

@@ -165,68 +165,25 @@ export function SalesInvoiceFilterSidebar<TData>({
     poType.length > 0;
 
   return (
-    <div className='flex flex-col space-y-3 w-full py-1'>
-      <PeriodFilter context='salesInvoice' />
+    <div className='flex flex-col space-y-3 w-full py-2'>
+      <div className='mb-3'>
+        <PeriodFilter context='salesInvoice' />
+      </div>
 
-      <CompanyFacetedFilter />
+      <div className='mb-3'>
+        <CompanyFacetedFilter />
+      </div>
 
-      <DataTableFacetedFilter
-        column={table?.getColumn('paidStatus')}
-        title='Paid Status'
-        options={paidStatusOptions}
-        isLoading={isPaidStatusLoading}
-        disabled={salesPersonName.length > 1}
-        selectedValues={new Set(paidStatus)}
-        onSelect={(value) => {
-          const updatedValues = new Set(paidStatus);
-          if (value) {
-            if (updatedValues.has(value)) {
-              updatedValues.delete(value);
-            } else {
-              updatedValues.add(value);
-            }
-          } else {
-            updatedValues.clear();
-          }
-          setSalesInvoiceFilters({
-            paidStatus: Array.from(updatedValues),
-          });
-        }}
-      />
-
-      <DataTableFacetedFilter
-        column={table?.getColumn('poType')}
-        title='PO Type'
-        options={poTypeOptionList}
-        isLoading={isPoTypeLoading}
-        disabled={salesPersonName.length > 1}
-        selectedValues={new Set(poType)}
-        onSelect={(value) => {
-          const updatedValues = new Set(poType);
-          if (value) {
-            if (updatedValues.has(value)) {
-              updatedValues.delete(value);
-            } else {
-              updatedValues.add(value);
-            }
-          } else {
-            updatedValues.clear();
-          }
-          setSalesInvoiceFilters({
-            poType: Array.from(updatedValues),
-          });
-        }}
-      />
-
-      {/* <div className='dark:text-slate-400'>
+      <div className='mb-3'>
         <DataTableFacetedFilter
-          column={table?.getColumn('salesPersonName')}
-          title='Sales Person'
-          options={salesPersonOptionList}
-          isLoading={isSalesPersonLoading}
-          selectedValues={new Set(salesPersonName)}
+          column={table?.getColumn('paidStatus')}
+          title='Paid Status'
+          options={paidStatusOptions}
+          isLoading={isPaidStatusLoading}
+          disabled={salesPersonName.length > 1}
+          selectedValues={new Set(paidStatus)}
           onSelect={(value) => {
-            const updatedValues = new Set(salesPersonName);
+            const updatedValues = new Set(paidStatus);
             if (value) {
               if (updatedValues.has(value)) {
                 updatedValues.delete(value);
@@ -237,21 +194,49 @@ export function SalesInvoiceFilterSidebar<TData>({
               updatedValues.clear();
             }
             setSalesInvoiceFilters({
-              salesPersonName: Array.from(updatedValues),
+              paidStatus: Array.from(updatedValues),
             });
           }}
         />
-      </div> */}
+      </div>
+
+      <div className='mb-3'>
+        <DataTableFacetedFilter
+          column={table?.getColumn('poType')}
+          title='PO Type'
+          options={poTypeOptionList}
+          isLoading={isPoTypeLoading}
+          disabled={salesPersonName.length > 1}
+          selectedValues={new Set(poType)}
+          onSelect={(value) => {
+            const updatedValues = new Set(poType);
+            if (value) {
+              if (updatedValues.has(value)) {
+                updatedValues.delete(value);
+              } else {
+                updatedValues.add(value);
+              }
+            } else {
+              updatedValues.clear();
+            }
+            setSalesInvoiceFilters({
+              poType: Array.from(updatedValues),
+            });
+          }}
+        />
+      </div>
 
       {hasActiveFilters && (
-        <Button
-          variant='outline'
-          onClick={handleReset}
-          className='h-9 px-2 w-full bg-secondary text-slate hover:bg-secondary-dark dark:bg-secondary dark:text-slate-400 dark:hover:bg-secondary dark:hover:text-slate-400'
-        >
-          <Cross2Icon className='mr-2 h-4 w-4' />
-          Reset Filter
-        </Button>
+        <div className='mb-3'>
+          <Button
+            variant='outline'
+            onClick={handleReset}
+            className='h-10 px-2 w-full bg-secondary text-slate hover:bg-secondary-dark dark:bg-secondary dark:text-slate-400 dark:hover:bg-secondary dark:hover:text-slate-400'
+          >
+            <Cross2Icon className='mr-2 h-4 w-4' />
+            Reset Filter
+          </Button>
+        </div>
       )}
     </div>
   );

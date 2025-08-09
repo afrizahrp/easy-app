@@ -84,7 +84,7 @@ const SalesPersonPerformaAnalytics: React.FC<
 
   const handleSalesPersonSelect = (selection: SalesPersonSelection | null) => {
     if (selection) {
-      setSelectedSalesPerson(selection.salesPersonName);
+      setSelectedSalesPerson(null);
       setSelectedYear(selection.year || null);
       setSelectedMonth(selection.month || null);
       setSelectedColor(selection.color || null);

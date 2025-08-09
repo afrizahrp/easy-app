@@ -1,5 +1,9 @@
 // SalesInvoiceFilterSummary.tsx
-import { useMonthYearPeriodStore, useSalesInvoiceHdFilterStore } from '@/store';
+import {
+  useMonthYearPeriodStore,
+  useSalesInvoiceHdFilterStore,
+  useCompanyFilterStore,
+} from '@/store';
 import { FilterSummary } from '@/components/ui/filterSummary';
 import { format } from 'date-fns';
 
@@ -25,6 +29,9 @@ export default function SalesInvoiceFilterSummary({
     setSalesPersonInvoiceFilters,
   } = useSalesInvoiceHdFilterStore();
 
+  // Tambahkan company filter store
+  const { selectedCompanyIds } = useCompanyFilterStore();
+
   const period =
     context === 'salesInvoice' ? salesInvoicePeriod : salesPersonInvoicePeriod;
   const setPeriod =
@@ -41,6 +48,14 @@ export default function SalesInvoiceFilterSummary({
       : setSalesPersonInvoiceFilters;
 
   const { paidStatus, poType, salesPersonName } = filters;
+
+  // Fungsi untuk clear company individual
+  const handleClearIndividualCompany = (companyId: string) => {
+    const updatedCompanyIds = selectedCompanyIds.filter(
+      (id) => id !== companyId
+    );
+    useCompanyFilterStore.getState().setSelectedCompanyIds(updatedCompanyIds);
+  };
 
   // Fungsi untuk clear salesperson individual
   const handleClearIndividualSalesPerson = (salesPerson: string) => {
@@ -80,6 +95,9 @@ export default function SalesInvoiceFilterSummary({
       case 'salesPersonName':
         setFilters({ salesPersonName: [] });
         break;
+      case 'company':
+        useCompanyFilterStore.getState().setSelectedCompanyIds(['BIS']); // Reset ke default
+        break;
       default:
         break;
     }
@@ -89,6 +107,19 @@ export default function SalesInvoiceFilterSummary({
     context === 'salesInvoice' ? 'Jan 2024 - Dec 2024' : 'Jan 2025 - May 2025';
 
   const filtersList = [
+    // Company filter di atas Period
+    ...(selectedCompanyIds.length > 0
+      ? [
+          {
+            label: 'Company',
+            value: selectedCompanyIds,
+            isClearable: true,
+            onClear: () => handleClear('company'),
+            individualValues: selectedCompanyIds,
+            onClearIndividual: handleClearIndividualCompany,
+          },
+        ]
+      : []),
     {
       label: 'Period', // Ubah label menjadi 'Period' agar sesuai dengan contoh
       value:

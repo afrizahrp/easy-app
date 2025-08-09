@@ -9,7 +9,7 @@ import { FacetedFilter } from '@/components/ui/facetedFilter';
 import { MonthFacetedFilter } from '@/components/ui/monthFacetedFilter';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
-import { months } from '@/utils/monthNameMap'; // Import months array
+import { months } from '@/utils/monthNameMap';
 import CompanyFacetedFilter from '@/components/ui/companyFacetedFilter';
 
 interface ChartYearFilterProps {
@@ -38,7 +38,7 @@ interface MonthPeriodStore {
 }
 
 export function ChartYearFilter({
-  title = 'Show Charts by Year',
+  title = '',
   isLoading,
   disabled,
   className,
@@ -62,17 +62,15 @@ export function ChartYearFilter({
   const handleYearSelect = (value: string) => {
     const updatedYears = new Set(selectedYears);
     if (value) {
-      updatedYears.has(value)
-        ? updatedYears.delete(value)
-        : updatedYears.add(value);
+      if (updatedYears.has(value)) {
+        updatedYears.delete(value);
+      } else {
+        updatedYears.add(value);
+      }
       setYears(Array.from(updatedYears));
     } else {
       resetYears();
     }
-    console.log('handleYearSelect:', {
-      value,
-      selectedYears: Array.from(updatedYears),
-    });
   };
 
   const handleMonthSelect = (value: string) => {
@@ -87,17 +85,15 @@ export function ChartYearFilter({
       if (updatedMonths.has('all')) {
         updatedMonths.delete('all');
       }
-      updatedMonths.has(value)
-        ? updatedMonths.delete(value)
-        : updatedMonths.add(value);
+      if (updatedMonths.has(value)) {
+        updatedMonths.delete(value);
+      } else {
+        updatedMonths.add(value);
+      }
       setMonths(Array.from(updatedMonths));
     } else {
       resetMonths();
     }
-    console.log('handleMonthSelect:', {
-      value,
-      selectedMonths: Array.from(updatedMonths),
-    });
   };
 
   const handleReset = React.useCallback(() => {
@@ -136,40 +132,51 @@ export function ChartYearFilter({
 
   return (
     <motion.div
-      className={cn('flex flex-col space-y-4 w-full py-2', className)}
+      className={cn('flex flex-col space-y-3 w-full py-2', className)}
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, ease: 'easeOut' }}
     >
       <div>
-        <h3 className='text-lg font-semibold mb-2 text-center text-gray-800 dark:text-gray-200'>
+        <h3 className='text-lg font-semibold mb-3 text-center text-gray-800 dark:text-gray-200'>
           {title}
         </h3>
-        <CompanyFacetedFilter />
-        <FacetedFilter
-          title='Year'
-          options={yearOptions}
-          isLoading={isLoading}
-          disabled={disabled}
-          selectedValues={new Set(selectedYears)}
-          onSelect={handleYearSelect}
-          ariaLabel={`${ariaLabel} - Year`}
-        />
-        <MonthFacetedFilter
-          title='Month'
-          options={[
-            // { value: 'all', label: 'All Months' },
-            ...months.map((month) => ({
-              value: month.toLowerCase(),
-              label: month,
-            })),
-          ]}
-          isLoading={isLoading}
-          disabled={disabled}
-          selectedValues={new Set(selectedMonths)}
-          onSelect={handleMonthSelect}
-          ariaLabel={`${ariaLabel} - Month`}
-        />
+
+        {/* Company Filter dengan spacing */}
+        <div className='mb-3'>
+          <CompanyFacetedFilter />
+        </div>
+
+        {/* Year Filter dengan spacing */}
+        <div className='mb-3'>
+          <FacetedFilter
+            title='Year'
+            options={yearOptions}
+            isLoading={isLoading}
+            disabled={disabled}
+            selectedValues={new Set(selectedYears)}
+            onSelect={handleYearSelect}
+            ariaLabel={`${ariaLabel} - Year`}
+          />
+        </div>
+
+        {/* Month Filter dengan spacing */}
+        <div className='mb-3'>
+          <MonthFacetedFilter
+            title='Month'
+            options={[
+              ...months.map((month) => ({
+                value: month.toLowerCase(),
+                label: month,
+              })),
+            ]}
+            isLoading={isLoading}
+            disabled={disabled}
+            selectedValues={new Set(selectedMonths)}
+            onSelect={handleMonthSelect}
+            ariaLabel={`${ariaLabel} - Month`}
+          />
+        </div>
       </div>
 
       {hasActiveFilters && (

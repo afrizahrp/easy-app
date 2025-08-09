@@ -49,10 +49,10 @@ export function FloatingFilterButton({
   // Calculate modal position
   const calculateModalPosition = () => {
     const buttonWidth = 150;
-    const modalWidth = 300;
-    const modalHeight = 400;
-    const offsetY = 10;
-    const offsetX = 10;
+    const modalWidth = 380; // Reduced from 400 to 380 for better proportion
+    const modalHeight = 500; // Reduced from 600 to 500 for better proportion
+    const offsetY = 15; // Increased from 10 to 15 for better spacing
+    const offsetX = 15; // Increased from 10 to 15 for better spacing
 
     const buttonRight = 24; // right-6 = 24px
     const buttonBottom = 24; // bottom-6 = 24px
@@ -65,7 +65,7 @@ export function FloatingFilterButton({
 
     if (modalPosition === 'above') {
       modalX = buttonX - modalWidth - offsetX;
-      modalY = buttonY - modalHeight - offsetY - 40;
+      modalY = buttonY - modalHeight - offsetY - 20; // Reduced from 40 to 20 for closer positioning
     } else {
       modalX = buttonX;
       modalY = buttonY + 40 + offsetY;
@@ -143,15 +143,17 @@ export function FloatingFilterButton({
               onClick={() => setIsOpen(false)}
             />
             <motion.div
-              className='fixed bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg z-50 transition-colors duration-300'
+              className='fixed bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg z-50 transition-colors duration-300 max-h-[70vh] overflow-y-auto'
               style={calculateModalPosition()}
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: 20, opacity: 0 }}
               transition={{ duration: 0.3, ease: 'easeOut' }}
             >
-              {children}
-              <div className='flex gap-2 mt-4'>
+              <div className='max-h-[calc(70vh-120px)] overflow-y-auto'>
+                {children}
+              </div>
+              <div className='flex gap-2 mt-4 pt-4 border-t border-gray-200 dark:border-gray-600 sticky bottom-0 bg-white dark:bg-gray-800'>
                 <Button
                   variant='outline'
                   className='w-full text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700'

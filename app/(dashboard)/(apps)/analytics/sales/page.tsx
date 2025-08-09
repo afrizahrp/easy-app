@@ -3,7 +3,6 @@
 import Link from 'next/link';
 import { ArrowRight, BarChart2, FileText, ArrowLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { useSearchParams, useRouter } from 'next/navigation';
 import SalesInvoiceAnalytics from './salesinvoice-chart/page';
 import SalesPersonPerformaAnalytics from './salespersonperforma-chart/page';
 import { PageHeaderWrapper } from '@/components/page-header-wrapper';
@@ -18,6 +17,7 @@ import { FloatingFilterButton } from '@/components/ui/floating-filter-button';
 import { ChartPeriodFilter } from '@/components/ui/chartPeriodFilter';
 import { useInView } from 'framer-motion';
 import { useRef } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 
 const cardVariants = {
   hidden: { opacity: 0, y: 50 },
@@ -32,11 +32,6 @@ const cardVariants = {
 };
 
 export default function SalesAnalyticsPage() {
-  const searchParams = useSearchParams();
-  const router = useRouter();
-  const urlStartPeriod = searchParams.get('startPeriod');
-  const urlEndPeriod = searchParams.get('endPeriod');
-
   const tooltipTextViewDetailsSalesInvoice =
     'Explore sales invoices to spot trends and track performance.';
   const tooltipTextViewDetailsSalesPersonPerforma =
@@ -46,6 +41,11 @@ export default function SalesAnalyticsPage() {
   const ref2 = useRef(null);
   const isInView1 = useInView(ref1, { once: true });
   const isInView2 = useInView(ref2, { once: true });
+
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const urlStartPeriod = searchParams.get('startPeriod');
+  const urlEndPeriod = searchParams.get('endPeriod');
 
   const handleBack = () => {
     router.push('/dashboard');

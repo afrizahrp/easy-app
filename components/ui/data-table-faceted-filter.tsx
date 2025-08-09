@@ -52,7 +52,7 @@ export function DataTableFacetedFilter<TData, TValue>({
         >
           {isLoading && <Loader2 className='mr-2 h-4 w-4 animate-spin' />}
           <FilterIcon className='mr-2 h-4 w-4 text-sm' />
-          Filter data by {title}
+          Filter by {title}
           {selectedValues.size > 0 && (
             <>
               <Separator
