@@ -165,7 +165,7 @@ export function SalesInvoiceFilterSidebar<TData>({
     poType.length > 0;
 
   return (
-    <div className='flex flex-col space-y-3 w-full py-2'>
+    <div className='flex flex-col space-y-3 w-full py-2 min-w-[350px]'>
       <div className='mb-3'>
         <PeriodFilter context='salesInvoice' />
       </div>

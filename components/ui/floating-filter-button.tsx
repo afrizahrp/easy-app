@@ -49,7 +49,7 @@ export function FloatingFilterButton({
   // Calculate modal position
   const calculateModalPosition = () => {
     const buttonWidth = 150;
-    const modalWidth = 380; // Reduced from 400 to 380 for better proportion
+    const modalWidth = 380; // Reduced from 450 to 380 for better proportion
     const modalHeight = 500; // Reduced from 600 to 500 for better proportion
     const offsetY = 15; // Increased from 10 to 15 for better spacing
     const offsetX = 15; // Increased from 10 to 15 for better spacing
