@@ -22,20 +22,33 @@ interface UseSalespersonFilteredSummaryProps {
   salesPersonName?: string;
   startPeriod?: string;
   endPeriod?: string;
+  companyIds?: string[]; // Tambahkan parameter untuk multiple company_id
 }
 
 const useSalespersonFilteredSummary = ({
   salesPersonName,
   startPeriod,
   endPeriod,
+  companyIds, // Tambahkan parameter companyIds
 }: UseSalespersonFilteredSummaryProps) => {
   const user = useSessionStore((state) => state.user);
-  const company_id = user?.company_id?.toUpperCase() || '';
+  const defaultCompany_id = user?.company_id?.toUpperCase() || '';
   const module_id = 'dsb';
   const subModule_id = 'sls';
 
+  // Gunakan companyIds jika disediakan, jika tidak gunakan default dari user
+  const effectiveCompanyIds =
+    companyIds && companyIds.length > 0
+      ? companyIds.map((id) => id.toUpperCase())
+      : [defaultCompany_id];
+
   const { salesPersonInvoicePeriod } = useMonthYearPeriodStore();
-  const isValidRequest = Boolean(company_id && module_id && subModule_id);
+  const isValidRequest = Boolean(
+    effectiveCompanyIds.length > 0 &&
+      effectiveCompanyIds.every((id) => id) &&
+      module_id &&
+      subModule_id
+  );
 
   // Gunakan periode dari store jika tidak disediakan, pastikan tanpa spasi
   const normalizePeriod = (period: string | Date): string => {
@@ -65,7 +78,7 @@ const useSalespersonFilteredSummary = ({
   >({
     queryKey: [
       'salespersonFilteredSummary',
-      company_id,
+      effectiveCompanyIds, // Gunakan effectiveCompanyIds dalam queryKey
       module_id,
       subModule_id,
       salesPersonName,
@@ -78,7 +91,14 @@ const useSalespersonFilteredSummary = ({
       params.append('endPeriod', effectiveEndPeriod);
       if (salesPersonName) params.append('salesPersonName', salesPersonName);
 
-      const url = `${process.env.NEXT_PUBLIC_API_URL}/${company_id}/${module_id}/${subModule_id}/get-analytics/getSalespersonFilteredSummary`;
+      // Tambahkan multiple company_id parameters
+      effectiveCompanyIds.forEach((companyId) => {
+        params.append('company_id', companyId);
+      });
+
+      // Gunakan base URL dari environment variable
+      const baseURL = process.env.NEXT_PUBLIC_API_URL;
+      const url = `${baseURL}/dsb/sls/get-analytics/getSalespersonFilteredSummary`;
       const finalUrl = `${url}?${params.toString()}`;
 
       try {

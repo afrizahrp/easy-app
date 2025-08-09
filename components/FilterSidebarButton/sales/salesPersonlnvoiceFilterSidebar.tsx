@@ -11,6 +11,8 @@ import { PeriodFilter } from '@/components/period-filter';
 import { useResetSalesInvoiceFilter } from '@/utils/reset-filter-state/sls/resetSalesInvoiceFilterStore';
 import { Button } from '@/components/ui/button';
 import { DataTableFacetedFilter } from '@/components/ui/data-table-faceted-filter';
+import CompanyFacetedFilter from '@/components/ui/companyFacetedFilter';
+
 import { useMonthYearPeriodStore, useSalesInvoiceHdFilterStore } from '@/store';
 import { useToast } from '@/components/ui/use-toast';
 
@@ -207,6 +209,8 @@ export function SalesPersonInvoiceFilterSidebar<TData>({
   return (
     <div className='flex flex-col space-y-4 w-full py-2'>
       <PeriodFilter context='salesPersonInvoice' />
+
+      <CompanyFacetedFilter />
 
       <div className='w-full py-3 dark:text-slate-400'>
         <DataTableFacetedFilter
