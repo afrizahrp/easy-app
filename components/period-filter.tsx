@@ -113,9 +113,9 @@ export function PeriodFilter({ context, onChange, value }: PeriodFilterProps) {
   ]);
 
   return (
-    <div className='w-full space-y-2'>
+    <div className='w-full space-y-2 flex flex-col items-center justify-center'>
       {/* Date Picker Container */}
-      <div className='flex flex-col sm:flex-row gap-2'>
+      <div className='flex flex-col sm:flex-row gap-2 justify-center items-center'>
         {/* Start Period */}
         <div className='flex-1 min-w-0 max-w-[120px]'>
           <label className='text-xs font-medium text-foreground block mb-0.5'>
